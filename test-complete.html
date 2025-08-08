@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content=\"width=device-width, initial-scale=1.0\">
+    <title>Complete Journal Analytics Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>🧪 Journal → Home → Analytics Sync Test</h1>
+    
+    <!-- Test Journal Tab -->
+    <div style="border: 2px solid #007bff; padding: 1rem; margin: 1rem 0;">
+        <h2>📝 Journal (Sport Tracking)</h2>
+        <div class="day-button" data-type="sport" data-day="1">MO</div>
+        <div class="day-button" data-type="sport" data-day="2">DI</div>
+        <div class="day-button" data-type="sport" data-day="3">MI</div>
+        <div class="day-button" data-type="sport" data-day="4">DO</div>
+        <div class="day-button" data-type="sport" data-day="5">FR</div>
+        <div class="day-button" data-type="sport" data-day="6">SA</div>
+        <div class="day-button" data-type="sport" data-day="0">SO</div>
+        <span id="sportCount">0/7 Tage</span>
+    </div>
+
+    <!-- Test Home Tab -->
+    <div style="border: 2px solid #28a745; padding: 1rem; margin: 1rem 0;">
+        <h2>🏠 Home (Monthly Tiles)</h2>
+        <div class="streak-tile" style="display: inline-block; padding: 1rem; margin: 0.5rem; border: 1px solid #ddd;">
+            <div class="streak-number" id="sportStreakCount">0</div>
+            <div class="streak-label">Sport</div>
+            <div class="streak-date" id="sportStreakDate">August 2025</div>
+        </div>
+    </div>
+
+    <!-- Test Analytics Tab -->
+    <div style="border: 2px solid #dc3545; padding: 1rem; margin: 1rem 0;">
+        <h2>📊 Analytics (Heatmap)</h2>
+        <div id="sport-heatmap-container" data-type="sport">
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 1rem;">
+                <div style="text-align: center; font-size: 0.8rem; color: #666;">Mo</div>
+                <div style="text-align: center; font-size: 0.8rem; color: #666;">Di</div>
+                <div style="text-align: center; font-size: 0.8rem; color: #666;">Mi</div>
+                <div style="text-align: center; font-size: 0.8rem; color: #666;">Do</div>
+                <div style="text-align: center; font-size: 0.8rem; color: #666;">Fr</div>
+                <div style="text-align: center; font-size: 0.8rem; color: #666;">Sa</div>
+                <div style="text-align: center; font-size: 0.8rem; color: #666;">So</div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;" data-week="31">
+                <div class="heatmap-cell heat-0" data-day="1" data-type="sport" style="aspect-ratio: 1; min-height: 45px; border: 1px solid #ddd;"></div>
+                <div class="heatmap-cell heat-0" data-day="2" data-type="sport" style="aspect-ratio: 1; min-height: 45px; border: 1px solid #ddd;"></div>
+                <div class="heatmap-cell heat-0" data-day="3" data-type="sport" style="aspect-ratio: 1; min-height: 45px; border: 1px solid #ddd;"></div>
+                <div class="heatmap-cell heat-0" data-day="4" data-type="sport" style="aspect-ratio: 1; min-height: 45px; border: 1px solid #ddd;"></div>
+                <div class="heatmap-cell heat-0" data-day="5" data-type="sport" style="aspect-ratio: 1; min-height: 45px; border: 1px solid #ddd;"></div>
+                <div class="heatmap-cell heat-0" data-day="6" data-type="sport" style="aspect-ratio: 1; min-height: 45px; border: 1px solid #ddd;"></div>
+                <div class="heatmap-cell heat-0" data-day="0" data-type="sport" style="aspect-ratio: 1; min-height: 45px; border: 1px solid #ddd;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Console Output -->
+    <div style="background: #f8f9fa; padding: 1rem; margin: 1rem 0; border: 1px solid #ddd;">
+        <h3>Console Output</h3>
+        <div id="console" style="font-family: monospace; font-size: 0.8rem; max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function log(message) {
+            const consoleDiv = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            consoleDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            console.log(message);
+        }
+
+        // Override console.log to show in our test output
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            log(args.join(' '));
+            originalConsoleLog.apply(console, args);
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🧪 Starting complete sync test');
+            log('Click on day buttons in Journal to test sync to Home and Analytics');
+        });
+    </script>
+</body>
+</html>

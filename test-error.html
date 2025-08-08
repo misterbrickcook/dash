@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Test</title>
+</head>
+<body>
+    <h1>JavaScript Error Test</h1>
+    <div id="error-output"></div>
+    
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            const errorDiv = document.getElementById('error-output');
+            errorDiv.innerHTML += `<p>Error: ${msg} at line ${line}, column ${col}</p>`;
+            console.log('JavaScript error:', msg, 'at', line + ':' + col);
+            return false;
+        };
+        
+        window.addEventListener('unhandledrejection', event => {
+            const errorDiv = document.getElementById('error-output');
+            errorDiv.innerHTML += `<p>Unhandled promise rejection: ${event.reason}</p>`;
+            console.log('Unhandled promise rejection:', event.reason);
+        });
+        
+        // Test loading main script
+        const script = document.createElement('script');
+        script.src = 'script.js';
+        script.onload = function() {
+            document.getElementById('error-output').innerHTML += '<p>Script loaded successfully!</p>';
+        };
+        script.onerror = function() {
+            document.getElementById('error-output').innerHTML += '<p>Script failed to load!</p>';
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>

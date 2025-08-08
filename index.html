@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life OS Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- === STICKY NAVIGATION === -->
+    <nav class="sticky-nav">
+        <div class="nav-container">
+            <div class="nav-link active" data-tab="home">
+                <i data-lucide="home" class="nav-icon"></i>
+                Home
+            </div>
+            <div class="nav-link" data-tab="todos">
+                <i data-lucide="check-square" class="nav-icon"></i>
+                ToDos
+            </div>
+            <div class="nav-link" data-tab="ziele">
+                <i data-lucide="target" class="nav-icon"></i>
+                Ziele
+            </div>
+            <div class="nav-link" data-tab="journal">
+                <i data-lucide="book-open" class="nav-icon"></i>
+                Journal
+            </div>
+            <!-- <div class="nav-link" data-tab="analytics">
+                <i data-lucide="bar-chart-3" class="nav-icon"></i>
+                Analytics
+            </div> -->
+            <div class="nav-link" data-tab="settings">
+                <i data-lucide="settings" class="nav-icon"></i>
+                Settings
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+
+        <!-- === 🏠 HOME TAB === -->
+        <div class="tab-content active" id="home">
+
+            <!-- 🔥 Streak Übersicht -->
+            <section class="section full-width">
+                <h2>📅 Monatsübersicht</h2>
+                <div class="streak-grid">
+                    <div class="streak-tile">
+                        <div class="streak-number" id="monthlyTodosCount">0</div>
+                        <div class="streak-label">Todos erledigt</div>
+                        <div class="streak-date" id="monthlyTodosDate">August 2025</div>
+                    </div>
+                    <div class="streak-tile" id="sportStreak">
+                        <div class="streak-number" id="sportStreakCount">0</div>
+                        <div class="streak-label">Sport</div>
+                        <div class="streak-date" id="sportStreakDate">August 2025</div>
+                    </div>
+                    <div class="streak-tile" id="workStreak">
+                        <div class="streak-number" id="workStreakCount">0</div>
+                        <div class="streak-label">7 Uhr Arbeit</div>
+                        <div class="streak-date" id="workStreakDate">August 2025</div>
+                    </div>
+                    <div class="streak-tile" id="nutritionStreak">
+                        <div class="streak-number" id="nutritionStreakCount">0</div>
+                        <div class="streak-label">Ernährung</div>
+                        <div class="streak-date" id="nutritionStreakDate">August 2025</div>
+                    </div>
+                    <div class="streak-tile" id="morningRoutineStreak">
+                        <div class="streak-number" id="morningRoutineStreakCount">0</div>
+                        <div class="streak-label">Morgenroutine</div>
+                        <div class="streak-date" id="morningRoutineStreakDate">August 2025</div>
+                    </div>
+                    <div class="streak-tile" id="eveningRoutineStreak">
+                        <div class="streak-number" id="eveningRoutineStreakCount">0</div>
+                        <div class="streak-label">Abendroutine</div>
+                        <div class="streak-date" id="eveningRoutineStreakDate">August 2025</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ☀️🌙 Morgen- & Abendroutine -->
+            <section class="section">
+                <div class="card-header">
+                    <h2 id="routine-title">☀️ Morgenroutine</h2>
+                    <div class="focus-toggle">
+                        <div class="focus-option active" data-routine="morning">☀️</div>
+                        <div class="focus-option" data-routine="evening">🌙</div>
+                    </div>
+                </div>
+                
+                <!-- Morgenroutine -->
+                <div class="checkbox-group" id="morning-routine">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="bett">
+                        <label for="bett">Bett machen</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="wasser">
+                        <label for="wasser">Wasser trinken (1L)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="meditation">
+                        <label for="meditation">Meditation (15 Min)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="journaling">
+                        <label for="journaling">Journaling</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="bewegung">
+                        <label for="bewegung">Bewegung/Sport</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="fruehstueck">
+                        <label for="fruehstueck">Gesundes Frühstück</label>
+                    </div>
+                </div>
+                
+                <!-- Abendroutine -->
+                <div class="checkbox-group" id="evening-routine" style="display: none;">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="handy-weg">
+                        <label for="handy-weg">Handy weglegen (1h vor Schlafenszeit)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="journal-abend">
+                        <label for="journal-abend">Tagesreflexion schreiben</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="dankbarkeit">
+                        <label for="dankbarkeit">3 Dinge wofür ich dankbar bin</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="morgen-planung">
+                        <label for="morgen-planung">Nächsten Tag planen</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lesen-abend">
+                        <label for="lesen-abend">Lesen (20-30 Min)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="entspannung">
+                        <label for="entspannung">Entspannungsübung/Atemtechnik</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ordnung">
+                        <label for="ordnung">Wohnung aufräumen</label>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="routine-progress" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 📋 Heutige Aufgaben -->
+            <section class="card">
+                <div class="card-header">
+                    <h2>📋 Heutige Aufgaben</h2>
+                    <div id="todayTaskCounter" style="font-size: 0.8rem; color: #666;">3 von 5 erledigt</div>
+                </div>
+                
+                <div class="checkbox-group" style="margin-bottom: 1rem;">
+                    <div class="checkbox-item" data-category="privat">
+                        <input type="checkbox" id="home_morgenroutine">
+                        <label for="home_morgenroutine">Morgenroutine durchführen</label>
+                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 8px; height: 8px; background: #666; border-radius: 50%;"></div>
+                            <span style="font-size: 0.8rem; color: #666;">08:00</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-item" data-category="arbeit">
+                        <input type="checkbox" id="home_emails">
+                        <label for="home_emails">E-Mails bearbeiten</label>
+                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 8px; height: 8px; background: #333; border-radius: 50%;"></div>
+                            <span style="font-size: 0.8rem; color: #666;">09:30</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-item" data-category="arbeit">
+                        <input type="checkbox" id="home_projekt">
+                        <label for="home_projekt">Projekt X fertigstellen</label>
+                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 8px; height: 8px; background: #333; border-radius: 50%;"></div>
+                            <span style="font-size: 0.8rem; color: #666;">14:00</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-item" data-category="privat">
+                        <input type="checkbox" id="home_einkaufen">
+                        <label for="home_einkaufen">Einkaufen gehen</label>
+                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 8px; height: 8px; background: #666; border-radius: 50%;"></div>
+                            <span style="font-size: 0.8rem; color: #666;">16:00</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-item" data-category="arbeit">
+                        <input type="checkbox" id="home_telefonate">
+                        <label for="home_telefonate">Telefonate führen</label>
+                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 8px; height: 8px; background: #333; border-radius: 50%;"></div>
+                            <span style="font-size: 0.8rem; color: #666;">17:30</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center;">
+                    <button class="btn btn-small" data-tab="todos" style="font-size: 0.8rem;">
+                        Alle Aufgaben anzeigen
+                    </button>
+                </div>
+            </section>
+
+        </div>
+
+
+        <!-- === ✅ TODOS TAB === -->
+        <div class="tab-content" id="todos">
+
+            <!-- 📋 ToDo Management -->
+            <section class="section full-width">
+                <div class="card-header">
+                    <h2>📋 Aufgaben</h2>
+                    <div class="tabs">
+                        <div class="tab active" data-filter="heute">Heute</div>
+                        <div class="tab" data-filter="privat">Privat</div>
+                        <div class="tab" data-filter="uni">Uni</div>
+                        <div class="tab" data-filter="arbeit">Arbeit</div>
+                        <div class="tab" data-filter="alle">Alle</div>
+                        <div class="tab" data-filter="archiv">Archiv</div>
+                    </div>
+                </div>
+                
+                
+                <!-- Neue Aufgabe hinzufügen -->
+                <div style="background: var(--form-section-bg); padding: 1.5rem; border: 1px solid var(--border-color); margin-bottom: 2rem;">
+                    <div style="display: flex; gap: 1rem; align-items: end; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0; min-width: 200px;">
+                            <input type="text" id="newTaskInput" class="form-input" placeholder="Neue Aufgabe hinzufügen..." style="padding: 0.75rem;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <select id="newTaskCategory" class="form-select" style="padding: 0.75rem; min-width: 120px;">
+                                <option value="privat">Privat</option>
+                                <option value="uni">Uni</option>
+                                <option value="arbeit">Arbeit</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <input type="date" id="newTaskDate" class="form-input" style="padding: 0.75rem; min-width: 140px;" title="Fälligkeitsdatum">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <input type="time" id="newTaskTime" class="form-input" style="padding: 0.75rem; min-width: 100px;" title="Uhrzeit (optional)">
+                        </div>
+                        <button id="addTaskBtn" class="form-input" style="width: auto; background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--input-border); font-family: inherit; font-size: 0.95rem; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; text-align: center;">
+                            <i data-lucide="plus" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
+                            <span style="text-align: center;">Hinzufügen</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Fortschrittsbalken -->
+                <div class="progress-container" id="todoProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%;"></div>
+                    </div>
+                    <span class="progress-text">60%</span>
+                </div>
+                <div style="font-size: 0.8rem; color: #666666; margin-bottom: 2rem;" id="todoProgressText">3 von 5 Aufgaben erledigt</div>
+                
+                <!-- Heute Filter -->
+                <div class="todo-filter" data-filter="heute">
+                    <div class="checkbox-group">
+                        <div class="checkbox-item" data-category="privat">
+                            <input type="checkbox" id="heute_morgenroutine">
+                            <label for="heute_morgenroutine">Morgenroutine durchführen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">08:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="arbeit">
+                            <input type="checkbox" id="heute_emails">
+                            <label for="heute_emails">E-Mails bearbeiten</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">09:30</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="arbeit">
+                            <input type="checkbox" id="heute_projekt">
+                            <label for="heute_projekt">Projekt X fertigstellen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">14:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="privat">
+                            <input type="checkbox" id="heute_einkaufen">
+                            <label for="heute_einkaufen">Einkaufen gehen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">16:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="arbeit">
+                            <input type="checkbox" id="heute_telefonate">
+                            <label for="heute_telefonate">Telefonate führen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">17:30</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privat Filter -->
+                <div class="todo-filter" data-filter="privat" style="display: none;">
+                    <div class="checkbox-group">
+                        <div class="checkbox-item" data-category="privat">
+                            <input type="checkbox">
+                            <label>Morgenroutine durchführen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">08:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="privat">
+                            <input type="checkbox">
+                            <label>Einkaufen gehen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">16:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="privat">
+                            <input type="checkbox">
+                            <label>Wohnung putzen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">19:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Uni Filter -->
+                <div class="todo-filter" data-filter="uni" style="display: none;">
+                    <div class="checkbox-group">
+                        <div class="checkbox-item" data-category="uni">
+                            <input type="checkbox">
+                            <label>Vorlesung vorbereiten</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="book-open" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">10:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="uni">
+                            <input type="checkbox">
+                            <label>Hausarbeit abgeben</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="book-open" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">12:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arbeit Filter -->
+                <div class="todo-filter" data-filter="arbeit" style="display: none;">
+                    <div class="checkbox-group">
+                        <div class="checkbox-item" data-category="arbeit">
+                            <input type="checkbox">
+                            <label>E-Mails bearbeiten</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">09:30</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="arbeit">
+                            <input type="checkbox">
+                            <label>Projekt X fertigstellen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">14:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="arbeit">
+                            <input type="checkbox">
+                            <label>Telefonate führen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">17:30</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alle Filter -->
+                <div class="todo-filter" data-filter="alle" style="display: none;">
+                    <div class="checkbox-group">
+                        <div class="checkbox-item" data-category="privat">
+                            <input type="checkbox">
+                            <label>Morgenroutine durchführen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">08:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="arbeit">
+                            <input type="checkbox">
+                            <label>E-Mails bearbeiten</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">09:30</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="uni">
+                            <input type="checkbox">
+                            <label>Vorlesung vorbereiten</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="book-open" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">10:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="uni">
+                            <input type="checkbox">
+                            <label>Hausarbeit abgeben</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="book-open" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">12:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="arbeit">
+                            <input type="checkbox">
+                            <label>Projekt X fertigstellen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">14:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="privat">
+                            <input type="checkbox">
+                            <label>Einkaufen gehen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">16:00</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="arbeit">
+                            <input type="checkbox">
+                            <label>Telefonate führen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">17:30</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-item" data-category="privat">
+                            <input type="checkbox">
+                            <label>Wohnung putzen</label>
+                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
+                                <span style="font-size: 0.8rem; color: #666;">19:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Archiv Filter -->
+                <div class="todo-filter" data-filter="archiv" style="display: none;">
+                    <div style="font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin-bottom: 1.5rem;">📦 Archivierte Aufgaben</div>
+                    <div class="checkbox-group">
+                        <!-- Archivierte Todos erscheinen hier automatisch -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- === 🎯 ZIELE TAB === -->
+        <div class="tab-content" id="ziele">
+
+            <!-- 🎯 Monats- & Quartalsziele -->
+            <section class="section full-width">
+                <div class="card-header">
+                    <h2>🎯 Ziele Übersicht</h2>
+                    <div class="tabs">
+                        <div class="tab active" data-goal-filter="monat">Monat</div>
+                        <div class="tab" data-goal-filter="quartal">Quartal</div>
+                        <div class="tab" data-goal-filter="jahr">Jahr</div>
+                        <div class="tab" data-goal-filter="alle">Alle</div>
+                    </div>
+                </div>
+                
+                <div class="goals-grid">
+                    <!-- Ziel 1: Abnehmen -->
+                    <div class="goal-card">
+                        <div class="goal-category">Fitness</div>
+                        <div class="goal-name">5 kg abnehmen</div>
+                        <div class="goal-description">Aktuell: 83 kg → Ziel: 78 kg<br>Durch gesunde Ernährung und regelmäßigen Sport</div>
+                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
+                        <div class="goal-progress-section">
+                            <div class="goal-progress-header">
+                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
+                                <span class="goal-percentage">40%</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 40%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ziel 2: Meditation -->
+                    <div class="goal-card">
+                        <div class="goal-category">Persönlich</div>
+                        <div class="goal-name">Meditation: 31 Tage Juli</div>
+                        <div class="goal-description">Täglich 15 Minuten<br>Mindfulness & Achtsamkeit</div>
+                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
+                        <div class="goal-progress-section">
+                            <div class="goal-progress-header">
+                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
+                                <span class="goal-percentage">97%</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 97%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ziel 3: Buch lesen -->
+                    <div class="goal-card">
+                        <div class="goal-category">Bildung</div>
+                        <div class="goal-name">Buch lesen: "Atomic Habits"</div>
+                        <div class="goal-description">280 Seiten insgesamt<br>Täglich 20 Minuten lesen</div>
+                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
+                        <div class="goal-progress-section">
+                            <div class="goal-progress-header">
+                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
+                                <span class="goal-percentage">60%</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 60%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ziel 4: Freelance -->
+                    <div class="goal-card">
+                        <div class="goal-category">Karriere</div>
+                        <div class="goal-name">Freelance Business etablieren</div>
+                        <div class="goal-description">Webdesign & Frontend-Entwicklung<br>Mindestens 500€/Monat Zusatzeinkommen</div>
+                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
+                        <div class="goal-progress-section">
+                            <div class="goal-progress-header">
+                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
+                                <span class="goal-percentage">75%</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 75%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ziel 5: Sprachkenntnisse -->
+                    <div class="goal-card">
+                        <div class="goal-category">Bildung</div>
+                        <div class="goal-name">Französisch Grundkenntnisse</div>
+                        <div class="goal-description">Niveau A2 erreichen<br>Täglich 20 Minuten mit Duolingo</div>
+                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
+                        <div class="goal-progress-section">
+                            <div class="goal-progress-header">
+                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
+                                <span class="goal-percentage">25%</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 25%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ziel 6: Minimalismus -->
+                    <div class="goal-card">
+                        <div class="goal-category">Persönlich</div>
+                        <div class="goal-name">Minimalistischer Lebensstil</div>
+                        <div class="goal-description">100 Gegenstände aussortieren<br>Bewusster Konsum</div>
+                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
+                        <div class="goal-progress-section">
+                            <div class="goal-progress-header">
+                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
+                                <span class="goal-percentage">65%</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 65%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ziel 7: Langfristig 2026 -->
+                    <div class="goal-card">
+                        <div class="goal-category">Karriere</div>
+                        <div class="goal-name">Master-Abschluss</div>
+                        <div class="goal-description">Computer Science Master fertigstellen<br>Thesis über KI und Machine Learning</div>
+                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
+                        <div class="goal-progress-section">
+                            <div class="goal-progress-header">
+                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
+                                <span class="goal-percentage">15%</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 15%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ✨ Vision Board -->
+            <section class="section full-width">
+                <div class="card-header">
+                    <h2>✨ Vision Board</h2>
+                    <div class="tabs">
+                        <div id="addVisionBtn" class="tab" style="cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 40px;">+</div>
+                    </div>
+                </div>
+                
+                <div class="vision-grid">
+                    <div class="vision-item" data-vision-type="goal">
+                        <div class="vision-icon">🏠</div>
+                        <div class="vision-title">Traumhaus</div>
+                        <div class="vision-description">2026</div>
+                    </div>
+                    <div class="vision-item" data-vision-type="goal">
+                        <div class="vision-icon">🌍</div>
+                        <div class="vision-title">Weltreise</div>
+                        <div class="vision-description">2025</div>
+                    </div>
+                    <div class="vision-item" data-vision-type="quote">
+                        <div class="vision-quote">"Der Weg ist das Ziel"</div>
+                        <div class="vision-author">Konfuzius</div>
+                    </div>
+                    <div class="vision-item" data-vision-type="goal">
+                        <div class="vision-icon">💪</div>
+                        <div class="vision-title">Fitness Ziel</div>
+                        <div class="vision-description">70kg erreicht</div>
+                    </div>
+                    <div class="vision-item" data-vision-type="goal">
+                        <div class="vision-icon">💼</div>
+                        <div class="vision-title">Selbstständigkeit</div>
+                        <div class="vision-description">Eigenes Business</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- === 📔 JOURNAL TAB === -->
+        <div class="tab-content" id="journal">
+
+            <!-- 📔 Tagesjournal -->
+            <section class="section full-width">
+                <div class="card-header" style="align-items: flex-start;">
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <h2 style="margin: 0;">📔 Tagesjournal</h2>
+                        <div style="flex: 1; display: flex; justify-content: center;">
+                            <div class="mood-selector" style="display: flex; gap: 0.5rem;">
+                                <div class="mood-emoji" data-mood="very-happy" style="font-size: 1rem; padding: 0.4rem; cursor: pointer; transition: all 0.2s; border: 1px solid transparent;">😄</div>
+                                <div class="mood-emoji" data-mood="happy" style="font-size: 1rem; padding: 0.4rem; cursor: pointer; transition: all 0.2s; border: 1px solid transparent;">😊</div>
+                                <div class="mood-emoji selected" data-mood="neutral" style="font-size: 1rem; padding: 0.4rem; cursor: pointer; transition: all 0.2s; border: 1px solid #000;">😐</div>
+                                <div class="mood-emoji" data-mood="sad" style="font-size: 1rem; padding: 0.4rem; cursor: pointer; transition: all 0.2s; border: 1px solid transparent;">😔</div>
+                                <div class="mood-emoji" data-mood="very-sad" style="font-size: 1rem; padding: 0.4rem; cursor: pointer; transition: all 0.2s; border: 1px solid transparent;">😞</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <button class="btn btn-small" id="todayBtn" style="padding: 0.3rem 0.6rem; border: 1px solid #e0e0e0; background: transparent; color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Heute</button>
+                            <div id="currentDate" style="font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">
+                                30. Juli 2025
+                            </div>
+                            <button class="btn btn-small" id="prevDay" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15,18 9,12 15,6"></polyline>
+                                </svg>
+                            </button>
+                            <button class="btn btn-small" id="nextDay" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="autoSaveStatus" style="font-size: 0.8rem; color: #666; opacity: 0; transition: opacity 0.3s ease; position: absolute; right: 2rem; bottom: 0.5rem;">
+                        Automatisch gespeichert
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <div class="journal-category" data-category="general" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; background: #000; color: white;">Allgemein</div>
+                        <div class="journal-category" data-category="private" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Privat</div>
+                        <div class="journal-category" data-category="work" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Arbeit</div>
+                        <div class="journal-category" data-category="health" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Gesundheit</div>
+                        <div class="journal-category" data-category="nutrition" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Ernährung</div>
+                        <div class="journal-category" data-category="sport" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Sport</div>
+                        <div class="journal-category" data-category="crypto" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Crypto</div>
+                        <div class="journal-category" data-category="reading" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Lesen</div>
+                    </div>
+                    <textarea id="journalText" class="form-textarea" placeholder="Wie war dein Tag? Was hast du gelernt? Wofür bist du dankbar?" style="min-height: 300px;">Heute war ein produktiver Tag. Habe morgens meditiert und mich sehr fokussiert gefühlt. Das neue Projekt macht Fortschritte und ich bin zufrieden mit den Ergebnissen. Dankbar für die Zeit mit Familie und die kleinen Erfolge des Tages...</textarea>
+                </div>
+            </section>
+
+            <!-- 📅 Wochenjournal -->
+            <section class="section full-width">
+                <div class="card-header" style="align-items: flex-start;">
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <h2 style="margin: 0;">📅 Wochenjournal</h2>
+                        <div style="flex: 1;"></div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <button class="btn btn-small" id="currentWeekBtn" style="padding: 0.3rem 0.6rem; border: 1px solid #e0e0e0; background: transparent; color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Aktuelle Woche</button>
+                            <div id="currentWeek" style="font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">
+                                KW 30 • 21.-27. Juli 2025
+                            </div>
+                            <button class="btn btn-small" id="prevWeek" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15,18 9,12 15,6"></polyline>
+                                </svg>
+                            </button>
+                            <button class="btn btn-small" id="nextWeek" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="weekAutoSaveStatus" style="font-size: 0.8rem; color: #666; opacity: 0; transition: opacity 0.3s ease; position: absolute; right: 2rem; bottom: 0.5rem;">
+                        Automatisch gespeichert
+                    </div>
+                </div>
+                
+                <!-- Wöchentliche Kennzahlen -->
+                <div style="margin-bottom: 2rem;">
+                    <div style="font-size: 0.9rem; font-weight: 500; text-transform: uppercase; margin-bottom: 1.5rem;" id="weekStatsTitle">Kennzahlen:</div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
+                        <!-- Sport Tracking -->
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">💪 Sport</div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <div class="day-button" data-type="sport" data-day="1">MO</div>
+                                <div class="day-button" data-type="sport" data-day="2">DI</div>
+                                <div class="day-button" data-type="sport" data-day="3">MI</div>
+                                <div class="day-button" data-type="sport" data-day="4">DO</div>
+                                <div class="day-button" data-type="sport" data-day="5">FR</div>
+                                <div class="day-button" data-type="sport" data-day="6">SA</div>
+                                <div class="day-button" data-type="sport" data-day="0">SO</div>
+                                <div style="margin-left: 1rem; font-size: 0.9rem; color: #666;" id="sportCount">0/7 Tage</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Ernährung Tracking -->
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">🥗 Ernährung</div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <div class="day-button" data-type="nutrition" data-day="1">MO</div>
+                                <div class="day-button" data-type="nutrition" data-day="2">DI</div>
+                                <div class="day-button" data-type="nutrition" data-day="3">MI</div>
+                                <div class="day-button" data-type="nutrition" data-day="4">DO</div>
+                                <div class="day-button" data-type="nutrition" data-day="5">FR</div>
+                                <div class="day-button" data-type="nutrition" data-day="6">SA</div>
+                                <div class="day-button" data-type="nutrition" data-day="0">SO</div>
+                                <div style="margin-left: 1rem; font-size: 0.9rem; color: #666;" id="nutritionCount">0/7 Tage</div>
+                            </div>
+                        </div>
+
+                        <!-- 7 Uhr Arbeit Tracking -->
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">🕰️ 7 Uhr Arbeit</div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <div class="day-button" data-type="work7am" data-day="1">MO</div>
+                                <div class="day-button" data-type="work7am" data-day="2">DI</div>
+                                <div class="day-button" data-type="work7am" data-day="3">MI</div>
+                                <div class="day-button" data-type="work7am" data-day="4">DO</div>
+                                <div class="day-button" data-type="work7am" data-day="5">FR</div>
+                                <div style="margin-left: 1rem; font-size: 0.9rem; color: #666;" id="work7amCount">0/5 Tage</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </section>
+        </div>
+
+        <!-- === 📊 ANALYTICS TAB === -->
+        <!-- TEMPORARILY DISABLED - TOO COMPLEX FOR NOW
+        <div class="tab-content" id="analytics">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 3rem;">
+                <section class="section" style="min-height: 400px;">
+                    <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
+                        <h3 style="margin: 0;">💪 Sport</h3>
+                        <div class="tabs" style="font-size: 0.75rem;">
+                            <div class="tab active" data-period="4weeks" data-heatmap="training">4 Wochen</div>
+                            <div class="tab" data-period="3months" data-heatmap="training">3 Monate</div>
+                            <div class="tab" data-period="6months" data-heatmap="training">6 Monate</div>
+                            <div class="tab" data-period="1year" data-heatmap="training">1 Jahr</div>
+                        </div>
+                    </div>
+                    <div id="sport-heatmap-container" data-type="sport"></div>
+                </section>
+                <section class="section" style="min-height: 400px;">
+                    <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
+                        <h3 style="margin: 0;">🕰️ 7 Uhr Arbeit</h3>
+                        <div class="tabs" style="font-size: 0.75rem;">
+                            <div class="tab active" data-period="4weeks" data-heatmap="work">4 Wochen</div>
+                            <div class="tab" data-period="3months" data-heatmap="work">3 Monate</div>
+                            <div class="tab" data-period="6months" data-heatmap="work">6 Monate</div>
+                            <div class="tab" data-period="1year" data-heatmap="work">1 Jahr</div>
+                        </div>
+                    </div>
+                    <div id="work-heatmap-container" data-type="work7am"></div>
+                </section>
+            </div>
+        </div>
+        -->
+
+        <!-- === ⚙️ SETTINGS TAB === -->
+        <div class="tab-content" id="settings">
+
+            <!-- ⚙️ App Einstellungen -->
+            <section class="section full-width">
+                <h2>⚙️ App Einstellungen</h2>
+                <div class="dashboard-grid">
+                    <div class="card-compact">
+                        <h3>Darstellung</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
+                            <span>Dark Mode</span>
+                            <div id="darkModeToggle" class="toggle-switch" style="width: 60px; height: 30px; background: #e0e0e0; border-radius: 15px; position: relative; cursor: pointer;">
+                                <div id="darkModeSlider" class="toggle-slider" style="width: 26px; height: 26px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.2s;"></div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
+                            <span>Kompakte Ansicht</span>
+                            <div style="width: 60px; height: 30px; background: #000; border-radius: 15px; position: relative; cursor: pointer;">
+                                <div style="width: 26px; height: 26px; background: #fff; border-radius: 50%; position: absolute; top: 2px; right: 2px; transition: transform 0.2s;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-compact">
+                        <h3>Erinnerungen</h3>
+                        <div class="form-group">
+                            <label class="form-label">Morgenroutine</label>
+                            <input type="time" class="form-input" value="07:00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Meditation</label>
+                            <input type="time" class="form-input" value="18:00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Journal</label>
+                            <input type="time" class="form-input" value="21:00">
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
