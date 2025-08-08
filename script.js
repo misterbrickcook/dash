@@ -3,6 +3,41 @@ if (typeof lucide !== 'undefined') {
     lucide.createIcons();
 }
 
+// Global constants to avoid repetition
+const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                     'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+// Utility functions
+const Utils = {
+    getCurrentMonthYear() {
+        const now = new Date();
+        return {
+            month: now.getMonth(),
+            year: now.getFullYear(),
+            monthName: MONTH_NAMES[now.getMonth()],
+            display: `${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`
+        };
+    },
+    
+    getTodayDateString() {
+        return new Date().toISOString().split('T')[0];
+    },
+    
+    updateElement(id, content) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = content;
+    },
+    
+    getElement(id) {
+        return document.getElementById(id);
+    },
+    
+    setElementStyle(id, styles) {
+        const el = document.getElementById(id);
+        if (el) Object.assign(el.style, styles);
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Dashboard loading...');
 
@@ -1082,8 +1117,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
-            const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-                              'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
             
             let completedDays = 0;
             const completionData = getRoutineCompletionData();
@@ -1107,10 +1140,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (dateElement) {
-                dateElement.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                dateElement.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
             }
             
-            console.log(`Monthly ${routineType} routine streak updated: ${completedDays} days in ${monthNames[currentMonth]} ${currentYear}`);
+            console.log(`Monthly ${routineType} routine streak updated: ${completedDays} days in ${MONTH_NAMES[currentMonth]} ${currentYear}`);
         } catch (error) {
             console.log(`Error in updateMonthlyRoutineStreak(${routineType}):`, error);
         }
@@ -2261,8 +2294,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
-            const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-                              'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
             
             let totalSportDays = 0;
             
@@ -2304,12 +2335,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (sportDateElement) {
-                const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
                                   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-                sportDateElement.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                sportDateElement.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
             }
             
-            console.log(`Monthly sport streak updated: ${totalSportDays} days in ${monthNames[currentMonth]} ${currentYear}`);
+            console.log(`Monthly sport streak updated: ${totalSportDays} days in ${MONTH_NAMES[currentMonth]} ${currentYear}`);
         } catch (error) {
             console.log('Error in updateMonthlySportStreak:', error);
         }
@@ -2320,8 +2351,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
-            const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-                              'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
             
             let totalWorkDays = 0;
             
@@ -2363,12 +2392,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (workDateElement) {
-                const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
                                   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-                workDateElement.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                workDateElement.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
             }
             
-            console.log(`Monthly work streak updated: ${totalWorkDays} days in ${monthNames[currentMonth]} ${currentYear}`);
+            console.log(`Monthly work streak updated: ${totalWorkDays} days in ${MONTH_NAMES[currentMonth]} ${currentYear}`);
         } catch (error) {
             console.log('Error in updateMonthlyWorkStreak:', error);
         }
@@ -2379,8 +2408,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
-            const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-                              'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
             
             let totalNutritionDays = 0;
             
@@ -2422,12 +2449,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (nutritionDateElement) {
-                const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
                                   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-                nutritionDateElement.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                nutritionDateElement.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
             }
             
-            console.log(`Monthly nutrition streak updated: ${totalNutritionDays} days in ${monthNames[currentMonth]} ${currentYear}`);
+            console.log(`Monthly nutrition streak updated: ${totalNutritionDays} days in ${MONTH_NAMES[currentMonth]} ${currentYear}`);
         } catch (error) {
             console.log('Error in updateMonthlyNutritionStreak:', error);
         }
@@ -3157,7 +3184,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const now = new Date();
         const currentMonth = now.getMonth(); // 0-11
         const currentYear = now.getFullYear();
-        const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
+        const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
                            'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
         
         const countElement = document.getElementById('monthlyTodosCount');
@@ -3172,7 +3199,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 year: currentYear,
                 completedCount: 0
             };
-            console.log(`Monthly todo streak reset for ${monthNames[currentMonth]} ${currentYear}`);
+            console.log(`Monthly todo streak reset for ${MONTH_NAMES[currentMonth]} ${currentYear}`);
         }
         
         // Count archived todos from current month
@@ -3197,9 +3224,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update display
         countElement.textContent = monthlyTodoData.completedCount;
-        dateElement.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        dateElement.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
         
-        console.log(`Monthly todos completed: ${monthlyTodoData.completedCount} in ${monthNames[currentMonth]} ${currentYear}`);
+        console.log(`Monthly todos completed: ${monthlyTodoData.completedCount} in ${MONTH_NAMES[currentMonth]} ${currentYear}`);
         
         return monthlyTodoData.completedCount;
     }
