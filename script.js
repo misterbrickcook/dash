@@ -38,7 +38,7 @@ const Utils = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('Dashboard loading...');
 
     // Dark Mode System
@@ -258,6 +258,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     // initializeAnalyticsHeatmaps(); // DISABLED - too complex for now
                     console.log('Analytics initialization complete');
                     window.analyticsInitialized = true;
+                }, 100);
+            }
+        }
+        
+        // Initialize motivation slideshow when first accessed
+        if (tabId === 'motivation') {
+            if (!window.motivationInitialized) {
+                console.log('First time accessing motivation - initializing slideshow...');
+                setTimeout(() => {
+                    initializeMotivationSlideshow();
+                    window.motivationInitialized = true;
+                }, 100);
+            }
+        }
+        
+        // Initialize resources when first accessed
+        if (tabId === 'ressourcen') {
+            if (!window.resourcesInitialized) {
+                console.log('First time accessing resources - initializing...');
+                setTimeout(() => {
+                    initializeResources();
+                    window.resourcesInitialized = true;
                 }, 100);
             }
         }
@@ -1060,8 +1082,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     updateRoutineProgress();
                     
                     // Check if routine is completed and update monthly streaks
-                    setTimeout(() => {
-                        checkAndSaveRoutineCompletion();
+                    setTimeout(async () => {
+                        await checkAndSaveRoutineCompletion();
                     }, 100);
                 });
             });
@@ -1072,20 +1094,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Routine Completion Tracking for Monthly Streaks
-    function checkAndSaveRoutineCompletion() {
+    async function checkAndSaveRoutineCompletion() {
         const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
         
         // Check morning routine completion
         const morningComplete = isRoutineComplete('morning');
-        saveRoutineCompletion('morning', today, morningComplete);
+        await saveRoutineCompletion('morning', today, morningComplete);
         
         // Check evening routine completion
         const eveningComplete = isRoutineComplete('evening');
-        saveRoutineCompletion('evening', today, eveningComplete);
+        await saveRoutineCompletion('evening', today, eveningComplete);
         
         // Update monthly streak counters
-        updateMonthlyRoutineStreak('morning');
-        updateMonthlyRoutineStreak('evening');
+        await updateMonthlyRoutineStreak('morning');
+        await updateMonthlyRoutineStreak('evening');
     }
     
     function isRoutineComplete(routineType) {
@@ -1098,28 +1120,27 @@ document.addEventListener('DOMContentLoaded', function() {
         return checkboxes.length === checkedBoxes.length && checkboxes.length > 0;
     }
     
-    function getRoutineCompletionData() {
-        const stored = localStorage.getItem('routineCompletionData');
-        return stored ? JSON.parse(stored) : {};
+    async function getRoutineCompletionData() {
+        return await cloudStorage.getRoutineCompletionData();
     }
     
-    function saveRoutineCompletion(routineType, date, completed) {
-        const completionData = getRoutineCompletionData();
+    async function saveRoutineCompletion(routineType, date, completed) {
+        const completionData = await getRoutineCompletionData();
         if (!completionData[date]) completionData[date] = {};
         completionData[date][routineType] = completed;
-        localStorage.setItem('routineCompletionData', JSON.stringify(completionData));
+        await cloudStorage.saveRoutineCompletionData(completionData);
         
         console.log(`Saved ${routineType} routine completion for ${date}: ${completed}`);
     }
     
-    function updateMonthlyRoutineStreak(routineType) {
+    async function updateMonthlyRoutineStreak(routineType) {
         try {
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
             
             let completedDays = 0;
-            const completionData = getRoutineCompletionData();
+            const completionData = await getRoutineCompletionData();
             
             // Count completed days in current month
             Object.keys(completionData).forEach(dateStr => {
@@ -3361,6 +3382,857 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
     };
 
+    // === DEADLINE MANAGEMENT SYSTEM ===
+    
+    let deadlines = [];
+    
+    // Initialize with demo data if no cloud data exists
+    async function initializeDefaultDeadlines() {
+        const existingDeadlines = await cloudStorage.getDeadlines();
+        
+        if (!existingDeadlines || existingDeadlines.length === 0) {
+            const defaultDeadlines = [
+                { title: "Klausur Mathematik", date: "2025-08-12", category: "uni" },
+                { title: "Projekt Deadline", date: "2025-08-16", category: "arbeit" },
+                { title: "Hausarbeit Abgabe", date: "2025-08-24", category: "uni" },
+                { title: "Präsentation Uni", date: "2025-09-01", category: "uni" },
+                { title: "Semester Ende", date: "2025-09-23", category: "uni" },
+                { title: "Geburtstag Mama", date: "2025-10-15", category: "privat" }
+            ];
+            
+            // Save demo data to cloud
+            for (const deadline of defaultDeadlines) {
+                await cloudStorage.saveDeadline(deadline);
+            }
+            
+            deadlines = defaultDeadlines;
+        } else {
+            deadlines = existingDeadlines;
+        }
+    }
+    
+    function calculateDaysUntil(dateString) {
+        const today = new Date();
+        const targetDate = new Date(dateString);
+        const diffTime = targetDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    }
+    
+    async function updateDeadlineDisplay() {
+        // Load deadlines from cloud first
+        deadlines = await cloudStorage.getDeadlines();
+        
+        // Find the deadline section by looking for the specific heading
+        const section = Array.from(document.querySelectorAll('section')).find(s => {
+            const h2 = s.querySelector('h2');
+            return h2 && h2.textContent.includes('🚨 Wichtige Termine');
+        });
+        
+        const streakGrid = section ? section.querySelector('.streak-grid') : null;
+        if (!streakGrid) return;
+        
+        // Sort deadlines by urgency (soonest first)
+        const sortedDeadlines = [...deadlines].sort((a, b) => {
+            return calculateDaysUntil(a.date) - calculateDaysUntil(b.date);
+        });
+        
+        // Take only first 6 for display
+        const displayDeadlines = sortedDeadlines.slice(0, 6);
+        
+        // Clear current display
+        streakGrid.innerHTML = '';
+        
+        // Generate deadline tiles
+        displayDeadlines.forEach((deadline, index) => {
+            const daysUntil = calculateDaysUntil(deadline.date);
+            
+            const tile = document.createElement('div');
+            tile.className = 'streak-tile deadline-tile';
+            tile.setAttribute('data-deadline-index', index);
+            tile.style.cursor = 'pointer';
+            
+            // Add urgency styling based on days
+            let urgencyClass = '';
+            if (daysUntil <= 7) urgencyClass = 'urgent';
+            else if (daysUntil <= 30) urgencyClass = 'soon';
+            else urgencyClass = 'relaxed';
+            
+            tile.innerHTML = `
+                <div class="streak-number">${daysUntil}</div>
+                <div class="streak-label">Tage bis</div>
+                <div class="streak-date">${deadline.title}</div>
+            `;
+            
+            // Add click event for editing
+            tile.addEventListener('click', () => openDeadlineEditModal(deadline, index));
+            
+            // Add hover effect
+            tile.addEventListener('mouseenter', () => {
+                tile.style.transform = 'translateY(-2px)';
+                tile.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+            });
+            tile.addEventListener('mouseleave', () => {
+                tile.style.transform = 'translateY(0)';
+                tile.style.boxShadow = 'none';
+            });
+            
+            streakGrid.appendChild(tile);
+        });
+        
+        console.log('Deadline display updated');
+    }
+    
+    function openDeadlineEditModal(deadline = null, index = -1) {
+        const isEdit = deadline !== null;
+        const modalTitle = isEdit ? 'Termin bearbeiten' : 'Neuer Termin';
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        `;
+        
+        modal.innerHTML = `
+            <div style="background: var(--card-bg); padding: 2rem; border-radius: 8px; width: 100%; max-width: 400px; border: 1px solid var(--border-color);">
+                <h3 style="margin: 0 0 1.5rem 0; color: var(--text-primary);">${modalTitle}</h3>
+                
+                <div class="form-group">
+                    <label class="form-label">Titel</label>
+                    <input type="text" id="deadlineTitle" class="form-input" value="${deadline?.title || ''}" placeholder="z.B. Klausur Mathematik">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Datum</label>
+                    <input type="date" id="deadlineDate" class="form-input" value="${deadline?.date || ''}">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Kategorie</label>
+                    <select id="deadlineCategory" class="form-select">
+                        <option value="privat" ${deadline?.category === 'privat' ? 'selected' : ''}>Privat</option>
+                        <option value="arbeit" ${deadline?.category === 'arbeit' ? 'selected' : ''}>Arbeit</option>
+                        <option value="uni" ${deadline?.category === 'uni' ? 'selected' : ''}>Uni</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 2rem; flex-wrap: wrap;">
+                    ${isEdit ? '<button id="deleteDeadlineBtn" class="btn" style="background: #dc3545; border-color: #dc3545; color: white; margin-right: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem; white-space: nowrap;">Löschen</button>' : ''}
+                    <button id="cancelDeadlineBtn" class="btn" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); min-width: 80px; padding: 0.5rem 1rem;">Abbrechen</button>
+                    <button id="saveDeadlineBtn" class="btn" style="background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--input-border); min-width: 80px; padding: 0.5rem 1rem;">${isEdit ? 'Speichern' : 'Hinzufügen'}</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Event listeners
+        const titleInput = modal.querySelector('#deadlineTitle');
+        const dateInput = modal.querySelector('#deadlineDate');
+        const categorySelect = modal.querySelector('#deadlineCategory');
+        const cancelBtn = modal.querySelector('#cancelDeadlineBtn');
+        const saveBtn = modal.querySelector('#saveDeadlineBtn');
+        const deleteBtn = modal.querySelector('#deleteDeadlineBtn');
+        
+        // Close modal function
+        const closeModal = () => {
+            document.body.removeChild(modal);
+        };
+        
+        // Cancel button
+        cancelBtn.addEventListener('click', closeModal);
+        
+        // Click outside to close
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        
+        // Save button
+        saveBtn.addEventListener('click', () => {
+            const title = titleInput.value.trim();
+            const date = dateInput.value;
+            const category = categorySelect.value;
+            
+            if (!title || !date) {
+                alert('Bitte Titel und Datum eingeben!');
+                return;
+            }
+            
+            const newDeadline = { title, date, category };
+            
+            if (isEdit) {
+                // Update existing deadline
+                newDeadline.id = deadlines[index].id;
+                deadlines[index] = newDeadline;
+                await cloudStorage.saveDeadline(newDeadline);
+                console.log('Deadline updated:', newDeadline);
+            } else {
+                // Add new deadline
+                await cloudStorage.saveDeadline(newDeadline);
+                deadlines.push(newDeadline);
+                console.log('Deadline added:', newDeadline);
+            }
+            
+            await updateDeadlineDisplay();
+            closeModal();
+        });
+        
+        // Delete button (only in edit mode)
+        if (deleteBtn && isEdit) {
+            deleteBtn.addEventListener('click', async () => {
+                if (confirm('Termin wirklich löschen?')) {
+                    const deadlineId = deadlines[index].id;
+                    await cloudStorage.deleteDeadline(deadlineId);
+                    deadlines.splice(index, 1);
+                    await updateDeadlineDisplay();
+                    closeModal();
+                    console.log('Deadline deleted');
+                }
+            });
+        }
+        
+        // Focus first input
+        titleInput.focus();
+    }
+    
+    async function initializeDeadlines() {
+        // Initialize default deadlines if needed
+        await initializeDefaultDeadlines();
+        
+        // Add deadline button
+        const addBtn = document.getElementById('addDeadlineBtn');
+        if (addBtn) {
+            addBtn.addEventListener('click', () => openDeadlineEditModal());
+        }
+        
+        // Initial display update
+        await updateDeadlineDisplay();
+        
+        console.log('Deadline management initialized with cloud sync');
+    }
+
+    // === RESOURCES SYSTEM ===
+    
+    let resourcesInitialized = false;
+    
+    function showResourceFilter(filter) {
+        // Hide all resource filters
+        document.querySelectorAll('.resource-filter').forEach(filterDiv => {
+            filterDiv.style.display = 'none';
+        });
+        
+        // Remove active class from all resource tabs
+        document.querySelectorAll('[data-resource-filter]').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Show selected filter
+        const targetFilter = document.querySelector(`[data-filter="${filter}"].resource-filter`);
+        if (targetFilter) {
+            targetFilter.style.display = 'block';
+        }
+        
+        // Add active class to selected tab
+        const activeTab = document.querySelector(`[data-resource-filter="${filter}"]`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+        }
+        
+        // For "alle" filter, populate with all links
+        if (filter === 'alle') {
+            populateAllLinksFilter();
+        }
+    }
+    
+    function showNotesFilter(filter) {
+        // Hide all notes filters
+        document.querySelectorAll('.notes-filter').forEach(filterDiv => {
+            filterDiv.style.display = 'none';
+        });
+        
+        // Remove active class from all notes tabs
+        document.querySelectorAll('[data-notes-filter]').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Show selected filter
+        const targetFilter = document.querySelector(`[data-filter="${filter}"].notes-filter`);
+        if (targetFilter) {
+            targetFilter.style.display = 'block';
+        }
+        
+        // Add active class to selected tab
+        const activeTab = document.querySelector(`[data-notes-filter="${filter}"]`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+        }
+    }
+    
+    function populateAllLinksFilter() {
+        const alleContainer = document.querySelector('[data-filter="alle"].resource-filter .links-grid');
+        if (!alleContainer) return;
+        
+        // Clear existing content
+        alleContainer.innerHTML = '';
+        
+        // Get all link cards from other categories
+        const allLinkCards = document.querySelectorAll('.link-card[data-category]');
+        
+        allLinkCards.forEach(linkCard => {
+            const clone = linkCard.cloneNode(true);
+            alleContainer.appendChild(clone);
+        });
+    }
+    
+    function generateLinkIcon(title) {
+        // Generate a simple icon from the first letter or use common patterns
+        const firstLetter = title.charAt(0).toUpperCase();
+        const colors = ['#667eea', '#f093fb', '#4facfe', '#fa709a', '#a8edea', '#667eea', '#764ba2'];
+        const colorIndex = title.length % colors.length;
+        
+        return {
+            letter: firstLetter,
+            color: colors[colorIndex]
+        };
+    }
+    
+    function addNewLink() {
+        const titleInput = document.getElementById('newLinkTitle');
+        const urlInput = document.getElementById('newLinkUrl');
+        const categorySelect = document.getElementById('newLinkCategory');
+        
+        if (!titleInput || !urlInput || !categorySelect) return;
+        
+        const title = titleInput.value.trim();
+        const url = urlInput.value.trim();
+        const category = categorySelect.value;
+        
+        if (!title || !url) {
+            alert('Bitte Titel und URL eingeben!');
+            return;
+        }
+        
+        // Basic URL validation
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            urlInput.value = 'https://' + url;
+        }
+        
+        const icon = generateLinkIcon(title);
+        
+        // Create new link card
+        const linkCard = document.createElement('a');
+        linkCard.href = urlInput.value;
+        linkCard.target = '_blank';
+        linkCard.className = 'link-card';
+        linkCard.setAttribute('data-category', category);
+        linkCard.style.cssText = `
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+            padding: 1rem; 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            text-decoration: none; 
+            color: var(--text-primary); 
+            transition: all 0.2s; 
+            border-radius: 4px;
+        `;
+        
+        linkCard.innerHTML = `
+            <div style="width: 40px; height: 40px; background: ${icon.color}; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">${icon.letter}</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 500; margin-bottom: 0.2rem;">${title}</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">Custom Link</div>
+            </div>
+        `;
+        
+        // Add to appropriate category container
+        const categoryContainer = document.querySelector(`[data-filter="${category}"].resource-filter .links-grid`);
+        if (categoryContainer) {
+            categoryContainer.appendChild(linkCard);
+        }
+        
+        // Clear form
+        titleInput.value = '';
+        urlInput.value = '';
+        categorySelect.value = 'privat';
+        
+        console.log(`Added new link: ${title} (${category})`);
+    }
+    
+    function initializeResources() {
+        if (resourcesInitialized) return;
+        
+        // Initialize resource filter tabs
+        document.querySelectorAll('[data-resource-filter]').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const filter = tab.getAttribute('data-resource-filter');
+                showResourceFilter(filter);
+            });
+        });
+        
+        // Initialize notes filter tabs
+        document.querySelectorAll('[data-notes-filter]').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const filter = tab.getAttribute('data-notes-filter');
+                showNotesFilter(filter);
+            });
+        });
+        
+        // Add link button
+        const addLinkBtn = document.getElementById('addLinkBtn');
+        if (addLinkBtn) {
+            addLinkBtn.addEventListener('click', addNewLink);
+        }
+        
+        // Enter key support for adding links
+        const titleInput = document.getElementById('newLinkTitle');
+        const urlInput = document.getElementById('newLinkUrl');
+        
+        [titleInput, urlInput].forEach(input => {
+            if (input) {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        addNewLink();
+                    }
+                });
+            }
+        });
+        
+        // Add hover effects to link cards
+        const addHoverEffects = () => {
+            document.querySelectorAll('.link-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-2px)';
+                    card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                    card.style.boxShadow = 'none';
+                });
+            });
+        };
+        
+        addHoverEffects();
+        
+        // Show default filters
+        showResourceFilter('privat');
+        showNotesFilter('privat');
+        
+        resourcesInitialized = true;
+        console.log('Resources system initialized');
+    }
+
+    // === MOTIVATIONAL SLIDESHOW SYSTEM ===
+    
+    let currentSlide = 0;
+    let autoPlayInterval = null;
+    let isAutoPlaying = true;
+    
+    function showSlide(slideIndex) {
+        const slides = document.querySelectorAll('.motivational-slide');
+        const indicators = document.querySelectorAll('.indicator');
+        const slideCounter = document.getElementById('slideCounter');
+        
+        // Hide all slides
+        slides.forEach(slide => {
+            slide.style.display = 'none';
+        });
+        
+        // Reset all indicators
+        indicators.forEach(indicator => {
+            indicator.style.background = '#ccc';
+            indicator.style.opacity = '0.5';
+        });
+        
+        // Show current slide
+        if (slides[slideIndex]) {
+            slides[slideIndex].style.display = 'flex';
+        }
+        
+        // Highlight current indicator
+        if (indicators[slideIndex]) {
+            indicators[slideIndex].style.background = '#333';
+            indicators[slideIndex].style.opacity = '1';
+        }
+        
+        // Update counter
+        if (slideCounter) {
+            slideCounter.textContent = `${slideIndex + 1}/${slides.length}`;
+        }
+        
+        currentSlide = slideIndex;
+    }
+    
+    function nextSlide() {
+        const slides = document.querySelectorAll('.motivational-slide');
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+    }
+    
+    function prevSlide() {
+        const slides = document.querySelectorAll('.motivational-slide');
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        showSlide(currentSlide);
+    }
+    
+    function toggleAutoPlay() {
+        const autoPlayBtn = document.getElementById('autoPlayToggle');
+        
+        if (isAutoPlaying) {
+            // Stop auto play
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+            isAutoPlaying = false;
+            autoPlayBtn.textContent = 'Play';
+            autoPlayBtn.style.background = 'transparent';
+            autoPlayBtn.style.color = '#666';
+        } else {
+            // Start auto play
+            autoPlayInterval = setInterval(nextSlide, 4000); // 4 seconds
+            isAutoPlaying = true;
+            autoPlayBtn.textContent = 'Auto';
+            autoPlayBtn.style.background = '#000';
+            autoPlayBtn.style.color = 'white';
+        }
+    }
+    
+    function initializeMotivationSlideshow() {
+        // Show first slide
+        showSlide(0);
+        
+        // Start auto play
+        if (isAutoPlaying) {
+            autoPlayInterval = setInterval(nextSlide, 4000);
+        }
+        
+        // Add event listeners
+        const nextBtn = document.getElementById('nextSlide');
+        const prevBtn = document.getElementById('prevSlide');
+        const autoPlayBtn = document.getElementById('autoPlayToggle');
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                nextSlide();
+                // Reset auto play timer
+                if (isAutoPlaying) {
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = setInterval(nextSlide, 4000);
+                }
+            });
+        }
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                prevSlide();
+                // Reset auto play timer
+                if (isAutoPlaying) {
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = setInterval(nextSlide, 4000);
+                }
+            });
+        }
+        
+        if (autoPlayBtn) {
+            autoPlayBtn.addEventListener('click', toggleAutoPlay);
+        }
+        
+        // Add click events to indicators
+        const indicators = document.querySelectorAll('.indicator');
+        indicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', () => {
+                showSlide(index);
+                // Reset auto play timer
+                if (isAutoPlaying) {
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = setInterval(nextSlide, 4000);
+                }
+            });
+        });
+        
+        console.log('Motivational slideshow initialized');
+    }
+
+    // === DAILY QUOTE SYSTEM ===
+    
+    const dailyQuotes = [
+        { text: "Der einzige Weg, großartige Arbeit zu leisten, ist zu lieben, was du tust.", author: "Steve Jobs" },
+        { text: "Das Leben ist das, was passiert, während du andere Pläne machst.", author: "John Lennon" },
+        { text: "Sei die Veränderung, die du in der Welt sehen willst.", author: "Mahatma Gandhi" },
+        { text: "Der Weg ist das Ziel.", author: "Konfuzius" },
+        { text: "Was du heute kannst besorgen, das verschiebe nicht auf morgen.", author: "Benjamin Franklin" },
+        { text: "Erfolg ist nicht endgültig, Misserfolg ist nicht tödlich: Es ist der Mut weiterzumachen, der zählt.", author: "Winston Churchill" },
+        { text: "Die beste Zeit, einen Baum zu pflanzen, war vor 20 Jahren. Die zweitbeste Zeit ist jetzt.", author: "Chinesisches Sprichwort" },
+        { text: "Du musst die Dinge sein, die du in der Welt sehen willst.", author: "Mahatma Gandhi" },
+        { text: "Das Geheimnis des Erfolgs ist anzufangen.", author: "Mark Twain" },
+        { text: "Glaube an dich selbst und alles ist möglich.", author: "Unknown" },
+        { text: "Kleine Fortschritte täglich führen zu großen Ergebnissen jährlich.", author: "Unknown" },
+        { text: "Träume nicht dein Leben, lebe deinen Traum.", author: "Unknown" },
+        { text: "Der beste Weg, die Zukunft vorherzusagen, ist, sie zu erschaffen.", author: "Peter Drucker" },
+        { text: "Erfolg ist die Summe kleiner Anstrengungen, die Tag für Tag wiederholt werden.", author: "Robert Collier" },
+        { text: "Was hinter uns liegt und was vor uns liegt, sind winzige Angelegenheiten im Vergleich zu dem, was in uns liegt.", author: "Ralph Waldo Emerson" },
+        { text: "Disziplin ist die Brücke zwischen Zielen und Leistung.", author: "Jim Rohn" },
+        { text: "Du wirst morgen sein, was du heute denkst.", author: "Buddha" },
+        { text: "Jeder Tag ist eine neue Chance, das zu werden, was du sein möchtest.", author: "Unknown" },
+        { text: "Fortschritt ist unmöglich ohne Veränderung.", author: "George Bernard Shaw" },
+        { text: "Die Zukunft gehört denen, die an die Schönheit ihrer Träume glauben.", author: "Eleanor Roosevelt" },
+        { text: "Motivation bringt dich in Gang. Gewohnheit hält dich in Bewegung.", author: "Jim Ryun" },
+        { text: "Ein Jahr von heute wirst du dir wünschen, du hättest heute angefangen.", author: "Karen Lamb" },
+        { text: "Perfektion ist nicht erreichbar, aber wenn wir nach Perfektion streben, können wir Exzellenz erreichen.", author: "Vince Lombardi" },
+        { text: "Der Unterschied zwischen Gewöhnlich und Außergewöhnlich ist das kleine Extra.", author: "Jimmy Johnson" },
+        { text: "Konzentriere dich auf das, was du kontrollieren kannst.", author: "Unknown" },
+        { text: "Jeder Experte war einmal ein Anfänger.", author: "Helen Hayes" },
+        { text: "Die größte Revolution unserer Generation ist die Entdeckung, dass Menschen ihr Leben ändern können, indem sie ihre Einstellung ändern.", author: "William James" },
+        { text: "Warte nicht auf den perfekten Moment. Nimm den Moment und mach ihn perfekt.", author: "Unknown" },
+        { text: "Deine einzige Begrenzung ist deine Vorstellungskraft.", author: "Unknown" },
+        { text: "Großartige Dinge entstehen nie in der Komfortzone.", author: "Unknown" },
+        { text: "Es ist nie zu spät, das zu werden, was du hättest sein können.", author: "George Eliot" }
+    ];
+    
+    function getTodaysQuote() {
+        // Use current date as seed to get same quote for the whole day
+        const today = new Date();
+        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+        const quoteIndex = dayOfYear % dailyQuotes.length;
+        return dailyQuotes[quoteIndex];
+    }
+    
+    function updateDailyQuote() {
+        const quote = getTodaysQuote();
+        const quoteTextElement = document.getElementById('dailyQuoteText');
+        const quoteAuthorElement = document.getElementById('dailyQuoteAuthor');
+        
+        if (quoteTextElement && quoteAuthorElement) {
+            quoteTextElement.textContent = `"${quote.text}"`;
+            quoteAuthorElement.textContent = `— ${quote.author}`;
+            console.log('Daily quote updated:', quote.text, 'by', quote.author);
+        }
+    }
+    
+    function initializeDailyQuote() {
+        updateDailyQuote();
+        console.log('Daily quote system initialized');
+    }
+
+    // === ROUTINE RESET SYSTEM ===
+    
+    function getRoutineResetTime() {
+        const routineResetInput = document.getElementById('routineResetTime');
+        if (routineResetInput && routineResetInput.value) {
+            return routineResetInput.value;
+        }
+        return '06:00'; // Default to 6:00 AM
+    }
+    
+    async function saveRoutineResetTime(time) {
+        await cloudStorage.saveRoutineResetTime(time);
+    }
+    
+    async function loadRoutineResetTime() {
+        const savedTime = await cloudStorage.getRoutineResetTime();
+        if (savedTime) {
+            const routineResetInput = document.getElementById('routineResetTime');
+            if (routineResetInput) {
+                routineResetInput.value = savedTime;
+            }
+            return savedTime;
+        }
+        return '06:00';
+    }
+    
+    async function getLastRoutineResetDate() {
+        return await cloudStorage.getLastRoutineResetDate();
+    }
+    
+    async function saveLastRoutineResetDate(date) {
+        await cloudStorage.saveLastRoutineResetDate(date);
+    }
+    
+    async function shouldResetRoutines() {
+        const now = new Date();
+        const resetTime = await loadRoutineResetTime();
+        const [resetHour, resetMinute] = resetTime.split(':').map(Number);
+        
+        // Create today's reset time
+        const todayResetTime = new Date();
+        todayResetTime.setHours(resetHour, resetMinute, 0, 0);
+        
+        const lastResetDate = await getLastRoutineResetDate();
+        const today = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+        
+        // If we haven't reset today and current time is past reset time
+        if (lastResetDate !== today && now >= todayResetTime) {
+            return true;
+        }
+        
+        // Handle case where reset time is tomorrow (e.g., user sets reset time after current time)
+        if (lastResetDate !== today && now < todayResetTime) {
+            // Check if we should have reset yesterday
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            
+            if (lastResetDate !== yesterdayStr) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    async function resetRoutineCheckboxes() {
+        const morningRoutine = document.getElementById('morning-routine');
+        const eveningRoutine = document.getElementById('evening-routine');
+        
+        console.log('Resetting routine checkboxes for new day...');
+        
+        // Reset morning routine checkboxes
+        if (morningRoutine) {
+            const checkboxes = morningRoutine.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    checkbox.checked = false;
+                    // Update visual styling
+                    const label = checkbox.nextElementSibling;
+                    if (label) {
+                        label.style.textDecoration = 'none';
+                        label.style.color = 'inherit';
+                    }
+                }
+            });
+        }
+        
+        // Reset evening routine checkboxes
+        if (eveningRoutine) {
+            const checkboxes = eveningRoutine.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    checkbox.checked = false;
+                    // Update visual styling
+                    const label = checkbox.nextElementSibling;
+                    if (label) {
+                        label.style.textDecoration = 'none';
+                        label.style.color = 'inherit';
+                    }
+                }
+            });
+        }
+        
+        // Update progress bars
+        updateRoutineProgress();
+        
+        // Update localStorage completion data to reflect unchecked state
+        setTimeout(async () => {
+            await checkAndSaveRoutineCompletion();
+            await updateMonthlyRoutineStreak('morning');
+            await updateMonthlyRoutineStreak('evening');
+        }, 100);
+        
+        // Mark as reset for today
+        const today = new Date().toISOString().split('T')[0];
+        await saveLastRoutineResetDate(today);
+        
+        console.log('Routines reset successfully for', today);
+    }
+    
+    async function checkAndResetRoutines() {
+        if (await shouldResetRoutines()) {
+            await resetRoutineCheckboxes();
+        }
+    }
+    
+    function cleanupRoutineCompletionData() {
+        // Check if current routine completion data matches actual checkbox state
+        const today = new Date().toISOString().split('T')[0];
+        const completionData = getRoutineCompletionData();
+        
+        if (completionData[today]) {
+            const morningActuallyComplete = isRoutineComplete('morning');
+            const eveningActuallyComplete = isRoutineComplete('evening');
+            
+            // Fix any inconsistencies
+            if (completionData[today].morning !== morningActuallyComplete || 
+                completionData[today].evening !== eveningActuallyComplete) {
+                
+                console.log('Found inconsistent routine completion data, fixing...');
+                completionData[today].morning = morningActuallyComplete;
+                completionData[today].evening = eveningActuallyComplete;
+                localStorage.setItem('routineCompletionData', JSON.stringify(completionData));
+                
+                // Update streak displays
+                updateMonthlyRoutineStreak('morning');
+                updateMonthlyRoutineStreak('evening');
+            }
+        }
+    }
+    
+    function scheduleNextRoutineReset() {
+        const now = new Date();
+        const resetTime = getRoutineResetTime();
+        const [resetHour, resetMinute] = resetTime.split(':').map(Number);
+        
+        // Calculate next reset time
+        const nextResetTime = new Date();
+        nextResetTime.setHours(resetHour, resetMinute, 0, 0);
+        
+        // If reset time has passed today, schedule for tomorrow
+        if (nextResetTime <= now) {
+            nextResetTime.setDate(nextResetTime.getDate() + 1);
+        }
+        
+        const timeUntilReset = nextResetTime.getTime() - now.getTime();
+        
+        console.log('Next routine reset scheduled for:', nextResetTime.toLocaleString());
+        console.log('Time until reset:', Math.round(timeUntilReset / 1000 / 60), 'minutes');
+        
+        setTimeout(() => {
+            resetRoutineCheckboxes();
+            // Schedule the next reset
+            scheduleNextRoutineReset();
+        }, timeUntilReset);
+    }
+    
+    async function initializeRoutineReset() {
+        // Load saved reset time
+        await loadRoutineResetTime();
+        
+        // Clean up any inconsistent localStorage data on startup
+        cleanupRoutineCompletionData();
+        
+        // Check if we need to reset routines now
+        await checkAndResetRoutines();
+        
+        // Schedule next reset
+        scheduleNextRoutineReset();
+        
+        // Save reset time when changed
+        const routineResetInput = document.getElementById('routineResetTime');
+        if (routineResetInput) {
+            routineResetInput.addEventListener('change', function() {
+                saveRoutineResetTime(this.value);
+                console.log('Routine reset time updated to:', this.value);
+                // Reschedule next reset with new time
+                scheduleNextRoutineReset();
+            });
+        }
+        
+        console.log('Routine reset system initialized');
+        console.log('Reset time:', getRoutineResetTime());
+        console.log('Last reset date:', getLastRoutineResetDate());
+    }
+
     // Initialize todo system
     populateHeuteFilter(); // Populate heute with all todos first
     sortHeuteTodos(); // Sort todos in heute chronologically
@@ -3388,6 +4260,37 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize dark mode
     darkMode.init();
     
+    // Add hover effects to monthly overview tiles
+    function initializeMonthlyOverviewHover() {
+        document.querySelectorAll('.streak-tile').forEach(tile => {
+            // Skip deadline tiles as they already have hover effects
+            if (!tile.classList.contains('deadline-tile')) {
+                tile.addEventListener('mouseenter', () => {
+                    tile.style.transform = 'translateY(-2px)';
+                    tile.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                    tile.style.transition = 'all 0.2s ease';
+                });
+                tile.addEventListener('mouseleave', () => {
+                    tile.style.transform = 'translateY(0)';
+                    tile.style.boxShadow = 'none';
+                });
+            }
+        });
+        console.log('Monthly overview hover effects initialized');
+    }
+
+    // Initialize daily quote system
+    initializeDailyQuote();
+    
+    // Initialize deadline management
+    initializeDeadlines();
+    
+    // Initialize monthly overview hover effects
+    initializeMonthlyOverviewHover();
+    
+    // Initialize routine reset system
+    await initializeRoutineReset();
+    
     // Debug function for manual testing
     window.debugAnalytics = function() {
         console.log('=== DEBUG ANALYTICS ===');
@@ -3399,6 +4302,22 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeHeatmapFilters();
         // initializeAnalyticsHeatmaps(); // DISABLED - too complex for now
         console.log('=== END DEBUG ===');
+    };
+
+    // Force clear routine localStorage data on startup for clean state
+    localStorage.removeItem('routineCompletionData');
+    localStorage.removeItem('lastRoutineResetDate');
+    console.log('Routine localStorage cleared for clean startup');
+    
+    // Debug function to clear routine localStorage data
+    window.clearRoutineData = function() {
+        localStorage.removeItem('routineCompletionData');
+        localStorage.removeItem('lastRoutineResetDate');
+        console.log('Routine localStorage data cleared');
+        // Refresh streak displays
+        updateMonthlyRoutineStreak('morning');
+        updateMonthlyRoutineStreak('evening');
+        console.log('Routine streaks reset to 0');
     };
 
     console.log('Dashboard initialized successfully! 🚀');

@@ -27,6 +27,14 @@
                 <i data-lucide="book-open" class="nav-icon"></i>
                 Journal
             </div>
+            <div class="nav-link" data-tab="motivation">
+                <i data-lucide="zap" class="nav-icon"></i>
+                Motivation
+            </div>
+            <div class="nav-link" data-tab="ressourcen">
+                <i data-lucide="bookmark" class="nav-icon"></i>
+                Ressourcen
+            </div>
             <!-- <div class="nav-link" data-tab="analytics">
                 <i data-lucide="bar-chart-3" class="nav-icon"></i>
                 Analytics
@@ -79,6 +87,14 @@
                     </div>
                 </div>
             </section>
+
+            <!-- 💭 Tägliches Zitat -->
+            <div style="text-align: center; padding: 0.5rem 1rem; margin-bottom: 1rem;">
+                <div style="font-size: 0.9rem; font-style: italic; color: var(--text-secondary);">
+                    <span id="dailyQuoteText">"Der einzige Weg, großartige Arbeit zu leisten, ist zu lieben, was du tust."</span>
+                    <span id="dailyQuoteAuthor" style="font-size: 0.8rem; margin-left: 0.5rem;">— Steve Jobs</span>
+                </div>
+            </div>
 
             <!-- ☀️🌙 Morgen- & Abendroutine -->
             <section class="section">
@@ -211,6 +227,48 @@
                     <button class="btn btn-small" data-tab="todos" style="font-size: 0.8rem;">
                         Alle Aufgaben anzeigen
                     </button>
+                </div>
+            </section>
+
+            <!-- 🚨 Wichtige Termine -->
+            <section class="section full-width">
+                <div class="card-header">
+                    <h2>🚨 Wichtige Termine</h2>
+                    <div class="tabs">
+                        <div id="addDeadlineBtn" class="tab" style="cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 40px;">+</div>
+                    </div>
+                </div>
+                <div class="streak-grid">
+                    <div class="streak-tile">
+                        <div class="streak-number">3</div>
+                        <div class="streak-label">Tage bis</div>
+                        <div class="streak-date">Klausur Mathematik</div>
+                    </div>
+                    <div class="streak-tile">
+                        <div class="streak-number">7</div>
+                        <div class="streak-label">Tage bis</div>
+                        <div class="streak-date">Projekt Deadline</div>
+                    </div>
+                    <div class="streak-tile">
+                        <div class="streak-number">15</div>
+                        <div class="streak-label">Tage bis</div>
+                        <div class="streak-date">Hausarbeit Abgabe</div>
+                    </div>
+                    <div class="streak-tile">
+                        <div class="streak-number">23</div>
+                        <div class="streak-label">Tage bis</div>
+                        <div class="streak-date">Präsentation Uni</div>
+                    </div>
+                    <div class="streak-tile">
+                        <div class="streak-number">45</div>
+                        <div class="streak-label">Tage bis</div>
+                        <div class="streak-date">Semester Ende</div>
+                    </div>
+                    <div class="streak-tile">
+                        <div class="streak-number">67</div>
+                        <div class="streak-label">Tage bis</div>
+                        <div class="streak-date">Geburtstag Mama</div>
+                    </div>
                 </div>
             </section>
 
@@ -803,6 +861,258 @@
             </section>
         </div>
 
+        <!-- === ⚡ MOTIVATION TAB === -->
+        <div class="tab-content" id="motivation">
+
+            <!-- 🎬 Motivations-Diashow -->
+            <section class="section full-width">
+                <div class="card-header">
+                    <h2>⚡ Tägliche Motivation</h2>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button id="prevSlide" class="btn btn-small" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15,18 9,12 15,6"></polyline>
+                            </svg>
+                        </button>
+                        <div id="slideCounter" style="font-size: 0.8rem; color: #666; min-width: 50px; text-align: center;">1/5</div>
+                        <button id="nextSlide" class="btn btn-small" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9,18 15,12 9,6"></polyline>
+                            </svg>
+                        </button>
+                        <button id="autoPlayToggle" class="btn btn-small" style="padding: 0.3rem 0.6rem; border: 1px solid #e0e0e0; background: #000; color: white; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Auto</button>
+                    </div>
+                </div>
+                
+                <!-- Slideshow Container -->
+                <div class="slideshow-container" style="position: relative; max-width: 800px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+                    
+                    <!-- Slide 1 -->
+                    <div class="motivational-slide active" style="display: block; text-align: center; padding: 3rem 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                            Deine Träume sind größer als deine Ausreden
+                        </div>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
+                            — Unbekannt
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 2 -->
+                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                            Erfolg ist die Summe kleiner Anstrengungen
+                        </div>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
+                            — Robert Collier
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 3 -->
+                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                            Der beste Zeitpunkt war gestern.<br>Der zweitbeste ist jetzt.
+                        </div>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
+                            — Chinesisches Sprichwort
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 4 -->
+                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                            Große Träume brauchen große Taten
+                        </div>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
+                            — Unbekannt
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 5 -->
+                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                        <div style="color: #333; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            Du wirst morgen sein, was du heute denkst
+                        </div>
+                        <div style="color: #666; font-size: 1rem; font-style: italic;">
+                            — Buddha
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Slide Indicators -->
+                <div style="text-align: center; margin-top: 1rem;">
+                    <div class="slide-indicators" style="display: inline-flex; gap: 0.5rem;">
+                        <div class="indicator active" data-slide="0" style="width: 10px; height: 10px; border-radius: 50%; background: #333; cursor: pointer; opacity: 1;"></div>
+                        <div class="indicator" data-slide="1" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5;"></div>
+                        <div class="indicator" data-slide="2" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5;"></div>
+                        <div class="indicator" data-slide="3" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5;"></div>
+                        <div class="indicator" data-slide="4" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5;"></div>
+                    </div>
+                </div>
+                
+            </section>
+        </div>
+
+        <!-- === 📚 RESSOURCEN TAB === -->
+        <div class="tab-content" id="ressourcen">
+
+            <!-- 🔗 Quick Links -->
+            <section class="section full-width">
+                <div class="card-header">
+                    <h2>🔗 Quick Links</h2>
+                    <div class="tabs">
+                        <div class="tab active" data-resource-filter="privat">Privat</div>
+                        <div class="tab" data-resource-filter="arbeit">Arbeit</div>
+                        <div class="tab" data-resource-filter="uni">Uni</div>
+                        <div class="tab" data-resource-filter="alle">Alle</div>
+                    </div>
+                </div>
+                
+
+                <!-- Links Grid - Privat -->
+                <div class="resource-filter" data-filter="privat">
+                    <div class="links-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        
+                        <!-- Demo Links - Privat -->
+                        <a href="https://netflix.com" target="_blank" class="link-card" data-category="privat" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
+                            <div style="width: 40px; height: 40px; background: #e50914; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">N</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Netflix</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Streaming</div>
+                            </div>
+                        </a>
+
+                        <a href="https://spotify.com" target="_blank" class="link-card" data-category="privat" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
+                            <div style="width: 40px; height: 40px; background: #1db954; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">♫</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Spotify</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Musik</div>
+                            </div>
+                        </a>
+
+                        <a href="https://amazon.de" target="_blank" class="link-card" data-category="privat" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
+                            <div style="width: 40px; height: 40px; background: #ff9900; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">A</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Amazon</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Shopping</div>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+
+                <!-- Links Grid - Arbeit -->
+                <div class="resource-filter" data-filter="arbeit" style="display: none;">
+                    <div class="links-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        
+                        <!-- Demo Links - Arbeit -->
+                        <a href="https://gmail.com" target="_blank" class="link-card" data-category="arbeit" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
+                            <div style="width: 40px; height: 40px; background: #ea4335; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">@</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Gmail</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">E-Mail</div>
+                            </div>
+                        </a>
+
+                        <a href="https://slack.com" target="_blank" class="link-card" data-category="arbeit" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
+                            <div style="width: 40px; height: 40px; background: #4a154b; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">S</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Slack</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Team Chat</div>
+                            </div>
+                        </a>
+
+                        <a href="https://github.com" target="_blank" class="link-card" data-category="arbeit" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
+                            <div style="width: 40px; height: 40px; background: #333; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">⌘</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; margin-bottom: 0.2rem;">GitHub</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Code</div>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+
+                <!-- Links Grid - Uni -->
+                <div class="resource-filter" data-filter="uni" style="display: none;">
+                    <div class="links-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        
+                        <!-- Demo Links - Uni -->
+                        <a href="https://moodle.org" target="_blank" class="link-card" data-category="uni" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
+                            <div style="width: 40px; height: 40px; background: #f98012; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">M</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Moodle</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Lernplattform</div>
+                            </div>
+                        </a>
+
+                        <a href="https://scholar.google.com" target="_blank" class="link-card" data-category="uni" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
+                            <div style="width: 40px; height: 40px; background: #4285f4; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">📚</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Google Scholar</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Research</div>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+
+                <!-- Links Grid - Alle -->
+                <div class="resource-filter" data-filter="alle" style="display: none;">
+                    <div class="links-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <!-- Alle Links werden hier dynamisch eingefügt -->
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- 📝 Quick Notes -->
+            <section class="section full-width">
+                <div class="card-header">
+                    <h2>📝 Quick Notes</h2>
+                    <div class="tabs">
+                        <div class="tab active" data-notes-filter="privat">Privat</div>
+                        <div class="tab" data-notes-filter="arbeit">Arbeit</div>
+                        <div class="tab" data-notes-filter="uni">Uni</div>
+                    </div>
+                </div>
+
+                <!-- Notes Privat -->
+                <div class="notes-filter" data-filter="privat">
+                    <div class="form-group">
+                        <textarea id="notesPrivat" class="form-textarea" placeholder="Deine privaten Notizen, Ideen, wichtige Infos..." style="min-height: 200px;">• Zahnarzttermin: nächste Woche Donnerstag 14:00
+• Geburtstag Mama: 15. Oktober - Geschenk besorgen!
+• Auto TÜV fällig im März
+• Netflix-Serien: Stranger Things S4 noch schauen
+• Wochenende: Wanderung planen</textarea>
+                    </div>
+                </div>
+
+                <!-- Notes Arbeit -->
+                <div class="notes-filter" data-filter="arbeit" style="display: none;">
+                    <div class="form-group">
+                        <textarea id="notesArbeit" class="form-textarea" placeholder="Arbeitsbezogene Notizen, Meeting-Notes, wichtige Infos..." style="min-height: 200px;">• Projekt X Deadline: 30. September
+• Team Meeting Mittwoch 10:00 - neue Features besprechen
+• Code Review für Pull Request #234
+• Kunde ABC: Follow-up E-Mail senden
+• Neues Framework evaluieren: React vs Vue</textarea>
+                    </div>
+                </div>
+
+                <!-- Notes Uni -->
+                <div class="notes-filter" data-filter="uni" style="display: none;">
+                    <div class="form-group">
+                        <textarea id="notesUni" class="form-textarea" placeholder="Uni-Notizen, Lernstoff, wichtige Termine..." style="min-height: 200px;">• Klausur Mathematik: 20. Oktober (Kapitel 1-5 lernen)
+• Hausarbeit Literatur: Abgabe 15. November, 15 Seiten
+• Sprechstunde Prof. Schmidt: Donnerstag 14-16 Uhr
+• Bibliothek: Buch "Algorithm Design" reserviert
+• Lerngruppe: Samstag 10:00 Mensa</textarea>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
         <!-- === 📊 ANALYTICS TAB === -->
         <!-- TEMPORARILY DISABLED - TOO COMPLEX FOR NOW
         <div class="tab-content" id="analytics">
@@ -843,35 +1153,65 @@
                 <h2>⚙️ App Einstellungen</h2>
                 <div class="dashboard-grid">
                     <div class="card-compact">
-                        <h3>Darstellung</h3>
+                        <h3>App Einstellungen</h3>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
                             <span>Dark Mode</span>
                             <div id="darkModeToggle" class="toggle-switch" style="width: 60px; height: 30px; background: #e0e0e0; border-radius: 15px; position: relative; cursor: pointer;">
                                 <div id="darkModeSlider" class="toggle-slider" style="width: 26px; height: 26px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.2s;"></div>
                             </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
-                            <span>Kompakte Ansicht</span>
-                            <div style="width: 60px; height: 30px; background: #000; border-radius: 15px; position: relative; cursor: pointer;">
-                                <div style="width: 26px; height: 26px; background: #fff; border-radius: 50%; position: absolute; top: 2px; right: 2px; transition: transform 0.2s;"></div>
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label">Routine Reset Zeit</label>
+                            <input type="time" id="routineResetTime" class="form-input" value="06:00">
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 🔗 Link Management -->
+            <section class="section full-width">
+                <h2>🔗 Link Management</h2>
+                <div class="dashboard-grid">
+                    <div class="card-compact">
+                        <h3>Neuen Link hinzufügen</h3>
+                        <div class="form-group">
+                            <label class="form-label">Titel</label>
+                            <input type="text" id="newLinkTitle" class="form-input" placeholder="z.B. Gmail, Netflix...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">URL</label>
+                            <input type="url" id="newLinkUrl" class="form-input" placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Kategorie</label>
+                            <select id="newLinkCategory" class="form-select">
+                                <option value="privat">Privat</option>
+                                <option value="arbeit">Arbeit</option>
+                                <option value="uni">Uni</option>
+                            </select>
+                        </div>
+                        <button id="addLinkBtn" class="btn" style="width: 100%; margin-top: 0.5rem;">
+                            <i data-lucide="plus" style="width: 16px; height: 16px; margin-right: 0.5rem;"></i>
+                            Link hinzufügen
+                        </button>
                     </div>
 
                     <div class="card-compact">
-                        <h3>Erinnerungen</h3>
-                        <div class="form-group">
-                            <label class="form-label">Morgenroutine</label>
-                            <input type="time" class="form-input" value="07:00">
+                        <h3>Link-Verwaltung</h3>
+                        <div style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                            Links können im Ressourcen-Tab verwaltet werden
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Meditation</label>
-                            <input type="time" class="form-input" value="18:00">
+                        <div id="linkCount" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                            Gesamt: 8 Links
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Journal</label>
-                            <input type="time" class="form-input" value="21:00">
-                        </div>
+                        <button id="clearAllLinksBtn" class="btn" style="width: 100%; background: #dc3545; border-color: #dc3545; color: white; margin-bottom: 0.5rem;">
+                            <i data-lucide="trash-2" style="width: 16px; height: 16px; margin-right: 0.5rem;"></i>
+                            Alle Links löschen
+                        </button>
+                        <button id="exportLinksBtn" class="btn" style="width: 100%; background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);">
+                            <i data-lucide="download" style="width: 16px; height: 16px; margin-right: 0.5rem;"></i>
+                            Links exportieren
+                        </button>
                     </div>
                 </div>
             </section>
@@ -879,6 +1219,19 @@
 
     </div>
 
+    <!-- Supabase Configuration -->
+    <script src="supabase-config.js"></script>
+    <!-- Cloud Storage System -->
+    <script src="cloud-storage.js"></script>
+    <!-- Main Application -->
     <script src="script.js"></script>
+    
+    <!-- Initialize Cloud Connection -->
+    <script>
+        // Try to initialize Supabase on load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeSupabase();
+        });
+    </script>
 </body>
 </html>
