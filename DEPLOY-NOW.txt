@@ -1,8 +1,0 @@
-DEPLOYMENT TEST
-================
-Time: 2025-08-09 16:52
-Commit: FORCE DEPLOY NOW
-Status: Testing if ANY change triggers deployment
-
-If you see this file, Vercel auto-deploy works.
-If not, there's a fundamental configuration issue.
