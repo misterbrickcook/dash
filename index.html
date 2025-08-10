@@ -1234,11 +1234,14 @@
             if (connected && window.supabase) {
                 console.log('🧪 Testing Supabase connection...');
                 try {
-                    // Simple test query (will fail if no tables exist, but that's OK)
-                    const testResult = await window.supabase.query('test');
-                    console.log('🚀 Supabase test completed');
+                    // Test actual tables
+                    const todos = await window.supabase.select('todos');
+                    const goals = await window.supabase.select('goals');
+                    console.log('✅ Found todos:', todos?.length || 0);
+                    console.log('✅ Found goals:', goals?.length || 0);
+                    console.log('🚀 Database tables are working!');
                 } catch (error) {
-                    console.log('⚠️ Supabase tables not set up yet, but connection works');
+                    console.log('❌ Database error:', error.message);
                 }
             }
         });
