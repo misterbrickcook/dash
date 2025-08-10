@@ -610,11 +610,27 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     
     // New synchronized task check handler
-    function handleTaskCheckSync(sharedId, checked) {
-        console.log(`Task check sync triggered for ${sharedId}:`, checked);
+    async function handleTaskCheckSync(sharedId, checked) {
+        console.log(`🔄 Task sync: ${sharedId} → ${checked}`);
         
-        // Update central state, which will handle syncing across tabs and archiving
+        // Update central state (local sync)
         todoState.setTodoChecked(sharedId, checked);
+        
+        // Save to cloud storage for cross-device sync
+        if (window.cloudStorage) {
+            try {
+                const todoData = todoState.getTodoData(sharedId);
+                if (todoData) {
+                    todoData.completed = checked;
+                    todoData.updated_at = new Date().toISOString();
+                    await window.cloudStorage.saveTodo(todoData);
+                    console.log(`☁️ Todo synced to cloud: ${sharedId}`);
+                }
+            } catch (error) {
+                console.error('❌ Cloud sync failed:', error);
+                // Continue with local sync even if cloud fails
+            }
+        }
     }
     
     // Legacy handler for backward compatibility (will be phased out)
