@@ -1230,42 +1230,22 @@
             // Initialize Supabase
             const connected = initializeSupabase();
             
-            // Test Supabase connection and database
+            // Test Supabase connection
             if (connected && window.supabase) {
-                console.log('🧪 Testing Supabase database...');
+                console.log('🧪 Database test starting...');
                 
-                // Test 1: Check todos table
-                try {
-                    const todos = await window.supabase.select('todos');
-                    console.log('📊 Database todos found:', todos ? todos.length : 0);
-                    if (todos && todos.length > 0) {
-                        console.log('📝 Sample todo:', todos[0]);
-                    }
-                } catch (error) {
-                    console.log('❌ Todos table error:', error);
-                }
+                // Simple direct test
+                window.supabase.select('todos').then(todos => {
+                    console.log('📊 TODOS RESULT:', todos);
+                }).catch(error => {
+                    console.log('❌ TODOS ERROR:', error);
+                });
                 
-                // Test 2: Check goals table  
-                try {
-                    const goals = await window.supabase.select('goals');
-                    console.log('🎯 Database goals found:', goals ? goals.length : 0);
-                    if (goals && goals.length > 0) {
-                        console.log('🎯 Sample goal:', goals[0]);
-                    }
-                } catch (error) {
-                    console.log('❌ Goals table error:', error);
-                }
-                
-                // Test 3: Try a simple insert test
-                try {
-                    const testInsert = await window.supabase.insert('sync_test', {
-                        id: Date.now(),
-                        checked: true
-                    });
-                    console.log('✅ Database write test successful');
-                } catch (error) {
-                    console.log('❌ Database write test failed:', error);
-                }
+                // Test if supabase object has the right methods
+                console.log('🔧 Supabase methods:', Object.keys(window.supabase));
+                console.log('🔧 Supabase URL:', window.supabase.url);
+            } else {
+                console.log('❌ NO SUPABASE CONNECTION');
             }
         });
     </script>
