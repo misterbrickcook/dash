@@ -116,10 +116,15 @@
         <div class="tab-content" id="ziele">
             <section class="card">
                 <div class="card-header">
-                    <h2>🎯 Goals & Targets</h2>
+                    <h2 id="goals-section-title">🎯 Active Goals</h2>
                     <button id="add-goal-btn" style="padding: 0.3rem 0.8rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
                         + Add Goal
                     </button>
+                </div>
+                
+                <!-- Goal Filter Tabs -->
+                <div class="goal-filter-tabs" style="display: flex; gap: 0.5rem; margin: 1rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+                    <!-- Filter tabs will be created dynamically -->
                 </div>
                 
                 <div class="checkbox-group" id="active-goals">
@@ -129,19 +134,7 @@
                 </div>
             </section>
 
-            <!-- Completed Goals -->
-            <section class="card" style="margin-top: 1rem;">
-                <div class="card-header">
-                    <h2>🏆 Completed Goals</h2>
-                    <small style="color: #666;">Achieved targets</small>
-                </div>
-                
-                <div class="checkbox-group" id="completed-goals">
-                    <div style="text-align: center; color: #666; padding: 1rem;">
-                        🏆 Completed goals will appear here
-                    </div>
-                </div>
-            </section>
+            <!-- Note: Completed goals now available via "Erreicht" filter tab -->
         </div>
 
         <!-- === 📔 JOURNAL TAB === -->
@@ -710,76 +703,97 @@
         
         function renderGoals(goals) {
             const activeContainer = document.getElementById('active-goals');
-            const completedContainer = document.getElementById('completed-goals');
             
-            // Clear containers
-            activeContainer.innerHTML = '';
-            completedContainer.innerHTML = '';
+            // Clear container
+            if (activeContainer) activeContainer.innerHTML = '';
             
             const activeGoals = goals.filter(g => !g.completed);
             const completedGoals = goals.filter(g => g.completed);
             
-            // Render active goals as cards
-            activeGoals.forEach(goal => {
-                const categoryIcon = getCategoryIconGoal(goal.category);
-                
-                // Format target date if available
-                let targetDateDisplay = '';
-                if (goal.target_date) {
-                    const targetDate = new Date(goal.target_date);
-                    const today = new Date();
-                    const isOverdue = targetDate < today;
-                    
-                    if (isOverdue) {
-                        targetDateDisplay = `<div style="color: #dc3545; font-size: 0.8rem; margin-top: 0.5rem;">⚠️ Überfällig: ${targetDate.toLocaleDateString('de-DE')}</div>`;
-                    } else {
-                        targetDateDisplay = `<div style="color: #666; font-size: 0.8rem; margin-top: 0.5rem;">🎯 Ziel: ${targetDate.toLocaleDateString('de-DE')}</div>`;
-                    }
+            // Filter goals based on current filter
+            let filteredGoals;
+            if (currentGoalFilter === 'active') {
+                filteredGoals = activeGoals;
+            } else if (currentGoalFilter === 'completed') {
+                filteredGoals = completedGoals;
+            }
+            
+            // Render filtered goals
+            if (activeContainer) {
+                if (filteredGoals.length > 0) {
+                    filteredGoals.forEach(goal => {
+                        const categoryIcon = getCategoryIconGoal(goal.category);
+                        
+                        if (currentGoalFilter === 'active') {
+                            // Format target date for active goals
+                            let targetDateDisplay = '';
+                            if (goal.target_date) {
+                                const targetDate = new Date(goal.target_date);
+                                const today = new Date();
+                                const isOverdue = targetDate < today;
+                                
+                                if (isOverdue) {
+                                    targetDateDisplay = `<div style="color: #dc3545; font-size: 0.8rem; margin-top: 0.5rem;">⚠️ Überfällig: ${targetDate.toLocaleDateString('de-DE')}</div>`;
+                                } else {
+                                    targetDateDisplay = `<div style="color: #666; font-size: 0.8rem; margin-top: 0.5rem;">🎯 Ziel: ${targetDate.toLocaleDateString('de-DE')}</div>`;
+                                }
+                            }
+                            
+                            const goalHTML = `
+                                <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                                        <input type="checkbox" data-cloud-id="${goal.id}" onchange="syncGoalChange('${goal.id}', this.checked)" style="margin-top: 0.2rem;">
+                                        <div style="flex: 1;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                                <span style="font-size: 1.2rem;">${categoryIcon}</span>
+                                                <h4 style="margin: 0; color: #333; font-size: 1rem;">${goal.title}</h4>
+                                            </div>
+                                            ${goal.description ? `<p style="margin: 0.5rem 0; color: #666; font-size: 0.9rem; line-height: 1.4;">${goal.description}</p>` : ''}
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                                <span style="background: #28a745; color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.7rem; text-transform: uppercase;">${goal.category}</span>
+                                                ${targetDateDisplay}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            activeContainer.insertAdjacentHTML('beforeend', goalHTML);
+                        } else {
+                            // Render completed goal
+                            const completedHTML = `
+                                <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: #f8f9fa; opacity: 0.7;">
+                                    <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                                        <input type="checkbox" checked disabled style="margin-top: 0.2rem;">
+                                        <div style="flex: 1;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                                <span style="font-size: 1.2rem;">🏆</span>
+                                                <h4 style="margin: 0; color: #666; font-size: 1rem; text-decoration: line-through;">${goal.title}</h4>
+                                            </div>
+                                            ${goal.description ? `<p style="margin: 0.5rem 0; color: #999; font-size: 0.9rem; text-decoration: line-through;">${goal.description}</p>` : ''}
+                                            <span style="background: #6c757d; color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.7rem;">ERREICHT ✅</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            activeContainer.insertAdjacentHTML('beforeend', completedHTML);
+                        }
+                    });
+                } else {
+                    // Show empty message
+                    const emptyMessage = currentGoalFilter === 'active' 
+                        ? 'Keine aktiven Ziele - klicke + um eins hinzuzufügen!'
+                        : '🏆 Keine erreichten Ziele vorhanden';
+                    activeContainer.innerHTML = `<div style="text-align: center; color: #666; padding: 1rem;">${emptyMessage}</div>`;
                 }
-                
-                const goalHTML = `
-                    <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
-                            <input type="checkbox" data-cloud-id="${goal.id}" onchange="syncGoalChange('${goal.id}', this.checked)" style="margin-top: 0.2rem;">
-                            <div style="flex: 1;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                                    <span style="font-size: 1.2rem;">${categoryIcon}</span>
-                                    <h4 style="margin: 0; color: #333; font-size: 1rem;">${goal.title}</h4>
-                                </div>
-                                ${goal.description ? `<p style="margin: 0.5rem 0; color: #666; font-size: 0.9rem; line-height: 1.4;">${goal.description}</p>` : ''}
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-                                    <span style="background: #28a745; color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.7rem; text-transform: uppercase;">${goal.category}</span>
-                                    ${targetDateDisplay}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                activeContainer.insertAdjacentHTML('beforeend', goalHTML);
-            });
+            }
             
-            // Render completed goals
-            completedGoals.forEach(goal => {
-                const categoryIcon = getCategoryIconGoal(goal.category);
-                const completedHTML = `
-                    <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: #f8f9fa; opacity: 0.7;">
-                        <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
-                            <input type="checkbox" checked disabled style="margin-top: 0.2rem;">
-                            <div style="flex: 1;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                                    <span style="font-size: 1.2rem;">🏆</span>
-                                    <h4 style="margin: 0; color: #666; font-size: 1rem; text-decoration: line-through;">${goal.title}</h4>
-                                </div>
-                                ${goal.description ? `<p style="margin: 0.5rem 0; color: #999; font-size: 0.9rem; text-decoration: line-through;">${goal.description}</p>` : ''}
-                                <span style="background: #6c757d; color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.7rem;">ERREICHT ✅</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                completedContainer.insertAdjacentHTML('beforeend', completedHTML);
-            });
+            // Update section title
+            const titleEl = document.getElementById('goals-section-title');
+            if (titleEl) {
+                titleEl.textContent = currentGoalFilter === 'active' ? '🎯 Active Goals' : '🏆 Erreichte Ziele';
+            }
             
-            console.log(`✅ Rendered ${activeGoals.length} active, ${completedGoals.length} completed goals`);
+            console.log(`✅ Rendered ${filteredGoals?.length || 0} goals (${currentGoalFilter})`);
         }
         
         function clearGoalLoadingMessages() {
@@ -791,6 +805,64 @@
         
         function setupGoalButtons() {
             document.getElementById('add-goal-btn').addEventListener('click', addNewGoal);
+            setupGoalFilterTabs();
+        }
+        
+        let currentGoalFilter = 'active';
+        
+        function setupGoalFilterTabs() {
+            console.log('🔧 Setting up goal filter tabs...');
+            
+            // Create filter tabs dynamically
+            const filterContainer = document.querySelector('.goal-filter-tabs');
+            if (!filterContainer) {
+                console.log('❌ Goal filter container not found');
+                return;
+            }
+            
+            const goalFilters = [
+                { id: 'active', label: 'Aktiv', icon: '🎯' },
+                { id: 'completed', label: 'Erreicht', icon: '🏆' }
+            ];
+            
+            // Clear and rebuild filter tabs
+            filterContainer.innerHTML = '';
+            
+            goalFilters.forEach(filter => {
+                const button = document.createElement('button');
+                button.className = 'goal-filter-tab' + (filter.id === 'active' ? ' active' : '');
+                button.setAttribute('data-filter', filter.id);
+                button.textContent = `${filter.icon} ${filter.label}`;
+                button.style.cssText = filter.id === 'active' 
+                    ? 'padding: 0.5rem 1rem; border: none; border-radius: 20px; background: #28a745; color: white; cursor: pointer; font-size: 0.8rem;'
+                    : 'padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;';
+                
+                button.addEventListener('click', () => {
+                    console.log(`🔍 Goal filter clicked: ${filter.id}`);
+                    
+                    // Update all tabs
+                    document.querySelectorAll('.goal-filter-tab').forEach(t => {
+                        t.classList.remove('active');
+                        t.style.cssText = 'padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;';
+                    });
+                    
+                    // Activate clicked tab
+                    button.classList.add('active');
+                    button.style.cssText = 'padding: 0.5rem 1rem; border: none; border-radius: 20px; background: #28a745; color: white; cursor: pointer; font-size: 0.8rem;';
+                    
+                    // Update filter
+                    currentGoalFilter = filter.id;
+                    
+                    // Re-render
+                    if (window.supabase) {
+                        loadAndRenderGoals();
+                    }
+                });
+                
+                filterContainer.appendChild(button);
+            });
+            
+            console.log(`✅ Created ${goalFilters.length} goal filter tabs`);
         }
         
         function showAddGoalModal() {
