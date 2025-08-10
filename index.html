@@ -46,6 +46,21 @@
                 </div>
             </section>
 
+            <!-- 💭 Tägliches Zitat -->
+            <section class="card" style="margin-bottom: 1rem;">
+                <div style="text-align: center; padding: 1.5rem;">
+                    <div style="font-size: 1.1rem; font-style: italic; color: #495057; line-height: 1.5; margin-bottom: 1rem;" id="dailyQuoteText">
+                        "Der einzige Weg, großartige Arbeit zu leisten, ist zu lieben, was du tust."
+                    </div>
+                    <div style="font-size: 0.9rem; color: #6c757d; font-weight: 500;" id="dailyQuoteAuthor">
+                        — Steve Jobs
+                    </div>
+                    <button onclick="getNewQuote()" style="margin-top: 1rem; padding: 0.3rem 0.8rem; background: transparent; color: #6c757d; border: 1px solid #dee2e6; border-radius: 15px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                        🔄 Neues Zitat
+                    </button>
+                </div>
+            </section>
+
             <!-- ☀️ Routines Section -->
             <section class="section">
                 <div class="card-header">
@@ -228,9 +243,11 @@
                 setupJournalButtons();
                 setupRoutineToggles();
                 await initializeStreaks();
+                displayDailyQuote();
             } else {
                 // Even without database, setup filter tabs
                 setupFilterTabs();
+                displayDailyQuote();
             }
             
             // Initialize Lucide icons
@@ -1566,6 +1583,64 @@
         // Initialize streaks on page load
         async function initializeStreaks() {
             await updateRoutineStreaks();
+        }
+        
+        // === QUOTES SYSTEM ===
+        const motivationalQuotes = [
+            { text: "Der einzige Weg, großartige Arbeit zu leisten, ist zu lieben, was du tust.", author: "Steve Jobs" },
+            { text: "Das Leben ist das, was passiert, während du eifrig dabei bist, andere Pläne zu machen.", author: "John Lennon" },
+            { text: "Die Zukunft gehört denen, die an die Schönheit ihrer Träume glauben.", author: "Eleanor Roosevelt" },
+            { text: "Es ist nicht wichtig, wie langsam du gehst, solange du nicht stehen bleibst.", author: "Konfuzius" },
+            { text: "Der beste Zeitpunkt, einen Baum zu pflanzen, war vor 20 Jahren. Der zweitbeste ist jetzt.", author: "Chinesisches Sprichwort" },
+            { text: "Erfolg ist nicht endgültig, Misserfolg ist nicht tödlich: Was zählt, ist der Mut weiterzumachen.", author: "Winston Churchill" },
+            { text: "Das einzige Unmögliche ist das, was du nicht versuchst.", author: "Tommy Lasorda" },
+            { text: "Du bist nie zu alt, um dir ein weiteres Ziel zu setzen oder einen neuen Traum zu träumen.", author: "C.S. Lewis" },
+            { text: "Der Unterschied zwischen dem Unmöglichen und dem Möglichen liegt in der Entschlossenheit einer Person.", author: "Tommy Lasorda" },
+            { text: "Glaube an dich selbst und alles ist möglich.", author: "Unbekannt" },
+            { text: "Die größte Belohnung für harte Arbeit ist nicht das, was man dafür bekommt, sondern das, was man dadurch wird.", author: "John Ruskin" },
+            { text: "Träume nicht dein Leben, sondern lebe deine Träume.", author: "Mark Twain" },
+            { text: "Was uns nicht umbringt, macht uns stärker.", author: "Friedrich Nietzsche" },
+            { text: "Der Weg zum Erfolg ist, dass man seine Berufung zu seinem Beruf macht.", author: "Mark Twain" },
+            { text: "Wer kämpft, kann verlieren. Wer nicht kämpft, hat schon verloren.", author: "Bertolt Brecht" },
+            { text: "Das Geheimnis des Vorankommens besteht darin, den ersten Schritt zu tun.", author: "Mark Twain" },
+            { text: "Erfolg ist die Summe kleiner Anstrengungen, die täglich wiederholt werden.", author: "Robert Collier" },
+            { text: "Du kannst die Wellen nicht stoppen, aber du kannst lernen zu surfen.", author: "Jon Kabat-Zinn" },
+            { text: "Das Leben beginnt dort, wo deine Komfortzone endet.", author: "Neale Donald Walsch" },
+            { text: "Jeder Tag ist eine neue Chance, das zu tun, was du möchtest.", author: "Friedrich von Schiller" }
+        ];
+        
+        function getDailyQuote() {
+            // Use current date as seed for consistent daily quote
+            const today = new Date();
+            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+            const quoteIndex = dayOfYear % motivationalQuotes.length;
+            return motivationalQuotes[quoteIndex];
+        }
+        
+        function displayDailyQuote() {
+            const quote = getDailyQuote();
+            document.getElementById('dailyQuoteText').textContent = `"${quote.text}"`;
+            document.getElementById('dailyQuoteAuthor').textContent = `— ${quote.author}`;
+        }
+        
+        function getNewQuote() {
+            // Random quote for manual refresh
+            const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+            const quote = motivationalQuotes[randomIndex];
+            
+            // Animate quote change
+            const textEl = document.getElementById('dailyQuoteText');
+            const authorEl = document.getElementById('dailyQuoteAuthor');
+            
+            textEl.style.opacity = '0.3';
+            authorEl.style.opacity = '0.3';
+            
+            setTimeout(() => {
+                textEl.textContent = `"${quote.text}"`;
+                authorEl.textContent = `— ${quote.author}`;
+                textEl.style.opacity = '1';
+                authorEl.style.opacity = '1';
+            }, 200);
         }
         
         function updateStreakInstantly(templateId, completed) {
