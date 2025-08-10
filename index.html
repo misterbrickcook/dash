@@ -477,7 +477,6 @@
                         <div style="margin-bottom: 1rem;">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555;">Kategorie:</label>
                             <select id="todo-category-modal" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
-                                <option value="heute">📅 Heute</option>
                                 <option value="privat">🏠 Privat</option>
                                 <option value="uni">🎓 Uni</option>
                                 <option value="arbeit">💼 Arbeit</option>
@@ -532,7 +531,7 @@
                 return;
             }
             
-            const category = categoryInput.value;
+            let category = categoryInput.value;
             const date = dateInput.value;
             const time = timeInput.value;
             
@@ -543,6 +542,12 @@
                     dueDate = new Date(`${date}T${time}`).toISOString();
                 } else {
                     dueDate = new Date(`${date}T12:00:00`).toISOString();
+                }
+                
+                // Auto-set category to "heute" if date is today
+                const today = new Date().toISOString().split('T')[0];
+                if (date === today) {
+                    category = 'heute';
                 }
             }
             
