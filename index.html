@@ -999,24 +999,49 @@
             container.innerHTML = '';
             
             entries.forEach(entry => {
-                const date = new Date(entry.created_at).toLocaleDateString('de-DE', {
-                    weekday: 'short',
+                const date = new Date(entry.created_at);
+                const dateString = date.toLocaleDateString('de-DE', {
+                    weekday: 'long',
                     year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                const timeString = date.toLocaleTimeString('de-DE', {
                     hour: '2-digit',
                     minute: '2-digit'
                 });
                 
+                // Parse tags if they exist
+                let tagsDisplay = '';
+                if (entry.tags) {
+                    const tagList = entry.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+                    if (tagList.length > 0) {
+                        tagsDisplay = `
+                            <div style="margin-top: 0.5rem;">
+                                ${tagList.map(tag => `<span style="background: #e9ecef; color: #495057; padding: 0.2rem 0.4rem; border-radius: 8px; font-size: 0.7rem; margin-right: 0.3rem;">#${tag}</span>`).join('')}
+                            </div>
+                        `;
+                    }
+                }
+                
                 const entryHTML = `
-                    <div class="journal-entry" style="margin-bottom: 1rem; padding: 1rem; border-left: 3px solid #17a2b8; background: #f8f9fa; border-radius: 4px;">
-                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 0.5rem;">
-                            <strong style="color: #17a2b8;">📔 ${entry.title || 'Journal Entry'}</strong>
-                            <small style="color: #666; margin-left: auto;">${date}</small>
-                            <button onclick="deleteJournalEntry('${entry.id}')" style="margin-left: 0.5rem; padding: 0.2rem 0.4rem; background: #dc3545; color: white; border: none; border-radius: 3px; font-size: 0.7rem; cursor: pointer;">🗑️</button>
+                    <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                            <div>
+                                <h4 style="margin: 0; color: #17a2b8; font-size: 1.1rem;">📔 ${entry.title || 'Journal Entry'}</h4>
+                                <small style="color: #666; font-size: 0.8rem;">${dateString} um ${timeString}</small>
+                            </div>
+                            <button onclick="deleteJournalEntry('${entry.id}')" style="padding: 0.3rem 0.5rem; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 0.7rem; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</button>
                         </div>
-                        <div style="white-space: pre-wrap; color: #333; line-height: 1.4;">${entry.content}</div>
-                        ${entry.mood ? `<div style="margin-top: 0.5rem; color: #666; font-size: 0.8rem;">Mood: ${entry.mood}</div>` : ''}
+                        
+                        <div style="white-space: pre-wrap; color: #333; line-height: 1.6; margin-bottom: 1rem; font-size: 0.95rem;">${entry.content}</div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                ${entry.mood ? `<span style="background: #fff3cd; color: #856404; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.8rem; border: 1px solid #ffeaa7;">${entry.mood}</span>` : ''}
+                            </div>
+                            ${tagsDisplay}
+                        </div>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', entryHTML);
@@ -1036,28 +1061,114 @@
             document.getElementById('add-journal-btn').addEventListener('click', addNewJournalEntry);
         }
         
-        async function addNewJournalEntry() {
-            const title = prompt('Entry title (optional):') || `Entry ${new Date().toLocaleDateString('de-DE')}`;
-            const content = prompt('Write your journal entry:');
-            if (!content) return;
+        function showAddJournalModal() {
+            // Create modal HTML
+            const modalHTML = `
+                <div id="journal-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                    <div style="background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                        <h3 style="margin: 0 0 1rem 0; color: #333;">📔 Neuer Journal-Eintrag</h3>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555;">Titel (optional):</label>
+                            <input type="text" id="journal-title-input" placeholder="z.B. Mein Tag, Gedanken, Reflexion..." autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555;">Inhalt:</label>
+                            <textarea id="journal-content-input" placeholder="Schreibe deine Gedanken, Erlebnisse, Reflexionen..." autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; min-height: 120px; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555;">Stimmung (optional):</label>
+                            <select id="journal-mood-input" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                                <option value="">-- Stimmung wählen --</option>
+                                <option value="😊 Sehr gut">😊 Sehr gut</option>
+                                <option value="🙂 Gut">🙂 Gut</option>
+                                <option value="😐 Neutral">😐 Neutral</option>
+                                <option value="😔 Schlecht">😔 Schlecht</option>
+                                <option value="😢 Sehr schlecht">😢 Sehr schlecht</option>
+                                <option value="😤 Gestresst">😤 Gestresst</option>
+                                <option value="😴 Müde">😴 Müde</option>
+                                <option value="💪 Motiviert">💪 Motiviert</option>
+                                <option value="🤔 Nachdenklich">🤔 Nachdenklich</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555;">Tags (optional):</label>
+                            <input type="text" id="journal-tags-input" placeholder="z.B. work, family, goals, reflection (durch Komma getrennt)" autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            <button onclick="closeJournalModal()" style="padding: 0.5rem 1rem; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Abbrechen</button>
+                            <button onclick="saveJournalEntry()" style="padding: 0.5rem 1rem; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">Speichern</button>
+                        </div>
+                    </div>
+                </div>
+            `;
             
-            const mood = prompt('How are you feeling? (optional):') || '';
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Set default title to today's date
+            const today = new Date().toLocaleDateString('de-DE', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('journal-title-input').value = `${today}`;
+            
+            // Focus on content input
+            document.getElementById('journal-content-input').focus();
+        }
+        
+        function closeJournalModal() {
+            const modal = document.getElementById('journal-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        async function saveJournalEntry() {
+            const titleInput = document.getElementById('journal-title-input');
+            const contentInput = document.getElementById('journal-content-input');
+            const moodInput = document.getElementById('journal-mood-input');
+            const tagsInput = document.getElementById('journal-tags-input');
+            
+            const content = contentInput.value.trim();
+            if (!content) {
+                alert('Bitte Journal-Inhalt eingeben!');
+                contentInput.focus();
+                return;
+            }
+            
+            const title = titleInput.value.trim() || `Entry ${new Date().toLocaleDateString('de-DE')}`;
+            const mood = moodInput.value;
+            const tags = tagsInput.value.trim();
             
             const newEntry = {
                 id: 'journal_' + Date.now(),
                 title: title,
                 content: content,
                 mood: mood,
+                tags: tags,
                 created_at: new Date().toISOString()
             };
             
             try {
                 await window.supabase.insert('journal_entries', newEntry);
                 console.log(`✅ Journal entry added: ${title}`);
+                closeJournalModal();
                 await loadAndRenderJournal(); // Refresh
             } catch (error) {
                 console.error('❌ Failed to add journal entry:', error);
+                alert('Fehler beim Speichern des Journal-Eintrags!');
             }
+        }
+        
+        async function addNewJournalEntry() {
+            showAddJournalModal();
         }
         
         async function deleteJournalEntry(entryId) {
