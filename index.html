@@ -507,15 +507,22 @@
                 }
                 
                 console.log(`🗑️ Cleared ${completedTodos.length} archived todos`);
-                alert(`${completedTodos.length} archivierte Todos wurden gelöscht.`);
+                
+                // Immediately clear the display to prevent old data showing
+                const activeContainer = document.getElementById('active-todos');
+                if (activeContainer) {
+                    if (currentFilter === 'archiv') {
+                        activeContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">📁 Archiv ist leer</div>';
+                    } else {
+                        // Clear any old content for other filters
+                        activeContainer.innerHTML = '<div class="loading-placeholder" style="text-align: center; color: #666; padding: 1rem;">☁️ Loading todos...</div>';
+                    }
+                }
                 
                 // Refresh display - force reload from database
                 await loadAndRenderTodos();
                 
-                // Make sure we're still on archive view to see the result
-                if (currentFilter === 'archiv') {
-                    console.log('Archive cleared, staying on archive view');
-                }
+                alert(`${completedTodos.length} archivierte Todos wurden gelöscht.`);
                 
             } catch (error) {
                 console.error('❌ Failed to clear archive:', error);
