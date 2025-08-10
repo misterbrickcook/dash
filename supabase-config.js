@@ -30,7 +30,11 @@ class SupabaseClient {
 
         try {
             const response = await fetch(url, options);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Supabase ${response.status} Error:`, errorText);
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
             
             // Handle empty responses (common with PATCH/DELETE)
             const text = await response.text();
