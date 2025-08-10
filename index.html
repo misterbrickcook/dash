@@ -40,14 +40,29 @@
 
         <!-- === ✅ TODOS TAB === -->
         <div class="tab-content" id="todos">
+            <!-- Active Todos -->
             <section class="card">
                 <div class="card-header">
-                    <h2>All Todos</h2>
+                    <h2>Active Todos</h2>
                 </div>
                 
-                <div class="checkbox-group" id="all-todos">
+                <div class="checkbox-group" id="active-todos">
                     <div class="placeholder" style="text-align: center; color: #666; padding: 2rem;">
-                        ☁️ Cloud todos will appear here
+                        ☁️ Active todos will appear here
+                    </div>
+                </div>
+            </section>
+
+            <!-- Archived Todos -->
+            <section class="card" style="margin-top: 1rem;">
+                <div class="card-header">
+                    <h2>📁 Archived Todos</h2>
+                    <small style="color: #666;">Auto-archived after completion</small>
+                </div>
+                
+                <div class="checkbox-group" id="archived-todos">
+                    <div class="placeholder" style="text-align: center; color: #666; padding: 2rem;">
+                        ☁️ Completed todos will be archived here
                     </div>
                 </div>
             </section>
@@ -89,26 +104,46 @@
         
         function renderCloudTodos(todos) {
             const homeContainer = document.getElementById('home-todos');
-            const allContainer = document.getElementById('all-todos');
+            const activeContainer = document.getElementById('active-todos');
+            const archivedContainer = document.getElementById('archived-todos');
             
-            // Clear placeholders
+            // Clear containers
             homeContainer.innerHTML = '';
-            allContainer.innerHTML = '';
+            activeContainer.innerHTML = '';
+            archivedContainer.innerHTML = '';
             
-            todos.forEach(todo => {
+            const activeTodos = todos.filter(t => !t.archived);
+            const archivedTodos = todos.filter(t => t.archived);
+            
+            // Render active todos
+            activeTodos.forEach(todo => {
                 const todoHTML = `
                     <div class="checkbox-item">
                         <input type="checkbox" ${todo.completed ? 'checked' : ''} 
                                data-cloud-id="${todo.id}" onchange="syncTodoChange('${todo.id}', this.checked)">
                         <label style="${todo.completed ? 'text-decoration: line-through; color: #999;' : ''}">${todo.text}</label>
+                        ${todo.completed ? '<span style="margin-left: auto; color: #666;">⏳ Archiving in 3s...</span>' : ''}
                     </div>
                 `;
                 
                 homeContainer.insertAdjacentHTML('beforeend', todoHTML);
-                allContainer.insertAdjacentHTML('beforeend', todoHTML);
+                activeContainer.insertAdjacentHTML('beforeend', todoHTML);
             });
             
-            console.log(`✅ Rendered ${todos.length} cloud todos`);
+            // Render archived todos  
+            archivedTodos.forEach(todo => {
+                const archivedHTML = `
+                    <div class="checkbox-item" style="opacity: 0.7;">
+                        <input type="checkbox" checked disabled>
+                        <label style="text-decoration: line-through; color: #999;">${todo.text}</label>
+                        <span style="margin-left: auto; color: #666; font-size: 0.8rem;">📁 Archived</span>
+                    </div>
+                `;
+                
+                archivedContainer.insertAdjacentHTML('beforeend', archivedHTML);
+            });
+            
+            console.log(`✅ Rendered ${activeTodos.length} active, ${archivedTodos.length} archived todos`);
         }
         
         function setupAddTodo() {
@@ -142,7 +177,7 @@
                 await window.supabase.update('todos', { completed: checked }, todoId);
                 console.log(`☁️ Todo synced: ${todoId} = ${checked}`);
                 
-                // Update UI
+                // Update UI immediately
                 const checkboxes = document.querySelectorAll(`[data-cloud-id="${todoId}"]`);
                 checkboxes.forEach(cb => {
                     cb.checked = checked;
@@ -152,6 +187,24 @@
                         label.style.color = checked ? '#999' : '';
                     }
                 });
+                
+                // Auto-archive after 3 seconds
+                if (checked) {
+                    console.log(`⏳ Auto-archiving ${todoId} in 3 seconds...`);
+                    
+                    setTimeout(async () => {
+                        try {
+                            await window.supabase.update('todos', { archived: true }, todoId);
+                            console.log(`📁 Todo archived: ${todoId}`);
+                            
+                            // Refresh display
+                            const todos = await window.supabase.select('todos');
+                            renderCloudTodos(todos);
+                        } catch (error) {
+                            console.error('❌ Archiving failed:', error);
+                        }
+                    }, 3000);
+                }
             } catch (error) {
                 console.error('❌ Sync failed:', error);
             }
