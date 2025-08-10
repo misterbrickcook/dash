@@ -1230,21 +1230,52 @@
             // Initialize Supabase
             const connected = initializeSupabase();
             
-            // Test Supabase connection
+            // Test Supabase connection and load cloud todos
             if (connected && window.supabase) {
-                console.log('🧪 Database test starting...');
+                console.log('🧪 Loading todos from cloud...');
                 
-                // Simple direct test
-                window.supabase.select('todos').then(todos => {
-                    console.log('📊 TODOS RESULT:', todos);
-                    console.log('🎉 DATABASE READY FOR SYNC!');
+                // Load todos from cloud and sync with local state
+                window.supabase.select('todos').then(cloudTodos => {
+                    console.log('📊 Cloud todos loaded:', cloudTodos?.length || 0);
+                    
+                    if (cloudTodos && cloudTodos.length > 0) {
+                        console.log('🔄 Syncing cloud todos to local state...');
+                        
+                        // Update local todoState with cloud data
+                        cloudTodos.forEach(todo => {
+                            if (window.todoState) {
+                                window.todoState.setTodo(todo.id, {
+                                    text: todo.text,
+                                    category: todo.category,
+                                    completed: todo.completed,
+                                    date: todo.date,
+                                    time: todo.time,
+                                    icon: todo.category === 'arbeit' ? 'briefcase' : 
+                                          todo.category === 'uni' ? 'book-open' : 'home'
+                                });
+                                
+                                if (todo.completed) {
+                                    window.todoState.setTodoChecked(todo.id, true);
+                                }
+                            }
+                        });
+                        
+                        console.log('✅ Cloud todos synced to local state!');
+                        
+                        // Refresh UI
+                        setTimeout(() => {
+                            if (window.location.hash || !window.location.hash) {
+                                window.location.reload();
+                            }
+                        }, 1000);
+                    } else {
+                        console.log('📝 No cloud todos found - using local data');
+                    }
                 }).catch(error => {
-                    console.log('❌ TODOS ERROR:', error);
+                    console.log('❌ Cloud loading failed:', error);
                 });
                 
-                // Test if supabase object has the right methods
-                console.log('🔧 Supabase methods:', Object.keys(window.supabase));
-                console.log('🔧 Supabase URL:', window.supabase.url);
+                console.log('🎉 CLOUD SYNC READY!');
             } else {
                 console.log('❌ NO SUPABASE CONNECTION');
             }
