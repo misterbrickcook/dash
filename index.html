@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 CLEAN SLATE - CLOUD SYNC TEST 🚀</title>
+    <title>🚀 HYBRID DASHBOARD - Cloud Sync + Beautiful UI 🚀</title>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- === STICKY NAVIGATION === -->
+    <!-- === BEAUTIFUL STICKY NAVIGATION === -->
     <nav class="sticky-nav">
         <div class="nav-container">
             <div class="nav-link active" data-tab="home">Home</div>
             <div class="nav-link" data-tab="todos">ToDos</div>
+            <div class="nav-link" data-tab="ziele">Ziele</div>
+            <div class="nav-link" data-tab="journal">Journal</div>
+            <div class="nav-link" data-tab="motivation">Motivation</div>
+            <div class="nav-link" data-tab="ressourcen">Ressourcen</div>
+            <div class="nav-link" data-tab="settings">Settings</div>
         </div>
     </nav>
 
@@ -20,19 +25,58 @@
         
         <!-- === 🏠 HOME TAB === -->
         <div class="tab-content active" id="home">
+            <!-- 🔥 Streak Übersicht -->
+            <section class="streak-overview">
+                <div class="streak-grid">
+                    <div class="streak-tile" id="morningRoutineStreak">
+                        <div class="streak-number" id="morningRoutineStreakCount">0</div>
+                        <div class="streak-label">Morgenroutine</div>
+                        <div class="streak-date" id="morningRoutineStreakDate">August 2025</div>
+                    </div>
+                    <div class="streak-tile" id="eveningRoutineStreak">
+                        <div class="streak-number" id="eveningRoutineStreakCount">0</div>
+                        <div class="streak-label">Abendroutine</div>
+                        <div class="streak-date" id="eveningRoutineStreakDate">August 2025</div>
+                    </div>
+                    <div class="streak-tile" id="todoStreak">
+                        <div class="streak-number" id="todoStreakCount">0</div>
+                        <div class="streak-label">Todo Streak</div>
+                        <div class="streak-date" id="todoStreakDate">August 2025</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ☀️ Routines Section -->
+            <section class="section">
+                <div class="card-header">
+                    <h2 id="routine-title">☀️ Morgenroutine</h2>
+                    <div class="focus-toggle">
+                        <div class="focus-option active" data-routine="morning">☀️</div>
+                        <div class="focus-option" data-routine="evening">🌙</div>
+                    </div>
+                </div>
+                
+                <!-- Routines will be loaded here -->
+                <div class="checkbox-group" id="current-routine">
+                    <div style="text-align: center; padding: 1rem; color: #666;">
+                        ⏳ Loading routines...
+                    </div>
+                </div>
+            </section>
+
+            <!-- 📋 Heutige Aufgaben (Cloud-Synced) -->
             <section class="card">
                 <div class="card-header">
-                    <h2>🚀 Cloud Sync Test</h2>
-                    <button id="add-todo-btn" style="padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Add Test Todo
+                    <h2>📋 Heutige Aufgaben</h2>
+                    <button id="add-todo-btn" style="padding: 0.3rem 0.8rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                        + Add Todo
                     </button>
                 </div>
                 
-                <!-- CLEAN: Only cloud todos -->
+                <!-- Cloud-synced todos -->
                 <div class="checkbox-group" id="home-todos">
-                    <div class="placeholder" style="text-align: center; color: #666; padding: 2rem;">
-                        ☁️ Ready for cloud sync test<br>
-                        <small>Add a todo and test cross-device sync!</small>
+                    <div class="loading-placeholder" style="text-align: center; color: #666; padding: 1rem;">
+                        ☁️ Loading todos from cloud...
                     </div>
                 </div>
             </section>
@@ -40,69 +84,169 @@
 
         <!-- === ✅ TODOS TAB === -->
         <div class="tab-content" id="todos">
-            <!-- Active Todos -->
             <section class="card">
                 <div class="card-header">
                     <h2>Active Todos</h2>
+                    <button id="add-todo-btn-2" style="padding: 0.3rem 0.8rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                        + Add Todo
+                    </button>
                 </div>
                 
                 <div class="checkbox-group" id="active-todos">
-                    <div class="placeholder" style="text-align: center; color: #666; padding: 2rem;">
-                        ☁️ Active todos will appear here
+                    <div class="loading-placeholder" style="text-align: center; color: #666; padding: 1rem;">
+                        ☁️ Loading active todos...
                     </div>
                 </div>
             </section>
 
-            <!-- Archived Todos -->
+            <!-- Archived Section -->
             <section class="card" style="margin-top: 1rem;">
                 <div class="card-header">
-                    <h2>📁 Archived Todos</h2>
-                    <small style="color: #666;">Auto-archived after completion</small>
+                    <h2>📁 Completed Todos</h2>
+                    <small style="color: #666;">Auto-archived</small>
                 </div>
                 
                 <div class="checkbox-group" id="archived-todos">
-                    <div class="placeholder" style="text-align: center; color: #666; padding: 2rem;">
-                        ☁️ Completed todos will be archived here
+                    <div style="text-align: center; color: #666; padding: 1rem;">
+                        📁 Completed todos will appear here
                     </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- === 🎯 ZIELE TAB === -->
+        <div class="tab-content" id="ziele">
+            <section class="card">
+                <div class="card-header">
+                    <h2>🎯 Goals & Targets</h2>
+                </div>
+                
+                <div style="text-align: center; color: #666; padding: 2rem;">
+                    🚧 Goals system coming soon with cloud sync!
+                </div>
+            </section>
+        </div>
+
+        <!-- === 📔 JOURNAL TAB === -->
+        <div class="tab-content" id="journal">
+            <section class="card">
+                <div class="card-header">
+                    <h2>📔 Daily Journal</h2>
+                </div>
+                
+                <div style="text-align: center; color: #666; padding: 2rem;">
+                    📝 Journal system coming soon with cloud sync!
+                </div>
+            </section>
+        </div>
+
+        <!-- === ⚡ MOTIVATION TAB === -->
+        <div class="tab-content" id="motivation">
+            <section class="card">
+                <div class="card-header">
+                    <h2>⚡ Daily Motivation</h2>
+                </div>
+                
+                <div style="text-align: center; color: #666; padding: 2rem;">
+                    💪 Motivation system coming soon!
+                </div>
+            </section>
+        </div>
+
+        <!-- === 📚 RESSOURCEN TAB === -->
+        <div class="tab-content" id="ressourcen">
+            <section class="card">
+                <div class="card-header">
+                    <h2>📚 Resources & Links</h2>
+                </div>
+                
+                <div style="text-align: center; color: #666; padding: 2rem;">
+                    🔗 Resources coming soon!
+                </div>
+            </section>
+        </div>
+
+        <!-- === ⚙️ SETTINGS TAB === -->
+        <div class="tab-content" id="settings">
+            <section class="card">
+                <div class="card-header">
+                    <h2>⚙️ Settings</h2>
+                </div>
+                
+                <div style="text-align: center; color: #666; padding: 2rem;">
+                    ⚙️ Settings panel coming soon!
                 </div>
             </section>
         </div>
 
     </div>
 
-    <!-- Supabase Configuration -->
+    <!-- Scripts -->
     <script src="supabase-config.js?v=4"></script>
-    <!-- Cloud Storage System -->
     <script src="cloud-storage.js?v=3"></script>
-    <!-- Main Application -->
     <script src="script.js?v=3"></script>
     
-    <!-- CLEAN SLATE CLOUD SYNC -->
+    <!-- HYBRID SYSTEM: Beautiful UI + Working Cloud Sync -->
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 CLEAN SLATE - Initializing cloud sync...');
+            console.log('🚀 HYBRID DASHBOARD - Beautiful UI + Cloud Sync');
+            
+            // Initialize navigation
+            initializeNavigation();
             
             // Initialize Supabase
             const connected = initializeSupabase();
             
             if (connected && window.supabase) {
-                console.log('✅ Database connected - ready for clean sync test');
-                
-                // Load existing todos from cloud
-                const cloudTodos = await window.supabase.select('todos');
-                console.log('📊 Existing cloud todos:', cloudTodos?.length || 0);
-                
-                // Render existing todos
-                if (cloudTodos && cloudTodos.length > 0) {
-                    renderCloudTodos(cloudTodos);
-                }
-                
-                // Add todo functionality
-                setupAddTodo();
+                console.log('✅ Database connected - loading todos...');
+                await loadAndRenderTodos();
+                setupTodoButtons();
+            }
+            
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
             }
         });
         
-        function renderCloudTodos(todos) {
+        function initializeNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    const tabId = link.getAttribute('data-tab');
+                    
+                    // Remove active from all
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    tabContents.forEach(t => t.classList.remove('active'));
+                    
+                    // Add active to clicked
+                    link.classList.add('active');
+                    const targetTab = document.getElementById(tabId);
+                    if (targetTab) {
+                        targetTab.classList.add('active');
+                    }
+                });
+            });
+        }
+        
+        async function loadAndRenderTodos() {
+            try {
+                const todos = await window.supabase.select('todos');
+                console.log(`📊 Loaded ${todos?.length || 0} todos from cloud`);
+                
+                if (todos && todos.length > 0) {
+                    renderTodos(todos);
+                } else {
+                    clearLoadingMessages();
+                }
+            } catch (error) {
+                console.error('❌ Failed to load todos:', error);
+            }
+        }
+        
+        function renderTodos(todos) {
             const homeContainer = document.getElementById('home-todos');
             const activeContainer = document.getElementById('active-todos');
             const archivedContainer = document.getElementById('archived-todos');
@@ -113,62 +257,65 @@
             archivedContainer.innerHTML = '';
             
             const activeTodos = todos.filter(t => !t.completed);
-            const archivedTodos = todos.filter(t => t.completed);
+            const completedTodos = todos.filter(t => t.completed);
             
             // Render active todos
             activeTodos.forEach(todo => {
                 const todoHTML = `
                     <div class="checkbox-item">
-                        <input type="checkbox" ${todo.completed ? 'checked' : ''} 
-                               data-cloud-id="${todo.id}" onchange="syncTodoChange('${todo.id}', this.checked)">
-                        <label style="${todo.completed ? 'text-decoration: line-through; color: #999;' : ''}">${todo.text}</label>
+                        <input type="checkbox" data-cloud-id="${todo.id}" onchange="syncTodoChange('${todo.id}', this.checked)">
+                        <label>${todo.text}</label>
                     </div>
                 `;
-                
                 homeContainer.insertAdjacentHTML('beforeend', todoHTML);
                 activeContainer.insertAdjacentHTML('beforeend', todoHTML);
             });
             
-            // Render archived todos  
-            archivedTodos.forEach(todo => {
+            // Render completed todos
+            completedTodos.forEach(todo => {
                 const archivedHTML = `
                     <div class="checkbox-item" style="opacity: 0.7;">
                         <input type="checkbox" checked disabled>
                         <label style="text-decoration: line-through; color: #999;">${todo.text}</label>
-                        <span style="margin-left: auto; color: #666; font-size: 0.8rem;">📁 Archived</span>
+                        <span style="margin-left: auto; color: #666; font-size: 0.8rem;">📁</span>
                     </div>
                 `;
-                
                 archivedContainer.insertAdjacentHTML('beforeend', archivedHTML);
             });
             
-            console.log(`✅ Rendered ${activeTodos.length} active, ${archivedTodos.length} archived todos`);
+            console.log(`✅ Rendered ${activeTodos.length} active, ${completedTodos.length} completed todos`);
         }
         
-        function setupAddTodo() {
-            document.getElementById('add-todo-btn').addEventListener('click', async () => {
-                const todoText = prompt('Enter todo text:');
-                if (!todoText) return;
-                
-                const newTodo = {
-                    id: 'todo_' + Date.now(),
-                    text: todoText,
-                    completed: false,
-                    category: 'test',
-                    created_at: new Date().toISOString()
-                };
-                
-                try {
-                    await window.supabase.insert('todos', newTodo);
-                    console.log('✅ Todo added to cloud:', todoText);
-                    
-                    // Refresh display
-                    const todos = await window.supabase.select('todos');
-                    renderCloudTodos(todos);
-                } catch (error) {
-                    console.error('❌ Failed to add todo:', error);
-                }
+        function clearLoadingMessages() {
+            document.querySelectorAll('.loading-placeholder').forEach(el => {
+                el.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">No todos yet - click + to add one!</div>';
             });
+        }
+        
+        function setupTodoButtons() {
+            document.getElementById('add-todo-btn').addEventListener('click', addNewTodo);
+            document.getElementById('add-todo-btn-2').addEventListener('click', addNewTodo);
+        }
+        
+        async function addNewTodo() {
+            const todoText = prompt('Enter todo text:');
+            if (!todoText) return;
+            
+            const newTodo = {
+                id: 'todo_' + Date.now(),
+                text: todoText,
+                completed: false,
+                category: 'general',
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                await window.supabase.insert('todos', newTodo);
+                console.log('✅ Todo added to cloud:', todoText);
+                await loadAndRenderTodos(); // Refresh
+            } catch (error) {
+                console.error('❌ Failed to add todo:', error);
+            }
         }
         
         async function syncTodoChange(todoId, checked) {
@@ -176,28 +323,11 @@
                 await window.supabase.update('todos', { completed: checked }, todoId);
                 console.log(`☁️ Todo synced: ${todoId} = ${checked}`);
                 
-                // Update UI immediately
-                const checkboxes = document.querySelectorAll(`[data-cloud-id="${todoId}"]`);
-                checkboxes.forEach(cb => {
-                    cb.checked = checked;
-                    const label = cb.nextElementSibling;
-                    if (label) {
-                        label.style.textDecoration = checked ? 'line-through' : '';
-                        label.style.color = checked ? '#999' : '';
-                    }
-                });
+                // Refresh display
+                setTimeout(async () => {
+                    await loadAndRenderTodos();
+                }, 300);
                 
-                // Auto-move to archive section after 3 seconds
-                if (checked) {
-                    console.log(`📁 Todo completed - moved to archive: ${todoId}`);
-                    
-                    setTimeout(() => {
-                        // Refresh display to show in archive section
-                        window.supabase.select('todos').then(todos => {
-                            renderCloudTodos(todos);
-                        });
-                    }, 500); // Quick refresh
-                }
             } catch (error) {
                 console.error('❌ Sync failed:', error);
             }
