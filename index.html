@@ -112,8 +112,8 @@
             activeContainer.innerHTML = '';
             archivedContainer.innerHTML = '';
             
-            const activeTodos = todos.filter(t => !t.archived);
-            const archivedTodos = todos.filter(t => t.archived);
+            const activeTodos = todos.filter(t => !t.completed);
+            const archivedTodos = todos.filter(t => t.completed);
             
             // Render active todos
             activeTodos.forEach(todo => {
@@ -122,7 +122,6 @@
                         <input type="checkbox" ${todo.completed ? 'checked' : ''} 
                                data-cloud-id="${todo.id}" onchange="syncTodoChange('${todo.id}', this.checked)">
                         <label style="${todo.completed ? 'text-decoration: line-through; color: #999;' : ''}">${todo.text}</label>
-                        ${todo.completed ? '<span style="margin-left: auto; color: #666;">⏳ Archiving in 3s...</span>' : ''}
                     </div>
                 `;
                 
@@ -188,22 +187,16 @@
                     }
                 });
                 
-                // Auto-archive after 3 seconds
+                // Auto-move to archive section after 3 seconds
                 if (checked) {
-                    console.log(`⏳ Auto-archiving ${todoId} in 3 seconds...`);
+                    console.log(`📁 Todo completed - moved to archive: ${todoId}`);
                     
-                    setTimeout(async () => {
-                        try {
-                            await window.supabase.update('todos', { archived: true }, todoId);
-                            console.log(`📁 Todo archived: ${todoId}`);
-                            
-                            // Refresh display
-                            const todos = await window.supabase.select('todos');
+                    setTimeout(() => {
+                        // Refresh display to show in archive section
+                        window.supabase.select('todos').then(todos => {
                             renderCloudTodos(todos);
-                        } catch (error) {
-                            console.error('❌ Archiving failed:', error);
-                        }
-                    }, 3000);
+                        });
+                    }, 500); // Quick refresh
                 }
             } catch (error) {
                 console.error('❌ Sync failed:', error);
