@@ -31,7 +31,12 @@ class SupabaseClient {
         try {
             const response = await fetch(url, options);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return await response.json();
+            
+            // Handle empty responses (common with PATCH/DELETE)
+            const text = await response.text();
+            if (!text) return {}; // Return empty object for empty responses
+            
+            return JSON.parse(text);
         } catch (error) {
             console.error('Supabase query error:', error);
             return null;
