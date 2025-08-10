@@ -164,10 +164,15 @@
             <section class="card">
                 <div class="card-header">
                     <h2>📔 Daily Journal</h2>
+                    <button id="add-journal-btn" style="padding: 0.3rem 0.8rem; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                        + New Entry
+                    </button>
                 </div>
                 
-                <div style="text-align: center; color: #666; padding: 2rem;">
-                    📝 Journal system coming soon with cloud sync!
+                <div id="journal-entries">
+                    <div class="loading-placeholder" style="text-align: center; color: #666; padding: 1rem;">
+                        ☁️ Loading journal entries...
+                    </div>
                 </div>
             </section>
         </div>
@@ -233,9 +238,11 @@
                 console.log('✅ Database connected - loading data...');
                 await loadAndRenderTodos();
                 await loadAndRenderGoals();
+                await loadAndRenderJournal();
                 await loadAndRenderRoutines();
                 setupTodoButtons();
                 setupGoalButtons();
+                setupJournalButtons();
                 setupRoutineToggles();
                 await initializeStreaks();
             } else {
@@ -560,6 +567,100 @@
                 
             } catch (error) {
                 console.error('❌ Goal sync failed:', error);
+            }
+        }
+        
+        // === JOURNAL SYSTEM ===
+        async function loadAndRenderJournal() {
+            try {
+                const entries = await window.supabase.select('journal_entries', '*', 'created_at.desc');
+                console.log(`📊 Loaded ${entries?.length || 0} journal entries from cloud`);
+                
+                if (entries && entries.length > 0) {
+                    renderJournalEntries(entries);
+                } else {
+                    clearJournalLoadingMessages();
+                }
+            } catch (error) {
+                console.error('❌ Failed to load journal entries:', error);
+            }
+        }
+        
+        function renderJournalEntries(entries) {
+            const container = document.getElementById('journal-entries');
+            container.innerHTML = '';
+            
+            entries.forEach(entry => {
+                const date = new Date(entry.created_at).toLocaleDateString('de-DE', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const entryHTML = `
+                    <div class="journal-entry" style="margin-bottom: 1rem; padding: 1rem; border-left: 3px solid #17a2b8; background: #f8f9fa; border-radius: 4px;">
+                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 0.5rem;">
+                            <strong style="color: #17a2b8;">📔 ${entry.title || 'Journal Entry'}</strong>
+                            <small style="color: #666; margin-left: auto;">${date}</small>
+                            <button onclick="deleteJournalEntry('${entry.id}')" style="margin-left: 0.5rem; padding: 0.2rem 0.4rem; background: #dc3545; color: white; border: none; border-radius: 3px; font-size: 0.7rem; cursor: pointer;">🗑️</button>
+                        </div>
+                        <div style="white-space: pre-wrap; color: #333; line-height: 1.4;">${entry.content}</div>
+                        ${entry.mood ? `<div style="margin-top: 0.5rem; color: #666; font-size: 0.8rem;">Mood: ${entry.mood}</div>` : ''}
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', entryHTML);
+            });
+            
+            console.log(`✅ Rendered ${entries.length} journal entries`);
+        }
+        
+        function clearJournalLoadingMessages() {
+            const container = document.getElementById('journal-entries');
+            if (container) {
+                container.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">No journal entries yet - click + to add one!</div>';
+            }
+        }
+        
+        function setupJournalButtons() {
+            document.getElementById('add-journal-btn').addEventListener('click', addNewJournalEntry);
+        }
+        
+        async function addNewJournalEntry() {
+            const title = prompt('Entry title (optional):') || `Entry ${new Date().toLocaleDateString('de-DE')}`;
+            const content = prompt('Write your journal entry:');
+            if (!content) return;
+            
+            const mood = prompt('How are you feeling? (optional):') || '';
+            
+            const newEntry = {
+                id: 'journal_' + Date.now(),
+                title: title,
+                content: content,
+                mood: mood,
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                await window.supabase.insert('journal_entries', newEntry);
+                console.log(`✅ Journal entry added: ${title}`);
+                await loadAndRenderJournal(); // Refresh
+            } catch (error) {
+                console.error('❌ Failed to add journal entry:', error);
+            }
+        }
+        
+        async function deleteJournalEntry(entryId) {
+            if (!confirm('Delete this journal entry?')) return;
+            
+            try {
+                await window.supabase.delete('journal_entries', entryId);
+                console.log(`🗑️ Journal entry deleted: ${entryId}`);
+                await loadAndRenderJournal(); // Refresh
+            } catch (error) {
+                console.error('❌ Failed to delete journal entry:', error);
             }
         }
         
