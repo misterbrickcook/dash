@@ -84,19 +84,10 @@
 
         <!-- === ✅ TODOS TAB === -->
         <div class="tab-content" id="todos">
-            <!-- Todo Filter Tabs -->
-            <div class="filter-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; padding: 0 1rem;">
-                <button class="filter-tab active" data-filter="alle" style="padding: 0.5rem 1rem; border: none; border-radius: 20px; background: #007bff; color: white; cursor: pointer; font-size: 0.8rem;">Alle</button>
-                <button class="filter-tab" data-filter="heute" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">Heute</button>
-                <button class="filter-tab" data-filter="privat" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">Privat</button>
-                <button class="filter-tab" data-filter="uni" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">Uni</button>
-                <button class="filter-tab" data-filter="arbeit" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">Arbeit</button>
-            </div>
-            
             <section class="card">
                 <div class="card-header">
                     <h2 id="todos-section-title">Active Todos</h2>
-                    <div style="display: flex; gap: 0.5rem;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
                         <select id="todo-category-select" style="padding: 0.3rem 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.8rem;">
                             <option value="heute">Heute</option>
                             <option value="privat">Privat</option>
@@ -107,6 +98,15 @@
                             + Add Todo
                         </button>
                     </div>
+                </div>
+                
+                <!-- Todo Filter Tabs -->
+                <div class="filter-tabs" style="display: flex; gap: 0.5rem; margin: 1rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+                    <button class="filter-tab active" data-filter="alle" style="padding: 0.5rem 1rem; border: none; border-radius: 20px; background: #007bff; color: white; cursor: pointer; font-size: 0.8rem;">Alle</button>
+                    <button class="filter-tab" data-filter="heute" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">📅 Heute</button>
+                    <button class="filter-tab" data-filter="privat" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">🏠 Privat</button>
+                    <button class="filter-tab" data-filter="uni" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">🎓 Uni</button>
+                    <button class="filter-tab" data-filter="arbeit" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">💼 Arbeit</button>
                 </div>
                 
                 <div class="checkbox-group" id="active-todos">
