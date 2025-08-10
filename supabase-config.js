@@ -64,6 +64,7 @@ function initializeSupabase() {
     if (SUPABASE_URL && SUPABASE_ANON_KEY && 
         SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE') {
         supabase = new SupabaseClient();
+        window.supabase = supabase; // Set window.supabase AFTER creation
         console.log('✅ Supabase connected');
         return true;
     }
@@ -72,5 +73,5 @@ function initializeSupabase() {
 }
 
 // Export for global use
-window.supabase = supabase;
+window.supabase = null; // Start as null, will be set during initialization
 window.initializeSupabase = initializeSupabase;
