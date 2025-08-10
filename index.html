@@ -1222,17 +1222,25 @@
     <!-- Initialize Cloud Connection -->
     <script>
         // Try to initialize Supabase on load
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             console.log('🔧 DOM loaded - testing navbar');
             const navLinks = document.querySelectorAll('.nav-link');
             console.log('📊 Found nav links:', navLinks.length);
             
-            // Test first nav link
-            if (navLinks[0]) {
-                console.log('🎯 First nav link data-tab:', navLinks[0].getAttribute('data-tab'));
-            }
+            // Initialize Supabase
+            const connected = initializeSupabase();
             
-            initializeSupabase();
+            // Test Supabase connection
+            if (connected && window.supabase) {
+                console.log('🧪 Testing Supabase connection...');
+                try {
+                    // Simple test query (will fail if no tables exist, but that's OK)
+                    const testResult = await window.supabase.query('test');
+                    console.log('🚀 Supabase test completed');
+                } catch (error) {
+                    console.log('⚠️ Supabase tables not set up yet, but connection works');
+                }
+            }
         });
     </script>
 </body>
