@@ -260,7 +260,7 @@
         
         async function loadAndRenderTodos() {
             try {
-                const todos = await window.supabase.select('todos');
+                const todos = await window.supabase.select('todos', '*', 'created_at.desc');
                 console.log(`📊 Loaded ${todos?.length || 0} todos from cloud`);
                 
                 if (todos && todos.length > 0) {
