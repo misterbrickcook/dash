@@ -141,10 +141,15 @@
         <div class="tab-content" id="journal">
             <section class="card">
                 <div class="card-header">
-                    <h2>📔 Daily Journal</h2>
+                    <h2 id="journal-section-title">📔 Daily Journal</h2>
                     <button id="add-journal-btn" style="padding: 0.3rem 0.8rem; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
                         + New Entry
                     </button>
+                </div>
+                
+                <!-- Journal Filter Tabs -->
+                <div class="journal-filter-tabs" style="display: flex; gap: 0.3rem; margin: 1rem; border-bottom: 1px solid #eee; padding-bottom: 1rem; flex-wrap: wrap;">
+                    <!-- Filter tabs will be created dynamically -->
                 </div>
                 
                 <div id="journal-entries">
@@ -994,11 +999,58 @@
             }
         }
         
+        function getCategoryIconJournal(category) {
+            const icons = {
+                'general': '📝',
+                'private': '🏠', 
+                'work': '💼',
+                'health': '💚',
+                'nutrition': '🥗',
+                'sport': '💪',
+                'crypto': '₿',
+                'reading': '📚'
+            };
+            return icons[category] || '📝';
+        }
+        
         function renderJournalEntries(entries) {
             const container = document.getElementById('journal-entries');
             container.innerHTML = '';
             
-            entries.forEach(entry => {
+            // Filter entries based on current filter
+            let filteredEntries;
+            if (currentJournalFilter === 'alle') {
+                filteredEntries = entries;
+            } else {
+                filteredEntries = entries.filter(entry => entry.category === currentJournalFilter);
+            }
+            
+            // Update section title
+            const titleEl = document.getElementById('journal-section-title');
+            if (titleEl) {
+                const filterLabels = {
+                    'alle': 'Daily Journal',
+                    'general': 'Allgemein Journal',
+                    'private': 'Privat Journal', 
+                    'work': 'Arbeit Journal',
+                    'health': 'Gesundheit Journal',
+                    'nutrition': 'Ernährung Journal',
+                    'sport': 'Sport Journal',
+                    'crypto': 'Crypto Journal',
+                    'reading': 'Lese Journal'
+                };
+                titleEl.textContent = `📔 ${filterLabels[currentJournalFilter] || 'Journal'}`;
+            }
+            
+            if (filteredEntries.length === 0) {
+                const emptyMessage = currentJournalFilter === 'alle' 
+                    ? 'Keine Journal-Einträge vorhanden - klicke + um einen hinzuzufügen!'
+                    : `Keine ${currentJournalFilter} Einträge vorhanden`;
+                container.innerHTML = `<div style="text-align: center; color: #666; padding: 2rem;">${emptyMessage}</div>`;
+                return;
+            }
+            
+            filteredEntries.forEach(entry => {
                 const date = new Date(entry.created_at);
                 const dateString = date.toLocaleDateString('de-DE', {
                     weekday: 'long',
@@ -1024,11 +1076,13 @@
                     }
                 }
                 
+                const categoryIcon = getCategoryIconJournal(entry.category || 'general');
+                
                 const entryHTML = `
                     <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                             <div>
-                                <h4 style="margin: 0; color: #17a2b8; font-size: 1.1rem;">📔 ${entry.title || 'Journal Entry'}</h4>
+                                <h4 style="margin: 0; color: #17a2b8; font-size: 1.1rem;">${categoryIcon} ${entry.title || 'Journal Entry'}</h4>
                                 <small style="color: #666; font-size: 0.8rem;">${dateString} um ${timeString}</small>
                             </div>
                             <button onclick="deleteJournalEntry('${entry.id}')" style="padding: 0.3rem 0.5rem; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 0.7rem; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</button>
@@ -1036,9 +1090,10 @@
                         
                         <div style="white-space: pre-wrap; color: #333; line-height: 1.6; margin-bottom: 1rem; font-size: 0.95rem;">${entry.content}</div>
                         
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
                                 ${entry.mood ? `<span style="background: #fff3cd; color: #856404; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.8rem; border: 1px solid #ffeaa7;">${entry.mood}</span>` : ''}
+                                ${entry.category ? `<span style="background: #17a2b8; color: white; padding: 0.2rem 0.5rem; border-radius: 8px; font-size: 0.7rem; text-transform: uppercase;">${entry.category}</span>` : ''}
                             </div>
                             ${tagsDisplay}
                         </div>
@@ -1047,7 +1102,7 @@
                 container.insertAdjacentHTML('beforeend', entryHTML);
             });
             
-            console.log(`✅ Rendered ${entries.length} journal entries`);
+            console.log(`✅ Rendered ${filteredEntries.length} journal entries (${currentJournalFilter})`);
         }
         
         function clearJournalLoadingMessages() {
@@ -1059,6 +1114,71 @@
         
         function setupJournalButtons() {
             document.getElementById('add-journal-btn').addEventListener('click', addNewJournalEntry);
+            setupJournalFilterTabs();
+        }
+        
+        let currentJournalFilter = 'alle';
+        
+        function setupJournalFilterTabs() {
+            console.log('🔧 Setting up journal filter tabs...');
+            
+            // Create filter tabs dynamically
+            const filterContainer = document.querySelector('.journal-filter-tabs');
+            if (!filterContainer) {
+                console.log('❌ Journal filter container not found');
+                return;
+            }
+            
+            const journalFilters = [
+                { id: 'alle', label: 'Alle', icon: '📔' },
+                { id: 'general', label: 'Allgemein', icon: '📝' },
+                { id: 'private', label: 'Privat', icon: '🏠' },
+                { id: 'work', label: 'Arbeit', icon: '💼' },
+                { id: 'health', label: 'Gesundheit', icon: '💚' },
+                { id: 'nutrition', label: 'Ernährung', icon: '🥗' },
+                { id: 'sport', label: 'Sport', icon: '💪' },
+                { id: 'crypto', label: 'Crypto', icon: '₿' },
+                { id: 'reading', label: 'Lesen', icon: '📚' }
+            ];
+            
+            // Clear and rebuild filter tabs
+            filterContainer.innerHTML = '';
+            
+            journalFilters.forEach(filter => {
+                const button = document.createElement('button');
+                button.className = 'journal-filter-tab' + (filter.id === 'alle' ? ' active' : '');
+                button.setAttribute('data-filter', filter.id);
+                button.textContent = `${filter.icon} ${filter.label}`;
+                button.style.cssText = filter.id === 'alle' 
+                    ? 'padding: 0.4rem 0.8rem; border: none; border-radius: 15px; background: #17a2b8; color: white; cursor: pointer; font-size: 0.75rem; margin-bottom: 0.3rem;'
+                    : 'padding: 0.4rem 0.8rem; border: 1px solid #ddd; border-radius: 15px; background: white; color: #666; cursor: pointer; font-size: 0.75rem; margin-bottom: 0.3rem;';
+                
+                button.addEventListener('click', () => {
+                    console.log(`🔍 Journal filter clicked: ${filter.id}`);
+                    
+                    // Update all tabs
+                    document.querySelectorAll('.journal-filter-tab').forEach(t => {
+                        t.classList.remove('active');
+                        t.style.cssText = 'padding: 0.4rem 0.8rem; border: 1px solid #ddd; border-radius: 15px; background: white; color: #666; cursor: pointer; font-size: 0.75rem; margin-bottom: 0.3rem;';
+                    });
+                    
+                    // Activate clicked tab
+                    button.classList.add('active');
+                    button.style.cssText = 'padding: 0.4rem 0.8rem; border: none; border-radius: 15px; background: #17a2b8; color: white; cursor: pointer; font-size: 0.75rem; margin-bottom: 0.3rem;';
+                    
+                    // Update filter
+                    currentJournalFilter = filter.id;
+                    
+                    // Re-render
+                    if (window.supabase) {
+                        loadAndRenderJournal();
+                    }
+                });
+                
+                filterContainer.appendChild(button);
+            });
+            
+            console.log(`✅ Created ${journalFilters.length} journal filter tabs`);
         }
         
         function showAddJournalModal() {
@@ -1095,8 +1215,22 @@
                         </div>
                         
                         <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555;">Kategorie:</label>
+                            <select id="journal-category-input" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                                <option value="general">📝 Allgemein</option>
+                                <option value="private">🏠 Privat</option>
+                                <option value="work">💼 Arbeit</option>
+                                <option value="health">💚 Gesundheit</option>
+                                <option value="nutrition">🥗 Ernährung</option>
+                                <option value="sport">💪 Sport</option>
+                                <option value="crypto">₿ Crypto</option>
+                                <option value="reading">📚 Lesen</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555;">Tags (optional):</label>
-                            <input type="text" id="journal-tags-input" placeholder="z.B. work, family, goals, reflection (durch Komma getrennt)" autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                            <input type="text" id="journal-tags-input" placeholder="z.B. thoughts, reflection, goals (durch Komma getrennt)" autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
                         </div>
                         
                         <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
@@ -1134,6 +1268,7 @@
             const titleInput = document.getElementById('journal-title-input');
             const contentInput = document.getElementById('journal-content-input');
             const moodInput = document.getElementById('journal-mood-input');
+            const categoryInput = document.getElementById('journal-category-input');
             const tagsInput = document.getElementById('journal-tags-input');
             
             const content = contentInput.value.trim();
@@ -1145,6 +1280,7 @@
             
             const title = titleInput.value.trim() || `Entry ${new Date().toLocaleDateString('de-DE')}`;
             const mood = moodInput.value;
+            const category = categoryInput.value;
             const tags = tagsInput.value.trim();
             
             const newEntry = {
@@ -1152,13 +1288,14 @@
                 title: title,
                 content: content,
                 mood: mood,
+                category: category,
                 tags: tags,
                 created_at: new Date().toISOString()
             };
             
             try {
                 await window.supabase.insert('journal_entries', newEntry);
-                console.log(`✅ Journal entry added: ${title}`);
+                console.log(`✅ Journal entry added (${category}): ${title}`);
                 closeJournalModal();
                 await loadAndRenderJournal(); // Refresh
             } catch (error) {
