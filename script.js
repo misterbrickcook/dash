@@ -3558,7 +3558,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
         
         // Save button
-        saveBtn.addEventListener('click', () => {
+        saveBtn.addEventListener('click', async () => {
             const title = titleInput.value.trim();
             const date = dateInput.value;
             const category = categorySelect.value;
