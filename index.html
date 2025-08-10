@@ -1255,38 +1255,38 @@
                         
                         console.log('✅ Cloud todos synced to local state!');
                         
-                        // Update checkboxes in real-time - find ALL instances
+                        // CLOUD-ONLY SYSTEM: Dynamically render todos
                         setTimeout(() => {
+                            console.log('🚀 Rendering cloud todos dynamically...');
+                            
+                            // Clear all loading messages
+                            document.querySelectorAll('.loading-message').forEach(msg => msg.remove());
+                            
+                            // Render todos in each section
                             cloudTodos.forEach(todo => {
-                                if (todo.completed) {
-                                    console.log(`🔍 Looking for todo: "${todo.text}"`);
-                                    
-                                    // Find ALL instances of this todo text
-                                    const allLabels = document.querySelectorAll('label');
-                                    let found = 0;
-                                    
-                                    allLabels.forEach(label => {
-                                        const labelText = label.textContent.trim();
-                                        if (labelText === todo.text) {
-                                            const checkbox = label.previousElementSibling;
-                                            if (checkbox && checkbox.type === 'checkbox') {
-                                                checkbox.checked = true;
-                                                label.style.textDecoration = 'line-through';
-                                                label.style.color = '#999';
-                                                found++;
-                                                console.log(`✅ Restored: "${todo.text}" (instance ${found})`);
-                                            }
-                                        }
-                                    });
-                                    
-                                    if (found === 0) {
-                                        console.log(`❌ Todo not found in DOM: "${todo.text}"`);
-                                    } else {
-                                        console.log(`🎉 Restored ${found} instances of: "${todo.text}"`);
-                                    }
+                                const todoHTML = `
+                                    <div class="checkbox-item" data-category="${todo.category}">
+                                        <input type="checkbox" ${todo.completed ? 'checked' : ''} 
+                                               data-cloud-id="${todo.id}">
+                                        <label style="${todo.completed ? 'text-decoration: line-through; color: #999;' : ''}">${todo.text}</label>
+                                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                                            <div style="width: 8px; height: 8px; background: #666; border-radius: 50%;"></div>
+                                            ${todo.time ? `<span style="font-size: 0.8rem; color: #666;">${todo.time}</span>` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                                
+                                // Add to appropriate sections
+                                const homeContainer = document.querySelector('#home-todos, .checkbox-group');
+                                if (homeContainer) {
+                                    homeContainer.insertAdjacentHTML('beforeend', todoHTML);
                                 }
+                                
+                                console.log(`🎯 Rendered: ${todo.text} (${todo.completed ? 'completed' : 'pending'})`);
                             });
-                        }, 3000); // Wait longer for full page load
+                            
+                            console.log(`✅ Rendered ${cloudTodos.length} cloud todos dynamically!`);
+                        }, 2000);
                     } else {
                         console.log('📝 No cloud todos found - using local data');
                     }
