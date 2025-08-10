@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 CLOUD SYNC v3 - TODOS READY FOR SYNC! 🚀</title>
+    <title>🚀 CLEAN SLATE - CLOUD SYNC TEST 🚀</title>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -11,1193 +11,43 @@
     <!-- === STICKY NAVIGATION === -->
     <nav class="sticky-nav">
         <div class="nav-container">
-            <div class="nav-link active" data-tab="home">
-                Home
-            </div>
-            <div class="nav-link" data-tab="todos">
-                ToDos
-            </div>
-            <div class="nav-link" data-tab="ziele">
-                Ziele
-            </div>
-            <div class="nav-link" data-tab="journal">
-                Journal
-            </div>
-            <div class="nav-link" data-tab="motivation">
-                Motivation
-            </div>
-            <div class="nav-link" data-tab="ressourcen">
-                Ressourcen
-            </div>
-            <!-- <div class="nav-link" data-tab="analytics">
-                <i data-lucide="bar-chart-3" class="nav-icon"></i>
-                Analytics
-            </div> -->
-            <div class="nav-link" data-tab="settings">
-                Settings
-            </div>
+            <div class="nav-link active" data-tab="home">Home</div>
+            <div class="nav-link" data-tab="todos">ToDos</div>
         </div>
     </nav>
 
     <div class="main-content">
-
+        
         <!-- === 🏠 HOME TAB === -->
         <div class="tab-content active" id="home">
-
-            <!-- 🔥 Streak Übersicht -->
-            <section class="section full-width">
-                <h2>📅 Overview</h2>
-                <div class="streak-grid">
-                    <div class="streak-tile">
-                        <div class="streak-number" id="monthlyTodosCount">0</div>
-                        <div class="streak-label">Todos erledigt</div>
-                        <div class="streak-date" id="monthlyTodosDate">August 2025</div>
-                    </div>
-                    <div class="streak-tile" id="sportStreak">
-                        <div class="streak-number" id="sportStreakCount">0</div>
-                        <div class="streak-label">Sport</div>
-                        <div class="streak-date" id="sportStreakDate">August 2025</div>
-                    </div>
-                    <div class="streak-tile" id="workStreak">
-                        <div class="streak-number" id="workStreakCount">0</div>
-                        <div class="streak-label">7 Uhr Arbeit</div>
-                        <div class="streak-date" id="workStreakDate">August 2025</div>
-                    </div>
-                    <div class="streak-tile" id="nutritionStreak">
-                        <div class="streak-number" id="nutritionStreakCount">0</div>
-                        <div class="streak-label">Ernährung</div>
-                        <div class="streak-date" id="nutritionStreakDate">August 2025</div>
-                    </div>
-                    <div class="streak-tile" id="morningRoutineStreak">
-                        <div class="streak-number" id="morningRoutineStreakCount">0</div>
-                        <div class="streak-label">Morgenroutine</div>
-                        <div class="streak-date" id="morningRoutineStreakDate">August 2025</div>
-                    </div>
-                    <div class="streak-tile" id="eveningRoutineStreak">
-                        <div class="streak-number" id="eveningRoutineStreakCount">0</div>
-                        <div class="streak-label">Abendroutine</div>
-                        <div class="streak-date" id="eveningRoutineStreakDate">August 2025</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 💭 Tägliches Zitat -->
-            <div style="text-align: center; padding: 0.5rem 1rem; margin-bottom: 1rem;">
-                <div style="font-size: 0.9rem; font-style: italic; color: var(--text-secondary);">
-                    <span id="dailyQuoteText">"Der einzige Weg, großartige Arbeit zu leisten, ist zu lieben, was du tust."</span>
-                    <span id="dailyQuoteAuthor" style="font-size: 0.8rem; margin-left: 0.5rem;">— Steve Jobs</span>
-                </div>
-            </div>
-
-            <!-- ☀️🌙 Morgen- & Abendroutine -->
-            <section class="section">
-                <div class="card-header">
-                    <h2 id="routine-title">☀️ Morgenroutine</h2>
-                    <div class="focus-toggle">
-                        <div class="focus-option active" data-routine="morning">☀️</div>
-                        <div class="focus-option" data-routine="evening">🌙</div>
-                    </div>
-                </div>
-                
-                <!-- Morgenroutine -->
-                <div class="checkbox-group" id="morning-routine">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="bett">
-                        <label for="bett">Bett machen</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="wasser">
-                        <label for="wasser">Wasser trinken (1L)</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="meditation">
-                        <label for="meditation">Meditation (15 Min)</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="journaling">
-                        <label for="journaling">Journaling</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="bewegung">
-                        <label for="bewegung">Bewegung/Sport</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="fruehstueck">
-                        <label for="fruehstueck">Gesundes Frühstück</label>
-                    </div>
-                </div>
-                
-                <!-- Abendroutine -->
-                <div class="checkbox-group" id="evening-routine" style="display: none;">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="handy-weg">
-                        <label for="handy-weg">Handy weglegen (1h vor Schlafenszeit)</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="journal-abend">
-                        <label for="journal-abend">Tagesreflexion schreiben</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="dankbarkeit">
-                        <label for="dankbarkeit">3 Dinge wofür ich dankbar bin</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="morgen-planung">
-                        <label for="morgen-planung">Nächsten Tag planen</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="lesen-abend">
-                        <label for="lesen-abend">Lesen (20-30 Min)</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="entspannung">
-                        <label for="entspannung">Entspannungsübung/Atemtechnik</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="ordnung">
-                        <label for="ordnung">Wohnung aufräumen</label>
-                    </div>
-                </div>
-                
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="routine-progress" style="width: 0%;"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 📋 Heutige Aufgaben -->
             <section class="card">
                 <div class="card-header">
-                    <h2>📋 Heutige Aufgaben</h2>
-                    <div id="todayTaskCounter" style="font-size: 0.8rem; color: #666;">3 von 5 erledigt</div>
-                </div>
-                
-                <div class="checkbox-group" style="margin-bottom: 1rem;">
-                    <!-- Hardcoded todo removed - now cloud-only -->
-                    <div class="checkbox-item" data-category="arbeit">
-                        <input type="checkbox" id="home_emails">
-                        <label for="home_emails">E-Mails bearbeiten</label>
-                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                            <div style="width: 8px; height: 8px; background: #333; border-radius: 50%;"></div>
-                            <span style="font-size: 0.8rem; color: #666;">09:30</span>
-                        </div>
-                    </div>
-                    <div class="checkbox-item" data-category="arbeit">
-                        <input type="checkbox" id="home_projekt">
-                        <label for="home_projekt">Projekt X fertigstellen</label>
-                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                            <div style="width: 8px; height: 8px; background: #333; border-radius: 50%;"></div>
-                            <span style="font-size: 0.8rem; color: #666;">14:00</span>
-                        </div>
-                    </div>
-                    <div class="checkbox-item" data-category="privat">
-                        <input type="checkbox" id="home_einkaufen">
-                        <label for="home_einkaufen">Einkaufen gehen</label>
-                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                            <div style="width: 8px; height: 8px; background: #666; border-radius: 50%;"></div>
-                            <span style="font-size: 0.8rem; color: #666;">16:00</span>
-                        </div>
-                    </div>
-                    <div class="checkbox-item" data-category="arbeit">
-                        <input type="checkbox" id="home_telefonate">
-                        <label for="home_telefonate">Telefonate führen</label>
-                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                            <div style="width: 8px; height: 8px; background: #333; border-radius: 50%;"></div>
-                            <span style="font-size: 0.8rem; color: #666;">17:30</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="text-align: center;">
-                    <button class="btn btn-small" data-tab="todos" style="font-size: 0.8rem;">
-                        Alle Aufgaben anzeigen
+                    <h2>🚀 Cloud Sync Test</h2>
+                    <button id="add-todo-btn" style="padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Add Test Todo
                     </button>
                 </div>
-            </section>
-
-            <!-- 🚨 Wichtige Termine -->
-            <section class="section full-width">
-                <div class="card-header">
-                    <h2>🚨 Wichtige Termine</h2>
-                    <div class="tabs">
-                        <div id="addDeadlineBtn" class="tab" style="cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 40px;">+</div>
-                    </div>
-                </div>
-                <div class="streak-grid">
-                    <div class="streak-tile">
-                        <div class="streak-number">3</div>
-                        <div class="streak-label">Tage bis</div>
-                        <div class="streak-date">Klausur Mathematik</div>
-                    </div>
-                    <div class="streak-tile">
-                        <div class="streak-number">7</div>
-                        <div class="streak-label">Tage bis</div>
-                        <div class="streak-date">Projekt Deadline</div>
-                    </div>
-                    <div class="streak-tile">
-                        <div class="streak-number">15</div>
-                        <div class="streak-label">Tage bis</div>
-                        <div class="streak-date">Hausarbeit Abgabe</div>
-                    </div>
-                    <div class="streak-tile">
-                        <div class="streak-number">23</div>
-                        <div class="streak-label">Tage bis</div>
-                        <div class="streak-date">Präsentation Uni</div>
-                    </div>
-                    <div class="streak-tile">
-                        <div class="streak-number">45</div>
-                        <div class="streak-label">Tage bis</div>
-                        <div class="streak-date">Semester Ende</div>
-                    </div>
-                    <div class="streak-tile">
-                        <div class="streak-number">67</div>
-                        <div class="streak-label">Tage bis</div>
-                        <div class="streak-date">Geburtstag Mama</div>
+                
+                <!-- CLEAN: Only cloud todos -->
+                <div class="checkbox-group" id="home-todos">
+                    <div class="placeholder" style="text-align: center; color: #666; padding: 2rem;">
+                        ☁️ Ready for cloud sync test<br>
+                        <small>Add a todo and test cross-device sync!</small>
                     </div>
                 </div>
             </section>
-
         </div>
-
 
         <!-- === ✅ TODOS TAB === -->
         <div class="tab-content" id="todos">
-
-            <!-- 📋 ToDo Management -->
-            <section class="section full-width">
+            <section class="card">
                 <div class="card-header">
-                    <h2>📋 Aufgaben</h2>
-                    <div class="tabs">
-                        <div class="tab active" data-filter="heute">Heute</div>
-                        <div class="tab" data-filter="privat">Privat</div>
-                        <div class="tab" data-filter="uni">Uni</div>
-                        <div class="tab" data-filter="arbeit">Arbeit</div>
-                        <div class="tab" data-filter="alle">Alle</div>
-                        <div class="tab" data-filter="archiv">Archiv</div>
-                    </div>
+                    <h2>All Todos</h2>
                 </div>
                 
-                
-                <!-- Neue Aufgabe hinzufügen -->
-                <div style="background: var(--form-section-bg); padding: 1.5rem; border: 1px solid var(--border-color); margin-bottom: 2rem;">
-                    <div style="display: flex; gap: 1rem; align-items: end; flex-wrap: wrap;">
-                        <div class="form-group" style="flex: 1; margin-bottom: 0; min-width: 200px;">
-                            <input type="text" id="newTaskInput" class="form-input" placeholder="Neue Aufgabe hinzufügen..." style="padding: 0.75rem;">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <select id="newTaskCategory" class="form-select" style="padding: 0.75rem; min-width: 120px;">
-                                <option value="privat">Privat</option>
-                                <option value="uni">Uni</option>
-                                <option value="arbeit">Arbeit</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <input type="date" id="newTaskDate" class="form-input" style="padding: 0.75rem; min-width: 140px;" title="Fälligkeitsdatum">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <input type="time" id="newTaskTime" class="form-input" style="padding: 0.75rem; min-width: 100px;" title="Uhrzeit (optional)">
-                        </div>
-                        <button id="addTaskBtn" class="form-input" style="width: auto; background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--input-border); font-family: inherit; font-size: 0.95rem; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; text-align: center;">
-                            <i data-lucide="plus" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
-                            <span style="text-align: center;">Hinzufügen</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Fortschrittsbalken -->
-                <div class="progress-container" id="todoProgress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 60%;"></div>
-                    </div>
-                    <span class="progress-text">60%</span>
-                </div>
-                <div style="font-size: 0.8rem; color: #666666; margin-bottom: 2rem;" id="todoProgressText">3 von 5 Aufgaben erledigt</div>
-                
-                <!-- Heute Filter -->
-                <div class="todo-filter" data-filter="heute">
-                    <div class="checkbox-group">
-                        <div class="checkbox-item" data-category="privat">
-                            <input type="checkbox" id="heute_morgenroutine">
-                            <label for="heute_morgenroutine">Morgenroutine durchführen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">08:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="arbeit">
-                            <input type="checkbox" id="heute_emails">
-                            <label for="heute_emails">E-Mails bearbeiten</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">09:30</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="arbeit">
-                            <input type="checkbox" id="heute_projekt">
-                            <label for="heute_projekt">Projekt X fertigstellen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">14:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="privat">
-                            <input type="checkbox" id="heute_einkaufen">
-                            <label for="heute_einkaufen">Einkaufen gehen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">16:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="arbeit">
-                            <input type="checkbox" id="heute_telefonate">
-                            <label for="heute_telefonate">Telefonate führen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">17:30</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Privat Filter -->
-                <div class="todo-filter" data-filter="privat" style="display: none;">
-                    <div class="checkbox-group">
-                        <div class="checkbox-item" data-category="privat">
-                            <input type="checkbox">
-                            <label>Morgenroutine durchführen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">08:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="privat">
-                            <input type="checkbox">
-                            <label>Einkaufen gehen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">16:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="privat">
-                            <input type="checkbox">
-                            <label>Wohnung putzen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">19:00</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Uni Filter -->
-                <div class="todo-filter" data-filter="uni" style="display: none;">
-                    <div class="checkbox-group">
-                        <div class="checkbox-item" data-category="uni">
-                            <input type="checkbox">
-                            <label>Vorlesung vorbereiten</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="book-open" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">10:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="uni">
-                            <input type="checkbox">
-                            <label>Hausarbeit abgeben</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="book-open" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">12:00</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Arbeit Filter -->
-                <div class="todo-filter" data-filter="arbeit" style="display: none;">
-                    <div class="checkbox-group">
-                        <div class="checkbox-item" data-category="arbeit">
-                            <input type="checkbox">
-                            <label>E-Mails bearbeiten</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">09:30</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="arbeit">
-                            <input type="checkbox">
-                            <label>Projekt X fertigstellen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">14:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="arbeit">
-                            <input type="checkbox">
-                            <label>Telefonate führen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">17:30</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Alle Filter -->
-                <div class="todo-filter" data-filter="alle" style="display: none;">
-                    <div class="checkbox-group">
-                        <div class="checkbox-item" data-category="privat">
-                            <input type="checkbox">
-                            <label>Morgenroutine durchführen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">08:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="arbeit">
-                            <input type="checkbox">
-                            <label>E-Mails bearbeiten</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">09:30</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="uni">
-                            <input type="checkbox">
-                            <label>Vorlesung vorbereiten</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="book-open" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">10:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="uni">
-                            <input type="checkbox">
-                            <label>Hausarbeit abgeben</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="book-open" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">12:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="arbeit">
-                            <input type="checkbox">
-                            <label>Projekt X fertigstellen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">14:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="privat">
-                            <input type="checkbox">
-                            <label>Einkaufen gehen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">16:00</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="arbeit">
-                            <input type="checkbox">
-                            <label>Telefonate führen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="briefcase" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">17:30</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-item" data-category="privat">
-                            <input type="checkbox">
-                            <label>Wohnung putzen</label>
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="home" style="width: 14px; height: 14px; color: #666;"></i>
-                                <span style="font-size: 0.8rem; color: #666;">19:00</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Archiv Filter -->
-                <div class="todo-filter" data-filter="archiv" style="display: none;">
-                    <div style="font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin-bottom: 1.5rem;">📦 Archivierte Aufgaben</div>
-                    <div class="checkbox-group">
-                        <!-- Archivierte Todos erscheinen hier automatisch -->
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- === 🎯 ZIELE TAB === -->
-        <div class="tab-content" id="ziele">
-
-            <!-- 🎯 Monats- & Quartalsziele -->
-            <section class="section full-width">
-                <div class="card-header">
-                    <h2>🎯 Ziele Übersicht</h2>
-                    <div class="tabs">
-                        <div class="tab active" data-goal-filter="monat">Monat</div>
-                        <div class="tab" data-goal-filter="quartal">Quartal</div>
-                        <div class="tab" data-goal-filter="jahr">Jahr</div>
-                        <div class="tab" data-goal-filter="alle">Alle</div>
-                    </div>
-                </div>
-                
-                <div class="goals-grid">
-                    <!-- Ziel 1: Abnehmen -->
-                    <div class="goal-card">
-                        <div class="goal-category">Fitness</div>
-                        <div class="goal-name">5 kg abnehmen</div>
-                        <div class="goal-description">Aktuell: 83 kg → Ziel: 78 kg<br>Durch gesunde Ernährung und regelmäßigen Sport</div>
-                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
-                        <div class="goal-progress-section">
-                            <div class="goal-progress-header">
-                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
-                                <span class="goal-percentage">40%</span>
-                            </div>
-                            <div class="progress-container">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 40%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ziel 2: Meditation -->
-                    <div class="goal-card">
-                        <div class="goal-category">Persönlich</div>
-                        <div class="goal-name">Meditation: 31 Tage Juli</div>
-                        <div class="goal-description">Täglich 15 Minuten<br>Mindfulness & Achtsamkeit</div>
-                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
-                        <div class="goal-progress-section">
-                            <div class="goal-progress-header">
-                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
-                                <span class="goal-percentage">97%</span>
-                            </div>
-                            <div class="progress-container">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 97%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ziel 3: Buch lesen -->
-                    <div class="goal-card">
-                        <div class="goal-category">Bildung</div>
-                        <div class="goal-name">Buch lesen: "Atomic Habits"</div>
-                        <div class="goal-description">280 Seiten insgesamt<br>Täglich 20 Minuten lesen</div>
-                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
-                        <div class="goal-progress-section">
-                            <div class="goal-progress-header">
-                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
-                                <span class="goal-percentage">60%</span>
-                            </div>
-                            <div class="progress-container">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 60%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ziel 4: Freelance -->
-                    <div class="goal-card">
-                        <div class="goal-category">Karriere</div>
-                        <div class="goal-name">Freelance Business etablieren</div>
-                        <div class="goal-description">Webdesign & Frontend-Entwicklung<br>Mindestens 500€/Monat Zusatzeinkommen</div>
-                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
-                        <div class="goal-progress-section">
-                            <div class="goal-progress-header">
-                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
-                                <span class="goal-percentage">75%</span>
-                            </div>
-                            <div class="progress-container">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 75%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ziel 5: Sprachkenntnisse -->
-                    <div class="goal-card">
-                        <div class="goal-category">Bildung</div>
-                        <div class="goal-name">Französisch Grundkenntnisse</div>
-                        <div class="goal-description">Niveau A2 erreichen<br>Täglich 20 Minuten mit Duolingo</div>
-                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
-                        <div class="goal-progress-section">
-                            <div class="goal-progress-header">
-                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
-                                <span class="goal-percentage">25%</span>
-                            </div>
-                            <div class="progress-container">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 25%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ziel 6: Minimalismus -->
-                    <div class="goal-card">
-                        <div class="goal-category">Persönlich</div>
-                        <div class="goal-name">Minimalistischer Lebensstil</div>
-                        <div class="goal-description">100 Gegenstände aussortieren<br>Bewusster Konsum</div>
-                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
-                        <div class="goal-progress-section">
-                            <div class="goal-progress-header">
-                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
-                                <span class="goal-percentage">65%</span>
-                            </div>
-                            <div class="progress-container">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 65%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ziel 7: Langfristig 2026 -->
-                    <div class="goal-card">
-                        <div class="goal-category">Karriere</div>
-                        <div class="goal-name">Master-Abschluss</div>
-                        <div class="goal-description">Computer Science Master fertigstellen<br>Thesis über KI und Machine Learning</div>
-                        <div class="goal-date" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;"></div>
-                        <div class="goal-progress-section">
-                            <div class="goal-progress-header">
-                                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Fortschritt</span>
-                                <span class="goal-percentage">15%</span>
-                            </div>
-                            <div class="progress-container">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 15%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </section>
-
-            <!-- ✨ Vision Board -->
-            <section class="section full-width">
-                <div class="card-header">
-                    <h2>✨ Vision Board</h2>
-                    <div class="tabs">
-                        <div id="addVisionBtn" class="tab" style="cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 40px;">+</div>
-                    </div>
-                </div>
-                
-                <div class="vision-grid">
-                    <div class="vision-item" data-vision-type="goal">
-                        <div class="vision-icon">🏠</div>
-                        <div class="vision-title">Traumhaus</div>
-                        <div class="vision-description">2026</div>
-                    </div>
-                    <div class="vision-item" data-vision-type="goal">
-                        <div class="vision-icon">🌍</div>
-                        <div class="vision-title">Weltreise</div>
-                        <div class="vision-description">2025</div>
-                    </div>
-                    <div class="vision-item" data-vision-type="quote">
-                        <div class="vision-quote">"Der Weg ist das Ziel"</div>
-                        <div class="vision-author">Konfuzius</div>
-                    </div>
-                    <div class="vision-item" data-vision-type="goal">
-                        <div class="vision-icon">💪</div>
-                        <div class="vision-title">Fitness Ziel</div>
-                        <div class="vision-description">70kg erreicht</div>
-                    </div>
-                    <div class="vision-item" data-vision-type="goal">
-                        <div class="vision-icon">💼</div>
-                        <div class="vision-title">Selbstständigkeit</div>
-                        <div class="vision-description">Eigenes Business</div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- === 📔 JOURNAL TAB === -->
-        <div class="tab-content" id="journal">
-
-            <!-- 📔 Tagesjournal -->
-            <section class="section full-width">
-                <div class="card-header" style="align-items: flex-start;">
-                    <div style="display: flex; align-items: center; width: 100%;">
-                        <h2 style="margin: 0;">📔 Tagesjournal</h2>
-                        <div style="flex: 1; display: flex; justify-content: center;">
-                            <div class="mood-selector" style="display: flex; gap: 0.5rem;">
-                                <div class="mood-emoji" data-mood="very-happy" style="font-size: 1rem; padding: 0.4rem; cursor: pointer; transition: all 0.2s; border: 1px solid transparent;">😄</div>
-                                <div class="mood-emoji" data-mood="happy" style="font-size: 1rem; padding: 0.4rem; cursor: pointer; transition: all 0.2s; border: 1px solid transparent;">😊</div>
-                                <div class="mood-emoji selected" data-mood="neutral" style="font-size: 1rem; padding: 0.4rem; cursor: pointer; transition: all 0.2s; border: 1px solid #000;">😐</div>
-                                <div class="mood-emoji" data-mood="sad" style="font-size: 1rem; padding: 0.4rem; cursor: pointer; transition: all 0.2s; border: 1px solid transparent;">😔</div>
-                                <div class="mood-emoji" data-mood="very-sad" style="font-size: 1rem; padding: 0.4rem; cursor: pointer; transition: all 0.2s; border: 1px solid transparent;">😞</div>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <button class="btn btn-small" id="todayBtn" style="padding: 0.3rem 0.6rem; border: 1px solid #e0e0e0; background: transparent; color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Heute</button>
-                            <div id="currentDate" style="font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">
-                                30. Juli 2025
-                            </div>
-                            <button class="btn btn-small" id="prevDay" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="15,18 9,12 15,6"></polyline>
-                                </svg>
-                            </button>
-                            <button class="btn btn-small" id="nextDay" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="9,18 15,12 9,6"></polyline>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div id="autoSaveStatus" style="font-size: 0.8rem; color: #666; opacity: 0; transition: opacity 0.3s ease; position: absolute; right: 2rem; bottom: 0.5rem;">
-                        Automatisch gespeichert
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
-                        <div class="journal-category" data-category="general" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; background: #000; color: white;">Allgemein</div>
-                        <div class="journal-category" data-category="private" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Privat</div>
-                        <div class="journal-category" data-category="work" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Arbeit</div>
-                        <div class="journal-category" data-category="health" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Gesundheit</div>
-                        <div class="journal-category" data-category="nutrition" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Ernährung</div>
-                        <div class="journal-category" data-category="sport" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Sport</div>
-                        <div class="journal-category" data-category="crypto" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Crypto</div>
-                        <div class="journal-category" data-category="reading" style="padding: 0.4rem 0.8rem; border: 1px solid #e0e0e0; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;">Lesen</div>
-                    </div>
-                    <textarea id="journalText" class="form-textarea" placeholder="Wie war dein Tag? Was hast du gelernt? Wofür bist du dankbar?" style="min-height: 300px;">Heute war ein produktiver Tag. Habe morgens meditiert und mich sehr fokussiert gefühlt. Das neue Projekt macht Fortschritte und ich bin zufrieden mit den Ergebnissen. Dankbar für die Zeit mit Familie und die kleinen Erfolge des Tages...</textarea>
-                </div>
-            </section>
-
-            <!-- 📅 Wochenjournal -->
-            <section class="section full-width">
-                <div class="card-header" style="align-items: flex-start;">
-                    <div style="display: flex; align-items: center; width: 100%;">
-                        <h2 style="margin: 0;">📅 Wochenjournal</h2>
-                        <div style="flex: 1;"></div>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <button class="btn btn-small" id="currentWeekBtn" style="padding: 0.3rem 0.6rem; border: 1px solid #e0e0e0; background: transparent; color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Aktuelle Woche</button>
-                            <div id="currentWeek" style="font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">
-                                KW 30 • 21.-27. Juli 2025
-                            </div>
-                            <button class="btn btn-small" id="prevWeek" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="15,18 9,12 15,6"></polyline>
-                                </svg>
-                            </button>
-                            <button class="btn btn-small" id="nextWeek" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="9,18 15,12 9,6"></polyline>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div id="weekAutoSaveStatus" style="font-size: 0.8rem; color: #666; opacity: 0; transition: opacity 0.3s ease; position: absolute; right: 2rem; bottom: 0.5rem;">
-                        Automatisch gespeichert
-                    </div>
-                </div>
-                
-                <!-- Wöchentliche Kennzahlen -->
-                <div style="margin-bottom: 2rem;">
-                    <div style="font-size: 0.9rem; font-weight: 500; text-transform: uppercase; margin-bottom: 1.5rem;" id="weekStatsTitle">Kennzahlen:</div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
-                        <!-- Sport Tracking -->
-                        <div>
-                            <div style="font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">💪 Sport</div>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <div class="day-button" data-type="sport" data-day="1">MO</div>
-                                <div class="day-button" data-type="sport" data-day="2">DI</div>
-                                <div class="day-button" data-type="sport" data-day="3">MI</div>
-                                <div class="day-button" data-type="sport" data-day="4">DO</div>
-                                <div class="day-button" data-type="sport" data-day="5">FR</div>
-                                <div class="day-button" data-type="sport" data-day="6">SA</div>
-                                <div class="day-button" data-type="sport" data-day="0">SO</div>
-                                <div style="margin-left: 1rem; font-size: 0.9rem; color: #666;" id="sportCount">0/7 Tage</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Ernährung Tracking -->
-                        <div>
-                            <div style="font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">🥗 Ernährung</div>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <div class="day-button" data-type="nutrition" data-day="1">MO</div>
-                                <div class="day-button" data-type="nutrition" data-day="2">DI</div>
-                                <div class="day-button" data-type="nutrition" data-day="3">MI</div>
-                                <div class="day-button" data-type="nutrition" data-day="4">DO</div>
-                                <div class="day-button" data-type="nutrition" data-day="5">FR</div>
-                                <div class="day-button" data-type="nutrition" data-day="6">SA</div>
-                                <div class="day-button" data-type="nutrition" data-day="0">SO</div>
-                                <div style="margin-left: 1rem; font-size: 0.9rem; color: #666;" id="nutritionCount">0/7 Tage</div>
-                            </div>
-                        </div>
-
-                        <!-- 7 Uhr Arbeit Tracking -->
-                        <div>
-                            <div style="font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">🕰️ 7 Uhr Arbeit</div>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <div class="day-button" data-type="work7am" data-day="1">MO</div>
-                                <div class="day-button" data-type="work7am" data-day="2">DI</div>
-                                <div class="day-button" data-type="work7am" data-day="3">MI</div>
-                                <div class="day-button" data-type="work7am" data-day="4">DO</div>
-                                <div class="day-button" data-type="work7am" data-day="5">FR</div>
-                                <div style="margin-left: 1rem; font-size: 0.9rem; color: #666;" id="work7amCount">0/5 Tage</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </section>
-        </div>
-
-        <!-- === ⚡ MOTIVATION TAB === -->
-        <div class="tab-content" id="motivation">
-
-            <!-- 🎬 Motivations-Diashow -->
-            <section class="section full-width">
-                <div class="card-header">
-                    <h2>⚡ Tägliche Motivation</h2>
-                    <div style="display: flex; gap: 1rem; align-items: center;">
-                        <button id="prevSlide" class="btn btn-small" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="15,18 9,12 15,6"></polyline>
-                            </svg>
-                        </button>
-                        <div id="slideCounter" style="font-size: 0.8rem; color: #666; min-width: 50px; text-align: center;">1/5</div>
-                        <button id="nextSlide" class="btn btn-small" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="9,18 15,12 9,6"></polyline>
-                            </svg>
-                        </button>
-                        <button id="autoPlayToggle" class="btn btn-small" style="padding: 0.3rem 0.6rem; border: 1px solid #e0e0e0; background: #000; color: white; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Auto</button>
-                    </div>
-                </div>
-                
-                <!-- Slideshow Container -->
-                <div class="slideshow-container" style="position: relative; max-width: 800px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
-                    
-                    <!-- Slide 1 -->
-                    <div class="motivational-slide active" style="display: block; text-align: center; padding: 3rem 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                            Deine Träume sind größer als deine Ausreden
-                        </div>
-                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
-                            — Unbekannt
-                        </div>
-                    </div>
-                    
-                    <!-- Slide 2 -->
-                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                            Erfolg ist die Summe kleiner Anstrengungen
-                        </div>
-                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
-                            — Robert Collier
-                        </div>
-                    </div>
-                    
-                    <!-- Slide 3 -->
-                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                            Der beste Zeitpunkt war gestern.<br>Der zweitbeste ist jetzt.
-                        </div>
-                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
-                            — Chinesisches Sprichwort
-                        </div>
-                    </div>
-                    
-                    <!-- Slide 4 -->
-                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                            Große Träume brauchen große Taten
-                        </div>
-                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
-                            — Unbekannt
-                        </div>
-                    </div>
-                    
-                    <!-- Slide 5 -->
-                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
-                        <div style="color: #333; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            Du wirst morgen sein, was du heute denkst
-                        </div>
-                        <div style="color: #666; font-size: 1rem; font-style: italic;">
-                            — Buddha
-                        </div>
-                    </div>
-                    
-                </div>
-                
-                <!-- Slide Indicators -->
-                <div style="text-align: center; margin-top: 1rem;">
-                    <div class="slide-indicators" style="display: inline-flex; gap: 0.5rem;">
-                        <div class="indicator active" data-slide="0" style="width: 10px; height: 10px; border-radius: 50%; background: #333; cursor: pointer; opacity: 1;"></div>
-                        <div class="indicator" data-slide="1" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5;"></div>
-                        <div class="indicator" data-slide="2" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5;"></div>
-                        <div class="indicator" data-slide="3" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5;"></div>
-                        <div class="indicator" data-slide="4" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5;"></div>
-                    </div>
-                </div>
-                
-            </section>
-        </div>
-
-        <!-- === 📚 RESSOURCEN TAB === -->
-        <div class="tab-content" id="ressourcen">
-
-            <!-- 🔗 Quick Links -->
-            <section class="section full-width">
-                <div class="card-header">
-                    <h2>🔗 Quick Links</h2>
-                    <div class="tabs">
-                        <div class="tab active" data-resource-filter="privat">Privat</div>
-                        <div class="tab" data-resource-filter="arbeit">Arbeit</div>
-                        <div class="tab" data-resource-filter="uni">Uni</div>
-                        <div class="tab" data-resource-filter="alle">Alle</div>
-                    </div>
-                </div>
-                
-
-                <!-- Links Grid - Privat -->
-                <div class="resource-filter" data-filter="privat">
-                    <div class="links-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                        
-                        <!-- Demo Links - Privat -->
-                        <a href="https://netflix.com" target="_blank" class="link-card" data-category="privat" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
-                            <div style="width: 40px; height: 40px; background: #e50914; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">N</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Netflix</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Streaming</div>
-                            </div>
-                        </a>
-
-                        <a href="https://spotify.com" target="_blank" class="link-card" data-category="privat" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
-                            <div style="width: 40px; height: 40px; background: #1db954; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">♫</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Spotify</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Musik</div>
-                            </div>
-                        </a>
-
-                        <a href="https://amazon.de" target="_blank" class="link-card" data-category="privat" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
-                            <div style="width: 40px; height: 40px; background: #ff9900; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">A</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Amazon</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Shopping</div>
-                            </div>
-                        </a>
-
-                    </div>
-                </div>
-
-                <!-- Links Grid - Arbeit -->
-                <div class="resource-filter" data-filter="arbeit" style="display: none;">
-                    <div class="links-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                        
-                        <!-- Demo Links - Arbeit -->
-                        <a href="https://gmail.com" target="_blank" class="link-card" data-category="arbeit" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
-                            <div style="width: 40px; height: 40px; background: #ea4335; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">@</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Gmail</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">E-Mail</div>
-                            </div>
-                        </a>
-
-                        <a href="https://slack.com" target="_blank" class="link-card" data-category="arbeit" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
-                            <div style="width: 40px; height: 40px; background: #4a154b; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">S</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Slack</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Team Chat</div>
-                            </div>
-                        </a>
-
-                        <a href="https://github.com" target="_blank" class="link-card" data-category="arbeit" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
-                            <div style="width: 40px; height: 40px; background: #333; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">⌘</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 500; margin-bottom: 0.2rem;">GitHub</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Code</div>
-                            </div>
-                        </a>
-
-                    </div>
-                </div>
-
-                <!-- Links Grid - Uni -->
-                <div class="resource-filter" data-filter="uni" style="display: none;">
-                    <div class="links-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                        
-                        <!-- Demo Links - Uni -->
-                        <a href="https://moodle.org" target="_blank" class="link-card" data-category="uni" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
-                            <div style="width: 40px; height: 40px; background: #f98012; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">M</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Moodle</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Lernplattform</div>
-                            </div>
-                        </a>
-
-                        <a href="https://scholar.google.com" target="_blank" class="link-card" data-category="uni" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; color: var(--text-primary); transition: all 0.2s; border-radius: 4px;">
-                            <div style="width: 40px; height: 40px; background: #4285f4; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">📚</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 500; margin-bottom: 0.2rem;">Google Scholar</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Research</div>
-                            </div>
-                        </a>
-
-                    </div>
-                </div>
-
-                <!-- Links Grid - Alle -->
-                <div class="resource-filter" data-filter="alle" style="display: none;">
-                    <div class="links-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                        <!-- Alle Links werden hier dynamisch eingefügt -->
-                    </div>
-                </div>
-
-            </section>
-
-            <!-- 📝 Quick Notes -->
-            <section class="section full-width">
-                <div class="card-header">
-                    <h2>📝 Quick Notes</h2>
-                    <div class="tabs">
-                        <div class="tab active" data-notes-filter="privat">Privat</div>
-                        <div class="tab" data-notes-filter="arbeit">Arbeit</div>
-                        <div class="tab" data-notes-filter="uni">Uni</div>
-                    </div>
-                </div>
-
-                <!-- Notes Privat -->
-                <div class="notes-filter" data-filter="privat">
-                    <div class="form-group">
-                        <textarea id="notesPrivat" class="form-textarea" placeholder="Deine privaten Notizen, Ideen, wichtige Infos..." style="min-height: 200px;">• Zahnarzttermin: nächste Woche Donnerstag 14:00
-• Geburtstag Mama: 15. Oktober - Geschenk besorgen!
-• Auto TÜV fällig im März
-• Netflix-Serien: Stranger Things S4 noch schauen
-• Wochenende: Wanderung planen</textarea>
-                    </div>
-                </div>
-
-                <!-- Notes Arbeit -->
-                <div class="notes-filter" data-filter="arbeit" style="display: none;">
-                    <div class="form-group">
-                        <textarea id="notesArbeit" class="form-textarea" placeholder="Arbeitsbezogene Notizen, Meeting-Notes, wichtige Infos..." style="min-height: 200px;">• Projekt X Deadline: 30. September
-• Team Meeting Mittwoch 10:00 - neue Features besprechen
-• Code Review für Pull Request #234
-• Kunde ABC: Follow-up E-Mail senden
-• Neues Framework evaluieren: React vs Vue</textarea>
-                    </div>
-                </div>
-
-                <!-- Notes Uni -->
-                <div class="notes-filter" data-filter="uni" style="display: none;">
-                    <div class="form-group">
-                        <textarea id="notesUni" class="form-textarea" placeholder="Uni-Notizen, Lernstoff, wichtige Termine..." style="min-height: 200px;">• Klausur Mathematik: 20. Oktober (Kapitel 1-5 lernen)
-• Hausarbeit Literatur: Abgabe 15. November, 15 Seiten
-• Sprechstunde Prof. Schmidt: Donnerstag 14-16 Uhr
-• Bibliothek: Buch "Algorithm Design" reserviert
-• Lerngruppe: Samstag 10:00 Mensa</textarea>
-                    </div>
-                </div>
-
-            </section>
-        </div>
-
-        <!-- === 📊 ANALYTICS TAB === -->
-        <!-- TEMPORARILY DISABLED - TOO COMPLEX FOR NOW
-        <div class="tab-content" id="analytics">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 3rem;">
-                <section class="section" style="min-height: 400px;">
-                    <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
-                        <h3 style="margin: 0;">💪 Sport</h3>
-                        <div class="tabs" style="font-size: 0.75rem;">
-                            <div class="tab active" data-period="4weeks" data-heatmap="training">4 Wochen</div>
-                            <div class="tab" data-period="3months" data-heatmap="training">3 Monate</div>
-                            <div class="tab" data-period="6months" data-heatmap="training">6 Monate</div>
-                            <div class="tab" data-period="1year" data-heatmap="training">1 Jahr</div>
-                        </div>
-                    </div>
-                    <div id="sport-heatmap-container" data-type="sport"></div>
-                </section>
-                <section class="section" style="min-height: 400px;">
-                    <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
-                        <h3 style="margin: 0;">🕰️ 7 Uhr Arbeit</h3>
-                        <div class="tabs" style="font-size: 0.75rem;">
-                            <div class="tab active" data-period="4weeks" data-heatmap="work">4 Wochen</div>
-                            <div class="tab" data-period="3months" data-heatmap="work">3 Monate</div>
-                            <div class="tab" data-period="6months" data-heatmap="work">6 Monate</div>
-                            <div class="tab" data-period="1year" data-heatmap="work">1 Jahr</div>
-                        </div>
-                    </div>
-                    <div id="work-heatmap-container" data-type="work7am"></div>
-                </section>
-            </div>
-        </div>
-        -->
-
-        <!-- === ⚙️ SETTINGS TAB === -->
-        <div class="tab-content" id="settings">
-
-            <!-- ⚙️ App Einstellungen -->
-            <section class="section full-width">
-                <h2>⚙️ App Einstellungen</h2>
-                <div class="dashboard-grid">
-                    <div class="card-compact">
-                        <h3>App Einstellungen</h3>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
-                            <span>Dark Mode</span>
-                            <div id="darkModeToggle" class="toggle-switch" style="width: 60px; height: 30px; background: #e0e0e0; border-radius: 15px; position: relative; cursor: pointer;">
-                                <div id="darkModeSlider" class="toggle-slider" style="width: 26px; height: 26px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.2s;"></div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Routine Reset Zeit</label>
-                            <input type="time" id="routineResetTime" class="form-input" value="06:00">
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 🔗 Link Management -->
-            <section class="section full-width">
-                <h2>🔗 Link Management</h2>
-                <div class="dashboard-grid">
-                    <div class="card-compact">
-                        <h3>Neuen Link hinzufügen</h3>
-                        <div class="form-group">
-                            <label class="form-label">Titel</label>
-                            <input type="text" id="newLinkTitle" class="form-input" placeholder="z.B. Gmail, Netflix...">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">URL</label>
-                            <input type="url" id="newLinkUrl" class="form-input" placeholder="https://...">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Kategorie</label>
-                            <select id="newLinkCategory" class="form-select">
-                                <option value="privat">Privat</option>
-                                <option value="arbeit">Arbeit</option>
-                                <option value="uni">Uni</option>
-                            </select>
-                        </div>
-                        <button id="addLinkBtn" class="btn" style="width: 100%; margin-top: 0.5rem;">
-                            <i data-lucide="plus" style="width: 16px; height: 16px; margin-right: 0.5rem;"></i>
-                            Link hinzufügen
-                        </button>
-                    </div>
-
-                    <div class="card-compact">
-                        <h3>Link-Verwaltung</h3>
-                        <div style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
-                            Links können im Ressourcen-Tab verwaltet werden
-                        </div>
-                        <div id="linkCount" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                            Gesamt: 8 Links
-                        </div>
-                        <button id="clearAllLinksBtn" class="btn" style="width: 100%; background: #dc3545; border-color: #dc3545; color: white; margin-bottom: 0.5rem;">
-                            <i data-lucide="trash-2" style="width: 16px; height: 16px; margin-right: 0.5rem;"></i>
-                            Alle Links löschen
-                        </button>
-                        <button id="exportLinksBtn" class="btn" style="width: 100%; background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);">
-                            <i data-lucide="download" style="width: 16px; height: 16px; margin-right: 0.5rem;"></i>
-                            Links exportieren
-                        </button>
+                <div class="checkbox-group" id="all-todos">
+                    <div class="placeholder" style="text-align: center; color: #666; padding: 2rem;">
+                        ☁️ Cloud todos will appear here
                     </div>
                 </div>
             </section>
@@ -1212,96 +62,100 @@
     <!-- Main Application -->
     <script src="script.js?v=3"></script>
     
-    <!-- Initialize Cloud Connection -->
+    <!-- CLEAN SLATE CLOUD SYNC -->
     <script>
-        // Try to initialize Supabase on load
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🔧 DOM loaded - testing navbar & cloud sync');
-            const navLinks = document.querySelectorAll('.nav-link');
-            console.log('📊 Found nav links:', navLinks.length);
+            console.log('🚀 CLEAN SLATE - Initializing cloud sync...');
             
             // Initialize Supabase
             const connected = initializeSupabase();
             
-            // Test Supabase connection and load cloud todos
             if (connected && window.supabase) {
-                console.log('🧪 Loading todos from cloud...');
+                console.log('✅ Database connected - ready for clean sync test');
                 
-                // Load todos from cloud and sync with local state
-                window.supabase.select('todos').then(cloudTodos => {
-                    console.log('📊 Cloud todos loaded:', cloudTodos?.length || 0);
-                    
-                    if (cloudTodos && cloudTodos.length > 0) {
-                        console.log('🔄 Syncing cloud todos to local state...');
-                        
-                        // Update local todoState with cloud data
-                        cloudTodos.forEach(todo => {
-                            if (window.todoState) {
-                                window.todoState.setTodo(todo.id, {
-                                    text: todo.text,
-                                    category: todo.category,
-                                    completed: todo.completed,
-                                    date: todo.date,
-                                    time: todo.time,
-                                    icon: todo.category === 'arbeit' ? 'briefcase' : 
-                                          todo.category === 'uni' ? 'book-open' : 'home'
-                                });
-                                
-                                if (todo.completed) {
-                                    window.todoState.setTodoChecked(todo.id, true);
-                                }
-                            }
-                        });
-                        
-                        console.log('✅ Cloud todos synced to local state!');
-                        
-                        // CLOUD-ONLY SYSTEM: Dynamically render todos
-                        setTimeout(() => {
-                            console.log('🚀 Rendering cloud todos dynamically...');
-                            
-                            // Clear all loading messages
-                            document.querySelectorAll('.loading-message').forEach(msg => msg.remove());
-                            
-                            // Render todos in each section
-                            cloudTodos.forEach(todo => {
-                                const todoHTML = `
-                                    <div class="checkbox-item" data-category="${todo.category}">
-                                        <input type="checkbox" ${todo.completed ? 'checked' : ''} 
-                                               data-cloud-id="${todo.id}">
-                                        <label style="${todo.completed ? 'text-decoration: line-through; color: #999;' : ''}">${todo.text}</label>
-                                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                            <div style="width: 8px; height: 8px; background: #666; border-radius: 50%;"></div>
-                                            ${todo.time ? `<span style="font-size: 0.8rem; color: #666;">${todo.time}</span>` : ''}
-                                        </div>
-                                    </div>
-                                `;
-                                
-                                // Add to appropriate sections
-                                const homeContainer = document.querySelector('#home-todos, .checkbox-group');
-                                if (homeContainer) {
-                                    homeContainer.insertAdjacentHTML('beforeend', todoHTML);
-                                }
-                                
-                                console.log(`🎯 Rendered: ${todo.text} (${todo.completed ? 'completed' : 'pending'})`);
-                            });
-                            
-                            console.log(`✅ Rendered ${cloudTodos.length} cloud todos dynamically!`);
-                        }, 2000);
-                    } else {
-                        console.log('📝 No cloud todos found - using local data');
-                    }
-                }).catch(error => {
-                    console.log('❌ Cloud loading failed:', error);
-                });
+                // Load existing todos from cloud
+                const cloudTodos = await window.supabase.select('todos');
+                console.log('📊 Existing cloud todos:', cloudTodos?.length || 0);
                 
-                console.log('🎉 CLOUD SYNC READY!');
-            } else {
-                console.log('❌ NO SUPABASE CONNECTION');
+                // Render existing todos
+                if (cloudTodos && cloudTodos.length > 0) {
+                    renderCloudTodos(cloudTodos);
+                }
+                
+                // Add todo functionality
+                setupAddTodo();
             }
-            
-            // OVERRIDE any broken async functions temporarily
-            console.log('🔧 CACHE BUSTER ACTIVE - JS should be updated now!');
         });
+        
+        function renderCloudTodos(todos) {
+            const homeContainer = document.getElementById('home-todos');
+            const allContainer = document.getElementById('all-todos');
+            
+            // Clear placeholders
+            homeContainer.innerHTML = '';
+            allContainer.innerHTML = '';
+            
+            todos.forEach(todo => {
+                const todoHTML = `
+                    <div class="checkbox-item">
+                        <input type="checkbox" ${todo.completed ? 'checked' : ''} 
+                               data-cloud-id="${todo.id}" onchange="syncTodoChange('${todo.id}', this.checked)">
+                        <label style="${todo.completed ? 'text-decoration: line-through; color: #999;' : ''}">${todo.text}</label>
+                    </div>
+                `;
+                
+                homeContainer.insertAdjacentHTML('beforeend', todoHTML);
+                allContainer.insertAdjacentHTML('beforeend', todoHTML);
+            });
+            
+            console.log(`✅ Rendered ${todos.length} cloud todos`);
+        }
+        
+        function setupAddTodo() {
+            document.getElementById('add-todo-btn').addEventListener('click', async () => {
+                const todoText = prompt('Enter todo text:');
+                if (!todoText) return;
+                
+                const newTodo = {
+                    id: 'todo_' + Date.now(),
+                    text: todoText,
+                    completed: false,
+                    category: 'test',
+                    created_at: new Date().toISOString()
+                };
+                
+                try {
+                    await window.supabase.insert('todos', newTodo);
+                    console.log('✅ Todo added to cloud:', todoText);
+                    
+                    // Refresh display
+                    const todos = await window.supabase.select('todos');
+                    renderCloudTodos(todos);
+                } catch (error) {
+                    console.error('❌ Failed to add todo:', error);
+                }
+            });
+        }
+        
+        async function syncTodoChange(todoId, checked) {
+            try {
+                await window.supabase.update('todos', { completed: checked }, todoId);
+                console.log(`☁️ Todo synced: ${todoId} = ${checked}`);
+                
+                // Update UI
+                const checkboxes = document.querySelectorAll(`[data-cloud-id="${todoId}"]`);
+                checkboxes.forEach(cb => {
+                    cb.checked = checked;
+                    const label = cb.nextElementSibling;
+                    if (label) {
+                        label.style.textDecoration = checked ? 'line-through' : '';
+                        label.style.color = checked ? '#999' : '';
+                    }
+                });
+            } catch (error) {
+                console.error('❌ Sync failed:', error);
+            }
+        }
     </script>
 </body>
 </html>
