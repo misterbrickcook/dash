@@ -445,8 +445,11 @@
                     }
                 }
                 
-                // Update streak counters
-                updateRoutineStreaks();
+                // Update streak counters instantly (optimistic UI)
+                updateStreakInstantly(templateId, completed);
+                
+                // Also do full recalculation in background
+                setTimeout(() => updateRoutineStreaks(), 200);
                 
             } catch (error) {
                 console.error('❌ Routine sync failed:', error);
@@ -564,9 +567,39 @@
         // Initialize streaks on page load
         async function initializeStreaks() {
             await updateRoutineStreaks();
+        }
+        
+        function updateStreakInstantly(templateId, completed) {
+            // Get current streak values
+            const morningStreakEl = document.getElementById('morningRoutineStreakCount');
+            const eveningStreakEl = document.getElementById('eveningRoutineStreakCount');
             
-            // Update streaks every time a routine is completed
-            // This ensures real-time streak updates
+            // Determine which routine type this template belongs to
+            const checkbox = document.querySelector(`[data-template-id="${templateId}"]`);
+            const routineType = checkbox?.getAttribute('data-routine-type');
+            
+            if (!routineType) return;
+            
+            // Check if all items of this routine type are now completed
+            const allCheckboxes = document.querySelectorAll(`[data-routine-type="${routineType}"]`);
+            let allCompleted = true;
+            allCheckboxes.forEach(cb => {
+                if (!cb.checked) allCompleted = false;
+            });
+            
+            // Update streak counter instantly
+            const streakEl = routineType === 'morning' ? morningStreakEl : eveningStreakEl;
+            const currentStreak = parseInt(streakEl.textContent) || 0;
+            
+            if (completed && allCompleted) {
+                // All items completed - increment streak
+                streakEl.textContent = currentStreak + 1;
+                console.log(`⚡ Instant streak update: ${routineType} +1`);
+            } else if (!completed && currentStreak > 0) {
+                // Item unchecked - decrement streak  
+                streakEl.textContent = Math.max(0, currentStreak - 1);
+                console.log(`⚡ Instant streak update: ${routineType} -1`);
+            }
         }
     </script>
 </body>
