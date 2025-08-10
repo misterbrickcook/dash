@@ -56,10 +56,10 @@
                     </div>
                 </div>
                 
-                <!-- Routines will be loaded here -->
+                <!-- Cloud-synced routines -->
                 <div class="checkbox-group" id="current-routine">
-                    <div style="text-align: center; padding: 1rem; color: #666;">
-                        ⏳ Loading routines...
+                    <div class="loading-placeholder" style="text-align: center; padding: 1rem; color: #666;">
+                        ☁️ Loading routines from cloud...
                     </div>
                 </div>
             </section>
@@ -198,9 +198,11 @@
             const connected = initializeSupabase();
             
             if (connected && window.supabase) {
-                console.log('✅ Database connected - loading todos...');
+                console.log('✅ Database connected - loading data...');
                 await loadAndRenderTodos();
+                await loadAndRenderRoutines();
                 setupTodoButtons();
+                setupRoutineToggles();
             }
             
             // Initialize Lucide icons
@@ -331,6 +333,156 @@
             } catch (error) {
                 console.error('❌ Sync failed:', error);
             }
+        }
+        
+        // === ROUTINES SYSTEM ===
+        let currentRoutineType = 'morning';
+        
+        async function loadAndRenderRoutines() {
+            try {
+                // Load routine templates
+                const templates = await window.supabase.select('routine_templates', '*');
+                console.log(`📊 Loaded ${templates?.length || 0} routine templates`);
+                
+                if (templates && templates.length > 0) {
+                    await renderCurrentRoutine(currentRoutineType);
+                } else {
+                    document.getElementById('current-routine').innerHTML = 
+                        '<div style="text-align: center; color: #666; padding: 1rem;">No routines configured</div>';
+                }
+            } catch (error) {
+                console.error('❌ Failed to load routines:', error);
+            }
+        }
+        
+        async function renderCurrentRoutine(routineType) {
+            try {
+                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+                
+                // Get templates for this routine type
+                const templates = await window.supabase.query(
+                    `routine_templates?routine_type=eq.${routineType}&active=eq.true&order=order_index`
+                );
+                
+                if (!templates || templates.length === 0) {
+                    document.getElementById('current-routine').innerHTML = 
+                        `<div style="text-align: center; color: #666; padding: 1rem;">No ${routineType} routine configured</div>`;
+                    return;
+                }
+                
+                // Get today's completions for these templates
+                const completions = await window.supabase.query(
+                    `routine_completions?date=eq.${today}`
+                );
+                
+                const completionMap = {};
+                if (completions) {
+                    completions.forEach(comp => {
+                        completionMap[comp.template_id] = comp.completed;
+                    });
+                }
+                
+                // Render routine items
+                const routineContainer = document.getElementById('current-routine');
+                routineContainer.innerHTML = '';
+                
+                templates.forEach(template => {
+                    const isCompleted = completionMap[template.id] || false;
+                    const routineHTML = `
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${isCompleted ? 'checked' : ''} 
+                                   data-template-id="${template.id}" data-routine-type="${routineType}"
+                                   onchange="syncRoutineChange('${template.id}', this.checked)">
+                            <label style="${isCompleted ? 'text-decoration: line-through; color: #999;' : ''}">${template.text}</label>
+                        </div>
+                    `;
+                    routineContainer.insertAdjacentHTML('beforeend', routineHTML);
+                });
+                
+                console.log(`✅ Rendered ${templates.length} ${routineType} routine items`);
+                
+            } catch (error) {
+                console.error('❌ Failed to render routine:', error);
+            }
+        }
+        
+        async function syncRoutineChange(templateId, completed) {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                // Check if completion record exists
+                const existing = await window.supabase.query(
+                    `routine_completions?template_id=eq.${templateId}&date=eq.${today}`
+                );
+                
+                if (existing && existing.length > 0) {
+                    // Update existing
+                    await window.supabase.update('routine_completions', 
+                        { completed: completed }, 
+                        existing[0].id
+                    );
+                } else {
+                    // Create new completion record
+                    const newCompletion = {
+                        id: `completion_${templateId}_${today}`,
+                        template_id: templateId,
+                        date: today,
+                        completed: completed
+                    };
+                    await window.supabase.insert('routine_completions', newCompletion);
+                }
+                
+                console.log(`☁️ Routine synced: ${templateId} = ${completed}`);
+                
+                // Update UI
+                const checkbox = document.querySelector(`[data-template-id="${templateId}"]`);
+                if (checkbox) {
+                    const label = checkbox.nextElementSibling;
+                    if (label) {
+                        label.style.textDecoration = completed ? 'line-through' : '';
+                        label.style.color = completed ? '#999' : '';
+                    }
+                }
+                
+                // Update streak counters
+                updateRoutineStreaks();
+                
+            } catch (error) {
+                console.error('❌ Routine sync failed:', error);
+            }
+        }
+        
+        function setupRoutineToggles() {
+            const morningToggle = document.querySelector('[data-routine="morning"]');
+            const eveningToggle = document.querySelector('[data-routine="evening"]');
+            const routineTitle = document.getElementById('routine-title');
+            
+            morningToggle?.addEventListener('click', async () => {
+                currentRoutineType = 'morning';
+                routineTitle.textContent = '☀️ Morgenroutine';
+                
+                // Update toggle states
+                morningToggle.classList.add('active');
+                eveningToggle?.classList.remove('active');
+                
+                await renderCurrentRoutine('morning');
+            });
+            
+            eveningToggle?.addEventListener('click', async () => {
+                currentRoutineType = 'evening';
+                routineTitle.textContent = '🌙 Abendroutine';
+                
+                // Update toggle states
+                eveningToggle.classList.add('active');
+                morningToggle?.classList.remove('active');
+                
+                await renderCurrentRoutine('evening');
+            });
+        }
+        
+        async function updateRoutineStreaks() {
+            // TODO: Implement streak calculation
+            console.log('📊 Updating routine streaks...');
         }
     </script>
 </body>
