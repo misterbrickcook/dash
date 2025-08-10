@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Test</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>TEST PAGE</h1>
+    <p>Wenn du das siehst, lädt CSS.</p>
+    <i data-lucide="home"></i>
+    <p>Wenn du ein Home-Icon siehst, funktionieren Lucide Icons.</p>
+    
+    <script>
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+            console.log('Lucide loaded successfully');
+        } else {
+            console.error('Lucide not loaded');
+        }
+    </script>
+</body>
+</html>
