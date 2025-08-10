@@ -221,6 +221,9 @@
                 setupTodoButtons();
                 setupRoutineToggles();
                 await initializeStreaks();
+            } else {
+                // Even without database, setup filter tabs
+                setupFilterTabs();
             }
             
             // Initialize Lucide icons
@@ -350,17 +353,15 @@
             });
         }
         
-        function setupTodoButtons() {
-            document.getElementById('add-todo-btn').addEventListener('click', addNewTodo);
-            document.getElementById('add-todo-btn-2').addEventListener('click', addNewTodo);
-            setupFilterTabs();
-        }
-        
         function setupFilterTabs() {
+            console.log('🔧 Setting up filter tabs...');
             const filterTabs = document.querySelectorAll('.filter-tab');
+            console.log(`Found ${filterTabs.length} filter tabs`);
+            
             filterTabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     const filter = tab.getAttribute('data-filter');
+                    console.log(`🔍 Filter clicked: ${filter}`);
                     
                     // Update active tab
                     filterTabs.forEach(t => {
@@ -379,9 +380,17 @@
                     currentFilter = filter;
                     
                     // Re-render todos with new filter
-                    loadAndRenderTodos();
+                    if (window.supabase) {
+                        loadAndRenderTodos();
+                    }
                 });
             });
+        }
+        
+        function setupTodoButtons() {
+            document.getElementById('add-todo-btn').addEventListener('click', addNewTodo);
+            document.getElementById('add-todo-btn-2').addEventListener('click', addNewTodo);
+            setupFilterTabs();
         }
         
         async function addNewTodo() {
