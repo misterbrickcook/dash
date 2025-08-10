@@ -358,17 +358,22 @@
             
             // Render completed todos (only in archive view)
             if (activeContainer) {
-                filteredCompletedTodos.forEach(todo => {
-                    const categoryIcon = getCategoryIcon(todo.category);
-                    const archivedHTML = `
-                        <div class="checkbox-item" style="opacity: 0.7;" data-category="${todo.category}">
-                            <input type="checkbox" checked disabled>
-                            <label style="text-decoration: line-through; color: #999;">${categoryIcon} ${todo.text}</label>
-                            <span style="margin-left: auto; color: #666; font-size: 0.8rem;">📁</span>
-                        </div>
-                    `;
-                    activeContainer.insertAdjacentHTML('beforeend', archivedHTML);
-                });
+                if (filteredCompletedTodos.length > 0) {
+                    filteredCompletedTodos.forEach(todo => {
+                        const categoryIcon = getCategoryIcon(todo.category);
+                        const archivedHTML = `
+                            <div class="checkbox-item" style="opacity: 0.7;" data-category="${todo.category}">
+                                <input type="checkbox" checked disabled>
+                                <label style="text-decoration: line-through; color: #999;">${categoryIcon} ${todo.text}</label>
+                                <span style="margin-left: auto; color: #666; font-size: 0.8rem;">📁</span>
+                            </div>
+                        `;
+                        activeContainer.insertAdjacentHTML('beforeend', archivedHTML);
+                    });
+                } else if (currentFilter === 'archiv') {
+                    // Show empty archive message
+                    activeContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">📁 Archiv ist leer</div>';
+                }
             }
             
             // Update section title
@@ -504,8 +509,13 @@
                 console.log(`🗑️ Cleared ${completedTodos.length} archived todos`);
                 alert(`${completedTodos.length} archivierte Todos wurden gelöscht.`);
                 
-                // Refresh display
+                // Refresh display - force reload from database
                 await loadAndRenderTodos();
+                
+                // Make sure we're still on archive view to see the result
+                if (currentFilter === 'archiv') {
+                    console.log('Archive cleared, staying on archive view');
+                }
                 
             } catch (error) {
                 console.error('❌ Failed to clear archive:', error);
