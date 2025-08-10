@@ -1230,6 +1230,15 @@
     <script>
         // Try to initialize Supabase on load
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔧 DOM loaded - testing navbar');
+            const navLinks = document.querySelectorAll('.nav-link');
+            console.log('📊 Found nav links:', navLinks.length);
+            
+            // Test first nav link
+            if (navLinks[0]) {
+                console.log('🎯 First nav link data-tab:', navLinks[0].getAttribute('data-tab'));
+            }
+            
             initializeSupabase();
         });
     </script>
