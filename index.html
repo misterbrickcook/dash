@@ -1262,24 +1262,38 @@
                         
                         console.log('✅ Cloud todos synced to local state!');
                         
-                        // Update checkboxes in real-time instead of reloading
+                        // Update checkboxes in real-time - find ALL instances
                         setTimeout(() => {
                             cloudTodos.forEach(todo => {
                                 if (todo.completed) {
-                                    // Find and check all instances of this todo
-                                    const checkboxes = document.querySelectorAll(`input[type="checkbox"]`);
-                                    checkboxes.forEach(cb => {
-                                        const label = cb.nextElementSibling;
-                                        if (label && label.textContent.trim() === todo.text) {
-                                            cb.checked = true;
-                                            label.style.textDecoration = 'line-through';
-                                            label.style.color = '#999';
-                                            console.log(`✅ Restored todo state: ${todo.text} = checked`);
+                                    console.log(`🔍 Looking for todo: "${todo.text}"`);
+                                    
+                                    // Find ALL instances of this todo text
+                                    const allLabels = document.querySelectorAll('label');
+                                    let found = 0;
+                                    
+                                    allLabels.forEach(label => {
+                                        const labelText = label.textContent.trim();
+                                        if (labelText === todo.text) {
+                                            const checkbox = label.previousElementSibling;
+                                            if (checkbox && checkbox.type === 'checkbox') {
+                                                checkbox.checked = true;
+                                                label.style.textDecoration = 'line-through';
+                                                label.style.color = '#999';
+                                                found++;
+                                                console.log(`✅ Restored: "${todo.text}" (instance ${found})`);
+                                            }
                                         }
                                     });
+                                    
+                                    if (found === 0) {
+                                        console.log(`❌ Todo not found in DOM: "${todo.text}"`);
+                                    } else {
+                                        console.log(`🎉 Restored ${found} instances of: "${todo.text}"`);
+                                    }
                                 }
                             });
-                        }, 2000); // Wait for page to fully load
+                        }, 3000); // Wait longer for full page load
                     } else {
                         console.log('📝 No cloud todos found - using local data');
                     }
