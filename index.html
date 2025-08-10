@@ -132,10 +132,29 @@
             <section class="card">
                 <div class="card-header">
                     <h2>🎯 Goals & Targets</h2>
+                    <button id="add-goal-btn" style="padding: 0.3rem 0.8rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                        + Add Goal
+                    </button>
                 </div>
                 
-                <div style="text-align: center; color: #666; padding: 2rem;">
-                    🚧 Goals system coming soon with cloud sync!
+                <div class="checkbox-group" id="active-goals">
+                    <div class="loading-placeholder" style="text-align: center; color: #666; padding: 1rem;">
+                        ☁️ Loading goals from cloud...
+                    </div>
+                </div>
+            </section>
+
+            <!-- Completed Goals -->
+            <section class="card" style="margin-top: 1rem;">
+                <div class="card-header">
+                    <h2>🏆 Completed Goals</h2>
+                    <small style="color: #666;">Achieved targets</small>
+                </div>
+                
+                <div class="checkbox-group" id="completed-goals">
+                    <div style="text-align: center; color: #666; padding: 1rem;">
+                        🏆 Completed goals will appear here
+                    </div>
                 </div>
             </section>
         </div>
@@ -213,8 +232,10 @@
             if (connected && window.supabase) {
                 console.log('✅ Database connected - loading data...');
                 await loadAndRenderTodos();
+                await loadAndRenderGoals();
                 await loadAndRenderRoutines();
                 setupTodoButtons();
+                setupGoalButtons();
                 setupRoutineToggles();
                 await initializeStreaks();
             } else {
@@ -435,6 +456,110 @@
                 await loadAndRenderTodos(); // Refresh
             } catch (error) {
                 console.error('❌ Failed to add todo:', error);
+            }
+        }
+        
+        // === GOALS SYSTEM ===
+        async function loadAndRenderGoals() {
+            try {
+                const goals = await window.supabase.select('goals');
+                console.log(`📊 Loaded ${goals?.length || 0} goals from cloud`);
+                
+                if (goals && goals.length > 0) {
+                    renderGoals(goals);
+                } else {
+                    clearGoalLoadingMessages();
+                }
+            } catch (error) {
+                console.error('❌ Failed to load goals:', error);
+            }
+        }
+        
+        function renderGoals(goals) {
+            const activeContainer = document.getElementById('active-goals');
+            const completedContainer = document.getElementById('completed-goals');
+            
+            // Clear containers
+            activeContainer.innerHTML = '';
+            completedContainer.innerHTML = '';
+            
+            const activeGoals = goals.filter(g => !g.completed);
+            const completedGoals = goals.filter(g => g.completed);
+            
+            // Render active goals
+            activeGoals.forEach(goal => {
+                const goalHTML = `
+                    <div class="checkbox-item">
+                        <input type="checkbox" data-cloud-id="${goal.id}" onchange="syncGoalChange('${goal.id}', this.checked)">
+                        <label>🎯 ${goal.title}</label>
+                        <span class="goal-category" style="margin-left: auto; color: #666; font-size: 0.7rem; text-transform: uppercase;">${goal.category || 'general'}</span>
+                    </div>
+                `;
+                activeContainer.insertAdjacentHTML('beforeend', goalHTML);
+            });
+            
+            // Render completed goals
+            completedGoals.forEach(goal => {
+                const completedHTML = `
+                    <div class="checkbox-item" style="opacity: 0.7;">
+                        <input type="checkbox" checked disabled>
+                        <label style="text-decoration: line-through; color: #999;">🏆 ${goal.title}</label>
+                        <span style="margin-left: auto; color: #666; font-size: 0.8rem;">✅</span>
+                    </div>
+                `;
+                completedContainer.insertAdjacentHTML('beforeend', completedHTML);
+            });
+            
+            console.log(`✅ Rendered ${activeGoals.length} active, ${completedGoals.length} completed goals`);
+        }
+        
+        function clearGoalLoadingMessages() {
+            const activeContainer = document.getElementById('active-goals');
+            if (activeContainer) {
+                activeContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">No goals yet - click + to add one!</div>';
+            }
+        }
+        
+        function setupGoalButtons() {
+            document.getElementById('add-goal-btn').addEventListener('click', addNewGoal);
+        }
+        
+        async function addNewGoal() {
+            const goalTitle = prompt('Enter goal title:');
+            if (!goalTitle) return;
+            
+            const goalCategory = prompt('Enter category (optional):') || 'general';
+            
+            const newGoal = {
+                id: 'goal_' + Date.now(),
+                title: goalTitle,
+                description: '',
+                category: goalCategory,
+                completed: false,
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                await window.supabase.insert('goals', newGoal);
+                console.log(`✅ Goal added to cloud: ${goalTitle}`);
+                await loadAndRenderGoals(); // Refresh
+            } catch (error) {
+                console.error('❌ Failed to add goal:', error);
+            }
+        }
+        
+        async function syncGoalChange(goalId, checked) {
+            try {
+                await window.supabase.update('goals', { completed: checked }, goalId);
+                console.log(`☁️ Goal synced: ${goalId} = ${checked}`);
+                
+                // Refresh display
+                setTimeout(async () => {
+                    await loadAndRenderGoals();
+                }, 300);
+                
+            } catch (error) {
+                console.error('❌ Goal sync failed:', error);
             }
         }
         
