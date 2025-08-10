@@ -84,12 +84,29 @@
 
         <!-- === ✅ TODOS TAB === -->
         <div class="tab-content" id="todos">
+            <!-- Todo Filter Tabs -->
+            <div class="filter-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; padding: 0 1rem;">
+                <button class="filter-tab active" data-filter="alle" style="padding: 0.5rem 1rem; border: none; border-radius: 20px; background: #007bff; color: white; cursor: pointer; font-size: 0.8rem;">Alle</button>
+                <button class="filter-tab" data-filter="heute" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">Heute</button>
+                <button class="filter-tab" data-filter="privat" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">Privat</button>
+                <button class="filter-tab" data-filter="uni" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">Uni</button>
+                <button class="filter-tab" data-filter="arbeit" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 20px; background: white; color: #666; cursor: pointer; font-size: 0.8rem;">Arbeit</button>
+            </div>
+            
             <section class="card">
                 <div class="card-header">
-                    <h2>Active Todos</h2>
-                    <button id="add-todo-btn-2" style="padding: 0.3rem 0.8rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
-                        + Add Todo
-                    </button>
+                    <h2 id="todos-section-title">Active Todos</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select id="todo-category-select" style="padding: 0.3rem 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.8rem;">
+                            <option value="heute">Heute</option>
+                            <option value="privat">Privat</option>
+                            <option value="uni">Uni</option>
+                            <option value="arbeit">Arbeit</option>
+                        </select>
+                        <button id="add-todo-btn-2" style="padding: 0.3rem 0.8rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                            + Add Todo
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="checkbox-group" id="active-todos">
@@ -249,6 +266,8 @@
             }
         }
         
+        let currentFilter = 'alle';
+        
         function renderTodos(todos) {
             const homeContainer = document.getElementById('home-todos');
             const activeContainer = document.getElementById('active-todos');
@@ -262,31 +281,67 @@
             const activeTodos = todos.filter(t => !t.completed);
             const completedTodos = todos.filter(t => t.completed);
             
-            // Render active todos
-            activeTodos.forEach(todo => {
+            // Filter todos based on current filter
+            const filteredActiveTodos = currentFilter === 'alle' 
+                ? activeTodos 
+                : activeTodos.filter(t => t.category === currentFilter);
+            
+            // Render active todos (filtered)
+            filteredActiveTodos.forEach(todo => {
+                const categoryIcon = getCategoryIcon(todo.category);
                 const todoHTML = `
-                    <div class="checkbox-item">
+                    <div class="checkbox-item" data-category="${todo.category}">
                         <input type="checkbox" data-cloud-id="${todo.id}" onchange="syncTodoChange('${todo.id}', this.checked)">
-                        <label>${todo.text}</label>
+                        <label>${categoryIcon} ${todo.text}</label>
+                        <span class="todo-category" style="margin-left: auto; color: #666; font-size: 0.7rem; text-transform: uppercase;">${todo.category}</span>
+                    </div>
+                `;
+                activeContainer.insertAdjacentHTML('beforeend', todoHTML);
+            });
+            
+            // Render home todos (heute category only)
+            const heuteTodos = activeTodos.filter(t => t.category === 'heute');
+            heuteTodos.forEach(todo => {
+                const categoryIcon = getCategoryIcon(todo.category);
+                const todoHTML = `
+                    <div class="checkbox-item" data-category="${todo.category}">
+                        <input type="checkbox" data-cloud-id="${todo.id}" onchange="syncTodoChange('${todo.id}', this.checked)">
+                        <label>${categoryIcon} ${todo.text}</label>
                     </div>
                 `;
                 homeContainer.insertAdjacentHTML('beforeend', todoHTML);
-                activeContainer.insertAdjacentHTML('beforeend', todoHTML);
             });
             
             // Render completed todos
             completedTodos.forEach(todo => {
+                const categoryIcon = getCategoryIcon(todo.category);
                 const archivedHTML = `
-                    <div class="checkbox-item" style="opacity: 0.7;">
+                    <div class="checkbox-item" style="opacity: 0.7;" data-category="${todo.category}">
                         <input type="checkbox" checked disabled>
-                        <label style="text-decoration: line-through; color: #999;">${todo.text}</label>
+                        <label style="text-decoration: line-through; color: #999;">${categoryIcon} ${todo.text}</label>
                         <span style="margin-left: auto; color: #666; font-size: 0.8rem;">📁</span>
                     </div>
                 `;
                 archivedContainer.insertAdjacentHTML('beforeend', archivedHTML);
             });
             
-            console.log(`✅ Rendered ${activeTodos.length} active, ${completedTodos.length} completed todos`);
+            // Update section title
+            const titleEl = document.getElementById('todos-section-title');
+            if (titleEl) {
+                titleEl.textContent = currentFilter === 'alle' ? 'Active Todos' : `${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)} Todos`;
+            }
+            
+            console.log(`✅ Rendered ${filteredActiveTodos.length} active (${currentFilter}), ${completedTodos.length} completed todos`);
+        }
+        
+        function getCategoryIcon(category) {
+            const icons = {
+                'heute': '📅',
+                'privat': '🏠',
+                'uni': '🎓',
+                'arbeit': '💼'
+            };
+            return icons[category] || '📝';
         }
         
         function clearLoadingMessages() {
@@ -298,23 +353,56 @@
         function setupTodoButtons() {
             document.getElementById('add-todo-btn').addEventListener('click', addNewTodo);
             document.getElementById('add-todo-btn-2').addEventListener('click', addNewTodo);
+            setupFilterTabs();
+        }
+        
+        function setupFilterTabs() {
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const filter = tab.getAttribute('data-filter');
+                    
+                    // Update active tab
+                    filterTabs.forEach(t => {
+                        t.classList.remove('active');
+                        t.style.background = 'white';
+                        t.style.color = '#666';
+                        t.style.border = '1px solid #ddd';
+                    });
+                    
+                    tab.classList.add('active');
+                    tab.style.background = '#007bff';
+                    tab.style.color = 'white';
+                    tab.style.border = 'none';
+                    
+                    // Update current filter and re-render
+                    currentFilter = filter;
+                    
+                    // Re-render todos with new filter
+                    loadAndRenderTodos();
+                });
+            });
         }
         
         async function addNewTodo() {
             const todoText = prompt('Enter todo text:');
             if (!todoText) return;
             
+            // Get selected category
+            const categorySelect = document.getElementById('todo-category-select');
+            const selectedCategory = categorySelect ? categorySelect.value : 'heute';
+            
             const newTodo = {
                 id: 'todo_' + Date.now(),
                 text: todoText,
                 completed: false,
-                category: 'general',
+                category: selectedCategory,
                 created_at: new Date().toISOString()
             };
             
             try {
                 await window.supabase.insert('todos', newTodo);
-                console.log('✅ Todo added to cloud:', todoText);
+                console.log(`✅ Todo added to cloud (${selectedCategory}):`, todoText);
                 await loadAndRenderTodos(); // Refresh
             } catch (error) {
                 console.error('❌ Failed to add todo:', error);
