@@ -555,8 +555,9 @@
             // Add modal to page
             document.body.insertAdjacentHTML('beforeend', modalHTML);
             
-            // Set default date to today
+            // Set default date to today and time to 20:00
             document.getElementById('todo-date-input').value = new Date().toISOString().split('T')[0];
+            document.getElementById('todo-time-input').value = '20:00';
             
             // Focus on text input
             document.getElementById('todo-text-input').focus();
