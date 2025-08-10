@@ -286,12 +286,10 @@
         function renderTodos(todos) {
             const homeContainer = document.getElementById('home-todos');
             const activeContainer = document.getElementById('active-todos');
-            const archivedContainer = document.getElementById('archived-todos');
             
             // Clear containers
-            homeContainer.innerHTML = '';
-            activeContainer.innerHTML = '';
-            archivedContainer.innerHTML = '';
+            if (homeContainer) homeContainer.innerHTML = '';
+            if (activeContainer) activeContainer.innerHTML = '';
             
             const activeTodos = todos.filter(t => !t.completed);
             const completedTodos = todos.filter(t => t.completed);
@@ -324,30 +322,34 @@
             });
             
             // Render home todos (heute category only)
-            const heuteTodos = activeTodos.filter(t => t.category === 'heute');
-            heuteTodos.forEach(todo => {
-                const categoryIcon = getCategoryIcon(todo.category);
-                const todoHTML = `
-                    <div class="checkbox-item" data-category="${todo.category}">
-                        <input type="checkbox" data-cloud-id="${todo.id}" onchange="syncTodoChange('${todo.id}', this.checked)">
-                        <label>${categoryIcon} ${todo.text}</label>
-                    </div>
-                `;
-                homeContainer.insertAdjacentHTML('beforeend', todoHTML);
-            });
+            if (homeContainer) {
+                const heuteTodos = activeTodos.filter(t => t.category === 'heute');
+                heuteTodos.forEach(todo => {
+                    const categoryIcon = getCategoryIcon(todo.category);
+                    const todoHTML = `
+                        <div class="checkbox-item" data-category="${todo.category}">
+                            <input type="checkbox" data-cloud-id="${todo.id}" onchange="syncTodoChange('${todo.id}', this.checked)">
+                            <label>${categoryIcon} ${todo.text}</label>
+                        </div>
+                    `;
+                    homeContainer.insertAdjacentHTML('beforeend', todoHTML);
+                });
+            }
             
             // Render completed todos (only in archive view)
-            filteredCompletedTodos.forEach(todo => {
-                const categoryIcon = getCategoryIcon(todo.category);
-                const archivedHTML = `
-                    <div class="checkbox-item" style="opacity: 0.7;" data-category="${todo.category}">
-                        <input type="checkbox" checked disabled>
-                        <label style="text-decoration: line-through; color: #999;">${categoryIcon} ${todo.text}</label>
-                        <span style="margin-left: auto; color: #666; font-size: 0.8rem;">📁</span>
-                    </div>
-                `;
-                activeContainer.insertAdjacentHTML('beforeend', archivedHTML);
-            });
+            if (activeContainer) {
+                filteredCompletedTodos.forEach(todo => {
+                    const categoryIcon = getCategoryIcon(todo.category);
+                    const archivedHTML = `
+                        <div class="checkbox-item" style="opacity: 0.7;" data-category="${todo.category}">
+                            <input type="checkbox" checked disabled>
+                            <label style="text-decoration: line-through; color: #999;">${categoryIcon} ${todo.text}</label>
+                            <span style="margin-left: auto; color: #666; font-size: 0.8rem;">📁</span>
+                        </div>
+                    `;
+                    activeContainer.insertAdjacentHTML('beforeend', archivedHTML);
+                });
+            }
             
             // Update section title
             const titleEl = document.getElementById('todos-section-title');
