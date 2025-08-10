@@ -1230,18 +1230,41 @@
             // Initialize Supabase
             const connected = initializeSupabase();
             
-            // Test Supabase connection
+            // Test Supabase connection and database
             if (connected && window.supabase) {
-                console.log('🧪 Testing Supabase connection...');
+                console.log('🧪 Testing Supabase database...');
+                
+                // Test 1: Check todos table
                 try {
-                    // Test actual tables
                     const todos = await window.supabase.select('todos');
-                    const goals = await window.supabase.select('goals');
-                    console.log('✅ Found todos:', todos?.length || 0);
-                    console.log('✅ Found goals:', goals?.length || 0);
-                    console.log('🚀 Database tables are working!');
+                    console.log('📊 Database todos found:', todos ? todos.length : 0);
+                    if (todos && todos.length > 0) {
+                        console.log('📝 Sample todo:', todos[0]);
+                    }
                 } catch (error) {
-                    console.log('❌ Database error:', error.message);
+                    console.log('❌ Todos table error:', error);
+                }
+                
+                // Test 2: Check goals table  
+                try {
+                    const goals = await window.supabase.select('goals');
+                    console.log('🎯 Database goals found:', goals ? goals.length : 0);
+                    if (goals && goals.length > 0) {
+                        console.log('🎯 Sample goal:', goals[0]);
+                    }
+                } catch (error) {
+                    console.log('❌ Goals table error:', error);
+                }
+                
+                // Test 3: Try a simple insert test
+                try {
+                    const testInsert = await window.supabase.insert('sync_test', {
+                        id: Date.now(),
+                        checked: true
+                    });
+                    console.log('✅ Database write test successful');
+                } catch (error) {
+                    console.log('❌ Database write test failed:', error);
                 }
             }
         });
