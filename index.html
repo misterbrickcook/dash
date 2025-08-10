@@ -291,17 +291,24 @@
             const activeTodos = todos.filter(t => !t.completed);
             const completedTodos = todos.filter(t => t.completed);
             
-            // Filter todos based on current filter
+            // Filter todos based on current filter and handle overdue logic
             let filteredActiveTodos, filteredCompletedTodos;
             
+            // Process todos for overdue status and auto-categorization
+            const processedTodos = processTodosForToday(activeTodos);
+            
             if (currentFilter === 'alle') {
-                filteredActiveTodos = activeTodos;
+                filteredActiveTodos = processedTodos;
                 filteredCompletedTodos = [];  // Don't show completed in 'alle' view
             } else if (currentFilter === 'archiv') {
                 filteredActiveTodos = [];     // Don't show active in archive view
                 filteredCompletedTodos = completedTodos;
+            } else if (currentFilter === 'heute') {
+                // Show today's todos AND overdue todos
+                filteredActiveTodos = processedTodos.filter(t => t.category === 'heute');
+                filteredCompletedTodos = [];
             } else {
-                filteredActiveTodos = activeTodos.filter(t => t.category === currentFilter);
+                filteredActiveTodos = processedTodos.filter(t => t.category === currentFilter);
                 filteredCompletedTodos = []; // Don't show completed in category views
             }
             
@@ -316,7 +323,9 @@
                     const today = new Date();
                     const isToday = dueDate.toDateString() === today.toDateString();
                     
-                    if (isToday) {
+                    if (todo.isOverdue) {
+                        dueDateDisplay = `<small style="color: #dc3545; margin-left: 0.5rem; font-weight: bold;">⚠️ ÜBERFÄLLIG ${dueDate.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'})}</small>`;
+                    } else if (isToday) {
                         dueDateDisplay = `<small style="color: #17a2b8; margin-left: 0.5rem;">⏰ ${dueDate.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}</small>`;
                     } else {
                         dueDateDisplay = `<small style="color: #666; margin-left: 0.5rem;">📅 ${dueDate.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'})}</small>`;
@@ -333,21 +342,25 @@
                 activeContainer.insertAdjacentHTML('beforeend', todoHTML);
             });
             
-            // Render home todos (heute category only)
+            // Render home todos (heute category only, including overdue)
             if (homeContainer) {
-                const heuteTodos = activeTodos.filter(t => t.category === 'heute');
+                const heuteTodos = processedTodos.filter(t => t.category === 'heute');
                 heuteTodos.forEach(todo => {
                     const categoryIcon = getCategoryIcon(todo.category);
                     
-                    // Format due time for home display (only show time, not date)
+                    // Format due time for home display
                     let dueDateDisplay = '';
                     if (todo.due_date) {
                         const dueDate = new Date(todo.due_date);
-                        dueDateDisplay = `<small style="color: #17a2b8; margin-left: 0.5rem;">⏰ ${dueDate.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}</small>`;
+                        if (todo.isOverdue) {
+                            dueDateDisplay = `<small style="color: #dc3545; margin-left: 0.5rem; font-weight: bold;">⚠️ ÜBERFÄLLIG</small>`;
+                        } else {
+                            dueDateDisplay = `<small style="color: #17a2b8; margin-left: 0.5rem;">⏰ ${dueDate.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}</small>`;
+                        }
                     }
                     
                     const todoHTML = `
-                        <div class="checkbox-item" data-category="${todo.category}">
+                        <div class="checkbox-item" data-category="${todo.category}" ${todo.isOverdue ? 'style="border-left: 3px solid #dc3545; padding-left: 0.5rem;"' : ''}>
                             <input type="checkbox" data-cloud-id="${todo.id}" onchange="syncTodoChange('${todo.id}', this.checked)">
                             <label>${categoryIcon} ${todo.text}${dueDateDisplay}</label>
                         </div>
@@ -399,6 +412,29 @@
                 'arbeit': '💼'
             };
             return icons[category] || '📝';
+        }
+        
+        function processTodosForToday(todos) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Start of today
+            
+            return todos.map(todo => {
+                const processedTodo = { ...todo };
+                
+                // Check if todo has a due date and is overdue
+                if (todo.due_date) {
+                    const dueDate = new Date(todo.due_date);
+                    dueDate.setHours(0, 0, 0, 0); // Start of due date
+                    
+                    // If due date is before today, mark as overdue and categorize as 'heute'
+                    if (dueDate < today) {
+                        processedTodo.isOverdue = true;
+                        processedTodo.category = 'heute'; // Move overdue todos to 'heute' category
+                    }
+                }
+                
+                return processedTodo;
+            });
         }
         
         function clearLoadingMessages() {
