@@ -203,6 +203,7 @@
                 await loadAndRenderRoutines();
                 setupTodoButtons();
                 setupRoutineToggles();
+                await initializeStreaks();
             }
             
             // Initialize Lucide icons
@@ -481,8 +482,91 @@
         }
         
         async function updateRoutineStreaks() {
-            // TODO: Implement streak calculation
-            console.log('📊 Updating routine streaks...');
+            try {
+                console.log('📊 Calculating routine streaks...');
+                
+                const today = new Date();
+                const currentMonth = today.getMonth();
+                const currentYear = today.getFullYear();
+                const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                                   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+                
+                // Calculate morning routine streak for current month
+                const morningStreak = await calculateMonthlyRoutineStreak('morning', currentYear, currentMonth);
+                const eveningStreak = await calculateMonthlyRoutineStreak('evening', currentYear, currentMonth);
+                
+                // Update UI
+                document.getElementById('morningRoutineStreakCount').textContent = morningStreak;
+                document.getElementById('morningRoutineStreakDate').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                
+                document.getElementById('eveningRoutineStreakCount').textContent = eveningStreak;
+                document.getElementById('eveningRoutineStreakDate').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                
+                console.log(`✅ Updated streaks: Morning ${morningStreak}, Evening ${eveningStreak}`);
+                
+            } catch (error) {
+                console.error('❌ Failed to update streaks:', error);
+            }
+        }
+        
+        async function calculateMonthlyRoutineStreak(routineType, year, month) {
+            try {
+                // Get first and last day of month
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const today = new Date();
+                
+                // Only count up to today if we're in current month
+                const endDate = (year === today.getFullYear() && month === today.getMonth()) 
+                    ? today : lastDay;
+                
+                let completedDays = 0;
+                
+                // Check each day in the month (up to today)
+                for (let day = 1; day <= endDate.getDate(); day++) {
+                    const checkDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    
+                    // Get all templates for this routine type
+                    const templates = await window.supabase.query(
+                        `routine_templates?routine_type=eq.${routineType}&active=eq.true`
+                    );
+                    
+                    if (!templates || templates.length === 0) continue;
+                    
+                    // Get completions for this day
+                    const completions = await window.supabase.query(
+                        `routine_completions?date=eq.${checkDate}`
+                    );
+                    
+                    // Check if ALL routine items for this type were completed
+                    let allCompleted = true;
+                    for (const template of templates) {
+                        const completion = completions?.find(c => c.template_id === template.id);
+                        if (!completion || !completion.completed) {
+                            allCompleted = false;
+                            break;
+                        }
+                    }
+                    
+                    if (allCompleted) {
+                        completedDays++;
+                    }
+                }
+                
+                return completedDays;
+                
+            } catch (error) {
+                console.error(`❌ Failed to calculate ${routineType} streak:`, error);
+                return 0;
+            }
+        }
+        
+        // Initialize streaks on page load
+        async function initializeStreaks() {
+            await updateRoutineStreaks();
+            
+            // Update streaks every time a routine is completed
+            // This ensures real-time streak updates
         }
     </script>
 </body>
