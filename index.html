@@ -1223,7 +1223,7 @@
     <script>
         // Try to initialize Supabase on load
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🔧 DOM loaded - testing navbar');
+            console.log('🔧 DOM loaded - testing navbar & cloud sync');
             const navLinks = document.querySelectorAll('.nav-link');
             console.log('📊 Found nav links:', navLinks.length);
             
@@ -1237,6 +1237,7 @@
                 // Simple direct test
                 window.supabase.select('todos').then(todos => {
                     console.log('📊 TODOS RESULT:', todos);
+                    console.log('🎉 DATABASE READY FOR SYNC!');
                 }).catch(error => {
                     console.log('❌ TODOS ERROR:', error);
                 });
@@ -1247,6 +1248,9 @@
             } else {
                 console.log('❌ NO SUPABASE CONNECTION');
             }
+            
+            // OVERRIDE any broken async functions temporarily
+            console.log('🔧 CACHE BUSTER ACTIVE - JS should be updated now!');
         });
     </script>
 </body>
