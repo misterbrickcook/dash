@@ -112,19 +112,7 @@
                 </div>
             </section>
 
-            <!-- Archived Section -->
-            <section class="card" style="margin-top: 1rem;">
-                <div class="card-header">
-                    <h2>📁 Completed Todos</h2>
-                    <small style="color: #666;">Auto-archived</small>
-                </div>
-                
-                <div class="checkbox-group" id="archived-todos">
-                    <div style="text-align: center; color: #666; padding: 1rem;">
-                        📁 Completed todos will appear here
-                    </div>
-                </div>
-            </section>
+            <!-- Note: Archived todos now available via "Archiv" filter tab -->
         </div>
 
         <!-- === 🎯 ZIELE TAB === -->
@@ -309,9 +297,18 @@
             const completedTodos = todos.filter(t => t.completed);
             
             // Filter todos based on current filter
-            const filteredActiveTodos = currentFilter === 'alle' 
-                ? activeTodos 
-                : activeTodos.filter(t => t.category === currentFilter);
+            let filteredActiveTodos, filteredCompletedTodos;
+            
+            if (currentFilter === 'alle') {
+                filteredActiveTodos = activeTodos;
+                filteredCompletedTodos = [];  // Don't show completed in 'alle' view
+            } else if (currentFilter === 'archiv') {
+                filteredActiveTodos = [];     // Don't show active in archive view
+                filteredCompletedTodos = completedTodos;
+            } else {
+                filteredActiveTodos = activeTodos.filter(t => t.category === currentFilter);
+                filteredCompletedTodos = []; // Don't show completed in category views
+            }
             
             // Render active todos (filtered)
             filteredActiveTodos.forEach(todo => {
@@ -339,8 +336,8 @@
                 homeContainer.insertAdjacentHTML('beforeend', todoHTML);
             });
             
-            // Render completed todos
-            completedTodos.forEach(todo => {
+            // Render completed todos (only in archive view)
+            filteredCompletedTodos.forEach(todo => {
                 const categoryIcon = getCategoryIcon(todo.category);
                 const archivedHTML = `
                     <div class="checkbox-item" style="opacity: 0.7;" data-category="${todo.category}">
@@ -349,16 +346,22 @@
                         <span style="margin-left: auto; color: #666; font-size: 0.8rem;">📁</span>
                     </div>
                 `;
-                archivedContainer.insertAdjacentHTML('beforeend', archivedHTML);
+                activeContainer.insertAdjacentHTML('beforeend', archivedHTML);
             });
             
             // Update section title
             const titleEl = document.getElementById('todos-section-title');
             if (titleEl) {
-                titleEl.textContent = currentFilter === 'alle' ? 'Active Todos' : `${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)} Todos`;
+                if (currentFilter === 'alle') {
+                    titleEl.textContent = 'Active Todos';
+                } else if (currentFilter === 'archiv') {
+                    titleEl.textContent = '📁 Archived Todos';
+                } else {
+                    titleEl.textContent = `${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)} Todos`;
+                }
             }
             
-            console.log(`✅ Rendered ${filteredActiveTodos.length} active (${currentFilter}), ${completedTodos.length} completed todos`);
+            console.log(`✅ Rendered ${filteredActiveTodos.length} active, ${filteredCompletedTodos.length} completed (${currentFilter})`);
         }
         
         function getCategoryIcon(category) {
@@ -392,7 +395,8 @@
                 { id: 'heute', label: 'Heute', icon: '📅' },
                 { id: 'privat', label: 'Privat', icon: '🏠' },
                 { id: 'uni', label: 'Uni', icon: '🎓' },
-                { id: 'arbeit', label: 'Arbeit', icon: '💼' }
+                { id: 'arbeit', label: 'Arbeit', icon: '💼' },
+                { id: 'archiv', label: 'Archiv', icon: '📁' }
             ];
             
             // Clear and rebuild filter tabs
