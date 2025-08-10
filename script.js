@@ -4289,7 +4289,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     initializeMonthlyOverviewHover();
     
     // Initialize routine reset system
-    await initializeRoutineReset();
+    initializeRoutineReset();
     
     // Debug function for manual testing
     window.debugAnalytics = function() {
