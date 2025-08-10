@@ -1262,12 +1262,24 @@
                         
                         console.log('✅ Cloud todos synced to local state!');
                         
-                        // Refresh UI
+                        // Update checkboxes in real-time instead of reloading
                         setTimeout(() => {
-                            if (window.location.hash || !window.location.hash) {
-                                window.location.reload();
-                            }
-                        }, 1000);
+                            cloudTodos.forEach(todo => {
+                                if (todo.completed) {
+                                    // Find and check all instances of this todo
+                                    const checkboxes = document.querySelectorAll(`input[type="checkbox"]`);
+                                    checkboxes.forEach(cb => {
+                                        const label = cb.nextElementSibling;
+                                        if (label && label.textContent.trim() === todo.text) {
+                                            cb.checked = true;
+                                            label.style.textDecoration = 'line-through';
+                                            label.style.color = '#999';
+                                            console.log(`✅ Restored todo state: ${todo.text} = checked`);
+                                        }
+                                    });
+                                }
+                            });
+                        }, 2000); // Wait for page to fully load
                     } else {
                         console.log('📝 No cloud todos found - using local data');
                     }
