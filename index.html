@@ -696,6 +696,18 @@
             }
         }
         
+        function getCategoryIconGoal(category) {
+            const icons = {
+                'personal': '🌱',
+                'career': '💼',
+                'health': '💪',
+                'finance': '💰',
+                'education': '📚',
+                'other': '🎯'
+            };
+            return icons[category] || '🎯';
+        }
+        
         function renderGoals(goals) {
             const activeContainer = document.getElementById('active-goals');
             const completedContainer = document.getElementById('completed-goals');
@@ -707,13 +719,40 @@
             const activeGoals = goals.filter(g => !g.completed);
             const completedGoals = goals.filter(g => g.completed);
             
-            // Render active goals
+            // Render active goals as cards
             activeGoals.forEach(goal => {
+                const categoryIcon = getCategoryIconGoal(goal.category);
+                
+                // Format target date if available
+                let targetDateDisplay = '';
+                if (goal.target_date) {
+                    const targetDate = new Date(goal.target_date);
+                    const today = new Date();
+                    const isOverdue = targetDate < today;
+                    
+                    if (isOverdue) {
+                        targetDateDisplay = `<div style="color: #dc3545; font-size: 0.8rem; margin-top: 0.5rem;">⚠️ Überfällig: ${targetDate.toLocaleDateString('de-DE')}</div>`;
+                    } else {
+                        targetDateDisplay = `<div style="color: #666; font-size: 0.8rem; margin-top: 0.5rem;">🎯 Ziel: ${targetDate.toLocaleDateString('de-DE')}</div>`;
+                    }
+                }
+                
                 const goalHTML = `
-                    <div class="checkbox-item">
-                        <input type="checkbox" data-cloud-id="${goal.id}" onchange="syncGoalChange('${goal.id}', this.checked)">
-                        <label>🎯 ${goal.title}</label>
-                        <span class="goal-category" style="margin-left: auto; color: #666; font-size: 0.7rem; text-transform: uppercase;">${goal.category || 'general'}</span>
+                    <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <input type="checkbox" data-cloud-id="${goal.id}" onchange="syncGoalChange('${goal.id}', this.checked)" style="margin-top: 0.2rem;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 1.2rem;">${categoryIcon}</span>
+                                    <h4 style="margin: 0; color: #333; font-size: 1rem;">${goal.title}</h4>
+                                </div>
+                                ${goal.description ? `<p style="margin: 0.5rem 0; color: #666; font-size: 0.9rem; line-height: 1.4;">${goal.description}</p>` : ''}
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                    <span style="background: #28a745; color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.7rem; text-transform: uppercase;">${goal.category}</span>
+                                    ${targetDateDisplay}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 `;
                 activeContainer.insertAdjacentHTML('beforeend', goalHTML);
@@ -721,11 +760,20 @@
             
             // Render completed goals
             completedGoals.forEach(goal => {
+                const categoryIcon = getCategoryIconGoal(goal.category);
                 const completedHTML = `
-                    <div class="checkbox-item" style="opacity: 0.7;">
-                        <input type="checkbox" checked disabled>
-                        <label style="text-decoration: line-through; color: #999;">🏆 ${goal.title}</label>
-                        <span style="margin-left: auto; color: #666; font-size: 0.8rem;">✅</span>
+                    <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: #f8f9fa; opacity: 0.7;">
+                        <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <input type="checkbox" checked disabled style="margin-top: 0.2rem;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 1.2rem;">🏆</span>
+                                    <h4 style="margin: 0; color: #666; font-size: 1rem; text-decoration: line-through;">${goal.title}</h4>
+                                </div>
+                                ${goal.description ? `<p style="margin: 0.5rem 0; color: #999; font-size: 0.9rem; text-decoration: line-through;">${goal.description}</p>` : ''}
+                                <span style="background: #6c757d; color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.7rem;">ERREICHT ✅</span>
+                            </div>
+                        </div>
                     </div>
                 `;
                 completedContainer.insertAdjacentHTML('beforeend', completedHTML);
@@ -745,17 +793,85 @@
             document.getElementById('add-goal-btn').addEventListener('click', addNewGoal);
         }
         
-        async function addNewGoal() {
-            const goalTitle = prompt('Enter goal title:');
-            if (!goalTitle) return;
+        function showAddGoalModal() {
+            // Create modal HTML
+            const modalHTML = `
+                <div id="goal-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                    <div style="background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 450px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                        <h3 style="margin: 0 0 1rem 0; color: #333;">🎯 Neues Ziel</h3>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555;">Titel:</label>
+                            <input type="text" id="goal-title-input" placeholder="Ziel-Titel..." autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555;">Beschreibung (optional):</label>
+                            <textarea id="goal-description-input" placeholder="Detaillierte Beschreibung..." autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; min-height: 80px; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555;">Kategorie:</label>
+                            <select id="goal-category-modal" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                                <option value="personal">🌱 Persönlich</option>
+                                <option value="career">💼 Karriere</option>
+                                <option value="health">💪 Gesundheit</option>
+                                <option value="finance">💰 Finanzen</option>
+                                <option value="education">📚 Bildung</option>
+                                <option value="other">🎯 Sonstiges</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555;">Ziel-Datum (optional):</label>
+                            <input type="date" id="goal-target-date-input" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            <button onclick="closeGoalModal()" style="padding: 0.5rem 1rem; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Abbrechen</button>
+                            <button onclick="saveGoal()" style="padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Speichern</button>
+                        </div>
+                    </div>
+                </div>
+            `;
             
-            const goalCategory = prompt('Enter category (optional):') || 'general';
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Focus on title input
+            document.getElementById('goal-title-input').focus();
+        }
+        
+        function closeGoalModal() {
+            const modal = document.getElementById('goal-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        async function saveGoal() {
+            const titleInput = document.getElementById('goal-title-input');
+            const descriptionInput = document.getElementById('goal-description-input');
+            const categoryInput = document.getElementById('goal-category-modal');
+            const targetDateInput = document.getElementById('goal-target-date-input');
+            
+            const goalTitle = titleInput.value.trim();
+            if (!goalTitle) {
+                alert('Bitte Ziel-Titel eingeben!');
+                titleInput.focus();
+                return;
+            }
+            
+            const description = descriptionInput.value.trim();
+            const category = categoryInput.value;
+            const targetDate = targetDateInput.value;
             
             const newGoal = {
                 id: 'goal_' + Date.now(),
                 title: goalTitle,
-                description: '',
-                category: goalCategory,
+                description: description,
+                category: category,
+                target_date: targetDate ? new Date(targetDate).toISOString() : null,
                 completed: false,
                 created_at: new Date().toISOString()
             };
@@ -763,10 +879,16 @@
             try {
                 await window.supabase.insert('goals', newGoal);
                 console.log(`✅ Goal added to cloud: ${goalTitle}`);
+                closeGoalModal();
                 await loadAndRenderGoals(); // Refresh
             } catch (error) {
                 console.error('❌ Failed to add goal:', error);
+                alert('Fehler beim Speichern des Ziels!');
             }
+        }
+        
+        async function addNewGoal() {
+            showAddGoalModal();
         }
         
         async function syncGoalChange(goalId, checked) {
