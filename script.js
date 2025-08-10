@@ -619,11 +619,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Save to cloud storage for cross-device sync
         if (window.cloudStorage) {
             try {
-                const todoData = todoState.getTodoData(sharedId);
+                const todoData = todoState.todos.get(sharedId);
                 if (todoData) {
-                    todoData.completed = checked;
-                    todoData.updated_at = new Date().toISOString();
-                    await window.cloudStorage.saveTodo(todoData);
+                    const cloudData = {
+                        id: sharedId,
+                        text: todoData.text,
+                        category: todoData.category,
+                        completed: checked,
+                        date: todoData.date || null,
+                        time: todoData.time || null,
+                        updated_at: new Date().toISOString()
+                    };
+                    await window.cloudStorage.saveTodo(cloudData);
                     console.log(`☁️ Todo synced to cloud: ${sharedId}`);
                 }
             } catch (error) {
