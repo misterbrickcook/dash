@@ -18,7 +18,21 @@ class CloudStorage {
         });
         
         console.log('📡 Cloud Storage initialized');
-        
+    }
+    
+    // Helper method to safely check if Supabase is authenticated
+    isSupabaseAuthenticated() {
+        try {
+            return supabase && 
+                   typeof supabase.isAuthenticated === 'function' && 
+                   supabase.isAuthenticated();
+        } catch (error) {
+            console.warn('Error checking Supabase authentication:', error);
+            return false;
+        }
+    }
+    
+    setupRoutineMethods() {
         // Ensure routine methods are available immediately
         if (typeof this.getLocalRoutineCompletions !== 'function') {
             console.log('⚠️ Adding routine methods to CloudStorage instance');
@@ -75,7 +89,7 @@ class CloudStorage {
     
     async getTodos() {
         try {
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 return this.getLocalTodos();
             }
             
@@ -97,7 +111,7 @@ class CloudStorage {
             // Always save locally first (immediate UI update)
             this.saveLocalTodo(todo);
             
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 this.queueSync('todos', 'save', todo);
                 return;
             }
@@ -148,7 +162,7 @@ class CloudStorage {
     
     async getDeadlines() {
         try {
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 return this.getLocalDeadlines();
             }
             
@@ -168,7 +182,7 @@ class CloudStorage {
         try {
             this.saveLocalDeadline(deadline);
             
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 this.queueSync('deadlines', 'save', deadline);
                 return;
             }
@@ -200,7 +214,7 @@ class CloudStorage {
         try {
             this.deleteLocalDeadline(deadlineId);
             
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 this.queueSync('deadlines', 'delete', { id: deadlineId });
                 return;
             }
@@ -217,7 +231,7 @@ class CloudStorage {
     
     async getLinks() {
         try {
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 return this.getLocalLinks();
             }
             
@@ -237,7 +251,7 @@ class CloudStorage {
         try {
             this.saveLocalLink(link);
             
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 this.queueSync('links', 'save', link);
                 return;
             }
@@ -269,7 +283,7 @@ class CloudStorage {
     
     async getRoutineTemplates() {
         try {
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 return this.getLocalRoutineTemplates();
             }
             
@@ -288,7 +302,7 @@ class CloudStorage {
     
     async getRoutineCompletions(date = null) {
         try {
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 return this.getLocalRoutineCompletions(date);
             }
             
@@ -318,7 +332,7 @@ class CloudStorage {
             // Save locally first
             this.saveLocalRoutineCompletion(completion);
             
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 this.queueSync('routine_completions', 'save', completion);
                 return;
             }
@@ -387,7 +401,7 @@ class CloudStorage {
     
     async getNotes(category) {
         try {
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 return this.getLocalNotes(category);
             }
             
@@ -407,7 +421,7 @@ class CloudStorage {
         try {
             this.saveLocalNotes(category, content);
             
-            if (!supabase || !this.isOnline || typeof supabase.isAuthenticated !== 'function' || !supabase.isAuthenticated()) {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 this.queueSync('notes', 'save', { category, content });
                 return;
             }
