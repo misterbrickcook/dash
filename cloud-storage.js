@@ -507,17 +507,23 @@ class CloudStorage {
     
     saveLocalRoutineCompletion(completion) {
         const completions = this.getLocalRoutineCompletions();
+        console.log(`💾 Saving routine completion:`, completion);
+        console.log(`📊 Current completions count: ${completions.length}`);
+        
         const existingIndex = completions.findIndex(c => 
             c.template_id === completion.template_id && c.date === completion.date
         );
         
         if (existingIndex >= 0) {
+            console.log(`✏️ Updating existing completion at index ${existingIndex}`);
             completions[existingIndex] = completion;
         } else {
+            console.log(`➕ Adding new completion to cache`);
             completions.push(completion);
         }
         
         localStorage.setItem('routine_completions_cache', JSON.stringify(completions));
+        console.log(`✅ Saved to localStorage, new total: ${completions.length}`);
     }
     
     saveLocalRoutineData(key, value) {
