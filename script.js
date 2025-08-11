@@ -76,15 +76,13 @@ const Auth = {
         const loginBtn = document.getElementById('login-btn');
         const passwordField = document.getElementById('login-password');
         const logoutBtn = document.getElementById('logout-btn');
-        const debugDiv = document.getElementById('mobile-debug');
         
         console.log('🔍 Elements found:', { loginBtn: !!loginBtn, passwordField: !!passwordField, logoutBtn: !!logoutBtn });
         
-        // Show debug info on mobile
+        // Log mobile detection
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile && debugDiv) {
-            debugDiv.style.display = 'block';
-            debugDiv.innerHTML = `📱 Mobile detected: ${navigator.userAgent.substring(0, 50)}...`;
+        if (isMobile) {
+            console.log(`📱 Mobile detected: ${navigator.userAgent.substring(0, 50)}...`);
         }
         
         if (loginBtn) {
@@ -94,10 +92,8 @@ const Auth = {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Mobile debug feedback
-                if (debugDiv) {
-                    debugDiv.innerHTML += `<br>✅ Button pressed at ${new Date().toTimeString().split(' ')[0]}`;
-                }
+                // Log button press
+                console.log(`✅ Button pressed at ${new Date().toTimeString().split(' ')[0]}`);
                 
                 // Add visual feedback
                 loginBtn.style.transform = 'scale(0.98)';
