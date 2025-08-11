@@ -447,6 +447,10 @@ input:focus, textarea:focus, select:focus {
     padding: 1rem;
 }
 
+.auth-screen.hide {
+    display: none;
+}
+
 .auth-container {
     background: #ffffff;
     border: 1px solid #e0e0e0;
