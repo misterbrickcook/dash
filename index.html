@@ -2649,15 +2649,31 @@
                 const templates = await cloudStorage.getRoutineTemplates();
                 console.log('Templates loaded:', templates);
                 
-                // Render routines
-                renderRoutineItems('morning', templates.filter(t => t.routine_type === 'morning'));
-                renderRoutineItems('evening', templates.filter(t => t.routine_type === 'evening'));
+                // Store templates globally for toggle switching
+                window.routineTemplates = templates;
                 
-                // Load completion status for today
-                await loadTodayRoutineCompletions();
+                // Start with morning routine
+                await switchRoutineType('morning');
                 
             } catch (error) {
                 console.error('Error loading routine templates:', error);
+                // Fallback: create default templates
+                const defaultTemplates = [
+                    {id: 'morning_1', text: '💧 Glas Wasser trinken', routine_type: 'morning', order_index: 1},
+                    {id: 'morning_2', text: '🧘 5 Min Meditation', routine_type: 'morning', order_index: 2},
+                    {id: 'morning_3', text: '🏃 10 Min Bewegung', routine_type: 'morning', order_index: 3},
+                    {id: 'morning_4', text: '☀️ Tageslicht tanken', routine_type: 'morning', order_index: 4},
+                    {id: 'morning_5', text: '📝 3 wichtigste Ziele definieren', routine_type: 'morning', order_index: 5},
+                    {id: 'evening_1', text: '📱 Alle Geräte weggelegt', routine_type: 'evening', order_index: 1},
+                    {id: 'evening_2', text: '📖 15 Min lesen', routine_type: 'evening', order_index: 2},
+                    {id: 'evening_3', text: '✅ Tag reflektieren & dankbar sein', routine_type: 'evening', order_index: 3},
+                    {id: 'evening_4', text: '🧹 Kurz aufräumen', routine_type: 'evening', order_index: 4},
+                    {id: 'evening_5', text: '😴 Vor 22:30 ins Bett', routine_type: 'evening', order_index: 5}
+                ];
+                
+                localStorage.setItem('routine_templates_cache', JSON.stringify(defaultTemplates));
+                window.routineTemplates = defaultTemplates;
+                await switchRoutineType('morning');
             }
         }
         
@@ -2703,8 +2719,15 @@
         
         async function switchRoutineType(routineType) {
             try {
-                const templates = await cloudStorage.getRoutineTemplates();
+                // Use cached templates or get fresh ones
+                let templates = window.routineTemplates;
+                if (!templates) {
+                    templates = await cloudStorage.getRoutineTemplates();
+                    window.routineTemplates = templates;
+                }
+                
                 const filteredTemplates = templates.filter(t => t.routine_type === routineType);
+                console.log(`Switching to ${routineType}, found ${filteredTemplates.length} templates`);
                 
                 renderRoutineItems(routineType, filteredTemplates);
                 await loadTodayRoutineCompletions();
@@ -2736,6 +2759,36 @@
                 console.error('Error loading routine completions:', error);
             }
         }
+        
+        // === QUICK FIX FOR ROUTINES ===
+        function initializeRoutineTemplates() {
+            console.log('🔧 Force initializing routine templates...');
+            
+            const templates = [
+                {id: 'morning_1', text: '💧 Glas Wasser trinken', routine_type: 'morning', order_index: 1},
+                {id: 'morning_2', text: '🧘 5 Min Meditation', routine_type: 'morning', order_index: 2},
+                {id: 'morning_3', text: '🏃 10 Min Bewegung', routine_type: 'morning', order_index: 3},
+                {id: 'morning_4', text: '☀️ Tageslicht tanken', routine_type: 'morning', order_index: 4},
+                {id: 'morning_5', text: '📝 3 wichtigste Ziele definieren', routine_type: 'morning', order_index: 5},
+                {id: 'evening_1', text: '📱 Alle Geräte weggelegt', routine_type: 'evening', order_index: 1},
+                {id: 'evening_2', text: '📖 15 Min lesen', routine_type: 'evening', order_index: 2},
+                {id: 'evening_3', text: '✅ Tag reflektieren & dankbar sein', routine_type: 'evening', order_index: 3},
+                {id: 'evening_4', text: '🧹 Kurz aufräumen', routine_type: 'evening', order_index: 4},
+                {id: 'evening_5', text: '😴 Vor 22:30 ins Bett', routine_type: 'evening', order_index: 5}
+            ];
+            
+            localStorage.setItem('routine_templates_cache', JSON.stringify(templates));
+            window.routineTemplates = templates;
+            
+            // Force render morning routine
+            const morningTemplates = templates.filter(t => t.routine_type === 'morning');
+            renderRoutineItems('morning', morningTemplates);
+            
+            console.log('✅ Templates initialized, rendered morning routine');
+        }
+        
+        // Call this immediately when page loads
+        setTimeout(initializeRoutineTemplates, 1000);
         
         // === RESTORE TAB FUNCTIONS ===
         
