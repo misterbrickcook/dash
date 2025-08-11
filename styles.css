@@ -443,7 +443,7 @@ input:focus, textarea:focus, select:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 2000;
     padding: 1rem;
 }
 

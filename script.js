@@ -242,6 +242,8 @@ const Auth = {
         if (nav) {
             console.log('🔄 Hiding navigation...');
             nav.style.display = 'none';
+            nav.style.visibility = 'hidden';
+            console.log('✅ Navigation display:', nav.style.display);
         }
         
         console.log('✅ showAuthScreen() completed');
