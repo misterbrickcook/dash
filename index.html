@@ -2863,6 +2863,18 @@
             }
             const completions = window.cloudStorage.getLocalRoutineCompletions();
             console.log('📊 Current completions:', completions);
+            
+            // Check today's completions specifically
+            const today = new Date().toISOString().split('T')[0];
+            const todayCompletions = completions.filter(c => c.date === today);
+            console.log('📅 Today completions:', todayCompletions);
+            
+            // Check current checkbox states
+            const morningChecked = document.querySelectorAll('input[data-template-id^="morning_"]:checked').length;
+            const eveningChecked = document.querySelectorAll('input[data-template-id^="evening_"]:checked').length;
+            console.log(`🌅 Morning checkboxes: ${morningChecked}/5 checked`);
+            console.log(`🌙 Evening checkboxes: ${eveningChecked}/5 checked`);
+            
             console.log('🧮 Morning streak:', calculateRoutineStreak('morning'));
             console.log('🧮 Evening streak:', calculateRoutineStreak('evening'));
             updateMonthlyRoutineStreak('morning');
@@ -2884,6 +2896,7 @@
                 // Get all completions from new system
                 const completions = window.cloudStorage.getLocalRoutineCompletions();
                 console.log(`📊 Found ${completions?.length || 0} total completions in cache`);
+                console.log('📋 All completions:', completions);
                 
                 if (!completions || completions.length === 0) {
                     console.log(`No completions found for ${routineType}`);
@@ -2916,14 +2929,15 @@
                         console.log(`✅ ${routineType} completed on ${dateStr} (${completedItems}/${totalItems}) - Streak: ${streak}`);
                     } else {
                         if (i === 0) {
-                            // Today is incomplete - still count it if we have any completions today
-                            console.log(`⏳ Today (${dateStr}) is incomplete but continuing streak calculation...`);
-                            // Don't break on first day (today) unless it's completely empty
-                            if (completedItems === 0 && i > 0) {
-                                console.log(`❌ ${routineType} completely empty on ${dateStr} - breaking streak`);
-                                break;
+                            // Today is incomplete - continue checking previous days
+                            console.log(`⏳ Today (${dateStr}) has ${completedItems}/${totalItems} items completed`);
+                            
+                            if (completedItems > 0) {
+                                console.log(`🔄 Today in progress, continuing streak calculation...`);
+                            } else {
+                                console.log(`❌ ${routineType} no items completed today - checking if streak continues from yesterday`);
                             }
-                            // Continue to check yesterday
+                            // Don't count today but continue checking previous days
                             continue;
                         } else {
                             console.log(`❌ ${routineType} incomplete on ${dateStr} (${completedItems}/${totalItems}) - breaking streak`);
