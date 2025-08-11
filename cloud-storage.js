@@ -18,6 +18,57 @@ class CloudStorage {
         });
         
         console.log('📡 Cloud Storage initialized');
+        
+        // Ensure routine methods are available immediately
+        if (typeof this.getLocalRoutineCompletions !== 'function') {
+            console.log('⚠️ Adding routine methods to CloudStorage instance');
+            this.setupRoutineMethods();
+        }
+    }
+    
+    setupRoutineMethods() {
+        this.getLocalRoutineCompletions = function(date = null) {
+            const cached = localStorage.getItem('routine_completions_cache');
+            if (cached) {
+                const completions = JSON.parse(cached);
+                return date ? completions.filter(c => c.date === date) : completions;
+            }
+            return [];
+        };
+        
+        this.saveLocalRoutineCompletion = function(completion) {
+            const completions = this.getLocalRoutineCompletions();
+            console.log(`💾 Saving routine completion:`, completion);
+            console.log(`📊 Current completions count: ${completions.length}`);
+            
+            const existingIndex = completions.findIndex(c => 
+                c.template_id === completion.template_id && c.date === completion.date
+            );
+            
+            if (existingIndex >= 0) {
+                console.log(`✏️ Updating existing completion at index ${existingIndex}`);
+                completions[existingIndex] = completion;
+            } else {
+                console.log(`➕ Adding new completion to cache`);
+                completions.push(completion);
+            }
+            
+            localStorage.setItem('routine_completions_cache', JSON.stringify(completions));
+            console.log(`✅ Saved to localStorage, new total: ${completions.length}`);
+        };
+        
+        this.saveRoutineCompletion = async function(templateId, date, completed) {
+            const completion = {
+                id: `${templateId}_${date}`,
+                template_id: templateId,
+                date: date,
+                completed: completed,
+                user_id: window.supabase?.getCurrentUser()?.id || 'local'
+            };
+            
+            this.saveLocalRoutineCompletion(completion);
+            console.log('✅ Routine completion saved:', templateId, completed);
+        };
     }
 
     // === TODOS CLOUD STORAGE ===

@@ -2926,9 +2926,27 @@
         // === STREAK CALCULATION FUNCTIONS ===
         
         async function waitForCloudStorageAndUpdateStreaks() {
-            console.log('🔧 CloudStorage has issues, using localStorage fallback for streaks...');
+            let attempts = 0;
+            while ((!window.cloudStorage || typeof window.cloudStorage.getLocalRoutineCompletions !== 'function') && attempts < 10) {
+                console.log(`⏳ Waiting for cloudStorage methods (attempt ${attempts + 1}/10)...`);
+                if (window.cloudStorage) {
+                    console.log('📋 CloudStorage exists, methods:', Object.keys(window.cloudStorage));
+                    // Try to setup methods if missing
+                    if (typeof window.cloudStorage.setupRoutineMethods === 'function') {
+                        console.log('🔧 Setting up routine methods...');
+                        window.cloudStorage.setupRoutineMethods();
+                    }
+                }
+                await new Promise(resolve => setTimeout(resolve, 200));
+                attempts++;
+            }
             
-            // Skip waiting, go directly to streak update with localStorage fallback
+            if (window.cloudStorage && typeof window.cloudStorage.getLocalRoutineCompletions === 'function') {
+                console.log('✅ CloudStorage methods now available, updating streaks...');
+            } else {
+                console.log('⚠️ CloudStorage methods still not available, using localStorage fallback...');
+            }
+            
             updateMonthlyRoutineStreak('morning');
             updateMonthlyRoutineStreak('evening');
         }
@@ -3000,6 +3018,14 @@
         function calculateRoutineStreak(routineType) {
             try {
                 console.log(`🔄 Calculating ${routineType} streak...`);
+                
+                // Try to setup cloudStorage methods if missing
+                if (window.cloudStorage && typeof window.cloudStorage.getLocalRoutineCompletions !== 'function') {
+                    if (typeof window.cloudStorage.setupRoutineMethods === 'function') {
+                        console.log('🔧 Setting up missing cloudStorage methods...');
+                        window.cloudStorage.setupRoutineMethods();
+                    }
+                }
                 
                 // Check if cloudStorage is available
                 if (!window.cloudStorage || typeof window.cloudStorage.getLocalRoutineCompletions !== 'function') {
