@@ -22,7 +22,63 @@
         </div>
     </nav>
 
+    <!-- === 🔐 AUTH OVERLAY === -->
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h2>🚀 DashFin Dashboard</h2>
+                <p>Secure your personal productivity data</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="register">Register</button>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form active">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Your password" required>
+                </div>
+                <button id="login-btn" class="auth-btn">Login</button>
+                <div id="login-error" class="auth-error"></div>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" placeholder="Min. 6 characters" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm">Confirm Password</label>
+                    <input type="password" id="register-confirm" placeholder="Confirm password" required minlength="6">
+                </div>
+                <button id="register-btn" class="auth-btn">Create Account</button>
+                <div id="register-error" class="auth-error"></div>
+            </div>
+            
+            <div class="auth-footer">
+                <p>Your data is encrypted and stored securely.</p>
+            </div>
+        </div>
+    </div>
+
     <div class="main-content">
+        <!-- User Info Bar -->
+        <div id="user-info" class="user-info">
+            <span id="user-email"></span>
+            <button id="logout-btn" class="logout-btn">Logout</button>
+        </div>
         
         <!-- === 🏠 HOME TAB === -->
         <div class="tab-content active" id="home">

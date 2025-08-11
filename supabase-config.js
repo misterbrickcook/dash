@@ -10,11 +10,142 @@ class SupabaseClient {
     constructor() {
         this.url = SUPABASE_URL;
         this.key = SUPABASE_ANON_KEY;
+        this.user = null;
+        this.session = null;
         this.headers = {
             'apikey': this.key,
             'Authorization': `Bearer ${this.key}`,
             'Content-Type': 'application/json'
         };
+        
+        // Load stored session
+        this.loadSession();
+    }
+    
+    // === AUTHENTICATION METHODS ===
+    
+    async signUp(email, password) {
+        try {
+            const response = await fetch(`${this.url}/auth/v1/signup`, {
+                method: 'POST',
+                headers: {
+                    'apikey': this.key,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email,
+                    password
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.user && data.session) {
+                this.setSession(data.session);
+                return { user: data.user, session: data.session, error: null };
+            }
+            
+            return { user: null, session: null, error: data.error || 'Signup failed' };
+        } catch (error) {
+            return { user: null, session: null, error: error.message };
+        }
+    }
+    
+    async signIn(email, password) {
+        try {
+            const response = await fetch(`${this.url}/auth/v1/token?grant_type=password`, {
+                method: 'POST',
+                headers: {
+                    'apikey': this.key,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email,
+                    password
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.access_token) {
+                const session = {
+                    access_token: data.access_token,
+                    refresh_token: data.refresh_token,
+                    user: data.user
+                };
+                this.setSession(session);
+                return { user: data.user, session, error: null };
+            }
+            
+            return { user: null, session: null, error: data.error_description || 'Login failed' };
+        } catch (error) {
+            return { user: null, session: null, error: error.message };
+        }
+    }
+    
+    async signOut() {
+        try {
+            if (this.session?.access_token) {
+                await fetch(`${this.url}/auth/v1/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': this.key,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.session.access_token}`
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+        
+        this.clearSession();
+        return { error: null };
+    }
+    
+    setSession(session) {
+        this.session = session;
+        this.user = session.user;
+        
+        // Update headers for authenticated requests
+        this.headers.Authorization = `Bearer ${session.access_token}`;
+        
+        // Store in localStorage
+        localStorage.setItem('supabase.auth.token', JSON.stringify(session));
+        
+        console.log('✅ User authenticated:', this.user.email);
+    }
+    
+    clearSession() {
+        this.session = null;
+        this.user = null;
+        this.headers.Authorization = `Bearer ${this.key}`;
+        localStorage.removeItem('supabase.auth.token');
+        console.log('🚪 User signed out');
+    }
+    
+    loadSession() {
+        try {
+            const stored = localStorage.getItem('supabase.auth.token');
+            if (stored) {
+                const session = JSON.parse(stored);
+                // Check if session is still valid (basic check)
+                if (session.access_token && session.user) {
+                    this.setSession(session);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading session:', error);
+            localStorage.removeItem('supabase.auth.token');
+        }
+    }
+    
+    getCurrentUser() {
+        return this.user;
+    }
+    
+    isAuthenticated() {
+        return !!(this.user && this.session);
     }
 
     async query(table, method = 'GET', data = null) {

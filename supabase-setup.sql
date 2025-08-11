@@ -141,7 +141,7 @@ ON CONFLICT (id) DO NOTHING;
 -- 14. Insert initial sync test data
 INSERT INTO sync_test (id, checked) VALUES (1, false) ON CONFLICT (id) DO NOTHING;
 
--- 15. Enable public access for now (TEMPORARY - will secure later)
+-- 15. Enable Row Level Security with user-based policies
 ALTER TABLE todos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE routine_templates ENABLE ROW LEVEL SECURITY;
@@ -149,10 +149,113 @@ ALTER TABLE routine_completions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sync_test ENABLE ROW LEVEL SECURITY;
 
--- Temporary open policies (will be restricted later with authentication)
-CREATE POLICY "Allow all access to todos" ON todos FOR ALL USING (true);
-CREATE POLICY "Allow all access to goals" ON goals FOR ALL USING (true);
-CREATE POLICY "Allow all access to routine_templates" ON routine_templates FOR ALL USING (true);
-CREATE POLICY "Allow all access to routine_completions" ON routine_completions FOR ALL USING (true);
-CREATE POLICY "Allow all access to journal_entries" ON journal_entries FOR ALL USING (true);
-CREATE POLICY "Allow all access to sync_test" ON sync_test FOR ALL USING (true);
+-- Drop temporary open policies if they exist
+DROP POLICY IF EXISTS "Allow all access to todos" ON todos;
+DROP POLICY IF EXISTS "Allow all access to goals" ON goals;
+DROP POLICY IF EXISTS "Allow all access to routine_templates" ON routine_templates;
+DROP POLICY IF EXISTS "Allow all access to routine_completions" ON routine_completions;
+DROP POLICY IF EXISTS "Allow all access to journal_entries" ON journal_entries;
+DROP POLICY IF EXISTS "Allow all access to sync_test" ON sync_test;
+
+-- Create secure user-based policies for todos
+CREATE POLICY "Users can view own todos" ON todos 
+    FOR SELECT USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can insert own todos" ON todos 
+    FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can update own todos" ON todos 
+    FOR UPDATE USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can delete own todos" ON todos 
+    FOR DELETE USING (auth.uid()::text = user_id);
+
+-- Create secure user-based policies for goals
+CREATE POLICY "Users can view own goals" ON goals 
+    FOR SELECT USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can insert own goals" ON goals 
+    FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can update own goals" ON goals 
+    FOR UPDATE USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can delete own goals" ON goals 
+    FOR DELETE USING (auth.uid()::text = user_id);
+
+-- Create secure user-based policies for routine_templates
+CREATE POLICY "Users can view own routine_templates" ON routine_templates 
+    FOR SELECT USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can insert own routine_templates" ON routine_templates 
+    FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can update own routine_templates" ON routine_templates 
+    FOR UPDATE USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can delete own routine_templates" ON routine_templates 
+    FOR DELETE USING (auth.uid()::text = user_id);
+
+-- Create secure user-based policies for routine_completions
+CREATE POLICY "Users can view own routine_completions" ON routine_completions 
+    FOR SELECT USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can insert own routine_completions" ON routine_completions 
+    FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can update own routine_completions" ON routine_completions 
+    FOR UPDATE USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can delete own routine_completions" ON routine_completions 
+    FOR DELETE USING (auth.uid()::text = user_id);
+
+-- Create secure user-based policies for journal_entries
+CREATE POLICY "Users can view own journal_entries" ON journal_entries 
+    FOR SELECT USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can insert own journal_entries" ON journal_entries 
+    FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can update own journal_entries" ON journal_entries 
+    FOR UPDATE USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can delete own journal_entries" ON journal_entries 
+    FOR DELETE USING (auth.uid()::text = user_id);
+
+-- Sync test table - allow authenticated users only
+CREATE POLICY "Authenticated users can access sync_test" ON sync_test 
+    FOR ALL USING (auth.role() = 'authenticated');
+
+-- 16. Update existing data to have proper user_ids for default templates
+-- Note: Default routine templates should be copied per user when they first register
+-- For now, we'll make them globally accessible by setting user_id to 'system'
+UPDATE routine_templates SET user_id = 'system' WHERE id LIKE 'morning_%' OR id LIKE 'evening_%';
+
+-- Create policy to allow all authenticated users to read system templates
+CREATE POLICY "Users can view system routine_templates" ON routine_templates 
+    FOR SELECT USING (user_id = 'system' AND auth.role() = 'authenticated');
+
+-- 17. Create a function to initialize user data when they first sign up
+CREATE OR REPLACE FUNCTION initialize_user_data()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Copy system routine templates to the new user
+    INSERT INTO routine_templates (id, text, routine_type, order_index, user_id)
+    SELECT 
+        NEW.id::text || '_' || id,
+        text,
+        routine_type,
+        order_index,
+        NEW.id::text
+    FROM routine_templates 
+    WHERE user_id = 'system';
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create trigger to initialize user data on signup
+CREATE TRIGGER initialize_user_data_trigger
+    AFTER INSERT ON auth.users
+    FOR EACH ROW
+    EXECUTE FUNCTION initialize_user_data();

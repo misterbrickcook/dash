@@ -38,8 +38,208 @@ const Utils = {
     }
 };
 
+// === AUTHENTICATION SYSTEM ===
+const Auth = {
+    isAuthenticated: false,
+    currentUser: null,
+    
+    async init() {
+        // Initialize Supabase first
+        const supabaseReady = initializeSupabase();
+        
+        if (!supabaseReady || !supabase) {
+            console.log('⚠️ Supabase not configured - using demo mode');
+            this.showDashboard();
+            return;
+        }
+        
+        // Check if user is already logged in
+        this.currentUser = supabase.getCurrentUser();
+        if (supabase.isAuthenticated()) {
+            console.log('✅ User already authenticated:', this.currentUser.email);
+            this.isAuthenticated = true;
+            this.showDashboard();
+        } else {
+            this.showAuthOverlay();
+        }
+        
+        this.setupAuthHandlers();
+    },
+    
+    setupAuthHandlers() {
+        // Auth tab switching
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                this.switchAuthTab(tabName);
+            });
+        });
+        
+        // Login form
+        document.getElementById('login-btn').addEventListener('click', () => this.handleLogin());
+        document.getElementById('login-password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleLogin();
+        });
+        
+        // Register form
+        document.getElementById('register-btn').addEventListener('click', () => this.handleRegister());
+        document.getElementById('register-confirm').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleRegister();
+        });
+        
+        // Logout button
+        document.getElementById('logout-btn').addEventListener('click', () => this.handleLogout());
+    },
+    
+    switchAuthTab(tab) {
+        // Update tab buttons
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+        
+        // Update forms
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        document.getElementById(`${tab}-form`).classList.add('active');
+        
+        // Clear errors
+        this.clearAuthErrors();
+    },
+    
+    async handleLogin() {
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        
+        if (!email || !password) {
+            this.showAuthError('login', 'Please fill in all fields');
+            return;
+        }
+        
+        this.setAuthLoading('login', true);
+        this.clearAuthErrors();
+        
+        try {
+            const { user, session, error } = await supabase.signIn(email, password);
+            
+            if (error) {
+                this.showAuthError('login', error);
+                return;
+            }
+            
+            console.log('✅ Login successful:', user.email);
+            this.currentUser = user;
+            this.isAuthenticated = true;
+            this.hideAuthOverlay();
+            this.showDashboard();
+            
+        } catch (error) {
+            this.showAuthError('login', 'Login failed. Please try again.');
+            console.error('Login error:', error);
+        } finally {
+            this.setAuthLoading('login', false);
+        }
+    },
+    
+    async handleRegister() {
+        const email = document.getElementById('register-email').value.trim();
+        const password = document.getElementById('register-password').value;
+        const confirmPassword = document.getElementById('register-confirm').value;
+        
+        if (!email || !password || !confirmPassword) {
+            this.showAuthError('register', 'Please fill in all fields');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            this.showAuthError('register', 'Passwords do not match');
+            return;
+        }
+        
+        if (password.length < 6) {
+            this.showAuthError('register', 'Password must be at least 6 characters');
+            return;
+        }
+        
+        this.setAuthLoading('register', true);
+        this.clearAuthErrors();
+        
+        try {
+            const { user, session, error } = await supabase.signUp(email, password);
+            
+            if (error) {
+                this.showAuthError('register', error);
+                return;
+            }
+            
+            console.log('✅ Registration successful:', user.email);
+            this.currentUser = user;
+            this.isAuthenticated = true;
+            this.hideAuthOverlay();
+            this.showDashboard();
+            
+        } catch (error) {
+            this.showAuthError('register', 'Registration failed. Please try again.');
+            console.error('Registration error:', error);
+        } finally {
+            this.setAuthLoading('register', false);
+        }
+    },
+    
+    async handleLogout() {
+        try {
+            await supabase.signOut();
+            this.currentUser = null;
+            this.isAuthenticated = false;
+            this.showAuthOverlay();
+            console.log('👋 User logged out');
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    },
+    
+    showAuthOverlay() {
+        document.getElementById('auth-overlay').classList.add('show');
+        document.querySelector('.main-content').style.display = 'none';
+    },
+    
+    hideAuthOverlay() {
+        document.getElementById('auth-overlay').classList.remove('show');
+    },
+    
+    showDashboard() {
+        document.querySelector('.main-content').style.display = 'block';
+        
+        if (this.currentUser) {
+            document.getElementById('user-email').textContent = this.currentUser.email;
+            document.getElementById('user-info').style.display = 'flex';
+        } else {
+            document.getElementById('user-info').style.display = 'none';
+        }
+    },
+    
+    showAuthError(form, message) {
+        const errorEl = document.getElementById(`${form}-error`);
+        errorEl.textContent = message;
+        errorEl.classList.add('show');
+    },
+    
+    clearAuthErrors() {
+        document.querySelectorAll('.auth-error').forEach(el => {
+            el.classList.remove('show');
+            el.textContent = '';
+        });
+    },
+    
+    setAuthLoading(form, loading) {
+        const btn = document.getElementById(`${form}-btn`);
+        btn.disabled = loading;
+        btn.textContent = loading ? 'Please wait...' : (form === 'login' ? 'Login' : 'Create Account');
+    }
+};
+
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Dashboard loading...');
+    
+    // Initialize Authentication first
+    await Auth.init();
 
     // Dark Mode System
     let darkMode = {

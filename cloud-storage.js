@@ -24,7 +24,7 @@ class CloudStorage {
     
     async getTodos() {
         try {
-            if (!supabase || !this.isOnline) {
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
                 return this.getLocalTodos();
             }
             
@@ -46,9 +46,15 @@ class CloudStorage {
             // Always save locally first (immediate UI update)
             this.saveLocalTodo(todo);
             
-            if (!supabase || !this.isOnline) {
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
                 this.queueSync('todos', 'save', todo);
                 return;
+            }
+            
+            // Add user_id to todo before saving
+            const user = supabase.getCurrentUser();
+            if (user) {
+                todo.user_id = user.id;
             }
             
             // Save to cloud
@@ -91,7 +97,7 @@ class CloudStorage {
     
     async getDeadlines() {
         try {
-            if (!supabase || !this.isOnline) {
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
                 return this.getLocalDeadlines();
             }
             
@@ -111,9 +117,15 @@ class CloudStorage {
         try {
             this.saveLocalDeadline(deadline);
             
-            if (!supabase || !this.isOnline) {
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
                 this.queueSync('deadlines', 'save', deadline);
                 return;
+            }
+            
+            // Add user_id to deadline before saving
+            const user = supabase.getCurrentUser();
+            if (user) {
+                deadline.user_id = user.id;
             }
             
             if (deadline.id) {
@@ -137,7 +149,7 @@ class CloudStorage {
         try {
             this.deleteLocalDeadline(deadlineId);
             
-            if (!supabase || !this.isOnline) {
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
                 this.queueSync('deadlines', 'delete', { id: deadlineId });
                 return;
             }
@@ -154,7 +166,7 @@ class CloudStorage {
     
     async getLinks() {
         try {
-            if (!supabase || !this.isOnline) {
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
                 return this.getLocalLinks();
             }
             
@@ -174,9 +186,15 @@ class CloudStorage {
         try {
             this.saveLocalLink(link);
             
-            if (!supabase || !this.isOnline) {
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
                 this.queueSync('links', 'save', link);
                 return;
+            }
+            
+            // Add user_id to link before saving
+            const user = supabase.getCurrentUser();
+            if (user) {
+                link.user_id = user.id;
             }
             
             if (link.id) {
@@ -255,7 +273,7 @@ class CloudStorage {
     
     async getNotes(category) {
         try {
-            if (!supabase || !this.isOnline) {
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
                 return this.getLocalNotes(category);
             }
             
@@ -275,18 +293,22 @@ class CloudStorage {
         try {
             this.saveLocalNotes(category, content);
             
-            if (!supabase || !this.isOnline) {
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
                 this.queueSync('notes', 'save', { category, content });
                 return;
             }
             
+            // Add user_id for notes
+            const user = supabase.getCurrentUser();
+            const userId = user ? user.id : 'anonymous';
+            
             // Check if notes exist for this category
-            const existing = await supabase.query(`notes?category=eq.${category}`);
+            const existing = await supabase.query(`notes?category=eq.${category}&user_id=eq.${userId}`);
             
             if (existing && existing.length > 0) {
                 await supabase.update('notes', { content, updated_at: new Date().toISOString() }, existing[0].id);
             } else {
-                await supabase.insert('notes', [{ category, content }]);
+                await supabase.insert('notes', [{ category, content, user_id: userId }]);
             }
             
             console.log('✅ Notes synced to cloud:', category);
