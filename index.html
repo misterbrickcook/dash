@@ -772,8 +772,34 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('🚀 HYBRID DASHBOARD - Beautiful UI + Cloud Sync');
             
-            // Initialize Auth system first (with retry mechanism)
+            // Initialize Auth system with fallback session check
             let authInitialized = false;
+            
+            // First check if there's a stored session regardless of Auth class
+            const storedSession = localStorage.getItem('supabase.auth.token');
+            if (storedSession) {
+                try {
+                    const session = JSON.parse(storedSession);
+                    const sessionAge = Date.now() - (session.created_at || 0);
+                    const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+                    
+                    if (sessionAge < maxAge && session.access_token && session.user) {
+                        console.log('✅ Valid session found, showing dashboard immediately');
+                        // Hide auth screen and show dashboard immediately
+                        const authScreen = document.getElementById('auth-screen');
+                        const mainContent = document.querySelector('.main-content');
+                        
+                        if (authScreen) authScreen.style.display = 'none';
+                        if (mainContent) mainContent.style.display = 'block';
+                        
+                        // Continue with Auth initialization in background
+                    }
+                } catch (error) {
+                    console.error('Error parsing stored session:', error);
+                    localStorage.removeItem('supabase.auth.token');
+                }
+            }
+            
             if (typeof Auth !== 'undefined') {
                 try {
                     const auth = new Auth();
