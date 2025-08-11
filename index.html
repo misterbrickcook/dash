@@ -1843,7 +1843,16 @@
         
         // Initialize streaks on page load
         async function initializeStreaks() {
-            await updateRoutineStreaks();
+            console.log('🔥 Initializing streaks...');
+            // Use the new streak system from script.js
+            if (typeof updateMonthlyRoutineStreak === 'function') {
+                updateMonthlyRoutineStreak('morning');
+                updateMonthlyRoutineStreak('evening');
+            } else {
+                // Fallback
+                console.log('⚠️ updateMonthlyRoutineStreak not found, using fallback');
+                await updateRoutineStreaks();
+            }
         }
         
         // === QUOTES SYSTEM ===
@@ -2708,11 +2717,12 @@
                     // Save completion to cloud
                     await cloudStorage.saveRoutineCompletion(templateId, today, completed);
                     
-                    // Update streaks
+                    // Update streaks immediately
                     setTimeout(() => {
+                        console.log('🔄 Updating streaks after completion change...');
                         updateMonthlyRoutineStreak('morning');
                         updateMonthlyRoutineStreak('evening');
-                    }, 100);
+                    }, 200);
                 });
             });
         }
@@ -2789,6 +2799,87 @@
         
         // Call this immediately when page loads
         setTimeout(initializeRoutineTemplates, 1000);
+        
+        // === STREAK CALCULATION FUNCTIONS ===
+        
+        function calculateRoutineStreak(routineType) {
+            try {
+                console.log(`🔄 Calculating ${routineType} streak...`);
+                
+                // Get all completions from new system
+                const completions = cloudStorage.getLocalRoutineCompletions();
+                if (!completions || completions.length === 0) {
+                    console.log(`No completions found for ${routineType}`);
+                    return 0;
+                }
+                
+                const today = new Date();
+                let streak = 0;
+                
+                // Check consecutive days backwards from today
+                for (let i = 0; i < 365; i++) { // Max 365 day streak
+                    const checkDate = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+                    const dateStr = checkDate.toISOString().split('T')[0];
+                    
+                    // Check if all routine items were completed for this date and routine type
+                    const dayCompletions = completions.filter(c => 
+                        c.date === dateStr && 
+                        c.template_id.startsWith(routineType) && 
+                        c.completed
+                    );
+                    
+                    // Count unique completed items for this day
+                    const completedItems = new Set(dayCompletions.map(c => c.template_id)).size;
+                    const totalItems = 5; // We have 5 items per routine
+                    
+                    if (completedItems === totalItems) {
+                        streak++;
+                        console.log(`✅ ${routineType} completed on ${dateStr} (${completedItems}/${totalItems})`);
+                    } else {
+                        console.log(`❌ ${routineType} incomplete on ${dateStr} (${completedItems}/${totalItems})`);
+                        break; // Streak broken
+                    }
+                }
+                
+                console.log(`🔥 ${routineType} final streak: ${streak}`);
+                return streak;
+                
+            } catch (error) {
+                console.error('Error calculating routine streak:', error);
+                return 0;
+            }
+        }
+        
+        function updateMonthlyRoutineStreak(routineType) {
+            try {
+                console.log(`📊 Updating ${routineType} streak display...`);
+                
+                // Calculate consecutive daily streak from new completion system
+                const streak = calculateRoutineStreak(routineType);
+                
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+                const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                                     'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+                
+                // Update streak tiles
+                const countElement = document.getElementById(`${routineType}RoutineStreakCount`);
+                const dateElement = document.getElementById(`${routineType}RoutineStreakDate`);
+                
+                if (countElement) {
+                    countElement.textContent = streak;
+                    console.log(`✅ Updated ${routineType} streak count to: ${streak}`);
+                }
+                
+                if (dateElement) {
+                    dateElement.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+                }
+                
+            } catch (error) {
+                console.error(`Error in updateMonthlyRoutineStreak(${routineType}):`, error);
+            }
+        }
         
         // === RESTORE TAB FUNCTIONS ===
         
