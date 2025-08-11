@@ -15,31 +15,57 @@ UPDATE routine_templates SET user_id = 'anonymous' WHERE user_id IS NULL;
 UPDATE routine_completions SET user_id = 'anonymous' WHERE user_id IS NULL;
 UPDATE journal_entries SET user_id = 'anonymous' WHERE user_id IS NULL;
 
--- 3. Create sync_test table if it doesn't exist
-CREATE TABLE IF NOT EXISTS sync_test (
-  id INTEGER PRIMARY KEY,
-  checked BOOLEAN DEFAULT FALSE,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Insert initial sync test data
-INSERT INTO sync_test (id, checked) VALUES (1, false) ON CONFLICT (id) DO NOTHING;
-
--- 4. Enable Row Level Security
+-- 3. Enable Row Level Security (only for existing tables)
 ALTER TABLE todos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
+
+-- Create tables that might not exist
+CREATE TABLE IF NOT EXISTS routine_templates (
+  id TEXT PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  text TEXT NOT NULL,
+  routine_type TEXT NOT NULL,
+  order_index INTEGER DEFAULT 0,
+  active BOOLEAN DEFAULT TRUE,
+  user_id TEXT DEFAULT 'anonymous'
+);
+
+CREATE TABLE IF NOT EXISTS routine_completions (
+  id TEXT PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  template_id TEXT REFERENCES routine_templates(id),
+  date DATE NOT NULL,
+  completed BOOLEAN DEFAULT FALSE,
+  user_id TEXT DEFAULT 'anonymous',
+  UNIQUE(template_id, date, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS journal_entries (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  date DATE NOT NULL,
+  type TEXT NOT NULL,
+  content TEXT,
+  title TEXT,
+  mood TEXT,
+  category TEXT DEFAULT 'general',
+  tags TEXT,
+  user_id TEXT DEFAULT 'anonymous',
+  UNIQUE(date, type, user_id)
+);
+
+-- Enable RLS for all tables
 ALTER TABLE routine_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE routine_completions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sync_test ENABLE ROW LEVEL SECURITY;
 
--- 5. Drop old open policies if they exist
+-- 4. Drop old open policies if they exist
 DROP POLICY IF EXISTS "Allow all access to todos" ON todos;
 DROP POLICY IF EXISTS "Allow all access to goals" ON goals;
 DROP POLICY IF EXISTS "Allow all access to routine_templates" ON routine_templates;
 DROP POLICY IF EXISTS "Allow all access to routine_completions" ON routine_completions;
 DROP POLICY IF EXISTS "Allow all access to journal_entries" ON journal_entries;
-DROP POLICY IF EXISTS "Allow all access to sync_test" ON sync_test;
 
 -- 6. Create secure user-based policies for todos
 CREATE POLICY "Users can view own todos" ON todos 
@@ -106,12 +132,21 @@ CREATE POLICY "Users can update own journal_entries" ON journal_entries
 CREATE POLICY "Users can delete own journal_entries" ON journal_entries 
     FOR DELETE USING (auth.uid()::text = user_id);
 
--- 11. Sync test table - allow authenticated users only
-CREATE POLICY "Authenticated users can access sync_test" ON sync_test 
-    FOR ALL USING (auth.role() = 'authenticated');
+-- 11. Skip sync_test table (not needed for authentication)
 
--- 12. Update existing routine templates to system templates
-UPDATE routine_templates SET user_id = 'system' WHERE id LIKE 'morning_%' OR id LIKE 'evening_%';
+-- 12. Insert default routine templates and mark as system
+INSERT INTO routine_templates (id, text, routine_type, order_index, user_id) VALUES
+('morning_1', '💧 Glas Wasser trinken', 'morning', 1, 'system'),
+('morning_2', '🧘 5 Min Meditation', 'morning', 2, 'system'),
+('morning_3', '📱 Handy Check vermeiden', 'morning', 3, 'system'),
+('morning_4', '☀️ Tageslicht tanken', 'morning', 4, 'system'),
+('morning_5', '📝 Tagesplan machen', 'morning', 5, 'system'),
+('evening_1', '📱 Handy weggelegen', 'evening', 1, 'system'),
+('evening_2', '📖 10 Min lesen', 'evening', 2, 'system'),
+('evening_3', '✅ Tag reflektieren', 'evening', 3, 'system'),
+('evening_4', '🌙 Zimmer abdunkeln', 'evening', 4, 'system'),
+('evening_5', '😴 Früh ins Bett', 'evening', 5, 'system')
+ON CONFLICT (id) DO UPDATE SET user_id = 'system';
 
 -- 13. Allow all authenticated users to read system templates
 CREATE POLICY "Users can view system routine_templates" ON routine_templates 
