@@ -19,6 +19,7 @@
             <div class="nav-link" data-tab="motivation">Motivation</div>
             <div class="nav-link" data-tab="ressourcen">Ressourcen</div>
             <div class="nav-link" data-tab="settings">Settings</div>
+            <div class="nav-link" data-tab="restore">🔧 Restore</div>
         </div>
     </nav>
 
@@ -394,6 +395,50 @@
                     </div>
                 </div>
                 
+            </section>
+        </div>
+
+        <!-- === 🔧 RESTORE TAB === -->
+        <div class="tab-content" id="restore">
+            <section class="card">
+                <div class="card-header">
+                    <h2>🔧 Routine Restore</h2>
+                    <p>Repair your routine system and restore streak data</p>
+                </div>
+                
+                <div class="settings-section">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">1️⃣ Check Current Data</label>
+                            <p class="setting-description">See what routine data is currently stored</p>
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn-secondary" onclick="checkCurrentRoutineData()">Check Data</button>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">2️⃣ Restore Routines</label>
+                            <p class="setting-description">Convert old data and restore your streaks</p>
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn-primary" onclick="restoreRoutineData()">Restore</button>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">3️⃣ Cleanup</label>
+                            <p class="setting-description">Remove old format data and duplicates</p>
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn-secondary" onclick="cleanupRoutineData()">Cleanup</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="restore-status" style="margin-top: 2rem;"></div>
             </section>
         </div>
 
@@ -2599,6 +2644,161 @@
                     window.location.reload();
                 }, 1000);
             }
+        }
+
+        // === RESTORE TAB FUNCTIONS ===
+        
+        function checkCurrentRoutineData() {
+            const status = document.getElementById('restore-status');
+            
+            // Check localStorage routine data
+            const routineCompletionData = localStorage.getItem('routineCompletionData');
+            const routineResetTime = localStorage.getItem('routineResetTime');
+            const lastRoutineResetDate = localStorage.getItem('lastRoutineResetDate');
+            
+            let html = '<h3>Current Routine Data:</h3>';
+            
+            if (routineCompletionData) {
+                try {
+                    const data = JSON.parse(routineCompletionData);
+                    html += `<div style="background: #f5f5f5; padding: 1rem; border-radius: 6px; margin: 1rem 0; font-family: monospace; font-size: 0.9rem;">
+                        <strong>Completion Data:</strong><br>
+                        ${JSON.stringify(data, null, 2)}
+                    </div>`;
+                } catch (e) {
+                    html += `<div style="background: #fee; color: #c33; padding: 1rem; border-radius: 6px;">Error parsing completion data: ${e.message}</div>`;
+                }
+            } else {
+                html += `<div style="background: #fee; color: #c33; padding: 1rem; border-radius: 6px;">No routine completion data found</div>`;
+            }
+            
+            html += `<div style="background: #f5f5f5; padding: 1rem; border-radius: 6px; margin: 1rem 0; font-family: monospace; font-size: 0.9rem;">
+                <strong>Reset Time:</strong> ${routineResetTime || 'Not set'}<br>
+                <strong>Last Reset Date:</strong> ${lastRoutineResetDate || 'Not set'}
+            </div>`;
+            
+            status.innerHTML = html;
+        }
+        
+        function restoreRoutineData() {
+            const status = document.getElementById('restore-status');
+            
+            // Get existing data
+            const routineCompletionData = localStorage.getItem('routineCompletionData');
+            
+            if (!routineCompletionData) {
+                status.innerHTML += '<div style="background: #fee; color: #c33; padding: 1rem; border-radius: 6px;">No routine data to restore</div>';
+                return;
+            }
+            
+            try {
+                const oldData = JSON.parse(routineCompletionData);
+                
+                // Convert old format to new format
+                const completions = [];
+                const today = new Date().toISOString().split('T')[0];
+                const yesterday = new Date(Date.now() - 24*60*60*1000).toISOString().split('T')[0];
+                
+                // Process morning routines
+                if (oldData.morningRoutine) {
+                    Object.keys(oldData.morningRoutine).forEach((routineId, index) => {
+                        const templateId = `morning_${index + 1}`;
+                        if (oldData.morningRoutine[routineId]) {
+                            // Add completion for yesterday to restore streak
+                            completions.push({
+                                id: `${templateId}_${yesterday}`,
+                                template_id: templateId,
+                                date: yesterday,
+                                completed: true,
+                                user_id: 'restored'
+                            });
+                            // Add for today if completed
+                            completions.push({
+                                id: `${templateId}_${today}`,
+                                template_id: templateId,
+                                date: today,
+                                completed: true,
+                                user_id: 'restored'
+                            });
+                        }
+                    });
+                }
+                
+                // Process evening routines
+                if (oldData.eveningRoutine) {
+                    Object.keys(oldData.eveningRoutine).forEach((routineId, index) => {
+                        const templateId = `evening_${index + 1}`;
+                        if (oldData.eveningRoutine[routineId]) {
+                            // Add completion for yesterday to restore streak
+                            completions.push({
+                                id: `${templateId}_${yesterday}`,
+                                template_id: templateId,
+                                date: yesterday,
+                                completed: true,
+                                user_id: 'restored'
+                            });
+                            // Add for today if completed
+                            completions.push({
+                                id: `${templateId}_${today}`,
+                                template_id: templateId,
+                                date: today,
+                                completed: true,
+                                user_id: 'restored'
+                            });
+                        }
+                    });
+                }
+                
+                // Save to new format
+                localStorage.setItem('routine_completions_cache', JSON.stringify(completions));
+                
+                // Clean templates
+                const templates = [
+                    {id: 'morning_1', text: '💧 Glas Wasser trinken', routine_type: 'morning', order_index: 1},
+                    {id: 'morning_2', text: '🧘 5 Min Meditation', routine_type: 'morning', order_index: 2},
+                    {id: 'morning_3', text: '📱 Handy Check vermeiden', routine_type: 'morning', order_index: 3},
+                    {id: 'morning_4', text: '☀️ Tageslicht tanken', routine_type: 'morning', order_index: 4},
+                    {id: 'morning_5', text: '📝 Tagesplan machen', routine_type: 'morning', order_index: 5},
+                    {id: 'evening_1', text: '📱 Handy weggelegen', routine_type: 'evening', order_index: 1},
+                    {id: 'evening_2', text: '📖 10 Min lesen', routine_type: 'evening', order_index: 2},
+                    {id: 'evening_3', text: '✅ Tag reflektieren', routine_type: 'evening', order_index: 3},
+                    {id: 'evening_4', text: '🌙 Zimmer abdunkeln', routine_type: 'evening', order_index: 4},
+                    {id: 'evening_5', text: '😴 Früh ins Bett', routine_type: 'evening', order_index: 5}
+                ];
+                
+                localStorage.setItem('routine_templates_cache', JSON.stringify(templates));
+                
+                status.innerHTML += `<div style="background: #efe; color: #363; padding: 1rem; border-radius: 6px;">✅ Restored ${completions.length} routine completions</div>`;
+                status.innerHTML += `<div style="background: #efe; color: #363; padding: 1rem; border-radius: 6px;">Templates cleaned and restored</div>`;
+                
+            } catch (error) {
+                status.innerHTML += `<div style="background: #fee; color: #c33; padding: 1rem; border-radius: 6px;">Error restoring routines: ${error.message}</div>`;
+            }
+        }
+        
+        function cleanupRoutineData() {
+            const status = document.getElementById('restore-status');
+            
+            // Remove old format data
+            localStorage.removeItem('routineCompletionData');
+            localStorage.removeItem('routines_cache');
+            
+            // Clean any duplicate keys
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.includes('routine') && !key.includes('_cache') && !key.includes('ResetTime') && !key.includes('ResetDate')) {
+                    keysToRemove.push(key);
+                }
+            }
+            
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+                status.innerHTML += `<div style="background: #eef; color: #336; padding: 0.5rem; border-radius: 6px; margin: 0.5rem 0;">Removed: ${key}</div>`;
+            });
+            
+            status.innerHTML += `<div style="background: #efe; color: #363; padding: 1rem; border-radius: 6px;">✅ Cleanup completed</div>`;
+            status.innerHTML += `<div style="background: #efe; color: #363; padding: 1rem; border-radius: 6px;"><strong>Now go to Home tab to see restored routines!</strong></div>`;
         }
     </script>
 </body>
