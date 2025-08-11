@@ -196,21 +196,53 @@ const Auth = {
     
     
     async handleLogout() {
+        console.log('🚪 handleLogout() called');
         try {
+            console.log('🔄 Calling supabase.signOut()...');
             await supabase.signOut();
+            
+            console.log('🔄 Setting currentUser = null...');
             this.currentUser = null;
             this.isAuthenticated = false;
+            
+            console.log('🔄 Calling showAuthScreen()...');
             this.showAuthScreen();
-            console.log('👋 User logged out');
+            
+            console.log('👋 User logged out successfully');
         } catch (error) {
-            console.error('Logout error:', error);
+            console.error('❌ Logout error:', error);
         }
     },
     
     showAuthScreen() {
-        document.getElementById('auth-screen').classList.remove('hide');
-        document.querySelector('.layout').style.display = 'none';
-        document.querySelector('.sidebar-nav').style.display = 'none';
+        console.log('📱 showAuthScreen() called');
+        const authScreen = document.getElementById('auth-screen');
+        const layout = document.querySelector('.layout');
+        const nav = document.querySelector('.sidebar-nav');
+        
+        console.log('🔍 Elements found:', {
+            authScreen: !!authScreen,
+            layout: !!layout,
+            nav: !!nav
+        });
+        
+        if (authScreen) {
+            console.log('🔄 Removing hide class from auth-screen...');
+            authScreen.classList.remove('hide');
+            console.log('✅ Auth screen classes:', authScreen.className);
+        }
+        
+        if (layout) {
+            console.log('🔄 Hiding layout...');
+            layout.style.display = 'none';
+        }
+        
+        if (nav) {
+            console.log('🔄 Hiding navigation...');
+            nav.style.display = 'none';
+        }
+        
+        console.log('✅ showAuthScreen() completed');
     },
     
     hideAuthScreen() {
