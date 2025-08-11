@@ -2012,6 +2012,40 @@
             };
             
             console.log('💡 Type "testDarkMode()" in console to test dark mode toggle');
+            console.log('💡 Type "fixWhiteBoxes()" in console to force fix white containers');
+            
+            // Add manual white box fixer
+            window.fixWhiteBoxes = function() {
+                console.log('🔧 Manually fixing all white boxes...');
+                if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                    // Find and fix ALL white backgrounds
+                    document.querySelectorAll('*').forEach(element => {
+                        const computedStyle = getComputedStyle(element);
+                        if (computedStyle.backgroundColor === 'rgb(255, 255, 255)' || 
+                            computedStyle.backgroundColor === 'white') {
+                            element.style.setProperty('background-color', 'transparent', 'important');
+                            element.style.setProperty('color', '#e0e0e0', 'important');
+                            console.log('🎯 Fixed white element:', element);
+                        }
+                    });
+                    
+                    // Special focus on routine containers
+                    const routineContainers = ['current-routine', 'home-todos', 'active-todos', 'active-goals', 'journal-entries'];
+                    routineContainers.forEach(id => {
+                        const container = document.getElementById(id);
+                        if (container) {
+                            container.querySelectorAll('*').forEach(el => {
+                                el.style.setProperty('background-color', 'transparent', 'important');
+                                el.style.setProperty('color', '#e0e0e0', 'important');
+                            });
+                        }
+                    });
+                    
+                    console.log('✅ White box fixing completed');
+                } else {
+                    console.log('ℹ️ Dark mode not active - activate first');
+                }
+            };
         }
         
         function loadUserPreferences() {
@@ -2196,10 +2230,18 @@
                         /* Routine boxes */
                         .checkbox-group { background: transparent !important; }
                         #current-routine { background: transparent !important; }
+                        #current-routine > * { background: transparent !important; color: #e0e0e0 !important; }
                         #home-todos { background: transparent !important; }
                         #active-todos { background: transparent !important; }
                         #active-goals { background: transparent !important; }
                         #journal-entries { background: transparent !important; }
+                        
+                        /* Force all checkbox items and routine items to be dark */
+                        .checkbox-item, .checkbox-item > *, [class*="routine"] { 
+                            background: transparent !important; 
+                            color: #e0e0e0 !important; 
+                            border-color: #404040 !important;
+                        }
                         
                         /* All divs with inline styles that could be white */
                         div[style*="padding: 1rem"] { color: #e0e0e0 !important; }
@@ -2327,17 +2369,50 @@
                 }
             });
             
-            // Force update routine containers
+            // Force update routine containers - AGGRESSIVE FIX
             const routineContainer = document.getElementById('current-routine');
             if (routineContainer) {
-                routineContainer.style.background = 'transparent';
-                routineContainer.querySelectorAll('div').forEach(div => {
-                    if (div.style.background && div.style.background.includes('#f8f9fa')) {
-                        div.style.background = '#2d2d2d';
-                        div.style.color = '#e0e0e0';
+                console.log('🔧 Forcing routine container to dark mode');
+                routineContainer.style.background = 'transparent !important';
+                
+                // Fix ALL children in routine container
+                routineContainer.querySelectorAll('*').forEach(element => {
+                    const computedStyle = getComputedStyle(element);
+                    const inlineStyle = element.getAttribute('style');
+                    
+                    // Force background to transparent/dark
+                    element.style.setProperty('background', 'transparent', 'important');
+                    element.style.setProperty('background-color', 'transparent', 'important');
+                    element.style.setProperty('color', '#e0e0e0', 'important');
+                    element.style.setProperty('border-color', '#404040', 'important');
+                    
+                    // Special handling for white backgrounds
+                    if (computedStyle.backgroundColor === 'rgb(255, 255, 255)' || 
+                        computedStyle.backgroundColor === 'white' ||
+                        (inlineStyle && (inlineStyle.includes('background: white') || 
+                                        inlineStyle.includes('background: #fff') ||
+                                        inlineStyle.includes('background-color: white')))) {
+                        element.style.setProperty('background-color', 'transparent', 'important');
+                        console.log('🎯 Fixed white background in routine:', element);
                     }
                 });
             }
+            
+            // Also fix any remaining white containers globally
+            document.querySelectorAll('div').forEach(div => {
+                const computedStyle = getComputedStyle(div);
+                if (computedStyle.backgroundColor === 'rgb(255, 255, 255)' || 
+                    computedStyle.backgroundColor === 'white') {
+                    // Check if it's in a routine or important container
+                    if (div.closest('.card') || div.closest('#current-routine') || 
+                        div.classList.contains('checkbox-item') ||
+                        div.classList.contains('checkbox-group')) {
+                        div.style.setProperty('background-color', 'transparent', 'important');
+                        div.style.setProperty('color', '#e0e0e0', 'important');
+                        console.log('🎯 Fixed white background globally:', div);
+                    }
+                }
+            });
         }
         
         function setupDarkModeObserver() {
