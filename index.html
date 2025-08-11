@@ -182,34 +182,77 @@
             }
             
             if (data.access_token && data.user) {
-                // Store session manually
-                localStorage.setItem('supabase.auth.token', JSON.stringify({
+                // Store session manually in multiple places for reliability
+                const sessionData = {
                     access_token: data.access_token,
                     refresh_token: data.refresh_token,
                     user: data.user,
                     created_at: Date.now()
-                }));
+                };
+                
+                localStorage.setItem('supabase.auth.token', JSON.stringify(sessionData));
+                localStorage.setItem('dashfin-logged-in', 'true');
+                localStorage.setItem('dashfin-user-email', data.user.email);
                 
                 if (debugDiv) {
                     debugDiv.innerHTML += `<br>✅ Login successful! User: ${data.user.email}`;
+                    debugDiv.innerHTML += `<br>💾 Session stored in localStorage`;
                 }
+                
+                // Clear the form to prevent confusion
+                document.getElementById('login-email').value = '';
+                document.getElementById('login-password').value = '';
+                
             } else {
                 throw new Error('Invalid login response - no access_token');
             }
             
             if (debugDiv) {
-                debugDiv.innerHTML += `<br>✅ Login successful! Redirecting...`;
+                debugDiv.innerHTML += `<br>✅ Login successful! Showing dashboard...`;
             }
             
-            // Hide auth screen and show dashboard
+            // Force hide auth screen and show dashboard
             const authScreen = document.getElementById('auth-screen');
             const mainContent = document.querySelector('.main-content');
+            const nav = document.querySelector('.sticky-nav');
             
-            if (authScreen) authScreen.style.display = 'none';
-            if (mainContent) mainContent.style.display = 'block';
+            if (debugDiv) {
+                debugDiv.innerHTML += `<br>🔍 Elements found: auth=${!!authScreen}, main=${!!mainContent}, nav=${!!nav}`;
+            }
             
-            // Reload to initialize dashboard
-            setTimeout(() => window.location.reload(), 1000);
+            if (authScreen) {
+                authScreen.style.display = 'none';
+                authScreen.classList.add('hide');
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>✅ Auth screen hidden`;
+                }
+            }
+            
+            if (mainContent) {
+                mainContent.style.display = 'block';
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>✅ Main content shown`;
+                }
+            }
+            
+            if (nav) {
+                nav.style.display = 'flex';
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>✅ Navigation shown`;
+                }
+            }
+            
+            // Try to show dashboard immediately, then reload as fallback
+            if (debugDiv) {
+                debugDiv.innerHTML += `<br>⏳ Dashboard should be visible now. Reloading in 3 seconds...`;
+            }
+            
+            setTimeout(() => {
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>🔄 Reloading to ensure full initialization...`;
+                }
+                window.location.reload();
+            }, 3000);
             
         } catch (error) {
             if (debugDiv) {
