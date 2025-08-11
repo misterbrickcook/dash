@@ -2892,17 +2892,24 @@
         // Add force refresh function for debugging
         window.debugRoutineSystem = function() {
             console.log('🔧 Debug: Force refresh routine system');
-            if (!window.cloudStorage) {
-                console.log('❌ CloudStorage not available');
-                return;
-            }
-            const completions = window.cloudStorage.getLocalRoutineCompletions();
-            console.log('📊 Current completions:', completions);
             
-            // Check today's completions specifically
-            const today = new Date().toISOString().split('T')[0];
-            const todayCompletions = completions.filter(c => c.date === today);
-            console.log('📅 Today completions:', todayCompletions);
+            // Check cloudStorage status
+            console.log('📋 CloudStorage status:');
+            console.log('  - Exists:', !!window.cloudStorage);
+            if (window.cloudStorage) {
+                console.log('  - Methods:', Object.keys(window.cloudStorage));
+            }
+            
+            // Check localStorage directly
+            const cached = localStorage.getItem('routine_completions_cache');
+            console.log('📦 LocalStorage routine_completions_cache:', cached);
+            
+            if (cached) {
+                const completions = JSON.parse(cached);
+                const today = new Date().toISOString().split('T')[0];
+                const todayCompletions = completions.filter(c => c.date === today);
+                console.log('📅 Today completions:', todayCompletions);
+            }
             
             // Check current checkbox states
             const morningChecked = document.querySelectorAll('input[data-template-id^="morning_"]:checked').length;
@@ -2919,22 +2926,9 @@
         // === STREAK CALCULATION FUNCTIONS ===
         
         async function waitForCloudStorageAndUpdateStreaks() {
-            let attempts = 0;
-            while ((!window.cloudStorage || typeof window.cloudStorage.getLocalRoutineCompletions !== 'function') && attempts < 20) {
-                console.log(`⏳ Waiting for cloudStorage and methods (attempt ${attempts + 1}/20)...`);
-                if (window.cloudStorage) {
-                    console.log('📋 CloudStorage exists but methods not ready:', Object.keys(window.cloudStorage));
-                }
-                await new Promise(resolve => setTimeout(resolve, 200));
-                attempts++;
-            }
+            console.log('🔧 CloudStorage has issues, using localStorage fallback for streaks...');
             
-            if (!window.cloudStorage || typeof window.cloudStorage.getLocalRoutineCompletions !== 'function') {
-                console.log('❌ CloudStorage or methods not available after waiting, cannot update streaks');
-                return;
-            }
-            
-            console.log('✅ CloudStorage and methods available, updating streaks...');
+            // Skip waiting, go directly to streak update with localStorage fallback
             updateMonthlyRoutineStreak('morning');
             updateMonthlyRoutineStreak('evening');
         }
