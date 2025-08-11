@@ -141,9 +141,18 @@
             return;
         }
         
-        // Skip Auth waiting, go directly to Supabase login
+        // Try the working desktop login method first
+        if (window.Auth && window.Auth.handleLogin) {
+            if (debugDiv) {
+                debugDiv.innerHTML += `<br>🎯 Using desktop login method (known to work)...`;
+            }
+            window.Auth.handleLogin();
+            return;
+        }
+        
+        // Fallback to direct mobile login
         if (debugDiv) {
-            debugDiv.innerHTML += `<br>🚀 Skipping Auth wait, direct login...`;
+            debugDiv.innerHTML += `<br>🚀 Auth not ready, trying direct mobile login...`;
         }
         directMobileLogin(email, password);
     }
@@ -211,48 +220,90 @@
                 debugDiv.innerHTML += `<br>✅ Login successful! Showing dashboard...`;
             }
             
-            // Force hide auth screen and show dashboard
-            const authScreen = document.getElementById('auth-screen');
-            const mainContent = document.querySelector('.main-content');
-            const nav = document.querySelector('.sticky-nav');
+            // Now properly initialize the application using the same flow as desktop
+            if (debugDiv) {
+                debugDiv.innerHTML += `<br>🔄 Initializing Supabase client with new session...`;
+            }
+            
+            // Initialize Supabase with the new session
+            if (window.initializeSupabase) {
+                window.initializeSupabase();
+            }
+            
+            // Set the session in the Supabase client if available
+            if (window.supabase && window.supabase.setSession) {
+                const sessionData = {
+                    access_token: data.access_token,
+                    refresh_token: data.refresh_token,
+                    user: data.user
+                };
+                window.supabase.setSession(sessionData);
+                
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>✅ Supabase session initialized`;
+                }
+            }
+            
+            // Use the same dashboard initialization flow as desktop
+            if (window.Auth) {
+                window.Auth.isAuthenticated = true;
+                window.Auth.currentUser = data.user;
+                
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>🎯 Using Auth.showDashboard() method...`;
+                }
+                
+                // Hide auth screen using the same method as desktop
+                if (typeof window.Auth.hideAuthScreen === 'function') {
+                    window.Auth.hideAuthScreen();
+                } else {
+                    // Manual fallback
+                    const authScreen = document.getElementById('auth-screen');
+                    if (authScreen) {
+                        authScreen.style.display = 'none';
+                        authScreen.classList.add('hide');
+                    }
+                }
+                
+                // Show dashboard using the same method as desktop
+                if (typeof window.Auth.showDashboard === 'function') {
+                    window.Auth.showDashboard();
+                    if (debugDiv) {
+                        debugDiv.innerHTML += `<br>✅ Dashboard shown via Auth.showDashboard()`;
+                    }
+                }
+            } else {
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>⚠️ Auth object not available, using manual dashboard display...`;
+                }
+                
+                // Manual fallback with proper element display
+                const authScreen = document.getElementById('auth-screen');
+                const mainContent = document.querySelector('.main-content');
+                const nav = document.querySelector('.sticky-nav');
+                
+                if (authScreen) {
+                    authScreen.style.display = 'none';
+                    authScreen.classList.add('hide');
+                }
+                
+                if (mainContent) {
+                    mainContent.style.display = 'block';
+                }
+                
+                if (nav) {
+                    nav.style.display = 'flex';
+                }
+                
+                // Initialize dashboard components
+                if (typeof loadDashboard === 'function') {
+                    loadDashboard();
+                }
+            }
             
             if (debugDiv) {
-                debugDiv.innerHTML += `<br>🔍 Elements found: auth=${!!authScreen}, main=${!!mainContent}, nav=${!!nav}`;
+                debugDiv.innerHTML += `<br>✅ Mobile login complete - dashboard should now be visible!`;
             }
-            
-            if (authScreen) {
-                authScreen.style.display = 'none';
-                authScreen.classList.add('hide');
-                if (debugDiv) {
-                    debugDiv.innerHTML += `<br>✅ Auth screen hidden`;
-                }
-            }
-            
-            if (mainContent) {
-                mainContent.style.display = 'block';
-                if (debugDiv) {
-                    debugDiv.innerHTML += `<br>✅ Main content shown`;
-                }
-            }
-            
-            if (nav) {
-                nav.style.display = 'flex';
-                if (debugDiv) {
-                    debugDiv.innerHTML += `<br>✅ Navigation shown`;
-                }
-            }
-            
-            // Try to show dashboard immediately, then reload as fallback
-            if (debugDiv) {
-                debugDiv.innerHTML += `<br>⏳ Dashboard should be visible now. Reloading in 3 seconds...`;
-            }
-            
-            setTimeout(() => {
-                if (debugDiv) {
-                    debugDiv.innerHTML += `<br>🔄 Reloading to ensure full initialization...`;
-                }
-                window.location.reload();
-            }, 3000);
             
         } catch (error) {
             if (debugDiv) {
