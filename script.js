@@ -76,24 +76,49 @@ const Auth = {
         const loginBtn = document.getElementById('login-btn');
         const passwordField = document.getElementById('login-password');
         const logoutBtn = document.getElementById('logout-btn');
+        const debugDiv = document.getElementById('mobile-debug');
         
         console.log('🔍 Elements found:', { loginBtn: !!loginBtn, passwordField: !!passwordField, logoutBtn: !!logoutBtn });
         
+        // Show debug info on mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile && debugDiv) {
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML = `📱 Mobile detected: ${navigator.userAgent.substring(0, 50)}...`;
+        }
+        
         if (loginBtn) {
-            // Add both click and touch events for mobile compatibility
-            const handleLoginClick = (e) => {
-                console.log('🖱️ Login button activated!');
+            // Simplified event handling for better mobile compatibility
+            const handleLoginEvent = (e) => {
+                console.log('🖱️ Login button pressed!');
                 e.preventDefault();
                 e.stopPropagation();
+                
+                // Mobile debug feedback
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>✅ Button pressed at ${new Date().toTimeString().split(' ')[0]}`;
+                }
+                
+                // Add visual feedback
+                loginBtn.style.transform = 'scale(0.98)';
+                loginBtn.style.backgroundColor = '#0056b3';
+                setTimeout(() => {
+                    loginBtn.style.transform = 'scale(1)';
+                    loginBtn.style.backgroundColor = '';
+                }, 200);
+                
+                // Call login handler
                 this.handleLogin();
             };
             
-            loginBtn.addEventListener('click', handleLoginClick);
+            // Add multiple event listeners for maximum compatibility
+            loginBtn.addEventListener('click', handleLoginEvent, { passive: false });
+            loginBtn.addEventListener('touchend', handleLoginEvent, { passive: false });
+            
+            // Prevent double-tap zoom on iOS
             loginBtn.addEventListener('touchstart', (e) => {
-                console.log('👆 Touch start on login button');
                 e.preventDefault();
-            });
-            loginBtn.addEventListener('touchend', handleLoginClick);
+            }, { passive: false });
         }
         
         if (passwordField) {

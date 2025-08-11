@@ -939,22 +939,40 @@ h3 {
 
 /* Mobile responsive auth screen */
 @media (max-width: 768px) {
+    .auth-screen {
+        padding: 1rem;
+    }
+    
     .auth-container {
         padding: 1.5rem;
-        width: 95%;
-        margin: 1rem;
+        width: calc(100% - 2rem);
+        margin: 0;
         border-radius: 8px;
+        max-width: none;
     }
     
     .auth-btn {
         padding: 1.25rem;
-        font-size: 1.1rem;
-        margin-top: 0.5rem;
+        font-size: 1.2rem;
+        margin-top: 1rem;
+        min-height: 60px;
+        border-radius: 8px;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
     }
     
     .form-group input {
-        padding: 1rem;
-        font-size: 1.1rem;
+        padding: 1.25rem;
+        font-size: 1.2rem;
+        min-height: 20px;
+        border-radius: 8px;
+        border: 2px solid var(--input-border);
+    }
+    
+    .auth-header h2 {
+        font-size: 1.8rem;
     }
 }
 
@@ -1049,7 +1067,7 @@ h3 {
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     /* Mobile-specific fixes */
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -1057,6 +1075,9 @@ h3 {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .auth-btn:hover {
