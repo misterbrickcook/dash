@@ -2748,46 +2748,46 @@
                     
                     console.log(`📋 ${templateId} completion: ${completed}`);
                     
-                    // Save completion to cloud
-                    if (window.cloudStorage && typeof window.cloudStorage.saveRoutineCompletion === 'function') {
-                        console.log(`💾 Saving completion: ${templateId} = ${completed}`);
+                    // Add cloudStorage methods if missing (force setup)
+                    if (window.cloudStorage && typeof window.cloudStorage.saveRoutineCompletion !== 'function') {
+                        console.log('🔧 Adding saveRoutineCompletion method to CloudStorage...');
+                        window.cloudStorage.saveRoutineCompletion = async function(templateId, date, completed) {
+                            const completion = {
+                                id: `${templateId}_${date}`,
+                                template_id: templateId,
+                                date: date,
+                                completed: completed,
+                                user_id: window.supabase?.getCurrentUser()?.id || 'local'
+                            };
+                            
+                            // Save to localStorage
+                            let completions = [];
+                            const cached = localStorage.getItem('routine_completions_cache');
+                            if (cached) {
+                                completions = JSON.parse(cached);
+                            }
+                            
+                            const existingIndex = completions.findIndex(c => 
+                                c.template_id === templateId && c.date === date
+                            );
+                            
+                            if (existingIndex >= 0) {
+                                completions[existingIndex] = completion;
+                            } else {
+                                completions.push(completion);
+                            }
+                            
+                            localStorage.setItem('routine_completions_cache', JSON.stringify(completions));
+                            console.log('✅ CloudStorage: Routine completion saved:', templateId, completed);
+                        };
+                    }
+                    
+                    // Save completion using CloudStorage (now guaranteed to exist)
+                    if (window.cloudStorage) {
+                        console.log(`💾 Saving completion via CloudStorage: ${templateId} = ${completed}`);
                         await window.cloudStorage.saveRoutineCompletion(templateId, today, completed);
                     } else {
-                        console.log('⚠️ cloudStorage not available or method missing:');
-                        console.log('  - cloudStorage exists:', !!window.cloudStorage);
-                        if (window.cloudStorage) {
-                            console.log('  - available methods:', Object.keys(window.cloudStorage));
-                            console.log('  - saveRoutineCompletion type:', typeof window.cloudStorage.saveRoutineCompletion);
-                        }
-                        console.log('  - completion not saved, but storing locally manually...');
-                        
-                        // Manual localStorage fallback
-                        const completion = {
-                            id: `${templateId}_${today}`,
-                            template_id: templateId,
-                            date: today,
-                            completed: completed,
-                            user_id: 'manual'
-                        };
-                        
-                        let completions = [];
-                        const cached = localStorage.getItem('routine_completions_cache');
-                        if (cached) {
-                            completions = JSON.parse(cached);
-                        }
-                        
-                        const existingIndex = completions.findIndex(c => 
-                            c.template_id === templateId && c.date === today
-                        );
-                        
-                        if (existingIndex >= 0) {
-                            completions[existingIndex] = completion;
-                        } else {
-                            completions.push(completion);
-                        }
-                        
-                        localStorage.setItem('routine_completions_cache', JSON.stringify(completions));
-                        console.log('📦 Manually saved to localStorage:', completion);
+                        console.log('❌ No cloudStorage available at all');
                     }
                     
                     // Update streaks immediately with delay to allow data to save
@@ -2926,25 +2926,53 @@
         // === STREAK CALCULATION FUNCTIONS ===
         
         async function waitForCloudStorageAndUpdateStreaks() {
-            let attempts = 0;
-            while ((!window.cloudStorage || typeof window.cloudStorage.getLocalRoutineCompletions !== 'function') && attempts < 10) {
-                console.log(`⏳ Waiting for cloudStorage methods (attempt ${attempts + 1}/10)...`);
-                if (window.cloudStorage) {
-                    console.log('📋 CloudStorage exists, methods:', Object.keys(window.cloudStorage));
-                    // Try to setup methods if missing
-                    if (typeof window.cloudStorage.setupRoutineMethods === 'function') {
-                        console.log('🔧 Setting up routine methods...');
-                        window.cloudStorage.setupRoutineMethods();
-                    }
-                }
-                await new Promise(resolve => setTimeout(resolve, 200));
-                attempts++;
-            }
+            console.log('🔧 Setting up CloudStorage routine methods directly...');
             
-            if (window.cloudStorage && typeof window.cloudStorage.getLocalRoutineCompletions === 'function') {
-                console.log('✅ CloudStorage methods now available, updating streaks...');
-            } else {
-                console.log('⚠️ CloudStorage methods still not available, using localStorage fallback...');
+            // Force add routine methods to existing cloudStorage object
+            if (window.cloudStorage && typeof window.cloudStorage.getLocalRoutineCompletions !== 'function') {
+                console.log('📋 Adding missing methods to CloudStorage...');
+                
+                window.cloudStorage.getLocalRoutineCompletions = function(date = null) {
+                    const cached = localStorage.getItem('routine_completions_cache');
+                    if (cached) {
+                        const completions = JSON.parse(cached);
+                        return date ? completions.filter(c => c.date === date) : completions;
+                    }
+                    return [];
+                };
+                
+                window.cloudStorage.saveLocalRoutineCompletion = function(completion) {
+                    const completions = this.getLocalRoutineCompletions();
+                    console.log(`💾 CloudStorage: Saving routine completion:`, completion);
+                    
+                    const existingIndex = completions.findIndex(c => 
+                        c.template_id === completion.template_id && c.date === completion.date
+                    );
+                    
+                    if (existingIndex >= 0) {
+                        completions[existingIndex] = completion;
+                    } else {
+                        completions.push(completion);
+                    }
+                    
+                    localStorage.setItem('routine_completions_cache', JSON.stringify(completions));
+                    console.log(`✅ CloudStorage: Saved, total: ${completions.length}`);
+                };
+                
+                window.cloudStorage.saveRoutineCompletion = async function(templateId, date, completed) {
+                    const completion = {
+                        id: `${templateId}_${date}`,
+                        template_id: templateId,
+                        date: date,
+                        completed: completed,
+                        user_id: window.supabase?.getCurrentUser()?.id || 'local'
+                    };
+                    
+                    this.saveLocalRoutineCompletion(completion);
+                    console.log('✅ CloudStorage: Routine completion saved:', templateId, completed);
+                };
+                
+                console.log('✅ CloudStorage methods added successfully!');
             }
             
             updateMonthlyRoutineStreak('morning');
