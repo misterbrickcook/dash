@@ -186,6 +186,21 @@ class SupabaseClient {
 
         try {
             const response = await fetch(url, options);
+            
+            // Check if token expired
+            if (response.status === 401) {
+                console.log('🔄 JWT expired, redirecting to login...');
+                this.clearSession();
+                // Force redirect to auth screen
+                if (window.Auth && window.Auth.showAuthScreen) {
+                    window.Auth.showAuthScreen();
+                } else {
+                    // Fallback: reload page
+                    window.location.reload();
+                }
+                throw new Error('Session expired - please login again');
+            }
+            
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error(`Supabase ${response.status} Error:`, errorText);

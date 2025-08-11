@@ -60,6 +60,9 @@ const Auth = {
             this.isAuthenticated = true;
             this.hideAuthScreen();
             this.showDashboard();
+            
+            // Make Auth available globally for session handling
+            window.Auth = this;
         } else {
             this.showAuthScreen();
         }
