@@ -938,3 +938,157 @@ h3 {
         grid-template-columns: 1fr;
     }
 }
+
+/* === MOTIVATION SLIDESHOW STYLES === */
+.slideshow-container {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px var(--shadow);
+}
+
+.motivational-slide {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+    min-height: 300px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.5s ease-in-out;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.motivational-slide.active {
+    display: flex;
+}
+
+.motivational-slide div:first-child {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    line-height: 1.2;
+    max-width: 90%;
+}
+
+.motivational-slide div:last-child {
+    font-size: 1rem;
+    font-style: italic;
+    opacity: 0.9;
+}
+
+.slide-indicators {
+    display: inline-flex;
+    gap: 0.5rem;
+    padding: 1rem 0;
+}
+
+.indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ccc;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.indicator.active {
+    background: #333;
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.indicator:hover {
+    opacity: 0.8;
+    transform: scale(1.1);
+}
+
+#prevSlide, #nextSlide {
+    background: transparent;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#prevSlide:hover, #nextSlide:hover {
+    background: var(--hover-bg);
+    color: #333;
+}
+
+#autoPlayToggle {
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #e0e0e0;
+    background: #000;
+    color: white;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+#autoPlayToggle:hover {
+    opacity: 0.9;
+}
+
+#slideCounter {
+    font-size: 0.8rem;
+    color: #666;
+    min-width: 50px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* === RESPONSIVE SLIDESHOW === */
+@media (max-width: 768px) {
+    .motivational-slide {
+        padding: 2rem 1rem;
+        min-height: 250px;
+    }
+    
+    .motivational-slide div:first-child {
+        font-size: 1.5rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .card-header > div {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .motivational-slide {
+        padding: 1.5rem 1rem;
+        min-height: 200px;
+    }
+    
+    .motivational-slide div:first-child {
+        font-size: 1.2rem;
+        line-height: 1.3;
+    }
+    
+    .motivational-slide div:last-child {
+        font-size: 0.9rem;
+    }
+}

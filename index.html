@@ -177,14 +177,92 @@
 
         <!-- === ⚡ MOTIVATION TAB === -->
         <div class="tab-content" id="motivation">
+            <!-- 🎬 Motivations-Diashow -->
             <section class="card">
                 <div class="card-header">
-                    <h2>⚡ Daily Motivation</h2>
+                    <h2>⚡ Tägliche Motivation</h2>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button id="prevSlide" class="btn btn-small" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15,18 9,12 15,6"></polyline>
+                            </svg>
+                        </button>
+                        <div id="slideCounter" style="font-size: 0.8rem; color: #666; min-width: 50px; text-align: center;">1/5</div>
+                        <button id="nextSlide" class="btn btn-small" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9,18 15,12 9,6"></polyline>
+                            </svg>
+                        </button>
+                        <button id="autoPlayToggle" class="btn btn-small" style="padding: 0.3rem 0.6rem; border: 1px solid #e0e0e0; background: #000; color: white; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Auto</button>
+                    </div>
                 </div>
                 
-                <div style="text-align: center; color: #666; padding: 2rem;">
-                    💪 Motivation system coming soon!
+                <!-- Slideshow Container -->
+                <div class="slideshow-container" style="position: relative; max-width: 800px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+                    
+                    <!-- Slide 1 -->
+                    <div class="motivational-slide active" style="display: flex; text-align: center; padding: 3rem 2rem; min-height: 300px; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                            Deine Träume sind größer als deine Ausreden
+                        </div>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
+                            — Unbekannt
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 2 -->
+                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                            Erfolg ist die Summe kleiner Anstrengungen
+                        </div>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
+                            — Robert Collier
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 3 -->
+                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                            Der beste Zeitpunkt war gestern.<br>Der zweitbeste ist jetzt.
+                        </div>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
+                            — Chinesisches Sprichwort
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 4 -->
+                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        <div style="color: white; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                            Große Träume brauchen große Taten
+                        </div>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem; font-style: italic;">
+                            — Unbekannt
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 5 -->
+                    <div class="motivational-slide" style="display: none; text-align: center; padding: 3rem 2rem; min-height: 300px; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                        <div style="color: #333; font-size: 2rem; font-weight: 600; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            Du wirst morgen sein, was du heute denkst
+                        </div>
+                        <div style="color: #666; font-size: 1rem; font-style: italic;">
+                            — Buddha
+                        </div>
+                    </div>
+                    
                 </div>
+                
+                <!-- Slide Indicators -->
+                <div style="text-align: center; margin-top: 1rem;">
+                    <div class="slide-indicators" style="display: inline-flex; gap: 0.5rem;">
+                        <div class="indicator active" data-slide="0" style="width: 10px; height: 10px; border-radius: 50%; background: #333; cursor: pointer; opacity: 1; transition: all 0.3s ease;"></div>
+                        <div class="indicator" data-slide="1" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5; transition: all 0.3s ease;"></div>
+                        <div class="indicator" data-slide="2" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5; transition: all 0.3s ease;"></div>
+                        <div class="indicator" data-slide="3" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5; transition: all 0.3s ease;"></div>
+                        <div class="indicator" data-slide="4" style="width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; opacity: 0.5; transition: all 0.3s ease;"></div>
+                    </div>
+                </div>
+                
             </section>
         </div>
 
@@ -244,10 +322,12 @@
                 setupRoutineToggles();
                 await initializeStreaks();
                 displayDailyQuote();
+                initializeMotivationSlideshow();
             } else {
                 // Even without database, setup filter tabs
                 setupFilterTabs();
                 displayDailyQuote();
+                initializeMotivationSlideshow();
             }
             
             // Initialize Lucide icons
@@ -1674,6 +1754,137 @@
                 streakEl.textContent = Math.max(0, currentStreak - 1);
                 console.log(`⚡ Instant streak update: ${routineType} -1`);
             }
+        }
+        
+        // === MOTIVATION SLIDESHOW SYSTEM ===
+        let currentSlide = 0;
+        let autoPlayInterval = null;
+        let isAutoPlaying = true;
+        
+        function showSlide(slideIndex) {
+            const slides = document.querySelectorAll('.motivational-slide');
+            const indicators = document.querySelectorAll('.indicator');
+            const slideCounter = document.getElementById('slideCounter');
+            
+            // Hide all slides
+            slides.forEach(slide => {
+                slide.style.display = 'none';
+            });
+            
+            // Reset all indicators
+            indicators.forEach(indicator => {
+                indicator.style.background = '#ccc';
+                indicator.style.opacity = '0.5';
+            });
+            
+            // Show current slide
+            if (slides[slideIndex]) {
+                slides[slideIndex].style.display = 'flex';
+            }
+            
+            // Highlight current indicator
+            if (indicators[slideIndex]) {
+                indicators[slideIndex].style.background = '#333';
+                indicators[slideIndex].style.opacity = '1';
+            }
+            
+            // Update counter
+            if (slideCounter) {
+                slideCounter.textContent = `${slideIndex + 1}/${slides.length}`;
+            }
+            
+            currentSlide = slideIndex;
+        }
+        
+        function nextSlide() {
+            const slides = document.querySelectorAll('.motivational-slide');
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }
+        
+        function prevSlide() {
+            const slides = document.querySelectorAll('.motivational-slide');
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            showSlide(currentSlide);
+        }
+        
+        function toggleAutoPlay() {
+            const autoPlayBtn = document.getElementById('autoPlayToggle');
+            
+            if (isAutoPlaying) {
+                // Stop auto play
+                if (autoPlayInterval) {
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = null;
+                }
+                isAutoPlaying = false;
+                autoPlayBtn.textContent = 'Play';
+                autoPlayBtn.style.background = 'transparent';
+                autoPlayBtn.style.color = '#666';
+            } else {
+                // Start auto play
+                autoPlayInterval = setInterval(nextSlide, 4000); // 4 seconds
+                isAutoPlaying = true;
+                autoPlayBtn.textContent = 'Auto';
+                autoPlayBtn.style.background = '#000';
+                autoPlayBtn.style.color = 'white';
+            }
+        }
+        
+        function initializeMotivationSlideshow() {
+            // Show first slide
+            showSlide(0);
+            
+            // Start auto play
+            if (isAutoPlaying) {
+                autoPlayInterval = setInterval(nextSlide, 4000);
+            }
+            
+            // Add event listeners
+            const nextBtn = document.getElementById('nextSlide');
+            const prevBtn = document.getElementById('prevSlide');
+            const autoPlayBtn = document.getElementById('autoPlayToggle');
+            
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    nextSlide();
+                    // Reset auto play timer
+                    if (isAutoPlaying) {
+                        clearInterval(autoPlayInterval);
+                        autoPlayInterval = setInterval(nextSlide, 4000);
+                    }
+                });
+            }
+            
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    prevSlide();
+                    // Reset auto play timer
+                    if (isAutoPlaying) {
+                        clearInterval(autoPlayInterval);
+                        autoPlayInterval = setInterval(nextSlide, 4000);
+                    }
+                });
+            }
+            
+            if (autoPlayBtn) {
+                autoPlayBtn.addEventListener('click', toggleAutoPlay);
+            }
+            
+            // Add click events to indicators
+            const indicators = document.querySelectorAll('.indicator');
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    showSlide(index);
+                    // Reset auto play timer
+                    if (isAutoPlaying) {
+                        clearInterval(autoPlayInterval);
+                        autoPlayInterval = setInterval(nextSlide, 4000);
+                    }
+                });
+            });
+            
+            console.log('✅ Motivational slideshow initialized');
         }
     </script>
 </body>
