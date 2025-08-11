@@ -2669,8 +2669,8 @@
                 console.log('📋 Loading routine templates...');
                 
                 // Ensure cloudStorage is available
-                if (!window.cloudStorage) {
-                    console.log('⚠️ cloudStorage not available, using default templates');
+                if (!window.cloudStorage || typeof window.cloudStorage.getRoutineTemplates !== 'function') {
+                    console.log('⚠️ cloudStorage not available or method missing, using default templates');
                     const defaultTemplates = [
                         {id: 'morning_1', text: '💧 Glas Wasser trinken', routine_type: 'morning', order_index: 1},
                         {id: 'morning_2', text: '🧘 5 Min Meditation', routine_type: 'morning', order_index: 2},
@@ -2749,10 +2749,10 @@
                     console.log(`📋 ${templateId} completion: ${completed}`);
                     
                     // Save completion to cloud
-                    if (window.cloudStorage) {
+                    if (window.cloudStorage && typeof window.cloudStorage.saveRoutineCompletion === 'function') {
                         await window.cloudStorage.saveRoutineCompletion(templateId, today, completed);
                     } else {
-                        console.log('⚠️ cloudStorage not available, completion not saved');
+                        console.log('⚠️ cloudStorage not available or method missing, completion not saved');
                     }
                     
                     // Update streaks immediately with delay to allow data to save
@@ -2804,8 +2804,8 @@
         
         async function loadTodayRoutineCompletions() {
             try {
-                if (!window.cloudStorage) {
-                    console.log('⚠️ cloudStorage not available for loading completions');
+                if (!window.cloudStorage || typeof window.cloudStorage.getRoutineCompletions !== 'function') {
+                    console.log('⚠️ cloudStorage not available or method missing for loading completions');
                     return;
                 }
                 

@@ -189,18 +189,12 @@ class SupabaseClient {
             
             // Check if token expired
             if (response.status === 401) {
-                console.log('🔄 JWT expired, redirecting to login...');
+                console.log('🔄 JWT expired, forcing logout...');
                 this.clearSession();
                 
-                // Force redirect to auth screen immediately
-                setTimeout(() => {
-                    if (window.Auth && window.Auth.showAuthScreen) {
-                        window.Auth.showAuthScreen();
-                    } else {
-                        // Fallback: reload page to show auth screen
-                        window.location.reload();
-                    }
-                }, 100);
+                // Force immediate logout and reload
+                localStorage.clear(); // Clear all local storage
+                window.location.reload(); // Force page reload to show auth
                 
                 throw new Error('Session expired - please login again');
             }
