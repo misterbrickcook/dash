@@ -268,23 +268,54 @@
                     debugDiv.innerHTML += `<br>⚠️ Auth object not available, using manual dashboard display...`;
                 }
                 
-                // Manual fallback with proper element display
+                // Manual fallback with comprehensive element display
                 const authScreen = document.getElementById('auth-screen');
                 const mainContent = document.querySelector('.main-content');
                 const nav = document.querySelector('.sticky-nav');
                 
+                console.log('🔍 Elements found:', { 
+                    authScreen: !!authScreen, 
+                    mainContent: !!mainContent, 
+                    nav: !!nav 
+                });
+                
                 if (authScreen) {
                     authScreen.style.display = 'none';
                     authScreen.classList.add('hide');
+                    console.log('✅ Auth screen hidden');
                 }
                 
                 if (mainContent) {
                     mainContent.style.display = 'block';
+                    mainContent.style.visibility = 'visible';
+                    mainContent.classList.remove('hide');
+                    console.log('✅ Main content shown');
                 }
                 
                 if (nav) {
                     nav.style.display = 'flex';
+                    nav.style.visibility = 'visible';
+                    nav.classList.remove('hide');
+                    console.log('✅ Navigation shown');
                 }
+                
+                // Force remove any global hide classes
+                document.body.classList.remove('hide-dashboard');
+                document.documentElement.classList.remove('hide-dashboard');
+                
+                // Trigger dashboard reload after successful mobile login
+                setTimeout(() => {
+                    if (debugDiv) {
+                        debugDiv.innerHTML += `<br>🔄 Triggering dashboard components...`;
+                    }
+                    
+                    // Trigger navigation to home tab to ensure visibility
+                    const homeNav = document.querySelector('[data-tab="home"]');
+                    if (homeNav) {
+                        homeNav.click();
+                        console.log('✅ Home tab activated');
+                    }
+                }, 200);
                 
                 // Initialize dashboard components
                 if (typeof loadDashboard === 'function') {
