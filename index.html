@@ -776,6 +776,18 @@
             // Add modal to page
             document.body.insertAdjacentHTML('beforeend', modalHTML);
             
+            // Apply dark mode if active
+            if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                const modal = document.getElementById('todo-modal');
+                modal.style.background = 'rgba(0,0,0,0.8)';
+                const modalContent = modal.querySelector('div');
+                if (modalContent) {
+                    modalContent.style.background = '#2d2d2d';
+                    modalContent.style.color = '#e0e0e0';
+                    modalContent.style.borderColor = '#404040';
+                }
+            }
+            
             // Set default date to today and time to 20:00
             document.getElementById('todo-date-input').value = new Date().toISOString().split('T')[0];
             document.getElementById('todo-time-input').value = '20:00';
@@ -1084,6 +1096,18 @@
             
             // Add modal to page
             document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Apply dark mode if active
+            if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                const modal = document.getElementById('goal-modal');
+                modal.style.background = 'rgba(0,0,0,0.8)';
+                const modalContent = modal.querySelector('div');
+                if (modalContent) {
+                    modalContent.style.background = '#2d2d2d';
+                    modalContent.style.color = '#e0e0e0';
+                    modalContent.style.borderColor = '#404040';
+                }
+            }
             
             // Focus on title input
             document.getElementById('goal-title-input').focus();
@@ -1413,6 +1437,18 @@
             
             // Add modal to page
             document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Apply dark mode if active
+            if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                const modal = document.getElementById('journal-modal');
+                modal.style.background = 'rgba(0,0,0,0.8)';
+                const modalContent = modal.querySelector('div');
+                if (modalContent) {
+                    modalContent.style.background = '#2d2d2d';
+                    modalContent.style.color = '#e0e0e0';
+                    modalContent.style.borderColor = '#404040';
+                }
+            }
             
             // Set default title to today's date
             const today = new Date().toLocaleDateString('de-DE', {
@@ -2067,21 +2103,106 @@
                 // Inject dynamic dark mode CSS
                 const darkModeCSS = `
                     <style id="dynamic-theme-style">
+                        /* Base styles */
                         body { background-color: #1a1a1a !important; color: #e0e0e0 !important; }
-                        .card { background: #2d2d2d !important; border-color: #404040 !important; }
+                        .card { background: #2d2d2d !important; border-color: #404040 !important; color: #e0e0e0 !important; }
                         .sticky-nav { background: #2d2d2d !important; border-bottom-color: #404040 !important; }
+                        
+                        /* Navigation */
                         .nav-link { color: #e0e0e0 !important; }
+                        .nav-link:hover { color: #ffffff !important; background: #404040 !important; }
                         .nav-link.active { background: #0056b3 !important; color: #ffffff !important; }
+                        
+                        /* Form elements */
                         input, textarea, select { background: #404040 !important; color: #e0e0e0 !important; border-color: #555555 !important; }
+                        input::placeholder, textarea::placeholder { color: #b0b0b0 !important; }
+                        
+                        /* Text elements */
                         h1, h2, h3, h4, h5, h6 { color: #e0e0e0 !important; }
+                        p, span, div, label { color: #e0e0e0 !important; }
+                        
+                        /* Buttons */
+                        button { background: #404040 !important; color: #e0e0e0 !important; border-color: #555555 !important; }
+                        button:hover { background: #555555 !important; }
+                        .btn-primary { background: #0056b3 !important; color: #ffffff !important; }
+                        .btn-success { background: #28a745 !important; color: #ffffff !important; }
+                        .btn-info { background: #17a2b8 !important; color: #ffffff !important; }
+                        .btn-danger { background: #dc3545 !important; color: #ffffff !important; }
+                        
+                        /* Checkboxes and todos */
+                        .checkbox-item { border-bottom-color: #404040 !important; color: #e0e0e0 !important; }
+                        .checkbox-item label { color: #e0e0e0 !important; }
+                        .todo-category { color: #b0b0b0 !important; }
+                        
+                        /* Modals */
+                        #todo-modal > div, #goal-modal > div, #journal-modal > div { 
+                            background: #2d2d2d !important; color: #e0e0e0 !important; border-color: #404040 !important; 
+                        }
+                        
+                        /* Filters and tabs */
+                        .filter-tab, .goal-filter-tab, .journal-filter-tab { 
+                            background: #404040 !important; color: #e0e0e0 !important; border-color: #555555 !important; 
+                        }
+                        .filter-tab.active, .goal-filter-tab.active, .journal-filter-tab.active { 
+                            background: #007bff !important; color: #ffffff !important; 
+                        }
+                        .filter-tabs, .goal-filter-tabs, .journal-filter-tabs { 
+                            border-bottom-color: #404040 !important; 
+                        }
+                        
+                        /* Streak tiles */
+                        .streak-tile { background: #404040 !important; border-color: #555555 !important; color: #e0e0e0 !important; }
+                        .streak-number { color: #ffffff !important; }
+                        .streak-label { color: #e0e0e0 !important; }
+                        .streak-date { color: #b0b0b0 !important; }
+                        
+                        /* Quote section */
+                        #dailyQuoteText { color: #e0e0e0 !important; }
+                        #dailyQuoteAuthor { color: #b0b0b0 !important; }
+                        
+                        /* Slideshow */
+                        .slideshow-container { background: #2d2d2d !important; border-color: #404040 !important; }
+                        #slideCounter { color: #b0b0b0 !important; }
+                        .indicator { background: #b0b0b0 !important; }
+                        .indicator.active { background: #ffffff !important; }
+                        
+                        /* Settings */
                         .settings-section { background: #2d2d2d !important; border-color: #404040 !important; }
+                        .settings-section-title { color: #e0e0e0 !important; border-bottom-color: #404040 !important; }
+                        .setting-item { border-bottom-color: #404040 !important; }
                         .setting-label { color: #e0e0e0 !important; }
                         .setting-description { color: #b0b0b0 !important; }
-                        .slideshow-container { background: #2d2d2d !important; border-color: #404040 !important; }
-                        .checkbox-item { border-bottom-color: #404040 !important; }
-                        .streak-tile { background: #404040 !important; border-color: #555555 !important; }
-                        #slideCounter { color: #b0b0b0 !important; }
-                        #dailyQuoteAuthor { color: #b0b0b0 !important; }
+                        
+                        /* Toggle switch */
+                        .toggle-slider { background: #555555 !important; }
+                        input:checked + .toggle-slider { background: #0056b3 !important; }
+                        
+                        /* Goals and journal entries */
+                        .goal-card, .journal-entry { background: #2d2d2d !important; border-color: #404040 !important; color: #e0e0e0 !important; }
+                        
+                        /* Loading placeholders */
+                        .loading-placeholder { color: #b0b0b0 !important; }
+                        
+                        /* Specific inline styled elements */
+                        div[style*="color: #666"], span[style*="color: #666"] { color: #b0b0b0 !important; }
+                        div[style*="color: #6c757d"], span[style*="color: #6c757d"] { color: #b0b0b0 !important; }
+                        div[style*="color: #495057"], span[style*="color: #495057"] { color: #e0e0e0 !important; }
+                        div[style*="border-bottom: 1px solid #eee"] { border-bottom-color: #404040 !important; }
+                        
+                        /* Focus states */
+                        .focus-option { background: #404040 !important; color: #e0e0e0 !important; border-color: #555555 !important; }
+                        .focus-option.active { background: #0056b3 !important; color: #ffffff !important; }
+                        
+                        /* Card headers */
+                        .card-header { color: #e0e0e0 !important; border-bottom-color: #404040 !important; }
+                        
+                        /* Override any remaining white backgrounds */
+                        * { 
+                            scrollbar-color: #555555 #2d2d2d !important;
+                        }
+                        *::-webkit-scrollbar { background: #2d2d2d !important; }
+                        *::-webkit-scrollbar-thumb { background: #555555 !important; }
+                        *::-webkit-scrollbar-track { background: #2d2d2d !important; }
                     </style>
                 `;
                 document.head.insertAdjacentHTML('beforeend', darkModeCSS);
@@ -2091,7 +2212,42 @@
                 document.body.classList.remove('dark-theme');
             }
             
+            // Apply theme to dynamically created elements
+            if (isDark) {
+                applyDarkModeToExistingElements();
+            }
+            
             console.log(`🔍 Dark mode ${isDark ? 'enabled' : 'disabled'} - theme attribute:`, document.documentElement.getAttribute('data-theme'));
+        }
+        
+        function applyDarkModeToExistingElements() {
+            // Apply to any existing modals
+            document.querySelectorAll('[id$="-modal"]').forEach(modal => {
+                modal.style.background = 'rgba(0,0,0,0.8)';
+                const modalContent = modal.querySelector('div');
+                if (modalContent) {
+                    modalContent.style.background = '#2d2d2d';
+                    modalContent.style.color = '#e0e0e0';
+                    modalContent.style.borderColor = '#404040';
+                }
+            });
+            
+            // Apply to filter tabs that might be dynamically generated
+            document.querySelectorAll('.filter-tab, .goal-filter-tab, .journal-filter-tab').forEach(tab => {
+                if (!tab.classList.contains('active')) {
+                    tab.style.background = '#404040';
+                    tab.style.color = '#e0e0e0';
+                    tab.style.borderColor = '#555555';
+                }
+            });
+            
+            // Apply to routine checkboxes
+            document.querySelectorAll('.checkbox-item').forEach(item => {
+                item.style.borderBottomColor = '#404040';
+                item.style.color = '#e0e0e0';
+                const label = item.querySelector('label');
+                if (label) label.style.color = '#e0e0e0';
+            });
         }
         
         async function requestNotificationPermission() {
