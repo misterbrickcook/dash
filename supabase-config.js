@@ -120,10 +120,14 @@ class SupabaseClient {
         // Update headers for authenticated requests
         this.headers.Authorization = `Bearer ${session.access_token}`;
         
+        // Add timestamp for expiration check
+        session.created_at = Date.now();
+        
         // Store in localStorage
         localStorage.setItem('supabase.auth.token', JSON.stringify(session));
         
         console.log('✅ User authenticated:', this.user.email);
+        console.log('⏰ Session expires in 24 hours');
     }
     
     clearSession() {
@@ -139,6 +143,17 @@ class SupabaseClient {
             const stored = localStorage.getItem('supabase.auth.token');
             if (stored) {
                 const session = JSON.parse(stored);
+                
+                // Check if session expired (24 hours)
+                const sessionAge = Date.now() - (session.created_at || 0);
+                const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+                
+                if (sessionAge > maxAge) {
+                    console.log('🕐 Session expired after 24 hours');
+                    localStorage.removeItem('supabase.auth.token');
+                    return;
+                }
+                
                 // Check if session is still valid (basic check)
                 if (session.access_token && session.user) {
                     this.setSession(session);
