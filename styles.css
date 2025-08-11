@@ -623,7 +623,7 @@ input:focus, textarea:focus, select:focus {
     font-size: var(--font-size-sm);
 }
 
-/* === HIDE UNTIL PROPERLY STYLED === */
-.sticky-nav {
-    display: none;
+/* === ENSURE SIDEBAR IS VISIBLE === */
+.sidebar-nav {
+    display: flex !important;
 }

@@ -235,7 +235,7 @@
                 // Manual fallback with comprehensive element display
                 const authScreen = document.getElementById('auth-screen');
                 const mainContent = document.querySelector('.main-content');
-                const nav = document.querySelector('.sticky-nav');
+                const nav = document.querySelector('.sidebar-nav');
                 
                 console.log('🔍 Elements found:', { 
                     authScreen: !!authScreen, 
@@ -372,9 +372,13 @@
     </script>
 </head>
 <body>
-    <!-- === BEAUTIFUL STICKY NAVIGATION === -->
-    <nav class="sticky-nav" style="display: none;">
-        <div class="nav-container">
+    <!-- === MODERN SIDEBAR NAVIGATION === -->
+    <nav class="sidebar-nav" style="display: none;">
+        <div class="nav-brand">
+            <div class="nav-brand-icon">🚀</div>
+            <h3>DashFin</h3>
+        </div>
+        <div class="nav-links">
             <div class="nav-link active" data-tab="home">
                 <span class="nav-icon">🏠</span>
                 <span>Home</span>
@@ -868,7 +872,7 @@
                         // Hide auth screen and show dashboard immediately
                         const authScreen = document.getElementById('auth-screen');
                         const mainContent = document.querySelector('.main-content');
-                        const nav = document.querySelector('.sticky-nav');
+                        const nav = document.querySelector('.sidebar-nav');
                         
                         if (authScreen) {
                             authScreen.style.display = 'none';
@@ -2722,7 +2726,7 @@
                         /* Base styles */
                         body { background-color: #1a1a1a !important; color: #e0e0e0 !important; }
                         .card { background: #2d2d2d !important; border-color: #404040 !important; color: #e0e0e0 !important; }
-                        .sticky-nav { background: #2d2d2d !important; border-bottom-color: #404040 !important; }
+                        .sidebar-nav { background: #2d2d2d !important; border-bottom-color: #404040 !important; }
                         
                         /* Navigation */
                         .nav-link { color: #e0e0e0 !important; }

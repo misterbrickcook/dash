@@ -209,13 +209,13 @@ const Auth = {
     
     showAuthScreen() {
         document.getElementById('auth-screen').classList.remove('hide');
-        document.querySelector('.main-content').style.display = 'none';
-        document.querySelector('.sticky-nav').style.display = 'none';
+        document.querySelector('.layout').style.display = 'none';
+        document.querySelector('.sidebar-nav').style.display = 'none';
     },
     
     hideAuthScreen() {
         document.getElementById('auth-screen').classList.add('hide');
-        document.querySelector('.sticky-nav').style.display = 'block';
+        document.querySelector('.sidebar-nav').style.display = 'flex';
     },
     
     showDashboard() {
