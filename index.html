@@ -2054,29 +2054,44 @@
         function applyTheme(isDark) {
             console.log(`🎨 Applying theme: ${isDark ? 'dark' : 'light'}`);
             
+            // Remove existing dynamic style
+            const existingStyle = document.getElementById('dynamic-theme-style');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+            
             if (isDark) {
                 document.documentElement.setAttribute('data-theme', 'dark');
                 document.body.classList.add('dark-theme');
-                document.body.style.backgroundColor = 'var(--bg-primary)';
-                document.body.style.color = 'var(--text-primary)';
+                
+                // Inject dynamic dark mode CSS
+                const darkModeCSS = `
+                    <style id="dynamic-theme-style">
+                        body { background-color: #1a1a1a !important; color: #e0e0e0 !important; }
+                        .card { background: #2d2d2d !important; border-color: #404040 !important; }
+                        .sticky-nav { background: #2d2d2d !important; border-bottom-color: #404040 !important; }
+                        .nav-link { color: #e0e0e0 !important; }
+                        .nav-link.active { background: #0056b3 !important; color: #ffffff !important; }
+                        input, textarea, select { background: #404040 !important; color: #e0e0e0 !important; border-color: #555555 !important; }
+                        h1, h2, h3, h4, h5, h6 { color: #e0e0e0 !important; }
+                        .settings-section { background: #2d2d2d !important; border-color: #404040 !important; }
+                        .setting-label { color: #e0e0e0 !important; }
+                        .setting-description { color: #b0b0b0 !important; }
+                        .slideshow-container { background: #2d2d2d !important; border-color: #404040 !important; }
+                        .checkbox-item { border-bottom-color: #404040 !important; }
+                        .streak-tile { background: #404040 !important; border-color: #555555 !important; }
+                        #slideCounter { color: #b0b0b0 !important; }
+                        #dailyQuoteAuthor { color: #b0b0b0 !important; }
+                    </style>
+                `;
+                document.head.insertAdjacentHTML('beforeend', darkModeCSS);
+                
             } else {
                 document.documentElement.removeAttribute('data-theme');
                 document.body.classList.remove('dark-theme');
-                document.body.style.backgroundColor = '';
-                document.body.style.color = '';
             }
             
-            console.log(`🔍 Current theme attribute:`, document.documentElement.getAttribute('data-theme'));
-            console.log(`🔍 Body classes:`, document.body.classList.toString());
-            console.log(`🔍 Computed background color:`, getComputedStyle(document.body).backgroundColor);
-            
-            // Force refresh of CSS variables
-            const testElement = document.createElement('div');
-            testElement.style.background = 'var(--bg-primary)';
-            document.body.appendChild(testElement);
-            const computedBg = getComputedStyle(testElement).backgroundColor;
-            document.body.removeChild(testElement);
-            console.log(`🔍 CSS Variable --bg-primary resolves to:`, computedBg);
+            console.log(`🔍 Dark mode ${isDark ? 'enabled' : 'disabled'} - theme attribute:`, document.documentElement.getAttribute('data-theme'));
         }
         
         async function requestNotificationPermission() {
