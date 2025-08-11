@@ -1315,3 +1315,98 @@ input:checked + .toggle-slider:before {
     color: #1a1a1a !important;
     border-color: #ffffff !important;
 }
+
+/* === FORCE DARK MODE STYLES === */
+[data-theme="dark"] body {
+    background-color: #1a1a1a !important;
+    color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .card {
+    background: #2d2d2d !important;
+    border-color: #404040 !important;
+}
+
+[data-theme="dark"] .sticky-nav {
+    background: #2d2d2d !important;
+    border-bottom-color: #404040 !important;
+}
+
+[data-theme="dark"] input, [data-theme="dark"] textarea, [data-theme="dark"] select {
+    background: #404040 !important;
+    border-color: #555555 !important;
+    color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .checkbox-item {
+    border-bottom-color: #404040 !important;
+}
+
+[data-theme="dark"] .streak-tile {
+    background: #404040 !important;
+    border-color: #555555 !important;
+}
+
+[data-theme="dark"] .slideshow-container {
+    background: #2d2d2d !important;
+    border-color: #404040 !important;
+}
+
+[data-theme="dark"] .settings-section {
+    background: #2d2d2d !important;
+    border-color: #404040 !important;
+}
+
+[data-theme="dark"] .setting-item {
+    border-bottom-color: #404040 !important;
+}
+
+[data-theme="dark"] .settings-section-title {
+    border-bottom-color: #404040 !important;
+    color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .setting-label {
+    color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .setting-description {
+    color: #b0b0b0 !important;
+}
+
+/* === DARK MODE FOR SPECIFIC INLINE ELEMENTS === */
+[data-theme="dark"] #slideCounter {
+    color: #b0b0b0 !important;
+}
+
+[data-theme="dark"] #dailyQuoteAuthor {
+    color: #b0b0b0 !important;
+}
+
+[data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4 {
+    color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .nav-link {
+    color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .nav-link:hover {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .nav-link.active {
+    background: #0056b3 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .filter-tab {
+    background: #404040 !important;
+    color: #e0e0e0 !important;
+    border-color: #555555 !important;
+}
+
+[data-theme="dark"] .filter-tab.active {
+    background: #007bff !important;
+    color: #ffffff !important;
+}
