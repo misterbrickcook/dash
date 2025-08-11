@@ -481,18 +481,18 @@ class CloudStorage {
             return JSON.parse(cached);
         }
         
-        // Default templates if none cached
+        // Default templates if none cached  
         return [
             {id: 'morning_1', text: '💧 Glas Wasser trinken', routine_type: 'morning', order_index: 1},
             {id: 'morning_2', text: '🧘 5 Min Meditation', routine_type: 'morning', order_index: 2},
-            {id: 'morning_3', text: '📱 Handy Check vermeiden', routine_type: 'morning', order_index: 3},
+            {id: 'morning_3', text: '🏃 10 Min Bewegung', routine_type: 'morning', order_index: 3},
             {id: 'morning_4', text: '☀️ Tageslicht tanken', routine_type: 'morning', order_index: 4},
-            {id: 'morning_5', text: '📝 Tagesplan machen', routine_type: 'morning', order_index: 5},
-            {id: 'evening_1', text: '📱 Handy weggelegen', routine_type: 'evening', order_index: 1},
-            {id: 'evening_2', text: '📖 10 Min lesen', routine_type: 'evening', order_index: 2},
-            {id: 'evening_3', text: '✅ Tag reflektieren', routine_type: 'evening', order_index: 3},
-            {id: 'evening_4', text: '🌙 Zimmer abdunkeln', routine_type: 'evening', order_index: 4},
-            {id: 'evening_5', text: '😴 Früh ins Bett', routine_type: 'evening', order_index: 5}
+            {id: 'morning_5', text: '📝 3 wichtigste Ziele definieren', routine_type: 'morning', order_index: 5},
+            {id: 'evening_1', text: '📱 Alle Geräte weggelegt', routine_type: 'evening', order_index: 1},
+            {id: 'evening_2', text: '📖 15 Min lesen', routine_type: 'evening', order_index: 2},
+            {id: 'evening_3', text: '✅ Tag reflektieren & dankbar sein', routine_type: 'evening', order_index: 3},
+            {id: 'evening_4', text: '🧹 Kurz aufräumen', routine_type: 'evening', order_index: 4},
+            {id: 'evening_5', text: '😴 Vor 22:30 ins Bett', routine_type: 'evening', order_index: 5}
         ];
     }
     

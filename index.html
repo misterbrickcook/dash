@@ -394,15 +394,6 @@
                         </div>
                     </div>
                     
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <label class="setting-label">🔧 Routine Restore</label>
-                            <p class="setting-description">Repariere Routine-System (temporär)</p>
-                        </div>
-                        <div class="setting-control">
-                            <button class="btn-primary" onclick="showTab('restore')">Open Restore</button>
-                        </div>
-                    </div>
                 </div>
                 
             </section>
@@ -1635,18 +1626,13 @@
         
         async function loadAndRenderRoutines() {
             try {
-                // Load routine templates
-                const templates = await window.supabase.select('routine_templates', '*');
-                console.log(`📊 Loaded ${templates?.length || 0} routine templates`);
-                
-                if (templates && templates.length > 0) {
-                    await renderCurrentRoutine(currentRoutineType);
-                } else {
-                    document.getElementById('current-routine').innerHTML = 
-                        '<div style="text-align: center; color: #666; padding: 1rem;">No routines configured</div>';
-                }
+                console.log('📋 Loading routine system...');
+                await loadRoutineTemplates();
+                console.log('✅ Routine system loaded');
             } catch (error) {
                 console.error('❌ Failed to load routines:', error);
+                // Fallback to local templates
+                await loadRoutineTemplates();
             }
         }
         
@@ -1753,28 +1739,25 @@
         function setupRoutineToggles() {
             const morningToggle = document.querySelector('[data-routine="morning"]');
             const eveningToggle = document.querySelector('[data-routine="evening"]');
-            const routineTitle = document.getElementById('routine-title');
             
             morningToggle?.addEventListener('click', async () => {
                 currentRoutineType = 'morning';
-                routineTitle.textContent = '☀️ Morgenroutine';
                 
                 // Update toggle states
                 morningToggle.classList.add('active');
                 eveningToggle?.classList.remove('active');
                 
-                await renderCurrentRoutine('morning');
+                await switchRoutineType('morning');
             });
             
             eveningToggle?.addEventListener('click', async () => {
                 currentRoutineType = 'evening';
-                routineTitle.textContent = '🌙 Abendroutine';
                 
                 // Update toggle states
                 eveningToggle.classList.add('active');
                 morningToggle?.classList.remove('active');
                 
-                await renderCurrentRoutine('evening');
+                await switchRoutineType('evening');
             });
         }
         
@@ -2656,6 +2639,104 @@
             }
         }
 
+        // === ROUTINE SYSTEM FUNCTIONS ===
+        
+        async function loadRoutineTemplates() {
+            try {
+                console.log('📋 Loading routine templates...');
+                
+                // Get templates from cloud storage system
+                const templates = await cloudStorage.getRoutineTemplates();
+                console.log('Templates loaded:', templates);
+                
+                // Render routines
+                renderRoutineItems('morning', templates.filter(t => t.routine_type === 'morning'));
+                renderRoutineItems('evening', templates.filter(t => t.routine_type === 'evening'));
+                
+                // Load completion status for today
+                await loadTodayRoutineCompletions();
+                
+            } catch (error) {
+                console.error('Error loading routine templates:', error);
+            }
+        }
+        
+        function renderRoutineItems(routineType, templates) {
+            const container = document.getElementById('current-routine');
+            if (!container) return;
+            
+            // Clear container
+            container.innerHTML = '';
+            
+            templates.forEach(template => {
+                const item = document.createElement('div');
+                item.className = 'checkbox-item';
+                item.innerHTML = `
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="${template.id}" data-template-id="${template.id}">
+                        <span class="checkbox-text">${template.text}</span>
+                    </label>
+                `;
+                
+                container.appendChild(item);
+                
+                // Add event listener for completion tracking
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', async (e) => {
+                    const templateId = e.target.dataset.templateId;
+                    const completed = e.target.checked;
+                    const today = new Date().toISOString().split('T')[0];
+                    
+                    console.log(`📋 ${templateId} completion: ${completed}`);
+                    
+                    // Save completion to cloud
+                    await cloudStorage.saveRoutineCompletion(templateId, today, completed);
+                    
+                    // Update streaks
+                    setTimeout(() => {
+                        updateMonthlyRoutineStreak('morning');
+                        updateMonthlyRoutineStreak('evening');
+                    }, 100);
+                });
+            });
+        }
+        
+        async function switchRoutineType(routineType) {
+            try {
+                const templates = await cloudStorage.getRoutineTemplates();
+                const filteredTemplates = templates.filter(t => t.routine_type === routineType);
+                
+                renderRoutineItems(routineType, filteredTemplates);
+                await loadTodayRoutineCompletions();
+                
+                // Update title
+                const title = document.getElementById('routine-title');
+                if (title) {
+                    title.textContent = routineType === 'morning' ? '☀️ Morgenroutine' : '🌙 Abendroutine';
+                }
+                
+            } catch (error) {
+                console.error('Error switching routine type:', error);
+            }
+        }
+        
+        async function loadTodayRoutineCompletions() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const completions = await cloudStorage.getRoutineCompletions(today);
+                
+                completions.forEach(completion => {
+                    const checkbox = document.getElementById(completion.template_id);
+                    if (checkbox) {
+                        checkbox.checked = completion.completed;
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading routine completions:', error);
+            }
+        }
+        
         // === RESTORE TAB FUNCTIONS ===
         
         function checkCurrentRoutineData() {
