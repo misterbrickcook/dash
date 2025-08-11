@@ -315,6 +315,53 @@
                 }
             }
             
+            // Aggressively hide login overlay and show dashboard (mobile fix)
+            const authScreen = document.getElementById('auth-screen');
+            const mainContent = document.querySelector('.main-content');
+            const nav = document.querySelector('.sticky-nav');
+            
+            if (authScreen) {
+                authScreen.style.display = 'none !important';
+                authScreen.style.visibility = 'hidden';
+                authScreen.style.opacity = '0';
+                authScreen.style.zIndex = '-1';
+                authScreen.classList.add('hide');
+                console.log('📱 Mobile: Auth screen aggressively hidden');
+            }
+            
+            if (mainContent) {
+                mainContent.style.display = 'block';
+                mainContent.style.visibility = 'visible';
+                mainContent.style.opacity = '1';
+                mainContent.classList.remove('hide');
+                console.log('📱 Mobile: Main content shown');
+            }
+            
+            if (nav) {
+                nav.style.display = 'flex';
+                nav.style.visibility = 'visible';
+                nav.style.opacity = '1';
+                nav.classList.remove('hide');
+                console.log('📱 Mobile: Navigation shown');
+            }
+            
+            // Force remove any body classes that might block dashboard on mobile
+            document.body.classList.remove('auth-screen-active', 'hide-dashboard', 'modal-open', 'no-scroll');
+            document.documentElement.classList.remove('hide-dashboard', 'auth-screen-active', 'modal-open');
+            
+            // Remove any possible backdrop elements
+            const backdrops = document.querySelectorAll('.modal-backdrop, .backdrop, .overlay');
+            backdrops.forEach(backdrop => backdrop.remove());
+            
+            // Force trigger home tab after mobile login
+            setTimeout(() => {
+                const homeTab = document.querySelector('[data-tab="home"]');
+                if (homeTab) {
+                    homeTab.click();
+                    console.log('📱 Mobile: Home tab activated after login');
+                }
+            }, 200);
+            
             console.log('✅ Mobile login complete - dashboard should now be visible!');
             
         } catch (error) {
