@@ -1267,3 +1267,51 @@ input:checked + .toggle-slider:before {
         padding: 1rem;
     }
 }
+
+/* === BUTTON CLASSES FOR CONSISTENT THEMING === */
+.btn-primary {
+    background: var(--button-bg) !important;
+    color: var(--button-text) !important;
+    border-color: var(--button-bg) !important;
+}
+
+.btn-success {
+    background: #28a745 !important;
+    color: white !important;
+    border-color: #28a745 !important;
+}
+
+.btn-info {
+    background: #17a2b8 !important;
+    color: white !important;
+    border-color: #17a2b8 !important;
+}
+
+.btn-danger {
+    background: #dc3545 !important;
+    color: white !important;
+    border-color: #dc3545 !important;
+}
+
+.btn-transparent {
+    background: transparent !important;
+    color: var(--text-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.btn-dark {
+    background: var(--text-primary) !important;
+    color: var(--bg-primary) !important;
+    border-color: var(--text-primary) !important;
+}
+
+/* === DARK MODE SPECIFIC OVERRIDES === */
+[data-theme="dark"] .btn-transparent {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .btn-dark {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    border-color: #ffffff !important;
+}

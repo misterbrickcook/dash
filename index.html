@@ -55,7 +55,7 @@
                     <div style="font-size: 0.9rem; color: #6c757d; font-weight: 500;" id="dailyQuoteAuthor">
                         — Steve Jobs
                     </div>
-                    <button onclick="getNewQuote()" style="margin-top: 1rem; padding: 0.3rem 0.8rem; background: transparent; color: #6c757d; border: 1px solid #dee2e6; border-radius: 15px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                    <button onclick="getNewQuote()" class="btn-transparent" style="margin-top: 1rem; padding: 0.3rem 0.8rem; border-radius: 15px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;">
                         🔄 Neues Zitat
                     </button>
                 </div>
@@ -83,7 +83,7 @@
             <section class="card">
                 <div class="card-header">
                     <h2>📋 Heutige Aufgaben</h2>
-                    <button id="add-todo-btn" style="padding: 0.3rem 0.8rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                    <button id="add-todo-btn" class="btn-primary" style="padding: 0.3rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
                         + Add Todo
                     </button>
                 </div>
@@ -103,10 +103,10 @@
                 <div class="card-header">
                     <h2 id="todos-section-title">Active Todos</h2>
                     <div style="display: flex; gap: 0.5rem;">
-                        <button id="add-todo-btn-2" style="padding: 0.3rem 0.8rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                        <button id="add-todo-btn-2" class="btn-primary" style="padding: 0.3rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
                             + Add Todo
                         </button>
-                        <button id="clear-archive-btn" style="padding: 0.3rem 0.8rem; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; display: none;">
+                        <button id="clear-archive-btn" class="btn-danger" style="padding: 0.3rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; display: none;">
                             🗑️ Clear Archive
                         </button>
                     </div>
@@ -132,7 +132,7 @@
             <section class="card">
                 <div class="card-header">
                     <h2 id="goals-section-title">🎯 Active Goals</h2>
-                    <button id="add-goal-btn" style="padding: 0.3rem 0.8rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                    <button id="add-goal-btn" class="btn-success" style="padding: 0.3rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
                         + Add Goal
                     </button>
                 </div>
@@ -157,7 +157,7 @@
             <section class="card">
                 <div class="card-header">
                     <h2 id="journal-section-title">📔 Daily Journal</h2>
-                    <button id="add-journal-btn" style="padding: 0.3rem 0.8rem; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                    <button id="add-journal-btn" class="btn-info" style="padding: 0.3rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
                         + New Entry
                     </button>
                 </div>
@@ -182,18 +182,18 @@
                 <div class="card-header">
                     <h2>⚡ Tägliche Motivation</h2>
                     <div style="display: flex; gap: 1rem; align-items: center;">
-                        <button id="prevSlide" class="btn btn-small" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
+                        <button id="prevSlide" class="btn btn-small btn-transparent" style="padding: 0.5rem; border: none; font-size: 0.75rem;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="15,18 9,12 15,6"></polyline>
                             </svg>
                         </button>
-                        <div id="slideCounter" style="font-size: 0.8rem; color: #666; min-width: 50px; text-align: center;">1/5</div>
-                        <button id="nextSlide" class="btn btn-small" style="padding: 0.5rem; border: none; background: transparent; color: #666;">
+                        <div id="slideCounter" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 50px; text-align: center;">1/5</div>
+                        <button id="nextSlide" class="btn btn-small btn-transparent" style="padding: 0.5rem; border: none; font-size: 0.75rem;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="9,18 15,12 9,6"></polyline>
                             </svg>
                         </button>
-                        <button id="autoPlayToggle" class="btn btn-small" style="padding: 0.3rem 0.6rem; border: 1px solid #e0e0e0; background: #000; color: white; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Auto</button>
+                        <button id="autoPlayToggle" class="btn btn-small btn-dark" style="padding: 0.3rem 0.6rem; border: 1px solid var(--border-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Auto</button>
                     </div>
                 </div>
                 
@@ -1892,15 +1892,13 @@
                 }
                 isAutoPlaying = false;
                 autoPlayBtn.textContent = 'Play';
-                autoPlayBtn.style.background = 'transparent';
-                autoPlayBtn.style.color = '#666';
+                autoPlayBtn.className = 'btn btn-small btn-transparent';
             } else {
                 // Start auto play
                 autoPlayInterval = setInterval(nextSlide, 4000); // 4 seconds
                 isAutoPlaying = true;
                 autoPlayBtn.textContent = 'Auto';
-                autoPlayBtn.style.background = '#000';
-                autoPlayBtn.style.color = 'white';
+                autoPlayBtn.className = 'btn btn-small btn-dark';
             }
         }
         
@@ -2045,11 +2043,15 @@
         }
         
         function applyTheme(isDark) {
+            console.log(`🎨 Applying theme: ${isDark ? 'dark' : 'light'}`);
             if (isDark) {
                 document.documentElement.setAttribute('data-theme', 'dark');
+                document.body.classList.add('dark-theme');
             } else {
                 document.documentElement.removeAttribute('data-theme');
+                document.body.classList.remove('dark-theme');
             }
+            console.log(`🔍 Current theme attribute:`, document.documentElement.getAttribute('data-theme'));
         }
         
         async function requestNotificationPermission() {
