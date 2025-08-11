@@ -79,6 +79,21 @@ body {
     font-size: 0.9rem;
 }
 
+.logout-link {
+    margin-left: auto;
+    padding-left: 2rem;
+    color: #666666 !important;
+    font-weight: 400 !important;
+}
+
+.logout-link:hover {
+    color: #000000 !important;
+}
+
+.logout-link span {
+    font-size: 1.2rem;
+}
+
 /* === LAYOUT === */
 .layout {
     display: flex;

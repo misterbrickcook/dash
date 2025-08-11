@@ -220,13 +220,6 @@ const Auth = {
     
     showDashboard() {
         document.querySelector('.layout').style.display = 'flex';
-        
-        if (this.currentUser) {
-            document.getElementById('user-email').textContent = this.currentUser.email;
-            document.getElementById('user-info').style.display = 'flex';
-        } else {
-            document.getElementById('user-info').style.display = 'none';
-        }
     },
     
     showAuthError(form, message) {
