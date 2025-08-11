@@ -1844,6 +1844,20 @@
         // Initialize streaks on page load
         async function initializeStreaks() {
             console.log('🔥 Initializing streaks...');
+            
+            // Wait for cloudStorage to be available
+            let attempts = 0;
+            while (!window.cloudStorage && attempts < 10) {
+                console.log('⏳ Waiting for cloudStorage to initialize...');
+                await new Promise(resolve => setTimeout(resolve, 200));
+                attempts++;
+            }
+            
+            if (!window.cloudStorage) {
+                console.log('❌ CloudStorage not available after waiting, skipping streak initialization');
+                return;
+            }
+            
             // Use the new streak system from script.js
             if (typeof updateMonthlyRoutineStreak === 'function') {
                 updateMonthlyRoutineStreak('morning');
@@ -2814,7 +2828,11 @@
         // Add force refresh function for debugging
         window.debugRoutineSystem = function() {
             console.log('🔧 Debug: Force refresh routine system');
-            const completions = cloudStorage.getLocalRoutineCompletions();
+            if (!window.cloudStorage) {
+                console.log('❌ CloudStorage not available');
+                return;
+            }
+            const completions = window.cloudStorage.getLocalRoutineCompletions();
             console.log('📊 Current completions:', completions);
             console.log('🧮 Morning streak:', calculateRoutineStreak('morning'));
             console.log('🧮 Evening streak:', calculateRoutineStreak('evening'));
@@ -2828,8 +2846,14 @@
             try {
                 console.log(`🔄 Calculating ${routineType} streak...`);
                 
+                // Check if cloudStorage is available
+                if (!window.cloudStorage || typeof window.cloudStorage.getLocalRoutineCompletions !== 'function') {
+                    console.log('⚠️ CloudStorage not yet available, returning 0');
+                    return 0;
+                }
+                
                 // Get all completions from new system
-                const completions = cloudStorage.getLocalRoutineCompletions();
+                const completions = window.cloudStorage.getLocalRoutineCompletions();
                 console.log(`📊 Found ${completions?.length || 0} total completions in cache`);
                 
                 if (!completions || completions.length === 0) {
