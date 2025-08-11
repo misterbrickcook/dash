@@ -80,8 +80,8 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    background: var(--nav-bg);
-    border-bottom: 1px solid var(--border-color);
+    background: #000000;
+    border-bottom: 1px solid #333333;
     z-index: 1000;
     padding: 0.75rem 0;
     transition: background-color 0.3s ease, border-color 0.3s ease;
@@ -99,7 +99,7 @@ body {
 
 .nav-link {
     text-decoration: none;
-    color: var(--text-secondary);
+    color: #888888;
     font-size: 0.8rem;
     font-weight: 400;
     text-transform: uppercase;
@@ -112,15 +112,19 @@ body {
     align-items: center;
     gap: 0.25rem;
     cursor: pointer;
+    border-radius: 8px;
 }
 
 .nav-link:hover {
-    color: var(--text-primary);
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .nav-link.active {
-    color: var(--text-primary);
+    color: #000000;
+    background: #ffffff;
     font-weight: 600;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .nav-icon {
