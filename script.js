@@ -219,7 +219,7 @@ const Auth = {
     },
     
     showDashboard() {
-        document.querySelector('.main-content').style.display = 'block';
+        document.querySelector('.layout').style.display = 'flex';
         
         if (this.currentUser) {
             document.getElementById('user-email').textContent = this.currentUser.email;
