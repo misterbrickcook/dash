@@ -2180,6 +2180,39 @@
                         /* Goals and journal entries */
                         .goal-card, .journal-entry { background: #2d2d2d !important; border-color: #404040 !important; color: #e0e0e0 !important; }
                         
+                        /* Dynamically generated content */
+                        div[style*="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)"] { 
+                            background: linear-gradient(135deg, #404040 0%, #555555 100%) !important; 
+                        }
+                        div[style*="background: #f8f9fa"] { background: #2d2d2d !important; }
+                        div[style*="background: #ffffff"] { background: #2d2d2d !important; }
+                        div[style*="background: white"] { background: #2d2d2d !important; }
+                        div[style*="border: 1px solid #e0e0e0"] { border-color: #404040 !important; }
+                        div[style*="color: #333"] { color: #e0e0e0 !important; }
+                        div[style*="color: #666"] { color: #b0b0b0 !important; }
+                        div[style*="color: #999"] { color: #b0b0b0 !important; }
+                        div[style*="color: #17a2b8"] { color: #17a2b8 !important; }
+                        
+                        /* Routine boxes */
+                        .checkbox-group { background: transparent !important; }
+                        #current-routine { background: transparent !important; }
+                        #home-todos { background: transparent !important; }
+                        #active-todos { background: transparent !important; }
+                        #active-goals { background: transparent !important; }
+                        #journal-entries { background: transparent !important; }
+                        
+                        /* All divs with inline styles that could be white */
+                        div[style*="padding: 1rem"] { color: #e0e0e0 !important; }
+                        div[style*="padding: 1.5rem"] { color: #e0e0e0 !important; }
+                        div[style*="padding: 2rem"] { color: #e0e0e0 !important; }
+                        
+                        /* Any element with box-shadow */
+                        div[style*="box-shadow"] { 
+                            background: #2d2d2d !important; 
+                            color: #e0e0e0 !important; 
+                            border-color: #404040 !important; 
+                        }
+                        
                         /* Loading placeholders */
                         .loading-placeholder { color: #b0b0b0 !important; }
                         
@@ -2215,6 +2248,9 @@
             // Apply theme to dynamically created elements
             if (isDark) {
                 applyDarkModeToExistingElements();
+                
+                // Set up observer for future dynamic content
+                setupDarkModeObserver();
             }
             
             console.log(`🔍 Dark mode ${isDark ? 'enabled' : 'disabled'} - theme attribute:`, document.documentElement.getAttribute('data-theme'));
@@ -2247,6 +2283,122 @@
                 item.style.color = '#e0e0e0';
                 const label = item.querySelector('label');
                 if (label) label.style.color = '#e0e0e0';
+            });
+            
+            // Apply to dynamically generated content with specific inline styles
+            document.querySelectorAll('div').forEach(div => {
+                const style = div.getAttribute('style');
+                if (style) {
+                    // Fix gradient backgrounds
+                    if (style.includes('background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)')) {
+                        div.style.background = 'linear-gradient(135deg, #404040 0%, #555555 100%)';
+                        div.style.color = '#e0e0e0';
+                    }
+                    
+                    // Fix white/light backgrounds
+                    if (style.includes('background: #f8f9fa') || 
+                        style.includes('background: #ffffff') || 
+                        style.includes('background: white')) {
+                        div.style.background = '#2d2d2d';
+                        div.style.color = '#e0e0e0';
+                    }
+                    
+                    // Fix border colors
+                    if (style.includes('border: 1px solid #e0e0e0') || 
+                        style.includes('border-color: #e0e0e0')) {
+                        div.style.borderColor = '#404040';
+                    }
+                    
+                    // Fix text colors
+                    if (style.includes('color: #333') || 
+                        style.includes('color: #666') || 
+                        style.includes('color: #999')) {
+                        div.style.color = '#e0e0e0';
+                    }
+                    
+                    // Fix box shadows - indicates cards/containers
+                    if (style.includes('box-shadow')) {
+                        if (!style.includes('background')) {
+                            div.style.background = '#2d2d2d';
+                        }
+                        div.style.color = '#e0e0e0';
+                        div.style.borderColor = '#404040';
+                    }
+                }
+            });
+            
+            // Force update routine containers
+            const routineContainer = document.getElementById('current-routine');
+            if (routineContainer) {
+                routineContainer.style.background = 'transparent';
+                routineContainer.querySelectorAll('div').forEach(div => {
+                    if (div.style.background && div.style.background.includes('#f8f9fa')) {
+                        div.style.background = '#2d2d2d';
+                        div.style.color = '#e0e0e0';
+                    }
+                });
+            }
+        }
+        
+        function setupDarkModeObserver() {
+            // Watch for new elements being added to the DOM
+            const observer = new MutationObserver(mutations => {
+                if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                    mutations.forEach(mutation => {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                applyDarkModeToElement(node);
+                            }
+                        });
+                    });
+                }
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+        
+        function applyDarkModeToElement(element) {
+            // Apply dark mode to a specific element and its children
+            const style = element.getAttribute('style');
+            if (style) {
+                // Fix common light backgrounds
+                if (style.includes('background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)')) {
+                    element.style.background = 'linear-gradient(135deg, #404040 0%, #555555 100%)';
+                    element.style.color = '#e0e0e0';
+                }
+                if (style.includes('background: #f8f9fa') || 
+                    style.includes('background: white') || 
+                    style.includes('background: #ffffff')) {
+                    element.style.background = '#2d2d2d';
+                    element.style.color = '#e0e0e0';
+                }
+                if (style.includes('border: 1px solid #e0e0e0')) {
+                    element.style.borderColor = '#404040';
+                }
+                if (style.includes('color: #333') || style.includes('color: #666')) {
+                    element.style.color = '#e0e0e0';
+                }
+            }
+            
+            // Apply to children as well
+            element.querySelectorAll('div').forEach(child => {
+                const childStyle = child.getAttribute('style');
+                if (childStyle) {
+                    if (childStyle.includes('background: #f8f9fa') || 
+                        childStyle.includes('background: white') || 
+                        childStyle.includes('background: #ffffff')) {
+                        child.style.background = '#2d2d2d';
+                        child.style.color = '#e0e0e0';
+                    }
+                    if (childStyle.includes('color: #333') || 
+                        childStyle.includes('color: #666') || 
+                        childStyle.includes('color: #17a2b8')) {
+                        child.style.color = '#e0e0e0';
+                    }
+                }
             });
         }
         
