@@ -250,8 +250,20 @@ const Auth = {
     },
     
     hideAuthScreen() {
-        document.getElementById('auth-screen').classList.add('hide');
-        document.querySelector('.sidebar-nav').style.display = 'flex';
+        console.log('🔒 hideAuthScreen() called');
+        const authScreen = document.getElementById('auth-screen');
+        const nav = document.querySelector('.sidebar-nav');
+        
+        if (authScreen) {
+            authScreen.classList.add('hide');
+            authScreen.style.display = 'none';
+        }
+        
+        if (nav) {
+            nav.style.display = 'flex';
+            nav.style.visibility = 'visible';
+            console.log('✅ Navigation restored:', nav.style.display, nav.style.visibility);
+        }
     },
     
     showDashboard() {
