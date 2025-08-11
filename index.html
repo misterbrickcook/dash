@@ -917,8 +917,7 @@
             
             if (typeof Auth !== 'undefined') {
                 try {
-                    const auth = new Auth();
-                    await auth.init();
+                    await Auth.init();
                     authInitialized = true;
                     console.log('✅ Auth system initialized successfully');
                 } catch (error) {
@@ -929,8 +928,7 @@
                 setTimeout(async () => {
                     if (typeof Auth !== 'undefined' && !authInitialized) {
                         try {
-                            const auth = new Auth();
-                            await auth.init();
+                            await Auth.init();
                             console.log('✅ Auth system initialized (delayed)');
                         } catch (error) {
                             console.error('❌ Delayed auth initialization failed:', error);
