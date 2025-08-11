@@ -68,22 +68,60 @@ const Auth = {
     },
     
     setupAuthHandlers() {
-        // Login form
-        document.getElementById('login-btn').addEventListener('click', () => this.handleLogin());
-        document.getElementById('login-password').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.handleLogin();
-        });
+        console.log('🔧 Setting up auth handlers...');
         
-        // Logout button
-        document.getElementById('logout-btn').addEventListener('click', () => this.handleLogout());
+        const loginBtn = document.getElementById('login-btn');
+        const passwordField = document.getElementById('login-password');
+        const logoutBtn = document.getElementById('logout-btn');
+        
+        console.log('🔍 Elements found:', { loginBtn: !!loginBtn, passwordField: !!passwordField, logoutBtn: !!logoutBtn });
+        
+        if (loginBtn) {
+            loginBtn.addEventListener('click', (e) => {
+                console.log('🖱️ Login button clicked!');
+                e.preventDefault();
+                this.handleLogin();
+            });
+        }
+        
+        if (passwordField) {
+            passwordField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    console.log('⌨️ Enter pressed in password field!');
+                    e.preventDefault();
+                    this.handleLogin();
+                }
+            });
+        }
+        
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => this.handleLogout());
+        }
+        
+        console.log('✅ Auth handlers set up');
     },
     
     
     async handleLogin() {
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
+        console.log('🚪 handleLogin() called');
+        
+        const emailField = document.getElementById('login-email');
+        const passwordField = document.getElementById('login-password');
+        
+        console.log('📍 Form fields:', { emailField: !!emailField, passwordField: !!passwordField });
+        
+        if (!emailField || !passwordField) {
+            console.error('❌ Form fields not found!');
+            return;
+        }
+        
+        const email = emailField.value.trim();
+        const password = passwordField.value;
+        
+        console.log('📝 Form values:', { email, passwordLength: password.length });
         
         if (!email || !password) {
+            console.log('⚠️ Empty fields detected');
             this.showAuthError('login', 'Please fill in all fields');
             return;
         }
