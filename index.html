@@ -755,12 +755,31 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('🚀 HYBRID DASHBOARD - Beautiful UI + Cloud Sync');
             
-            // Initialize Auth system first (with fallback)
+            // Initialize Auth system first (with retry mechanism)
+            let authInitialized = false;
             if (typeof Auth !== 'undefined') {
-                const auth = new Auth();
-                await auth.init();
+                try {
+                    const auth = new Auth();
+                    await auth.init();
+                    authInitialized = true;
+                    console.log('✅ Auth system initialized successfully');
+                } catch (error) {
+                    console.error('❌ Auth initialization failed:', error);
+                }
             } else {
-                console.warn('⚠️ Auth class not loaded yet, mobile login will use fallback');
+                // Retry after a short delay for scripts to load
+                setTimeout(async () => {
+                    if (typeof Auth !== 'undefined' && !authInitialized) {
+                        try {
+                            const auth = new Auth();
+                            await auth.init();
+                            console.log('✅ Auth system initialized (delayed)');
+                        } catch (error) {
+                            console.error('❌ Delayed auth initialization failed:', error);
+                        }
+                    }
+                }, 100);
+                console.warn('⚠️ Auth class not loaded yet, will retry in 100ms');
             }
             
             // Initialize navigation
