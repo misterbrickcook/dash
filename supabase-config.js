@@ -191,13 +191,17 @@ class SupabaseClient {
             if (response.status === 401) {
                 console.log('🔄 JWT expired, redirecting to login...');
                 this.clearSession();
-                // Force redirect to auth screen
-                if (window.Auth && window.Auth.showAuthScreen) {
-                    window.Auth.showAuthScreen();
-                } else {
-                    // Fallback: reload page
-                    window.location.reload();
-                }
+                
+                // Force redirect to auth screen immediately
+                setTimeout(() => {
+                    if (window.Auth && window.Auth.showAuthScreen) {
+                        window.Auth.showAuthScreen();
+                    } else {
+                        // Fallback: reload page to show auth screen
+                        window.location.reload();
+                    }
+                }, 100);
+                
                 throw new Error('Session expired - please login again');
             }
             

@@ -2668,8 +2668,28 @@
             try {
                 console.log('📋 Loading routine templates...');
                 
+                // Ensure cloudStorage is available
+                if (!window.cloudStorage) {
+                    console.log('⚠️ cloudStorage not available, using default templates');
+                    const defaultTemplates = [
+                        {id: 'morning_1', text: '💧 Glas Wasser trinken', routine_type: 'morning', order_index: 1},
+                        {id: 'morning_2', text: '🧘 5 Min Meditation', routine_type: 'morning', order_index: 2},
+                        {id: 'morning_3', text: '🏃 10 Min Bewegung', routine_type: 'morning', order_index: 3},
+                        {id: 'morning_4', text: '☀️ Tageslicht tanken', routine_type: 'morning', order_index: 4},
+                        {id: 'morning_5', text: '📝 3 wichtigste Ziele definieren', routine_type: 'morning', order_index: 5},
+                        {id: 'evening_1', text: '📱 Alle Geräte weggelegt', routine_type: 'evening', order_index: 1},
+                        {id: 'evening_2', text: '📖 15 Min lesen', routine_type: 'evening', order_index: 2},
+                        {id: 'evening_3', text: '✅ Tag reflektieren & dankbar sein', routine_type: 'evening', order_index: 3},
+                        {id: 'evening_4', text: '🧹 Kurz aufräumen', routine_type: 'evening', order_index: 4},
+                        {id: 'evening_5', text: '😴 Vor 22:30 ins Bett', routine_type: 'evening', order_index: 5}
+                    ];
+                    window.routineTemplates = defaultTemplates;
+                    await switchRoutineType('morning');
+                    return;
+                }
+                
                 // Get templates from cloud storage system
-                const templates = await cloudStorage.getRoutineTemplates();
+                const templates = await window.cloudStorage.getRoutineTemplates();
                 console.log('Templates loaded:', templates);
                 
                 // Store templates globally for toggle switching
@@ -2729,7 +2749,11 @@
                     console.log(`📋 ${templateId} completion: ${completed}`);
                     
                     // Save completion to cloud
-                    await cloudStorage.saveRoutineCompletion(templateId, today, completed);
+                    if (window.cloudStorage) {
+                        await window.cloudStorage.saveRoutineCompletion(templateId, today, completed);
+                    } else {
+                        console.log('⚠️ cloudStorage not available, completion not saved');
+                    }
                     
                     // Update streaks immediately with delay to allow data to save
                     setTimeout(() => {
@@ -2756,8 +2780,8 @@
             try {
                 // Use cached templates or get fresh ones
                 let templates = window.routineTemplates;
-                if (!templates) {
-                    templates = await cloudStorage.getRoutineTemplates();
+                if (!templates && window.cloudStorage) {
+                    templates = await window.cloudStorage.getRoutineTemplates();
                     window.routineTemplates = templates;
                 }
                 
@@ -2780,8 +2804,13 @@
         
         async function loadTodayRoutineCompletions() {
             try {
+                if (!window.cloudStorage) {
+                    console.log('⚠️ cloudStorage not available for loading completions');
+                    return;
+                }
+                
                 const today = new Date().toISOString().split('T')[0];
-                const completions = await cloudStorage.getRoutineCompletions(today);
+                const completions = await window.cloudStorage.getRoutineCompletions(today);
                 
                 completions.forEach(completion => {
                     const checkbox = document.getElementById(completion.template_id);
