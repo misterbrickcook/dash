@@ -286,9 +286,80 @@
                     <h2>⚙️ Settings</h2>
                 </div>
                 
-                <div style="text-align: center; color: #666; padding: 2rem;">
-                    ⚙️ Settings panel coming soon!
+                <!-- Appearance Settings -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">🎨 Aussehen</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">🌙 Dark Mode</label>
+                            <p class="setting-description">Wechsle zwischen hellem und dunklem Design</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="darkModeToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
+                
+                <!-- System Settings -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">⚙️ System</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">🔄 Auto-Sync</label>
+                            <p class="setting-description">Automatische Synchronisation mit der Cloud</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoSyncToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">🔔 Benachrichtigungen</label>
+                            <p class="setting-description">Browser-Benachrichtigungen für Erinnerungen</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="notificationsToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Data Settings -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">💾 Daten</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">📤 Daten exportieren</label>
+                            <p class="setting-description">Exportiere alle deine Daten als JSON</p>
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn-secondary" id="exportDataBtn">Exportieren</button>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">🗑️ Cache leeren</label>
+                            <p class="setting-description">Lösche lokale Zwischenspeicher</p>
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn-secondary" id="clearCacheBtn">Cache leeren</button>
+                        </div>
+                    </div>
+                </div>
+                
             </section>
         </div>
 
@@ -323,11 +394,13 @@
                 await initializeStreaks();
                 displayDailyQuote();
                 initializeMotivationSlideshow();
+                initializeSettings();
             } else {
                 // Even without database, setup filter tabs
                 setupFilterTabs();
                 displayDailyQuote();
                 initializeMotivationSlideshow();
+                initializeSettings();
             }
             
             // Initialize Lucide icons
@@ -1885,6 +1958,188 @@
             });
             
             console.log('✅ Motivational slideshow initialized');
+        }
+        
+        // === SETTINGS SYSTEM ===
+        function initializeSettings() {
+            // Load saved preferences
+            loadUserPreferences();
+            
+            // Setup event listeners
+            setupSettingsEventListeners();
+            
+            console.log('✅ Settings system initialized');
+        }
+        
+        function loadUserPreferences() {
+            // Load dark mode preference
+            const darkMode = localStorage.getItem('dashfin-dark-mode') === 'true';
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (darkModeToggle) {
+                darkModeToggle.checked = darkMode;
+                applyTheme(darkMode);
+            }
+            
+            // Load auto-sync preference
+            const autoSync = localStorage.getItem('dashfin-auto-sync') !== 'false'; // default true
+            const autoSyncToggle = document.getElementById('autoSyncToggle');
+            if (autoSyncToggle) {
+                autoSyncToggle.checked = autoSync;
+            }
+            
+            // Load notifications preference
+            const notifications = localStorage.getItem('dashfin-notifications') === 'true';
+            const notificationsToggle = document.getElementById('notificationsToggle');
+            if (notificationsToggle) {
+                notificationsToggle.checked = notifications;
+            }
+        }
+        
+        function setupSettingsEventListeners() {
+            // Dark Mode Toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (darkModeToggle) {
+                darkModeToggle.addEventListener('change', (e) => {
+                    const isDark = e.target.checked;
+                    applyTheme(isDark);
+                    localStorage.setItem('dashfin-dark-mode', isDark.toString());
+                    console.log(`🌙 Dark mode: ${isDark ? 'enabled' : 'disabled'}`);
+                });
+            }
+            
+            // Auto-Sync Toggle
+            const autoSyncToggle = document.getElementById('autoSyncToggle');
+            if (autoSyncToggle) {
+                autoSyncToggle.addEventListener('change', (e) => {
+                    const autoSync = e.target.checked;
+                    localStorage.setItem('dashfin-auto-sync', autoSync.toString());
+                    console.log(`🔄 Auto-sync: ${autoSync ? 'enabled' : 'disabled'}`);
+                });
+            }
+            
+            // Notifications Toggle
+            const notificationsToggle = document.getElementById('notificationsToggle');
+            if (notificationsToggle) {
+                notificationsToggle.addEventListener('change', (e) => {
+                    const notifications = e.target.checked;
+                    localStorage.setItem('dashfin-notifications', notifications.toString());
+                    
+                    if (notifications) {
+                        requestNotificationPermission();
+                    }
+                    console.log(`🔔 Notifications: ${notifications ? 'enabled' : 'disabled'}`);
+                });
+            }
+            
+            // Export Data Button
+            const exportBtn = document.getElementById('exportDataBtn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', exportUserData);
+            }
+            
+            // Clear Cache Button
+            const clearCacheBtn = document.getElementById('clearCacheBtn');
+            if (clearCacheBtn) {
+                clearCacheBtn.addEventListener('click', clearLocalCache);
+            }
+        }
+        
+        function applyTheme(isDark) {
+            if (isDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        }
+        
+        async function requestNotificationPermission() {
+            if ('Notification' in window) {
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        new Notification('🔔 Benachrichtigungen aktiviert!', {
+                            body: 'Du erhältst jetzt Erinnerungen für deine Todos und Ziele.',
+                            icon: '/favicon.ico'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error requesting notification permission:', error);
+                }
+            }
+        }
+        
+        async function exportUserData() {
+            try {
+                const exportBtn = document.getElementById('exportDataBtn');
+                const originalText = exportBtn.textContent;
+                exportBtn.textContent = 'Exportiere...';
+                exportBtn.disabled = true;
+                
+                // Gather all user data
+                const userData = {
+                    exportDate: new Date().toISOString(),
+                    todos: [],
+                    goals: [],
+                    journalEntries: [],
+                    routineCompletions: [],
+                    preferences: {
+                        darkMode: localStorage.getItem('dashfin-dark-mode') === 'true',
+                        autoSync: localStorage.getItem('dashfin-auto-sync') !== 'false',
+                        notifications: localStorage.getItem('dashfin-notifications') === 'true'
+                    }
+                };
+                
+                // Get data from Supabase if available
+                if (window.supabase) {
+                    userData.todos = await window.supabase.select('todos') || [];
+                    userData.goals = await window.supabase.select('goals') || [];
+                    userData.journalEntries = await window.supabase.select('journal_entries') || [];
+                    userData.routineCompletions = await window.supabase.select('routine_completions') || [];
+                }
+                
+                // Create download
+                const dataStr = JSON.stringify(userData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `dashfin-export-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                console.log('✅ Data exported successfully');
+                
+                // Reset button
+                setTimeout(() => {
+                    exportBtn.textContent = originalText;
+                    exportBtn.disabled = false;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('❌ Export failed:', error);
+                alert('Fehler beim Exportieren der Daten!');
+            }
+        }
+        
+        function clearLocalCache() {
+            if (confirm('Lokalen Cache leeren? Dies entfernt alle gespeicherten Präferenzen (außer Dark Mode).')) {
+                // Clear all localStorage except theme preference
+                const darkMode = localStorage.getItem('dashfin-dark-mode');
+                localStorage.clear();
+                if (darkMode !== null) {
+                    localStorage.setItem('dashfin-dark-mode', darkMode);
+                }
+                
+                console.log('🗑️ Local cache cleared');
+                alert('Cache wurde geleert! Seite wird neu geladen...');
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            }
         }
     </script>
 </body>
