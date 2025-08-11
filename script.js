@@ -229,7 +229,9 @@ const Auth = {
         if (authScreen) {
             console.log('🔄 Removing hide class from auth-screen...');
             authScreen.classList.remove('hide');
+            authScreen.style.display = 'flex';
             console.log('✅ Auth screen classes:', authScreen.className);
+            console.log('✅ Auth screen display:', authScreen.style.display);
         }
         
         if (layout) {
