@@ -53,21 +53,30 @@ class SupabaseClient {
     
     async signIn(email, password) {
         try {
+            // Use the newer Supabase auth endpoint
             const response = await fetch(`${this.url}/auth/v1/token?grant_type=password`, {
                 method: 'POST',
                 headers: {
                     'apikey': this.key,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.key}`
                 },
                 body: JSON.stringify({
-                    email,
-                    password
+                    email: email,
+                    password: password,
+                    gotrue_meta_security: {}
                 })
             });
             
             const data = await response.json();
+            console.log('🔍 Full Supabase response:', data);
             
-            if (data.access_token) {
+            if (!response.ok) {
+                console.error('❌ HTTP Error:', response.status, response.statusText);
+                return { user: null, session: null, error: data.error_description || data.msg || `HTTP ${response.status}` };
+            }
+            
+            if (data.access_token && data.user) {
                 const session = {
                     access_token: data.access_token,
                     refresh_token: data.refresh_token,
@@ -77,8 +86,9 @@ class SupabaseClient {
                 return { user: data.user, session, error: null };
             }
             
-            return { user: null, session: null, error: data.error_description || 'Login failed' };
+            return { user: null, session: null, error: data.error_description || data.error || 'Login failed' };
         } catch (error) {
+            console.error('❌ Network error:', error);
             return { user: null, session: null, error: error.message };
         }
     }

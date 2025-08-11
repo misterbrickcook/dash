@@ -85,8 +85,10 @@
                     throw new Error('Supabase not configured');
                 }
                 
-                // Create user
+                // Create user  
+                console.log('Creating user with:', email);
                 const { user, session, error } = await supabase.signUp(email, password);
+                console.log('SignUp response:', { user, session, error });
                 
                 if (error) {
                     messageDiv.innerHTML = `<div class="error">Error: ${error}</div>`;
