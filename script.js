@@ -92,10 +92,20 @@ const Auth = {
         this.clearAuthErrors();
         
         try {
+            console.log('🔄 Attempting login for:', email);
             const { user, session, error } = await supabase.signIn(email, password);
             
+            console.log('📥 Login response:', { user, session, error });
+            
             if (error) {
-                this.showAuthError('login', error);
+                console.error('❌ Login error:', error);
+                this.showAuthError('login', `Login failed: ${error}`);
+                return;
+            }
+            
+            if (!user || !session) {
+                console.error('❌ No user or session returned');
+                this.showAuthError('login', 'Login failed: No user data returned');
                 return;
             }
             
@@ -106,8 +116,8 @@ const Auth = {
             this.showDashboard();
             
         } catch (error) {
-            this.showAuthError('login', 'Login failed. Please try again.');
-            console.error('Login error:', error);
+            console.error('❌ Login exception:', error);
+            this.showAuthError('login', `Login failed: ${error.message}`);
         } finally {
             this.setAuthLoading('login', false);
         }
