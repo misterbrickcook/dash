@@ -1,26 +1,47 @@
-/* === CSS VARIABLES FOR THEMING === */
+/* === DESIGN SYSTEM === */
 :root {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fa;
-    --text-primary: #333333;
-    --text-secondary: #666666;
-    --border-color: #e0e0e0;
+    /* Typography Scale */
+    --font-size-xs: 0.75rem;    /* 12px */
+    --font-size-sm: 0.875rem;   /* 14px */
+    --font-size-base: 1rem;     /* 16px */
+    --font-size-lg: 1.125rem;   /* 18px */
+    --font-size-xl: 1.25rem;    /* 20px */
+    --font-size-2xl: 1.5rem;    /* 24px */
+    --font-size-3xl: 1.875rem;  /* 30px */
+    --font-size-4xl: 2.25rem;   /* 36px */
+    
+    /* Spacing Scale (8px grid) */
+    --space-1: 0.25rem;  /* 4px */
+    --space-2: 0.5rem;   /* 8px */
+    --space-3: 0.75rem;  /* 12px */
+    --space-4: 1rem;     /* 16px */
+    --space-5: 1.25rem;  /* 20px */
+    --space-6: 1.5rem;   /* 24px */
+    --space-8: 2rem;     /* 32px */
+    --space-10: 2.5rem;  /* 40px */
+    --space-12: 3rem;    /* 48px */
+    --space-16: 4rem;    /* 64px */
+    
+    /* Colors */
+    --gray-50: #fafafa;
+    --gray-100: #f5f5f5;
+    --gray-200: #e5e5e5;
+    --gray-300: #d4d4d4;
+    --gray-400: #a3a3a3;
+    --gray-500: #737373;
+    --gray-600: #525252;
+    --gray-700: #404040;
+    --gray-800: #262626;
+    --gray-900: #171717;
+    --gray-950: #0a0a0a;
+    
+    /* Legacy vars for compatibility */
+    --bg-primary: var(--gray-50);
+    --bg-secondary: var(--gray-100);
+    --text-primary: var(--gray-900);
+    --text-secondary: var(--gray-600);
+    --border-color: var(--gray-200);
     --card-bg: #ffffff;
-    --nav-bg: #ffffff;
-    --input-bg: #ffffff;
-    --input-border: #e0e0e0;
-    --button-bg: #007bff;
-    --button-text: #ffffff;
-    --streak-bg: #fafafa;
-    --progress-bg: #e9ecef;
-    --tab-bg: #f8f9fa;
-    --tab-active-bg: #000000;
-    --checkbox-bg: #ffffff;
-    --form-section-bg: #ffffff;
-    --shadow: rgba(0, 0, 0, 0.1);
-    --hover-bg: #f0f0f0;
-    --button-hover: #0056b3;
-    --toggle-bg: #e0e0e0;
 }
 
 /* === DARK MODE VARIABLES === */
@@ -60,19 +81,80 @@ html {
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, sans-serif;
     background-color: #f5f5f5;
-    color: var(--text-primary);
-    line-height: 1.6;
+    color: #1a1a1a;
+    line-height: 1.5;
     margin: 0;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: -0.011em;
+    transition: all 0.3s ease;
 }
 
 .main-content {
     margin-left: 280px;
-    padding: 2rem 3rem;
+    padding: var(--space-8) var(--space-12);
     min-height: 100vh;
-    background: #f5f5f5;
+    background: var(--gray-100);
+}
+
+/* === TYPOGRAPHY SYSTEM === */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    margin: 0;
+    color: var(--gray-900);
+}
+
+h1 {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    margin-bottom: var(--space-6);
+}
+
+h2 {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--space-5);
+}
+
+h3 {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--space-4);
+}
+
+h4 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-3);
+}
+
+p {
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin-bottom: var(--space-4);
+}
+
+.text-sm {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+}
+
+.text-xs {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.font-bold {
+    font-weight: 700;
 }
 
 /* === MODERN SIDEBAR NAVIGATION === */
@@ -101,10 +183,10 @@ body {
 .nav-brand {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
+    gap: var(--space-4);
+    padding: var(--space-6);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
 }
 
 .brand-logo {
@@ -112,48 +194,49 @@ body {
     height: 40px;
     background: #ffffff;
     color: #000000;
-    border-radius: 8px;
+    border-radius: var(--space-2);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: var(--font-size-xl);
 }
 
 .nav-brand h3 {
     color: #ffffff;
     margin: 0;
-    font-size: 1.2rem;
+    font-size: var(--font-size-xl);
     font-weight: 600;
+    letter-spacing: -0.025em;
 }
 
 /* Navigation Links Container */
 .nav-links {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding: 0 1.5rem;
+    gap: var(--space-2);
+    padding: 0 var(--space-6);
     flex: 1;
 }
 
 .nav-link {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--space-4);
     text-decoration: none;
-    color: #888888;
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
+    color: var(--gray-400);
+    padding: var(--space-4) var(--space-6);
+    border-radius: var(--space-3);
     transition: all 0.3s ease;
     font-weight: 500;
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     cursor: pointer;
     user-select: none;
     background: transparent;
     border: none;
     position: relative;
     text-transform: none;
-    letter-spacing: normal;
+    letter-spacing: -0.011em;
 }
 
 .nav-link:hover {
