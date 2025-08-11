@@ -141,18 +141,9 @@
             return;
         }
         
-        // Try the working desktop login method first
-        if (window.Auth && window.Auth.handleLogin) {
-            if (debugDiv) {
-                debugDiv.innerHTML += `<br>🎯 Using desktop login method (known to work)...`;
-            }
-            window.Auth.handleLogin();
-            return;
-        }
-        
-        // Fallback to direct mobile login
+        // Always use direct mobile login for mobile devices for better reliability
         if (debugDiv) {
-            debugDiv.innerHTML += `<br>🚀 Auth not ready, trying direct mobile login...`;
+            debugDiv.innerHTML += `<br>🚀 Using direct mobile login for better mobile compatibility...`;
         }
         directMobileLogin(email, password);
     }

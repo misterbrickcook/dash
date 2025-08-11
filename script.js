@@ -44,6 +44,9 @@ const Auth = {
     currentUser: null,
     
     async init() {
+        // Make Auth available globally IMMEDIATELY for mobile login
+        window.Auth = this;
+        
         // Initialize Supabase first
         const supabaseReady = initializeSupabase();
         
@@ -60,9 +63,6 @@ const Auth = {
             this.isAuthenticated = true;
             this.hideAuthScreen();
             this.showDashboard();
-            
-            // Make Auth available globally for session handling
-            window.Auth = this;
         } else {
             this.showAuthScreen();
         }
