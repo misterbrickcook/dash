@@ -2769,8 +2769,8 @@
                             console.log(`🎉 ${routineType} routine completed! Updating streak...`);
                         }
                         
-                        updateMonthlyRoutineStreak('morning');
-                        updateMonthlyRoutineStreak('evening');
+                        // Wait for cloudStorage to be available before calculating streaks
+                        waitForCloudStorageAndUpdateStreaks();
                     }, 200);
                 });
             });
@@ -2883,6 +2883,24 @@
         
         // === STREAK CALCULATION FUNCTIONS ===
         
+        async function waitForCloudStorageAndUpdateStreaks() {
+            let attempts = 0;
+            while (!window.cloudStorage && attempts < 20) {
+                console.log(`⏳ Waiting for cloudStorage (attempt ${attempts + 1}/20)...`);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+            
+            if (!window.cloudStorage) {
+                console.log('❌ CloudStorage not available after waiting, cannot update streaks');
+                return;
+            }
+            
+            console.log('✅ CloudStorage available, updating streaks...');
+            updateMonthlyRoutineStreak('morning');
+            updateMonthlyRoutineStreak('evening');
+        }
+        
         function calculateRoutineStreak(routineType) {
             try {
                 console.log(`🔄 Calculating ${routineType} streak...`);
@@ -2929,16 +2947,18 @@
                         console.log(`✅ ${routineType} completed on ${dateStr} (${completedItems}/${totalItems}) - Streak: ${streak}`);
                     } else {
                         if (i === 0) {
-                            // Today is incomplete - continue checking previous days
+                            // Today is incomplete
                             console.log(`⏳ Today (${dateStr}) has ${completedItems}/${totalItems} items completed`);
                             
-                            if (completedItems > 0) {
-                                console.log(`🔄 Today in progress, continuing streak calculation...`);
+                            // If today has no completions, break the streak
+                            if (completedItems === 0) {
+                                console.log(`❌ ${routineType} no items completed today - streak is 0`);
+                                break;
                             } else {
-                                console.log(`❌ ${routineType} no items completed today - checking if streak continues from yesterday`);
+                                console.log(`🔄 Today in progress (${completedItems}/5), continuing to check previous days...`);
+                                // Don't count today but continue checking previous days
+                                continue;
                             }
-                            // Don't count today but continue checking previous days
-                            continue;
                         } else {
                             console.log(`❌ ${routineType} incomplete on ${dateStr} (${completedItems}/${totalItems}) - breaking streak`);
                             break; // Streak broken
