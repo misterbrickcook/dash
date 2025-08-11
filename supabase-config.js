@@ -12,6 +12,7 @@ class SupabaseClient {
         this.key = SUPABASE_ANON_KEY;
         this.user = null;
         this.session = null;
+        this.sessionExpired = false; // Flag to prevent multiple logout attempts
         this.headers = {
             'apikey': this.key,
             'Authorization': `Bearer ${this.key}`,
@@ -116,6 +117,7 @@ class SupabaseClient {
     setSession(session) {
         this.session = session;
         this.user = session.user;
+        this.sessionExpired = false; // Reset expiration flag
         
         // Update headers for authenticated requests
         this.headers.Authorization = `Bearer ${session.access_token}`;
@@ -174,6 +176,11 @@ class SupabaseClient {
     }
 
     async query(table, method = 'GET', data = null) {
+        // If session already expired, don't make any more requests
+        if (this.sessionExpired) {
+            throw new Error('Session expired - page will reload');
+        }
+        
         const url = `${this.url}/rest/v1/${table}`;
         const options = {
             method,
@@ -190,11 +197,16 @@ class SupabaseClient {
             // Check if token expired
             if (response.status === 401) {
                 console.log('🔄 JWT expired, forcing logout...');
+                
+                // Set flag to prevent further requests
+                this.sessionExpired = true;
                 this.clearSession();
                 
-                // Force immediate logout and reload
-                localStorage.clear(); // Clear all local storage
-                window.location.reload(); // Force page reload to show auth
+                // Force immediate logout and reload (only once)
+                setTimeout(() => {
+                    localStorage.clear(); // Clear all local storage
+                    window.location.reload(); // Force page reload to show auth
+                }, 100);
                 
                 throw new Error('Session expired - please login again');
             }
