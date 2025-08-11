@@ -257,7 +257,7 @@
                 }
                 
                 // Show dashboard using the same method as desktop
-                if (typeof window.Auth.showDashboard === 'function') {
+                if (window.Auth && typeof window.Auth.showDashboard === 'function') {
                     window.Auth.showDashboard();
                     if (debugDiv) {
                         debugDiv.innerHTML += `<br>✅ Dashboard shown via Auth.showDashboard()`;
@@ -755,9 +755,13 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('🚀 HYBRID DASHBOARD - Beautiful UI + Cloud Sync');
             
-            // Initialize Auth system first
-            const auth = new Auth();
-            await auth.init();
+            // Initialize Auth system first (with fallback)
+            if (typeof Auth !== 'undefined') {
+                const auth = new Auth();
+                await auth.init();
+            } else {
+                console.warn('⚠️ Auth class not loaded yet, mobile login will use fallback');
+            }
             
             // Initialize navigation
             initializeNavigation();
