@@ -777,27 +777,49 @@
             
             // First check if there's a stored session regardless of Auth class
             const storedSession = localStorage.getItem('supabase.auth.token');
+            console.log('🔍 Checking stored session:', storedSession ? 'Found' : 'Not found');
+            
             if (storedSession) {
                 try {
                     const session = JSON.parse(storedSession);
                     const sessionAge = Date.now() - (session.created_at || 0);
                     const maxAge = 24 * 60 * 60 * 1000; // 24 hours
                     
+                    console.log('📅 Session age:', Math.round(sessionAge / 1000 / 60), 'minutes');
+                    console.log('👤 Session user:', session.user ? session.user.email : 'No user');
+                    console.log('🔑 Has access token:', !!session.access_token);
+                    
                     if (sessionAge < maxAge && session.access_token && session.user) {
                         console.log('✅ Valid session found, showing dashboard immediately');
                         // Hide auth screen and show dashboard immediately
                         const authScreen = document.getElementById('auth-screen');
                         const mainContent = document.querySelector('.main-content');
+                        const nav = document.querySelector('.sticky-nav');
                         
-                        if (authScreen) authScreen.style.display = 'none';
-                        if (mainContent) mainContent.style.display = 'block';
+                        if (authScreen) {
+                            authScreen.style.display = 'none';
+                            console.log('✅ Auth screen hidden');
+                        }
+                        if (mainContent) {
+                            mainContent.style.display = 'block';
+                            console.log('✅ Main content shown');
+                        }
+                        if (nav) {
+                            nav.style.display = 'flex';
+                            console.log('✅ Navigation shown');
+                        }
                         
                         // Continue with Auth initialization in background
+                    } else {
+                        console.log('❌ Session invalid - Age:', sessionAge > maxAge ? 'expired' : 'ok', 
+                                  'Token:', !!session.access_token, 'User:', !!session.user);
                     }
                 } catch (error) {
-                    console.error('Error parsing stored session:', error);
+                    console.error('❌ Error parsing stored session:', error);
                     localStorage.removeItem('supabase.auth.token');
                 }
+            } else {
+                console.log('ℹ️ No stored session found');
             }
             
             if (typeof Auth !== 'undefined') {
