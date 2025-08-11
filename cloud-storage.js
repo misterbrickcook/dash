@@ -216,19 +216,82 @@ class CloudStorage {
 
     // === ROUTINES CLOUD STORAGE ===
     
-    async getRoutineData() {
+    async getRoutineTemplates() {
         try {
-            if (!supabase || !this.isOnline) {
-                return this.getLocalRoutineData();
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
+                return this.getLocalRoutineTemplates();
             }
             
-            // Legacy routines table - disabled, using new routine system
-            console.log('⚠️ Legacy routines system disabled - using new routine_templates');
-            return this.getLocalRoutineData();
+            // Get user's routine templates (both system and personal)
+            const data = await supabase.query('routine_templates?order=order_index.asc');
+            if (data) {
+                localStorage.setItem('routine_templates_cache', JSON.stringify(data));
+                return data;
+            }
+            return this.getLocalRoutineTemplates();
         } catch (error) {
-            console.error('Error fetching routine data:', error);
-            return this.getLocalRoutineData();
+            console.error('Error fetching routine templates:', error);
+            return this.getLocalRoutineTemplates();
         }
+    }
+    
+    async getRoutineCompletions(date = null) {
+        try {
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
+                return this.getLocalRoutineCompletions(date);
+            }
+            
+            const dateFilter = date ? `&date=eq.${date}` : '';
+            const data = await supabase.query(`routine_completions?select=*${dateFilter}`);
+            if (data) {
+                localStorage.setItem('routine_completions_cache', JSON.stringify(data));
+                return data;
+            }
+            return this.getLocalRoutineCompletions(date);
+        } catch (error) {
+            console.error('Error fetching routine completions:', error);
+            return this.getLocalRoutineCompletions(date);
+        }
+    }
+    
+    async saveRoutineCompletion(templateId, date, completed) {
+        try {
+            const completion = {
+                id: `${templateId}_${date}`,
+                template_id: templateId,
+                date: date,
+                completed: completed,
+                user_id: supabase.getCurrentUser()?.id
+            };
+            
+            // Save locally first
+            this.saveLocalRoutineCompletion(completion);
+            
+            if (!supabase || !this.isOnline || !supabase.isAuthenticated()) {
+                this.queueSync('routine_completions', 'save', completion);
+                return;
+            }
+            
+            // Save to cloud
+            const existing = await supabase.query(`routine_completions?template_id=eq.${templateId}&date=eq.${date}`);
+            
+            if (existing && existing.length > 0) {
+                await supabase.update('routine_completions', { completed }, existing[0].id);
+            } else {
+                await supabase.insert('routine_completions', [completion]);
+            }
+            
+            console.log('✅ Routine completion synced:', templateId, completed);
+        } catch (error) {
+            console.error('Error saving routine completion:', error);
+            this.queueSync('routine_completions', 'save', completion);
+        }
+    }
+    
+    async getRoutineData() {
+        // Legacy method - redirect to new system
+        console.log('⚠️ Using legacy getRoutineData - redirecting to localStorage');
+        return this.getLocalRoutineData();
     }
     
     async saveRoutineData(key, value) {
@@ -410,6 +473,51 @@ class CloudStorage {
             routineResetTime: localStorage.getItem('routineResetTime') || '06:00',
             lastRoutineResetDate: localStorage.getItem('lastRoutineResetDate')
         };
+    }
+    
+    getLocalRoutineTemplates() {
+        const cached = localStorage.getItem('routine_templates_cache');
+        if (cached) {
+            return JSON.parse(cached);
+        }
+        
+        // Default templates if none cached
+        return [
+            {id: 'morning_1', text: '💧 Glas Wasser trinken', routine_type: 'morning', order_index: 1},
+            {id: 'morning_2', text: '🧘 5 Min Meditation', routine_type: 'morning', order_index: 2},
+            {id: 'morning_3', text: '📱 Handy Check vermeiden', routine_type: 'morning', order_index: 3},
+            {id: 'morning_4', text: '☀️ Tageslicht tanken', routine_type: 'morning', order_index: 4},
+            {id: 'morning_5', text: '📝 Tagesplan machen', routine_type: 'morning', order_index: 5},
+            {id: 'evening_1', text: '📱 Handy weggelegen', routine_type: 'evening', order_index: 1},
+            {id: 'evening_2', text: '📖 10 Min lesen', routine_type: 'evening', order_index: 2},
+            {id: 'evening_3', text: '✅ Tag reflektieren', routine_type: 'evening', order_index: 3},
+            {id: 'evening_4', text: '🌙 Zimmer abdunkeln', routine_type: 'evening', order_index: 4},
+            {id: 'evening_5', text: '😴 Früh ins Bett', routine_type: 'evening', order_index: 5}
+        ];
+    }
+    
+    getLocalRoutineCompletions(date = null) {
+        const cached = localStorage.getItem('routine_completions_cache');
+        if (cached) {
+            const completions = JSON.parse(cached);
+            return date ? completions.filter(c => c.date === date) : completions;
+        }
+        return [];
+    }
+    
+    saveLocalRoutineCompletion(completion) {
+        const completions = this.getLocalRoutineCompletions();
+        const existingIndex = completions.findIndex(c => 
+            c.template_id === completion.template_id && c.date === completion.date
+        );
+        
+        if (existingIndex >= 0) {
+            completions[existingIndex] = completion;
+        } else {
+            completions.push(completion);
+        }
+        
+        localStorage.setItem('routine_completions_cache', JSON.stringify(completions));
     }
     
     saveLocalRoutineData(key, value) {
