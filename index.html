@@ -141,12 +141,87 @@
             return;
         }
         
-        // Try to call the main Auth handler if available
-        if (window.Auth && window.Auth.handleLogin) {
-            window.Auth.handleLogin();
-        } else {
-            // Fallback: direct login attempt
-            alert('Login system not ready. Please refresh the page.');
+        // Wait for Auth system to load, then login
+        let attempts = 0;
+        const maxAttempts = 20;
+        
+        function tryLogin() {
+            attempts++;
+            if (debugDiv) {
+                debugDiv.innerHTML += `<br>Attempt ${attempts}: Checking Auth system...`;
+            }
+            
+            if (window.Auth && window.Auth.handleLogin) {
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>✅ Auth found! Attempting login...`;
+                }
+                window.Auth.handleLogin();
+            } else if (attempts < maxAttempts) {
+                // Wait and try again
+                setTimeout(tryLogin, 200);
+            } else {
+                // Final fallback: direct supabase login attempt
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>⚠️ Using direct login fallback...`;
+                }
+                directMobileLogin(email, password);
+            }
+        }
+        
+        tryLogin();
+    }
+    
+    async function directMobileLogin(email, password) {
+        const debugDiv = document.getElementById('mobile-debug');
+        
+        try {
+            if (debugDiv) {
+                debugDiv.innerHTML += `<br>🔄 Direct login attempt for ${email}...`;
+            }
+            
+            // Wait for supabase to be available
+            let supabaseAttempts = 0;
+            while (!window.supabase && supabaseAttempts < 10) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                supabaseAttempts++;
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>Waiting for Supabase... (${supabaseAttempts}/10)`;
+                }
+            }
+            
+            if (!window.supabase) {
+                throw new Error('Supabase not available');
+            }
+            
+            if (debugDiv) {
+                debugDiv.innerHTML += `<br>📡 Supabase found! Signing in...`;
+            }
+            
+            const result = await window.supabase.signIn(email, password);
+            
+            if (result.error) {
+                throw new Error(result.error);
+            }
+            
+            if (debugDiv) {
+                debugDiv.innerHTML += `<br>✅ Login successful! Redirecting...`;
+            }
+            
+            // Hide auth screen and show dashboard
+            const authScreen = document.getElementById('auth-screen');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (authScreen) authScreen.style.display = 'none';
+            if (mainContent) mainContent.style.display = 'block';
+            
+            // Reload to initialize dashboard
+            setTimeout(() => window.location.reload(), 1000);
+            
+        } catch (error) {
+            if (debugDiv) {
+                debugDiv.innerHTML += `<br>❌ Login failed: ${error.message}`;
+            }
+            alert('Login failed: ' + error.message);
         }
     }
     </script>
