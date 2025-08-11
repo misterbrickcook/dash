@@ -204,15 +204,8 @@ class CloudStorage {
                 return this.getLocalRoutineData();
             }
             
-            const data = await supabase.select('routines', '*');
-            if (data && data.length > 0) {
-                const routineData = {};
-                data.forEach(item => {
-                    routineData[item.key] = item.value;
-                });
-                localStorage.setItem('routines_cache', JSON.stringify(routineData));
-                return routineData;
-            }
+            // Legacy routines table - disabled, using new routine system
+            console.log('⚠️ Legacy routines system disabled - using new routine_templates');
             return this.getLocalRoutineData();
         } catch (error) {
             console.error('Error fetching routine data:', error);
@@ -222,26 +215,11 @@ class CloudStorage {
     
     async saveRoutineData(key, value) {
         try {
+            // Save locally only - legacy cloud sync disabled
             this.saveLocalRoutineData(key, value);
-            
-            if (!supabase || !this.isOnline) {
-                this.queueSync('routines', 'save', { key, value });
-                return;
-            }
-            
-            // Check if exists first
-            const existing = await supabase.query(`routines?key=eq.${key}`);
-            
-            if (existing && existing.length > 0) {
-                await supabase.update('routines', { value, updated_at: new Date().toISOString() }, existing[0].id);
-            } else {
-                await supabase.insert('routines', [{ key, value }]);
-            }
-            
-            console.log('✅ Routine data synced:', key);
+            console.log('✅ Routine data saved locally:', key);
         } catch (error) {
             console.error('Error saving routine data:', error);
-            this.queueSync('routines', 'save', { key, value });
         }
     }
     
@@ -462,14 +440,8 @@ class CloudStorage {
                         }
                         break;
                     case 'routines':
-                        if (item.action === 'save') {
-                            const existing = await supabase.query(`routines?key=eq.${item.data.key}`);
-                            if (existing && existing.length > 0) {
-                                await supabase.update('routines', { value: item.data.value, updated_at: new Date().toISOString() }, existing[0].id);
-                            } else {
-                                await supabase.insert('routines', [{ key: item.data.key, value: item.data.value }]);
-                            }
-                        }
+                        // Legacy routines sync disabled
+                        console.log('⚠️ Skipping legacy routines sync');
                         break;
                 }
                 console.log('✅ Synced:', item.table, item.action);
