@@ -67,42 +67,16 @@ const Auth = {
     },
     
     setupAuthHandlers() {
-        // Auth tab switching
-        document.querySelectorAll('.auth-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabName = tab.dataset.tab;
-                this.switchAuthTab(tabName);
-            });
-        });
-        
         // Login form
         document.getElementById('login-btn').addEventListener('click', () => this.handleLogin());
         document.getElementById('login-password').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.handleLogin();
         });
         
-        // Register form
-        document.getElementById('register-btn').addEventListener('click', () => this.handleRegister());
-        document.getElementById('register-confirm').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.handleRegister();
-        });
-        
         // Logout button
         document.getElementById('logout-btn').addEventListener('click', () => this.handleLogout());
     },
     
-    switchAuthTab(tab) {
-        // Update tab buttons
-        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-        document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-        
-        // Update forms
-        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-        document.getElementById(`${tab}-form`).classList.add('active');
-        
-        // Clear errors
-        this.clearAuthErrors();
-    },
     
     async handleLogin() {
         const email = document.getElementById('login-email').value.trim();
@@ -138,50 +112,6 @@ const Auth = {
         }
     },
     
-    async handleRegister() {
-        const email = document.getElementById('register-email').value.trim();
-        const password = document.getElementById('register-password').value;
-        const confirmPassword = document.getElementById('register-confirm').value;
-        
-        if (!email || !password || !confirmPassword) {
-            this.showAuthError('register', 'Please fill in all fields');
-            return;
-        }
-        
-        if (password !== confirmPassword) {
-            this.showAuthError('register', 'Passwords do not match');
-            return;
-        }
-        
-        if (password.length < 6) {
-            this.showAuthError('register', 'Password must be at least 6 characters');
-            return;
-        }
-        
-        this.setAuthLoading('register', true);
-        this.clearAuthErrors();
-        
-        try {
-            const { user, session, error } = await supabase.signUp(email, password);
-            
-            if (error) {
-                this.showAuthError('register', error);
-                return;
-            }
-            
-            console.log('✅ Registration successful:', user.email);
-            this.currentUser = user;
-            this.isAuthenticated = true;
-            this.hideAuthOverlay();
-            this.showDashboard();
-            
-        } catch (error) {
-            this.showAuthError('register', 'Registration failed. Please try again.');
-            console.error('Registration error:', error);
-        } finally {
-            this.setAuthLoading('register', false);
-        }
-    },
     
     async handleLogout() {
         try {
@@ -231,7 +161,7 @@ const Auth = {
     setAuthLoading(form, loading) {
         const btn = document.getElementById(`${form}-btn`);
         btn.disabled = loading;
-        btn.textContent = loading ? 'Please wait...' : (form === 'login' ? 'Login' : 'Create Account');
+        btn.textContent = loading ? 'Please wait...' : 'Login';
     }
 };
 
