@@ -798,16 +798,38 @@
                         
                         if (authScreen) {
                             authScreen.style.display = 'none';
+                            authScreen.style.visibility = 'hidden';
+                            authScreen.style.opacity = '0';
+                            authScreen.classList.add('hide');
                             console.log('✅ Auth screen hidden');
                         }
                         if (mainContent) {
                             mainContent.style.display = 'block';
+                            mainContent.style.visibility = 'visible';
+                            mainContent.style.opacity = '1';
+                            mainContent.classList.remove('hide');
                             console.log('✅ Main content shown');
                         }
                         if (nav) {
                             nav.style.display = 'flex';
+                            nav.style.visibility = 'visible';
+                            nav.style.opacity = '1';
+                            nav.classList.remove('hide');
                             console.log('✅ Navigation shown');
                         }
+                        
+                        // Force remove any body classes that might hide the dashboard
+                        document.body.classList.remove('auth-screen-active', 'hide-dashboard', 'modal-open');
+                        document.documentElement.classList.remove('hide-dashboard', 'auth-screen-active');
+                        
+                        // Trigger a navigation click to ensure visibility
+                        setTimeout(() => {
+                            const homeTab = document.querySelector('[data-tab="home"]');
+                            if (homeTab) {
+                                homeTab.click();
+                                console.log('✅ Home tab activated after session restore');
+                            }
+                        }, 100);
                         
                         // Continue with Auth initialization in background
                     } else {
