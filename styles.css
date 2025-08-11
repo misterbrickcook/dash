@@ -22,7 +22,7 @@
     --space-12: 3rem;    /* 48px */
     --space-16: 4rem;    /* 64px */
     
-    /* Colors */
+    /* Gray Palette */
     --gray-50: #fafafa;
     --gray-100: #f5f5f5;
     --gray-200: #e5e5e5;
@@ -34,6 +34,52 @@
     --gray-800: #262626;
     --gray-900: #171717;
     --gray-950: #0a0a0a;
+    
+    /* Blue Palette (Primary) */
+    --blue-50: #f0f9ff;
+    --blue-100: #e0f2fe;
+    --blue-500: #0ea5e9;
+    --blue-600: #0284c7;
+    --blue-700: #0369a1;
+    --blue-900: #0c4a6e;
+    
+    /* Green Palette (Success) */
+    --green-50: #f0fdf4;
+    --green-100: #dcfce7;
+    --green-500: #22c55e;
+    --green-600: #16a34a;
+    --green-700: #15803d;
+    
+    /* Orange Palette (Warning) */
+    --orange-50: #fffbeb;
+    --orange-100: #fef3c7;
+    --orange-500: #f59e0b;
+    --orange-600: #d97706;
+    --orange-700: #b45309;
+    
+    /* Red Palette (Error) */
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+    
+    /* Semantic Colors */
+    --primary: var(--blue-600);
+    --primary-hover: var(--blue-700);
+    --primary-light: var(--blue-50);
+    
+    --success: var(--green-600);
+    --success-hover: var(--green-700);
+    --success-light: var(--green-50);
+    
+    --warning: var(--orange-500);
+    --warning-hover: var(--orange-600);
+    --warning-light: var(--orange-50);
+    
+    --error: var(--red-500);
+    --error-hover: var(--red-600);
+    --error-light: var(--red-50);
     
     /* Legacy vars for compatibility */
     --bg-primary: var(--gray-50);
@@ -155,6 +201,90 @@ p {
 
 .font-bold {
     font-weight: 700;
+}
+
+/* === BUTTON SYSTEM === */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--space-2);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Primary Button */
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--primary-hover);
+    box-shadow: 0 4px 6px rgba(2, 132, 199, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Secondary Button */
+.btn-secondary {
+    background: white;
+    color: var(--gray-700);
+    border-color: var(--gray-200);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+    transform: translateY(-1px);
+}
+
+/* Ghost Button */
+.btn-ghost {
+    background: transparent;
+    color: var(--gray-600);
+    border: none;
+}
+
+.btn-ghost:hover:not(:disabled) {
+    background: var(--gray-100);
+    color: var(--gray-900);
+}
+
+/* Success Button */
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background: var(--success-hover);
+    transform: translateY(-1px);
+}
+
+/* Button Sizes */
+.btn-sm {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+}
+
+.btn-lg {
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--font-size-base);
 }
 
 /* === MODERN SIDEBAR NAVIGATION === */
@@ -548,42 +678,46 @@ h3 {
 .checkbox-item {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    background: #ffffff;
-    padding: 1rem 1.25rem;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    gap: var(--space-4);
+    background: white;
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--space-3);
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     cursor: pointer;
 }
 
 .checkbox-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    border-color: #d0d0d0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-color: var(--gray-300);
 }
 
 .checkbox-item:active {
     transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .checkbox-item input[type="checkbox"] {
     width: 20px;
     height: 20px;
-    border: 2px solid #d0d0d0;
-    background: #ffffff;
-    border-radius: 6px;
-    transition: all 0.3s ease;
+    border: 2px solid var(--gray-300);
+    background: white;
+    border-radius: var(--space-2);
+    transition: all 0.2s ease;
     appearance: none;
     cursor: pointer;
     flex-shrink: 0;
 }
 
+.checkbox-item input[type="checkbox"]:hover {
+    border-color: var(--primary);
+}
+
 .checkbox-item input[type="checkbox"]:checked {
-    background-color: #000000;
-    border-color: #000000;
+    background-color: var(--primary);
+    border-color: var(--primary);
     position: relative;
 }
 
@@ -598,10 +732,10 @@ h3 {
 }
 
 .checkbox-item label {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     cursor: pointer;
     line-height: 1.5;
-    color: #333333;
+    color: var(--gray-800);
     font-weight: 500;
     flex: 1;
 }
