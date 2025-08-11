@@ -80,11 +80,20 @@ const Auth = {
         console.log('🔍 Elements found:', { loginBtn: !!loginBtn, passwordField: !!passwordField, logoutBtn: !!logoutBtn });
         
         if (loginBtn) {
-            loginBtn.addEventListener('click', (e) => {
-                console.log('🖱️ Login button clicked!');
+            // Add both click and touch events for mobile compatibility
+            const handleLoginClick = (e) => {
+                console.log('🖱️ Login button activated!');
                 e.preventDefault();
+                e.stopPropagation();
                 this.handleLogin();
+            };
+            
+            loginBtn.addEventListener('click', handleLoginClick);
+            loginBtn.addEventListener('touchstart', (e) => {
+                console.log('👆 Touch start on login button');
+                e.preventDefault();
             });
+            loginBtn.addEventListener('touchend', handleLoginClick);
         }
         
         if (passwordField) {
