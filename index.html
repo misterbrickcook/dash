@@ -19,7 +19,7 @@
             <div class="nav-link" data-tab="motivation">Motivation</div>
             <div class="nav-link" data-tab="ressourcen">Ressourcen</div>
             <div class="nav-link" data-tab="settings">Settings</div>
-            <div class="nav-link" data-tab="restore">🔧 Restore</div>
+            <div class="nav-link" data-tab="restore" style="display: none;">🔧 Restore</div>
         </div>
     </nav>
 
@@ -393,6 +393,16 @@
                             <button class="btn-secondary" id="clearCacheBtn">Cache leeren</button>
                         </div>
                     </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">🔧 Routine Restore</label>
+                            <p class="setting-description">Repariere Routine-System (temporär)</p>
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn-primary" onclick="showTab('restore')">Open Restore</button>
+                        </div>
+                    </div>
                 </div>
                 
             </section>
@@ -419,11 +429,11 @@
                     
                     <div class="setting-item">
                         <div class="setting-info">
-                            <label class="setting-label">2️⃣ Restore Routines</label>
-                            <p class="setting-description">Convert old data and restore your streaks</p>
+                            <label class="setting-label">2️⃣ Set 5-Day Streaks</label>
+                            <p class="setting-description">Set both routines to 5-day streaks for testing</p>
                         </div>
                         <div class="setting-control">
-                            <button class="btn-primary" onclick="restoreRoutineData()">Restore</button>
+                            <button class="btn-primary" onclick="setFiveDayStreaks()">Set Streaks</button>
                         </div>
                     </div>
                     
@@ -2678,6 +2688,63 @@
             </div>`;
             
             status.innerHTML = html;
+        }
+        
+        function setFiveDayStreaks() {
+            const status = document.getElementById('restore-status');
+            
+            const completions = [];
+            const today = new Date();
+            
+            // Generate 5 days of completions for both morning and evening routines
+            for (let i = 0; i < 5; i++) {
+                const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                // Morning routine completions (all 5 items)
+                for (let j = 1; j <= 5; j++) {
+                    completions.push({
+                        id: `morning_${j}_${dateStr}`,
+                        template_id: `morning_${j}`,
+                        date: dateStr,
+                        completed: true,
+                        user_id: 'manual'
+                    });
+                }
+                
+                // Evening routine completions (all 5 items)
+                for (let j = 1; j <= 5; j++) {
+                    completions.push({
+                        id: `evening_${j}_${dateStr}`,
+                        template_id: `evening_${j}`,
+                        date: dateStr,
+                        completed: true,
+                        user_id: 'manual'
+                    });
+                }
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('routine_completions_cache', JSON.stringify(completions));
+            
+            // Clean templates
+            const templates = [
+                {id: 'morning_1', text: '💧 Glas Wasser trinken', routine_type: 'morning', order_index: 1},
+                {id: 'morning_2', text: '🧘 5 Min Meditation', routine_type: 'morning', order_index: 2},
+                {id: 'morning_3', text: '📱 Handy Check vermeiden', routine_type: 'morning', order_index: 3},
+                {id: 'morning_4', text: '☀️ Tageslicht tanken', routine_type: 'morning', order_index: 4},
+                {id: 'morning_5', text: '📝 Tagesplan machen', routine_type: 'morning', order_index: 5},
+                {id: 'evening_1', text: '📱 Handy weggelegen', routine_type: 'evening', order_index: 1},
+                {id: 'evening_2', text: '📖 10 Min lesen', routine_type: 'evening', order_index: 2},
+                {id: 'evening_3', text: '✅ Tag reflektieren', routine_type: 'evening', order_index: 3},
+                {id: 'evening_4', text: '🌙 Zimmer abdunkeln', routine_type: 'evening', order_index: 4},
+                {id: 'evening_5', text: '😴 Früh ins Bett', routine_type: 'evening', order_index: 5}
+            ];
+            
+            localStorage.setItem('routine_templates_cache', JSON.stringify(templates));
+            
+            status.innerHTML += `<div style="background: #efe; color: #363; padding: 1rem; border-radius: 6px;">✅ Set 5-day streaks for both routines (${completions.length} completions)</div>`;
+            status.innerHTML += `<div style="background: #efe; color: #363; padding: 1rem; border-radius: 6px;"><strong>Go to Home tab - both routines should show streak of 5!</strong></div>`;
         }
         
         function restoreRoutineData() {

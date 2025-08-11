@@ -1339,38 +1339,73 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     async function updateMonthlyRoutineStreak(routineType) {
         try {
+            // Calculate consecutive daily streak from new completion system
+            const streak = calculateRoutineStreak(routineType);
+            
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
-            
-            let completedDays = 0;
-            const completionData = await getRoutineCompletionData();
-            
-            // Count completed days in current month
-            Object.keys(completionData).forEach(dateStr => {
-                const date = new Date(dateStr);
-                if (date.getFullYear() === currentYear && date.getMonth() === currentMonth) {
-                    if (completionData[dateStr] && completionData[dateStr][routineType] === true) {
-                        completedDays++;
-                    }
-                }
-            });
             
             // Update streak tiles
             const countElement = document.getElementById(`${routineType}RoutineStreakCount`);
             const dateElement = document.getElementById(`${routineType}RoutineStreakDate`);
             
             if (countElement) {
-                countElement.textContent = completedDays;
+                countElement.textContent = streak;
             }
             
             if (dateElement) {
                 dateElement.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
             }
             
-            console.log(`Monthly ${routineType} routine streak updated: ${completedDays} days in ${MONTH_NAMES[currentMonth]} ${currentYear}`);
+            console.log(`🔥 ${routineType} routine streak: ${streak} days`);
         } catch (error) {
             console.log(`Error in updateMonthlyRoutineStreak(${routineType}):`, error);
+        }
+    }
+    
+    function calculateRoutineStreak(routineType) {
+        try {
+            // Get all completions from new system
+            const completions = cloudStorage.getLocalRoutineCompletions();
+            if (!completions || completions.length === 0) {
+                console.log(`No completions found for ${routineType}`);
+                return 0;
+            }
+            
+            const today = new Date();
+            let streak = 0;
+            
+            // Check consecutive days backwards from today
+            for (let i = 0; i < 365; i++) { // Max 365 day streak
+                const checkDate = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+                const dateStr = checkDate.toISOString().split('T')[0];
+                
+                // Check if all routine items were completed for this date and routine type
+                const dayCompletions = completions.filter(c => 
+                    c.date === dateStr && 
+                    c.template_id.startsWith(routineType) && 
+                    c.completed
+                );
+                
+                // Count unique completed items for this day
+                const completedItems = new Set(dayCompletions.map(c => c.template_id)).size;
+                const totalItems = 5; // We have 5 items per routine
+                
+                if (completedItems === totalItems) {
+                    streak++;
+                    console.log(`✅ ${routineType} completed on ${dateStr} (${completedItems}/${totalItems})`);
+                } else {
+                    console.log(`❌ ${routineType} incomplete on ${dateStr} (${completedItems}/${totalItems})`);
+                    break; // Streak broken
+                }
+            }
+            
+            return streak;
+            
+        } catch (error) {
+            console.error('Error calculating routine streak:', error);
+            return 0;
         }
     }
     
