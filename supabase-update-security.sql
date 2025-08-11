@@ -15,7 +15,17 @@ UPDATE routine_templates SET user_id = 'anonymous' WHERE user_id IS NULL;
 UPDATE routine_completions SET user_id = 'anonymous' WHERE user_id IS NULL;
 UPDATE journal_entries SET user_id = 'anonymous' WHERE user_id IS NULL;
 
--- 3. Enable Row Level Security
+-- 3. Create sync_test table if it doesn't exist
+CREATE TABLE IF NOT EXISTS sync_test (
+  id INTEGER PRIMARY KEY,
+  checked BOOLEAN DEFAULT FALSE,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Insert initial sync test data
+INSERT INTO sync_test (id, checked) VALUES (1, false) ON CONFLICT (id) DO NOTHING;
+
+-- 4. Enable Row Level Security
 ALTER TABLE todos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE routine_templates ENABLE ROW LEVEL SECURITY;
@@ -23,7 +33,7 @@ ALTER TABLE routine_completions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sync_test ENABLE ROW LEVEL SECURITY;
 
--- 4. Drop old open policies if they exist
+-- 5. Drop old open policies if they exist
 DROP POLICY IF EXISTS "Allow all access to todos" ON todos;
 DROP POLICY IF EXISTS "Allow all access to goals" ON goals;
 DROP POLICY IF EXISTS "Allow all access to routine_templates" ON routine_templates;
@@ -31,7 +41,7 @@ DROP POLICY IF EXISTS "Allow all access to routine_completions" ON routine_compl
 DROP POLICY IF EXISTS "Allow all access to journal_entries" ON journal_entries;
 DROP POLICY IF EXISTS "Allow all access to sync_test" ON sync_test;
 
--- 5. Create secure user-based policies for todos
+-- 6. Create secure user-based policies for todos
 CREATE POLICY "Users can view own todos" ON todos 
     FOR SELECT USING (auth.uid()::text = user_id);
 
@@ -44,7 +54,7 @@ CREATE POLICY "Users can update own todos" ON todos
 CREATE POLICY "Users can delete own todos" ON todos 
     FOR DELETE USING (auth.uid()::text = user_id);
 
--- 6. Create secure user-based policies for goals
+-- 7. Create secure user-based policies for goals
 CREATE POLICY "Users can view own goals" ON goals 
     FOR SELECT USING (auth.uid()::text = user_id);
 
@@ -57,7 +67,7 @@ CREATE POLICY "Users can update own goals" ON goals
 CREATE POLICY "Users can delete own goals" ON goals 
     FOR DELETE USING (auth.uid()::text = user_id);
 
--- 7. Create secure user-based policies for routine_templates
+-- 8. Create secure user-based policies for routine_templates
 CREATE POLICY "Users can view own routine_templates" ON routine_templates 
     FOR SELECT USING (auth.uid()::text = user_id);
 
@@ -70,7 +80,7 @@ CREATE POLICY "Users can update own routine_templates" ON routine_templates
 CREATE POLICY "Users can delete own routine_templates" ON routine_templates 
     FOR DELETE USING (auth.uid()::text = user_id);
 
--- 8. Create secure user-based policies for routine_completions
+-- 9. Create secure user-based policies for routine_completions
 CREATE POLICY "Users can view own routine_completions" ON routine_completions 
     FOR SELECT USING (auth.uid()::text = user_id);
 
@@ -83,7 +93,7 @@ CREATE POLICY "Users can update own routine_completions" ON routine_completions
 CREATE POLICY "Users can delete own routine_completions" ON routine_completions 
     FOR DELETE USING (auth.uid()::text = user_id);
 
--- 9. Create secure user-based policies for journal_entries
+-- 10. Create secure user-based policies for journal_entries
 CREATE POLICY "Users can view own journal_entries" ON journal_entries 
     FOR SELECT USING (auth.uid()::text = user_id);
 
@@ -96,18 +106,18 @@ CREATE POLICY "Users can update own journal_entries" ON journal_entries
 CREATE POLICY "Users can delete own journal_entries" ON journal_entries 
     FOR DELETE USING (auth.uid()::text = user_id);
 
--- 10. Sync test table - allow authenticated users only
+-- 11. Sync test table - allow authenticated users only
 CREATE POLICY "Authenticated users can access sync_test" ON sync_test 
     FOR ALL USING (auth.role() = 'authenticated');
 
--- 11. Update existing routine templates to system templates
+-- 12. Update existing routine templates to system templates
 UPDATE routine_templates SET user_id = 'system' WHERE id LIKE 'morning_%' OR id LIKE 'evening_%';
 
--- 12. Allow all authenticated users to read system templates
+-- 13. Allow all authenticated users to read system templates
 CREATE POLICY "Users can view system routine_templates" ON routine_templates 
     FOR SELECT USING (user_id = 'system' AND auth.role() = 'authenticated');
 
--- 13. Create function to initialize user data on signup
+-- 14. Create function to initialize user data on signup
 CREATE OR REPLACE FUNCTION initialize_user_data()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -127,12 +137,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 14. Create trigger to initialize user data on signup
+-- 15. Create trigger to initialize user data on signup
 DROP TRIGGER IF EXISTS initialize_user_data_trigger ON auth.users;
 CREATE TRIGGER initialize_user_data_trigger
     AFTER INSERT ON auth.users
     FOR EACH ROW
     EXECUTE FUNCTION initialize_user_data();
 
--- 15. Success message
+-- 16. Success message
 SELECT 'Authentication security policies successfully installed!' as status;
