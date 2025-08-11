@@ -909,27 +909,22 @@ h3 {
     letter-spacing: 0.05em;
 }
 
-/* === AUTH OVERLAY STYLES === */
-.auth-overlay {
+/* === AUTH SCREEN STYLES === */
+.auth-screen {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
+    background: var(--bg-primary);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.auth-overlay.show {
-    opacity: 1;
-    visibility: visible;
+.auth-screen.hide {
+    display: none;
 }
 
 .auth-container {

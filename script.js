@@ -58,9 +58,10 @@ const Auth = {
         if (supabase.isAuthenticated()) {
             console.log('✅ User already authenticated:', this.currentUser.email);
             this.isAuthenticated = true;
+            this.hideAuthScreen();
             this.showDashboard();
         } else {
-            this.showAuthOverlay();
+            this.showAuthScreen();
         }
         
         this.setupAuthHandlers();
@@ -101,7 +102,7 @@ const Auth = {
             console.log('✅ Login successful:', user.email);
             this.currentUser = user;
             this.isAuthenticated = true;
-            this.hideAuthOverlay();
+            this.hideAuthScreen();
             this.showDashboard();
             
         } catch (error) {
@@ -118,20 +119,22 @@ const Auth = {
             await supabase.signOut();
             this.currentUser = null;
             this.isAuthenticated = false;
-            this.showAuthOverlay();
+            this.showAuthScreen();
             console.log('👋 User logged out');
         } catch (error) {
             console.error('Logout error:', error);
         }
     },
     
-    showAuthOverlay() {
-        document.getElementById('auth-overlay').classList.add('show');
+    showAuthScreen() {
+        document.getElementById('auth-screen').classList.remove('hide');
         document.querySelector('.main-content').style.display = 'none';
+        document.querySelector('.sticky-nav').style.display = 'none';
     },
     
-    hideAuthOverlay() {
-        document.getElementById('auth-overlay').classList.remove('show');
+    hideAuthScreen() {
+        document.getElementById('auth-screen').classList.add('hide');
+        document.querySelector('.sticky-nav').style.display = 'block';
     },
     
     showDashboard() {
