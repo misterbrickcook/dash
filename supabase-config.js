@@ -181,6 +181,16 @@ class SupabaseClient {
             throw new Error('Session expired - page will reload');
         }
         
+        // Debug: Check auth status before making request
+        console.log('🔍 Query debug:', {
+            table,
+            method,
+            isAuthenticated: this.isAuthenticated(),
+            hasUser: !!this.user,
+            hasSession: !!this.session,
+            authHeader: this.headers.Authorization.substring(0, 20) + '...'
+        });
+        
         const url = `${this.url}/rest/v1/${table}`;
         const options = {
             method,
@@ -256,6 +266,11 @@ function initializeSupabase() {
         supabase = new SupabaseClient();
         window.supabase = supabase; // Set window.supabase AFTER creation
         console.log('✅ Supabase connected');
+        console.log('🔍 Auth status:', {
+            isAuthenticated: supabase.isAuthenticated(),
+            hasUser: !!supabase.user,
+            userEmail: supabase.user?.email || 'Not logged in'
+        });
         return true;
     }
     console.log('📱 Using localStorage (Supabase not configured)');
