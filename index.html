@@ -141,34 +141,11 @@
             return;
         }
         
-        // Wait for Auth system to load, then login
-        let attempts = 0;
-        const maxAttempts = 20;
-        
-        function tryLogin() {
-            attempts++;
-            if (debugDiv) {
-                debugDiv.innerHTML += `<br>Attempt ${attempts}: Checking Auth system...`;
-            }
-            
-            if (window.Auth && window.Auth.handleLogin) {
-                if (debugDiv) {
-                    debugDiv.innerHTML += `<br>✅ Auth found! Attempting login...`;
-                }
-                window.Auth.handleLogin();
-            } else if (attempts < maxAttempts) {
-                // Wait and try again
-                setTimeout(tryLogin, 200);
-            } else {
-                // Final fallback: direct supabase login attempt
-                if (debugDiv) {
-                    debugDiv.innerHTML += `<br>⚠️ Using direct login fallback...`;
-                }
-                directMobileLogin(email, password);
-            }
+        // Skip Auth waiting, go directly to Supabase login
+        if (debugDiv) {
+            debugDiv.innerHTML += `<br>🚀 Skipping Auth wait, direct login...`;
         }
-        
-        tryLogin();
+        directMobileLogin(email, password);
     }
     
     async function directMobileLogin(email, password) {
@@ -179,79 +156,45 @@
                 debugDiv.innerHTML += `<br>🔄 Direct login attempt for ${email}...`;
             }
             
-            // Wait for supabase to be available
-            let supabaseAttempts = 0;
-            while (!window.supabase && supabaseAttempts < 10) {
-                await new Promise(resolve => setTimeout(resolve, 500));
-                supabaseAttempts++;
-                if (debugDiv) {
-                    debugDiv.innerHTML += `<br>Waiting for Supabase... (${supabaseAttempts}/10)`;
-                }
-            }
+            // Direct API call (most reliable for mobile)
+            const response = await fetch('https://aotuakgnudtiigbbzkkf.supabase.co/auth/v1/token?grant_type=password', {
+                method: 'POST',
+                headers: {
+                    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvdHVha2dudWR0aWlnYmJ6a2tmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Mzk1MTYsImV4cCI6MjA3MDMxNTUxNn0.xC6i5Kphk-H3pGUwFj0ko7_YZTguast3hK5fprsJfZI',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvdHVha2dudWR0aWlnYmJ6a2tmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Mzk1MTYsImV4cCI6MjA3MDMxNTUxNn0.xC6i5Kphk-H3pGUwFj0ko7_YZTguast3hK5fprsJfZI'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    gotrue_meta_security: {}
+                })
+            });
             
-            if (!window.supabase) {
-                throw new Error('Supabase not available');
-            }
-            
+            const data = await response.json();
             if (debugDiv) {
-                debugDiv.innerHTML += `<br>📡 Supabase found! Signing in...`;
-                debugDiv.innerHTML += `<br>🔍 Available methods: ${Object.keys(window.supabase)}`;
-                debugDiv.innerHTML += `<br>🔍 signIn type: ${typeof window.supabase.signIn}`;
+                debugDiv.innerHTML += `<br>📡 API Response: ${response.status}`;
+                debugDiv.innerHTML += `<br>📊 Response data: ${JSON.stringify(data).substring(0, 100)}...`;
             }
             
-            // Make sure we have the signIn method
-            if (typeof window.supabase.signIn !== 'function') {
-                if (debugDiv) {
-                    debugDiv.innerHTML += `<br>⚠️ signIn method missing, trying direct API call...`;
-                }
-                
-                // Direct API fallback
-                const response = await fetch('https://aotuakgnudtiigbbzkkf.supabase.co/auth/v1/token?grant_type=password', {
-                    method: 'POST',
-                    headers: {
-                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvdHVha2dudWR0aWlnYmJ6a2tmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Mzk1MTYsImV4cCI6MjA3MDMxNTUxNn0.xC6i5Kphk-H3pGUwFj0ko7_YZTguast3hK5fprsJfZI',
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvdHVha2dudWR0aWlnYmJ6a2tmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Mzk1MTYsImV4cCI6MjA3MDMxNTUxNn0.xC6i5Kphk-H3pGUwFj0ko7_YZTguast3hK5fprsJfZI'
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password,
-                        gotrue_meta_security: {}
-                    })
-                });
-                
-                const data = await response.json();
-                if (debugDiv) {
-                    debugDiv.innerHTML += `<br>📡 Direct API response: ${response.status}`;
-                }
-                
-                if (!response.ok) {
-                    throw new Error(data.error_description || data.msg || `HTTP ${response.status}`);
-                }
-                
-                if (data.access_token && data.user) {
-                    // Store session manually
-                    localStorage.setItem('supabase.auth.token', JSON.stringify({
-                        access_token: data.access_token,
-                        refresh_token: data.refresh_token,
-                        user: data.user,
-                        created_at: Date.now()
-                    }));
-                    
-                    if (debugDiv) {
-                        debugDiv.innerHTML += `<br>✅ Direct login successful!`;
-                    }
-                } else {
-                    throw new Error('Invalid login response');
-                }
-                
-                return { user: data.user, session: data, error: null };
+            if (!response.ok) {
+                throw new Error(data.error_description || data.msg || `HTTP ${response.status}`);
             }
             
-            const result = await window.supabase.signIn(email, password);
-            
-            if (result.error) {
-                throw new Error(result.error);
+            if (data.access_token && data.user) {
+                // Store session manually
+                localStorage.setItem('supabase.auth.token', JSON.stringify({
+                    access_token: data.access_token,
+                    refresh_token: data.refresh_token,
+                    user: data.user,
+                    created_at: Date.now()
+                }));
+                
+                if (debugDiv) {
+                    debugDiv.innerHTML += `<br>✅ Login successful! User: ${data.user.email}`;
+                }
+            } else {
+                throw new Error('Invalid login response - no access_token');
             }
             
             if (debugDiv) {
