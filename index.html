@@ -2750,9 +2750,44 @@
                     
                     // Save completion to cloud
                     if (window.cloudStorage && typeof window.cloudStorage.saveRoutineCompletion === 'function') {
+                        console.log(`💾 Saving completion: ${templateId} = ${completed}`);
                         await window.cloudStorage.saveRoutineCompletion(templateId, today, completed);
                     } else {
-                        console.log('⚠️ cloudStorage not available or method missing, completion not saved');
+                        console.log('⚠️ cloudStorage not available or method missing:');
+                        console.log('  - cloudStorage exists:', !!window.cloudStorage);
+                        if (window.cloudStorage) {
+                            console.log('  - available methods:', Object.keys(window.cloudStorage));
+                            console.log('  - saveRoutineCompletion type:', typeof window.cloudStorage.saveRoutineCompletion);
+                        }
+                        console.log('  - completion not saved, but storing locally manually...');
+                        
+                        // Manual localStorage fallback
+                        const completion = {
+                            id: `${templateId}_${today}`,
+                            template_id: templateId,
+                            date: today,
+                            completed: completed,
+                            user_id: 'manual'
+                        };
+                        
+                        let completions = [];
+                        const cached = localStorage.getItem('routine_completions_cache');
+                        if (cached) {
+                            completions = JSON.parse(cached);
+                        }
+                        
+                        const existingIndex = completions.findIndex(c => 
+                            c.template_id === templateId && c.date === today
+                        );
+                        
+                        if (existingIndex >= 0) {
+                            completions[existingIndex] = completion;
+                        } else {
+                            completions.push(completion);
+                        }
+                        
+                        localStorage.setItem('routine_completions_cache', JSON.stringify(completions));
+                        console.log('📦 Manually saved to localStorage:', completion);
                     }
                     
                     // Update streaks immediately with delay to allow data to save
@@ -2885,20 +2920,87 @@
         
         async function waitForCloudStorageAndUpdateStreaks() {
             let attempts = 0;
-            while (!window.cloudStorage && attempts < 20) {
-                console.log(`⏳ Waiting for cloudStorage (attempt ${attempts + 1}/20)...`);
-                await new Promise(resolve => setTimeout(resolve, 100));
+            while ((!window.cloudStorage || typeof window.cloudStorage.getLocalRoutineCompletions !== 'function') && attempts < 20) {
+                console.log(`⏳ Waiting for cloudStorage and methods (attempt ${attempts + 1}/20)...`);
+                if (window.cloudStorage) {
+                    console.log('📋 CloudStorage exists but methods not ready:', Object.keys(window.cloudStorage));
+                }
+                await new Promise(resolve => setTimeout(resolve, 200));
                 attempts++;
             }
             
-            if (!window.cloudStorage) {
-                console.log('❌ CloudStorage not available after waiting, cannot update streaks');
+            if (!window.cloudStorage || typeof window.cloudStorage.getLocalRoutineCompletions !== 'function') {
+                console.log('❌ CloudStorage or methods not available after waiting, cannot update streaks');
                 return;
             }
             
-            console.log('✅ CloudStorage available, updating streaks...');
+            console.log('✅ CloudStorage and methods available, updating streaks...');
             updateMonthlyRoutineStreak('morning');
             updateMonthlyRoutineStreak('evening');
+        }
+        
+        function calculateRoutineStreakFromLocalStorage(routineType) {
+            try {
+                console.log(`📦 Using localStorage fallback for ${routineType} streak...`);
+                
+                const cached = localStorage.getItem('routine_completions_cache');
+                if (!cached) {
+                    console.log('No cached completions in localStorage');
+                    return 0;
+                }
+                
+                const completions = JSON.parse(cached);
+                console.log(`📊 Found ${completions.length} completions in localStorage`);
+                console.log('📋 LocalStorage completions:', completions);
+                
+                const today = new Date();
+                let streak = 0;
+                
+                // Check consecutive days backwards from today
+                for (let i = 0; i < 30; i++) { // Check last 30 days max
+                    const checkDate = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+                    const dateStr = checkDate.toISOString().split('T')[0];
+                    
+                    // Check if all routine items were completed for this date and routine type
+                    const dayCompletions = completions.filter(c => 
+                        c.date === dateStr && 
+                        c.template_id.startsWith(routineType) && 
+                        c.completed === true
+                    );
+                    
+                    // Count unique completed items for this day
+                    const completedItems = new Set(dayCompletions.map(c => c.template_id)).size;
+                    const totalItems = 5; // We have 5 items per routine
+                    
+                    console.log(`📅 ${dateStr}: ${completedItems}/${totalItems} ${routineType} items completed (localStorage)`);
+                    
+                    if (completedItems === totalItems) {
+                        streak++;
+                        console.log(`✅ ${routineType} completed on ${dateStr} - Streak: ${streak}`);
+                    } else {
+                        if (i === 0) {
+                            // Today - if incomplete, continue checking previous days
+                            if (completedItems === 0) {
+                                console.log(`❌ ${routineType} no items completed today - streak is 0`);
+                                break;
+                            } else {
+                                console.log(`🔄 Today in progress (${completedItems}/5), checking previous days...`);
+                                continue;
+                            }
+                        } else {
+                            console.log(`❌ ${routineType} incomplete on ${dateStr} - breaking streak`);
+                            break; // Streak broken
+                        }
+                    }
+                }
+                
+                console.log(`🔥 ${routineType} final streak (localStorage): ${streak}`);
+                return streak;
+                
+            } catch (error) {
+                console.error('Error calculating streak from localStorage:', error);
+                return 0;
+            }
         }
         
         function calculateRoutineStreak(routineType) {
@@ -2907,8 +3009,8 @@
                 
                 // Check if cloudStorage is available
                 if (!window.cloudStorage || typeof window.cloudStorage.getLocalRoutineCompletions !== 'function') {
-                    console.log('⚠️ CloudStorage not yet available, returning 0');
-                    return 0;
+                    console.log('⚠️ CloudStorage not available, using localStorage fallback...');
+                    return calculateRoutineStreakFromLocalStorage(routineType);
                 }
                 
                 // Get all completions from new system
