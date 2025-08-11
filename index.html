@@ -755,6 +755,10 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('🚀 HYBRID DASHBOARD - Beautiful UI + Cloud Sync');
             
+            // Initialize Auth system first
+            const auth = new Auth();
+            await auth.init();
+            
             // Initialize navigation
             initializeNavigation();
             
