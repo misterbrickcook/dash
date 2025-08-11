@@ -279,11 +279,34 @@
                     nav: !!nav 
                 });
                 
+                // Aggressively hide all possible auth/login overlays
                 if (authScreen) {
-                    authScreen.style.display = 'none';
+                    authScreen.style.display = 'none !important';
+                    authScreen.style.visibility = 'hidden';
+                    authScreen.style.opacity = '0';
                     authScreen.classList.add('hide');
                     console.log('✅ Auth screen hidden');
                 }
+                
+                // Also check for other possible login overlays
+                const possibleOverlays = [
+                    '#auth-screen',
+                    '.auth-screen', 
+                    '.login-screen',
+                    '.modal-overlay',
+                    '[data-modal="login"]'
+                ];
+                
+                possibleOverlays.forEach(selector => {
+                    const overlay = document.querySelector(selector);
+                    if (overlay) {
+                        overlay.style.display = 'none';
+                        overlay.style.visibility = 'hidden';
+                        overlay.style.opacity = '0';
+                        overlay.classList.add('hide');
+                        console.log(`✅ Hidden overlay: ${selector}`);
+                    }
+                });
                 
                 if (mainContent) {
                     mainContent.style.display = 'block';
@@ -299,9 +322,16 @@
                     console.log('✅ Navigation shown');
                 }
                 
-                // Force remove any global hide classes
-                document.body.classList.remove('hide-dashboard');
-                document.documentElement.classList.remove('hide-dashboard');
+                // Force remove any global hide classes and modal states
+                document.body.classList.remove('hide-dashboard', 'modal-open', 'no-scroll');
+                document.documentElement.classList.remove('hide-dashboard', 'modal-open');
+                
+                // Remove any backdrop/overlay elements that might be covering the dashboard
+                const backdropElements = document.querySelectorAll('.modal-backdrop, .backdrop, .overlay');
+                backdropElements.forEach(backdrop => {
+                    backdrop.remove();
+                    console.log('✅ Removed backdrop element');
+                });
                 
                 // Trigger dashboard reload after successful mobile login
                 setTimeout(() => {
