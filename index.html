@@ -273,6 +273,29 @@
         }
         .category-content { display: none; }
         .category-content.active { display: block; }
+        
+        /* === ZIELE SPECIFIC TABS === */
+        .ziel-tab {
+            padding: 0.75rem 2rem;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            color: #666666;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .ziel-tab:hover { border-color: #000000; color: #000000; }
+        .ziel-tab.active {
+            background: #000000;
+            border-color: #000000;
+            color: #ffffff;
+        }
+        .ziel-content { display: none; }
+        .ziel-content.active { display: block; }
         .todo-section {
             margin-bottom: 2rem;
         }
@@ -881,6 +904,41 @@
         <!-- === ZIELE TAB === -->
         <section id="tab-ziele" class="tab-section">
             
+            <div class="category-tabs">
+                <button class="ziel-tab active" data-ziel-category="monat">Monat</button>
+                <button class="ziel-tab" data-ziel-category="quartal">Quartal</button>
+                <button class="ziel-tab" data-ziel-category="jahr">Jahr</button>
+                <button class="ziel-tab" data-ziel-category="alle">Alle</button>
+                <button class="ziel-tab" data-ziel-category="archiv">Archiv</button>
+                <button id="add-goal-btn" class="btn" style="margin-left: 2rem;">+ Add Goal</button>
+            </div>
+
+            <!-- MONAT KATEGORIE -->
+            <div class="ziel-content active" id="ziel-monat">
+                <!-- Monatsziele will be loaded from database -->
+            </div>
+
+            <!-- QUARTAL KATEGORIE -->
+            <div class="ziel-content" id="ziel-quartal">
+                <!-- Quartalsziele will be loaded from database -->
+            </div>
+
+            <!-- JAHR KATEGORIE -->
+            <div class="ziel-content" id="ziel-jahr">
+                <!-- Jahresziele will be loaded from database -->
+            </div>
+
+            <!-- ALLE KATEGORIE -->
+            <div class="ziel-content" id="ziel-alle">
+                <!-- All ziele will be loaded from database -->
+            </div>
+
+            <!-- ARCHIV KATEGORIE -->
+            <div class="ziel-content" id="ziel-archiv">
+                <!-- Completed/archived ziele will be loaded from database -->
+            </div>
+
+            <!-- TEMPORARY: Original cards for now -->
             <div class="grid-2">
                 <div class="ziel-card">
                     <div class="ziel-kategorie">Fitness</div>
@@ -1202,6 +1260,26 @@
             TodoManager.displayTodosForCategory(categoryId);
         }
 
+        // === ZIELE CATEGORY SYSTEM ===
+        function switchZielCategory(categoryId) {
+            const parentTab = document.querySelector('#tab-ziele');
+            // Hide all ziel contents
+            parentTab.querySelectorAll('.ziel-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            // Remove active from all ziel tabs
+            parentTab.querySelectorAll('.ziel-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Show selected category
+            parentTab.querySelector(`#ziel-${categoryId}`).classList.add('active');
+            // Activate selected category tab
+            parentTab.querySelector(`[data-ziel-category="${categoryId}"]`).classList.add('active');
+            
+            // TODO: Load ziele for this category when ZielManager is implemented
+            console.log('Switched to ziel category:', categoryId);
+        }
+
         // === EVENT LISTENERS ===
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => {
@@ -1218,6 +1296,14 @@
             tab.addEventListener('click', () => {
                 const categoryId = tab.getAttribute('data-category');
                 switchCategory(categoryId);
+            });
+        });
+
+        // Ziele category tabs
+        document.querySelectorAll('.ziel-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const categoryId = tab.getAttribute('data-ziel-category');
+                switchZielCategory(categoryId);
             });
         });
 
