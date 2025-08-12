@@ -2066,11 +2066,32 @@
                     const data = await supabase.select('journal_entries', '*');
                     if (data && Array.isArray(data)) {
                         // Transform database data to ensure tags is always an array
-                        this.entries = data.map(entry => ({
-                            ...entry,
-                            tags: Array.isArray(entry.tags) ? entry.tags : 
-                                  (entry.tags ? JSON.parse(entry.tags) : [])
-                        }));
+                        this.entries = data.map(entry => {
+                            let tags = [];
+                            if (Array.isArray(entry.tags)) {
+                                tags = entry.tags;
+                            } else if (entry.tags) {
+                                if (typeof entry.tags === 'string') {
+                                    try {
+                                        // Try to parse as JSON first
+                                        tags = JSON.parse(entry.tags);
+                                        if (!Array.isArray(tags)) {
+                                            // If it's not an array, treat as single tag
+                                            tags = [entry.tags];
+                                        }
+                                    } catch (e) {
+                                        // If JSON.parse fails, treat as single tag
+                                        tags = [entry.tags];
+                                    }
+                                } else {
+                                    tags = [entry.tags];
+                                }
+                            }
+                            return {
+                                ...entry,
+                                tags: tags
+                            };
+                        });
                         this.refreshCurrentView();
                     }
                 } catch (error) {
