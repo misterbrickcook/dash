@@ -758,8 +758,8 @@
                     <div class="form-group">
                         <label for="todo-priority">Priorität</label>
                         <select id="todo-priority" required autocomplete="off">
-                            <option value="normal">Normal</option>
-                            <option value="wichtig">Wichtig</option>
+                            <option value="niedrig">Niedrig</option>
+                            <option value="mittel">Mittel</option>
                             <option value="dringend">Dringend</option>
                         </select>
                     </div>
@@ -1493,7 +1493,7 @@
                 switch(priorityInt) {
                     case 1: return 'niedrig';
                     case 2: return 'mittel';
-                    case 3: return 'wichtig';
+                    case 3: return 'dringend'; // Use dringend instead of wichtig
                     default: return 'niedrig';
                 }
             },
@@ -1522,7 +1522,7 @@
                             switch(todo.priority) {
                                 case 1: priorityString = 'niedrig'; break;
                                 case 2: priorityString = 'mittel'; break;
-                                case 3: priorityString = 'wichtig'; break;
+                                case 3: priorityString = 'dringend'; break; // Use dringend
                                 default: priorityString = 'niedrig';
                             }
                             
@@ -1569,6 +1569,7 @@
                     case 'niedrig': priorityInt = 1; break;
                     case 'mittel': priorityInt = 2; break;
                     case 'wichtig': priorityInt = 3; break;
+                    case 'dringend': priorityInt = 3; break; // Same as wichtig
                     default: priorityInt = 1;
                 }
                 
