@@ -1670,12 +1670,64 @@
             
             editGoalProgress(goalId) {
                 const goal = this.goals.find(g => g.id === goalId);
-                if (goal) {
-                    const newProgress = prompt(`Fortschritt für "${goal.name}" eingeben (0-100%):`, goal.progress);
-                    if (newProgress !== null && !isNaN(newProgress) && newProgress >= 0 && newProgress <= 100) {
-                        this.updateGoalProgress(goalId, parseInt(newProgress));
+                if (!goal) return;
+                
+                // Find the goal card and progress percentage element
+                const goalCard = document.querySelector(`[data-goal-id="${goalId}"]`);
+                const percentageElement = goalCard.querySelector('.ziel-percentage');
+                const progressFill = goalCard.querySelector('.progress-fill');
+                
+                // Create inline input field
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = '0';
+                input.max = '100';
+                input.value = goal.progress;
+                input.style.cssText = 'width: 50px; padding: 2px 4px; border: 1px solid #ccc; font-size: 1rem; font-weight: 500; text-align: center; background: #fff;';
+                
+                // Replace percentage display with input
+                const originalText = percentageElement.textContent;
+                percentageElement.replaceWith(input);
+                input.focus();
+                input.select();
+                
+                // Handle save/cancel
+                const saveProgress = () => {
+                    const newValue = parseInt(input.value);
+                    if (!isNaN(newValue) && newValue >= 0 && newValue <= 100) {
+                        goal.progress = newValue;
+                        goal.completed = newValue >= 100;
+                        
+                        // Update UI immediately
+                        const newPercentageElement = document.createElement('span');
+                        newPercentageElement.className = 'ziel-percentage';
+                        newPercentageElement.textContent = `${newValue}%`;
+                        input.replaceWith(newPercentageElement);
+                        
+                        // Update progress bar
+                        progressFill.style.width = `${newValue}%`;
+                        
+                        console.log('Goal progress updated:', goal);
+                    } else {
+                        // Restore original
+                        const newPercentageElement = document.createElement('span');
+                        newPercentageElement.className = 'ziel-percentage';
+                        newPercentageElement.textContent = originalText;
+                        input.replaceWith(newPercentageElement);
                     }
-                }
+                };
+                
+                // Save on Enter or blur
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') saveProgress();
+                    if (e.key === 'Escape') {
+                        const newPercentageElement = document.createElement('span');
+                        newPercentageElement.className = 'ziel-percentage';
+                        newPercentageElement.textContent = originalText;
+                        input.replaceWith(newPercentageElement);
+                    }
+                });
+                input.addEventListener('blur', saveProgress);
             }
         };
 
