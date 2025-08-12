@@ -2140,35 +2140,65 @@
             },
             
             async updateGoalProgress(goalId, newProgress) {
-                const goal = this.goals.find(g => g.id === goalId);
+                const goal = this.goals.find(g => g.id == goalId); // Use == for flexible ID matching
                 if (goal) {
                     const oldProgress = goal.progress;
                     goal.progress = parseInt(newProgress);
                     goal.completed = goal.progress >= 100;
                     
-                    if (supabase?.isAuthenticated()) {
+                    console.log('🎯 Updating goal:', goal.name, 'to progress:', goal.progress);
+                    
+                    // Only try database update if goal has database ID (not timestamp)
+                    const hasDbId = goal.id && !isNaN(goal.id) && goal.id.toString().length < 10;
+                    
+                    if (supabase?.isAuthenticated() && hasDbId) {
                         try {
+                            console.log('💾 Updating goal in database with ID:', goal.id);
                             await supabase.update('goals', { 
                                 progress: goal.progress,
                                 completed: goal.completed
                             }, goal.id);
                             console.log('✅ Goal progress updated in database');
                         } catch (error) {
-                            console.error('Error updating goal progress:', error);
-                            // Revert on error
-                            goal.progress = oldProgress;
-                            goal.completed = oldProgress >= 100;
+                            console.error('❌ Error updating goal progress:', error);
+                            // Don't revert - keep local change even if DB fails
+                            console.warn('⚠️ Goal updated locally only (database update failed)');
                         }
+                    } else {
+                        console.warn('⚠️ Goal updated locally only (no database ID or not authenticated)');
                     }
                     
-                    console.log('Goal progress updated:', goal);
+                    console.log('✅ Goal progress updated locally:', goal);
                     this.refreshCurrentView();
+                } else {
+                    console.error('❌ Goal not found for ID:', goalId);
+                }
+            },
+            
+            clearLocalGoals() {
+                if (confirm('Alle lokalen Ziele löschen? (Nur Ziele die nicht in der Datenbank sind)\n\nDas kann alte/kaputte Ziele entfernen.')) {
+                    const before = this.goals.length;
+                    // Keep only goals that look like they have database IDs
+                    this.goals = this.goals.filter(goal => {
+                        const hasDbId = goal.id && !isNaN(goal.id) && goal.id.toString().length < 10;
+                        return hasDbId;
+                    });
+                    const after = this.goals.length;
+                    console.log(`🗑️ Removed ${before - after} local-only goals`);
+                    this.refreshCurrentView();
+                    alert(`${before - after} lokale Ziele gelöscht!`);
                 }
             },
             
             editGoalProgress(goalId) {
-                const goal = this.goals.find(g => g.id === goalId);
-                if (!goal) return;
+                console.log('✏️ Edit goal progress - ID:', goalId, 'Type:', typeof goalId);
+                const goal = this.goals.find(g => g.id == goalId); // Flexible matching
+                if (!goal) {
+                    console.error('❌ Goal not found for edit. ID:', goalId);
+                    console.log('❌ Available goals:', this.goals.map(g => ({id: g.id, name: g.name})));
+                    return;
+                }
+                console.log('✏️ Editing goal:', goal.name, 'Current progress:', goal.progress);
                 
                 // Find the goal card and progress percentage element
                 const goalCard = document.querySelector(`[data-goal-id="${goalId}"]`);
