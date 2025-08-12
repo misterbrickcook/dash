@@ -296,6 +296,29 @@
         }
         .ziel-content { display: none; }
         .ziel-content.active { display: block; }
+        
+        /* === JOURNAL SPECIFIC TABS === */
+        .journal-tab {
+            padding: 0.75rem 2rem;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            color: #666666;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .journal-tab:hover { border-color: #000000; color: #000000; }
+        .journal-tab.active {
+            background: #000000;
+            border-color: #000000;
+            color: #ffffff;
+        }
+        .journal-content { display: none; }
+        .journal-content.active { display: block; }
         .todo-section {
             margin-bottom: 2rem;
         }
@@ -994,8 +1017,48 @@
 
         <!-- === JOURNAL TAB === -->
         <section id="tab-journal" class="tab-section">
-            <h1 class="section-title">Journal</h1>
             
+            <div class="category-tabs">
+                <button class="journal-tab active" data-journal-category="alle">Alle</button>
+                <button class="journal-tab" data-journal-category="allgemein">Allgemein</button>
+                <button class="journal-tab" data-journal-category="fitness">Fitness</button>
+                <button class="journal-tab" data-journal-category="uni">Uni</button>
+                <button class="journal-tab" data-journal-category="crypto">Crypto</button>
+                <button class="journal-tab" data-journal-category="lesen">Lesen</button>
+                <button id="add-journal-btn" class="btn" style="margin-left: 2rem;">+ Add Journal</button>
+            </div>
+
+            <!-- ALLE KATEGORIE -->
+            <div class="journal-content active" id="journal-alle">
+                <!-- All journal entries will be loaded from database -->
+            </div>
+
+            <!-- ALLGEMEIN KATEGORIE -->
+            <div class="journal-content" id="journal-allgemein">
+                <!-- Allgemein entries will be loaded from database -->
+            </div>
+
+            <!-- FITNESS KATEGORIE -->
+            <div class="journal-content" id="journal-fitness">
+                <!-- Fitness entries will be loaded from database -->
+            </div>
+
+            <!-- UNI KATEGORIE -->
+            <div class="journal-content" id="journal-uni">
+                <!-- Uni entries will be loaded from database -->
+            </div>
+
+            <!-- CRYPTO KATEGORIE -->
+            <div class="journal-content" id="journal-crypto">
+                <!-- Crypto entries will be loaded from database -->
+            </div>
+
+            <!-- LESEN KATEGORIE -->
+            <div class="journal-content" id="journal-lesen">
+                <!-- Lesen entries will be loaded from database -->
+            </div>
+
+            <!-- TEMPORARY: Original entries for now -->
             <div class="quick-journal">
                 <h2>Quick Journal</h2>
                 <form class="journal-form">
@@ -1261,6 +1324,26 @@
             GoalManager.displayGoalsForCategory(categoryId);
         }
 
+        // === JOURNAL CATEGORY SYSTEM ===
+        function switchJournalCategory(categoryId) {
+            const parentTab = document.querySelector('#tab-journal');
+            // Hide all journal contents
+            parentTab.querySelectorAll('.journal-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            // Remove active from all journal tabs
+            parentTab.querySelectorAll('.journal-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Show selected category
+            parentTab.querySelector(`#journal-${categoryId}`).classList.add('active');
+            // Activate selected category tab
+            parentTab.querySelector(`[data-journal-category="${categoryId}"]`).classList.add('active');
+            
+            // Load journal entries for this category
+            // JournalManager.displayEntriesForCategory(categoryId); // TODO: Implement later
+        }
+
         // === EVENT LISTENERS ===
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => {
@@ -1285,6 +1368,14 @@
             tab.addEventListener('click', () => {
                 const categoryId = tab.getAttribute('data-ziel-category');
                 switchZielCategory(categoryId);
+            });
+        });
+
+        // Journal category tabs
+        document.querySelectorAll('.journal-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const categoryId = tab.getAttribute('data-journal-category');
+                switchJournalCategory(categoryId);
             });
         });
 
