@@ -319,6 +319,47 @@
         }
         .journal-content { display: none; }
         .journal-content.active { display: block; }
+        
+        /* === TAG SELECTION === */
+        .tag-option {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            color: #666666;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 0;
+        }
+        .tag-option:hover { border-color: #000000; color: #000000; }
+        .tag-option.selected {
+            background: #000000;
+            border-color: #000000;
+            color: #ffffff;
+        }
+        .selected-tag {
+            padding: 0.4rem 0.8rem;
+            background: #000000;
+            color: #ffffff;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .selected-tag .remove-tag {
+            cursor: pointer;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        .selected-tag .remove-tag:hover {
+            opacity: 1;
+        }
         .todo-section {
             margin-bottom: 2rem;
         }
@@ -819,14 +860,18 @@
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="journal-category">Kategorie</label>
-                        <select id="journal-category" required autocomplete="off">
-                            <option value="allgemein">Allgemein</option>
-                            <option value="fitness">Fitness</option>
-                            <option value="uni">Uni</option>
-                            <option value="crypto">Crypto</option>
-                            <option value="lesen">Lesen</option>
-                        </select>
+                        <label for="journal-tags">Tags (mehrere möglich)</label>
+                        <div id="journal-tags-container" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <!-- Selected tags will appear here -->
+                        </div>
+                        <div id="journal-tag-options" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            <button type="button" class="tag-option" data-tag="allgemein">Allgemein</button>
+                            <button type="button" class="tag-option" data-tag="fitness">Fitness</button>
+                            <button type="button" class="tag-option" data-tag="uni">Uni</button>
+                            <button type="button" class="tag-option" data-tag="crypto">Crypto</button>
+                            <button type="button" class="tag-option" data-tag="lesen">Lesen</button>
+                        </div>
+                        <input type="hidden" id="journal-category" required>
                     </div>
                     <div class="form-group">
                         <label for="journal-date">Datum</label>
@@ -1907,7 +1952,7 @@
                     id: Date.now().toString(),
                     title: entryData.title,
                     content: entryData.content,
-                    category: entryData.category,
+                    tags: entryData.tags || [], // Array of tags
                     date: entryData.date,
                     createdAt: new Date().toISOString()
                 };
@@ -1939,7 +1984,10 @@
                         filteredEntries = this.entries;
                         break;
                     default:
-                        filteredEntries = this.entries.filter(entry => entry.category === category);
+                        // Filter entries that have the selected tag
+                        filteredEntries = this.entries.filter(entry => 
+                            entry.tags && entry.tags.includes(category)
+                        );
                 }
                 
                 // Sort by date (newest first)
@@ -1978,8 +2026,11 @@
                     year: 'numeric'
                 });
                 
+                const tagsHtml = entry.tags && entry.tags.length > 0 
+                    ? entry.tags.map(tag => `<span class="todo-tag normal" style="margin-right: 0.5rem;">${tag}</span>`).join('')
+                    : '';
+                
                 entryCard.innerHTML = `
-                    <div class="ziel-kategorie">${entry.category}</div>
                     <div class="ziel-header">
                         <div class="ziel-name">${entry.title}</div>
                         <div class="ziel-beschreibung">${entry.content}</div>
@@ -1987,6 +2038,9 @@
                     <div class="ziel-progress-section">
                         <div class="ziel-progress-header">
                             <span class="ziel-progress-label">${formattedDate}</span>
+                        </div>
+                        <div style="margin-top: 0.5rem;">
+                            ${tagsHtml}
                         </div>
                     </div>
                 `;
@@ -2148,21 +2202,83 @@
                 });
             }
             
+            // Tag selection functionality
+            let selectedTags = [];
+            
+            function updateTagsDisplay() {
+                const container = document.getElementById('journal-tags-container');
+                const hiddenInput = document.getElementById('journal-category');
+                
+                container.innerHTML = '';
+                selectedTags.forEach(tag => {
+                    const tagElement = document.createElement('div');
+                    tagElement.className = 'selected-tag';
+                    tagElement.innerHTML = `
+                        ${tag}
+                        <span class="remove-tag" data-tag="${tag}">×</span>
+                    `;
+                    container.appendChild(tagElement);
+                });
+                
+                // Update hidden input (use first tag or 'allgemein' as fallback for compatibility)
+                hiddenInput.value = selectedTags.length > 0 ? selectedTags[0] : 'allgemein';
+                
+                // Update tag option buttons
+                document.querySelectorAll('.tag-option').forEach(btn => {
+                    const tag = btn.getAttribute('data-tag');
+                    btn.classList.toggle('selected', selectedTags.includes(tag));
+                });
+            }
+            
+            // Tag option click handlers
+            document.querySelectorAll('.tag-option').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tag = btn.getAttribute('data-tag');
+                    
+                    if (selectedTags.includes(tag)) {
+                        selectedTags = selectedTags.filter(t => t !== tag);
+                    } else {
+                        selectedTags.push(tag);
+                    }
+                    
+                    updateTagsDisplay();
+                });
+            });
+            
+            // Remove tag handlers (event delegation)
+            document.getElementById('journal-tags-container').addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-tag')) {
+                    const tag = e.target.getAttribute('data-tag');
+                    selectedTags = selectedTags.filter(t => t !== tag);
+                    updateTagsDisplay();
+                }
+            });
+            
             // Add Journal Form Submission
             const addJournalForm = document.getElementById('add-journal-form');
             if (addJournalForm) {
                 addJournalForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     
+                    if (selectedTags.length === 0) {
+                        alert('Bitte wähle mindestens einen Tag aus.');
+                        return;
+                    }
+                    
                     const entryData = {
                         title: document.getElementById('journal-title').value,
                         content: document.getElementById('journal-content').value,
-                        category: document.getElementById('journal-category').value,
+                        tags: [...selectedTags], // Copy array
                         date: document.getElementById('journal-date').value
                     };
                     
                     JournalManager.addEntry(entryData);
                     JournalManager.hideAddJournalModal();
+                    
+                    // Reset tags
+                    selectedTags = [];
+                    updateTagsDisplay();
                 });
             }
             
