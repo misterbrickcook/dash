@@ -2094,11 +2094,8 @@
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('termin-date').value = today;
                 
-                // Set current time + 1 hour as default
-                const now = new Date();
-                now.setHours(now.getHours() + 1);
-                const timeString = now.toTimeString().slice(0, 5);
-                document.getElementById('termin-time').value = timeString;
+                // Leave time field empty - user can fill if needed
+                document.getElementById('termin-time').value = '';
             },
             
             hideAddTerminModal() {
