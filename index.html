@@ -656,16 +656,16 @@
                 <h2>Todo hinzufügen</h2>
             </div>
             
-            <form id="add-todo-form">
+            <form id="add-todo-form" autocomplete="off">
                 <div class="form-group">
                     <label for="todo-title">Aufgabe</label>
-                    <input type="text" id="todo-title" placeholder="Was möchtest du erledigen?" required>
+                    <input type="text" id="todo-title" placeholder="Was möchtest du erledigen?" required autocomplete="off">
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="todo-category">Kategorie</label>
-                        <select id="todo-category" required>
+                        <select id="todo-category" required autocomplete="off">
                             <option value="">Kategorie wählen</option>
                             <option value="privat">Privat</option>
                             <option value="uni">Uni</option>
@@ -674,7 +674,7 @@
                     </div>
                     <div class="form-group">
                         <label for="todo-priority">Priorität</label>
-                        <select id="todo-priority" required>
+                        <select id="todo-priority" required autocomplete="off">
                             <option value="normal">Normal</option>
                             <option value="wichtig">Wichtig</option>
                             <option value="dringend">Dringend</option>
@@ -685,11 +685,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="todo-deadline">Deadline</label>
-                        <input type="date" id="todo-deadline" required>
+                        <input type="date" id="todo-deadline" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="todo-time">Uhrzeit</label>
-                        <input type="time" id="todo-time" value="21:00" required>
+                        <input type="time" id="todo-time" value="21:00" required autocomplete="off">
                     </div>
                 </div>
                 
