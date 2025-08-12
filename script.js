@@ -201,16 +201,15 @@ const Auth = {
             console.log('🔄 Calling supabase.signOut()...');
             await supabase.signOut();
             
-            console.log('🔄 Setting currentUser = null...');
-            this.currentUser = null;
-            this.isAuthenticated = false;
+            console.log('🔄 Clearing localStorage and reloading...');
+            localStorage.clear();
+            window.location.reload();
             
-            console.log('🔄 Calling showAuthScreen()...');
-            this.showAuthScreen();
-            
-            console.log('👋 User logged out successfully');
         } catch (error) {
             console.error('❌ Logout error:', error);
+            // Even if supabase logout fails, clear local data and reload
+            localStorage.clear();
+            window.location.reload();
         }
     },
     
