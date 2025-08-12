@@ -724,6 +724,58 @@
         </div>
     </div>
 
+    <!-- === ADD GOAL MODAL === -->
+    <div id="add-goal-modal" class="add-todo-modal hide">
+        <div class="add-todo-container">
+            <div class="add-todo-header">
+                <h2>Ziel hinzufügen</h2>
+            </div>
+            
+            <form id="add-goal-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="goal-name">Ziel-Name</label>
+                    <input type="text" id="goal-name" placeholder="Was möchtest du erreichen?" required autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label for="goal-description">Beschreibung</label>
+                    <textarea id="goal-description" placeholder="Detaillierte Beschreibung des Ziels..." rows="3" required autocomplete="off" style="width: 100%; padding: 1rem; border: 1px solid #d0d0d0; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="goal-category">Kategorie</label>
+                        <input type="text" id="goal-category" placeholder="z.B. Fitness, Karriere, Finanzen..." required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-timeframe">Zeitrahmen</label>
+                        <select id="goal-timeframe" required autocomplete="off">
+                            <option value="monat">Monat</option>
+                            <option value="quartal">Quartal</option>
+                            <option value="jahr">Jahr</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="goal-deadline">Deadline</label>
+                        <input type="date" id="goal-deadline" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-progress">Aktueller Fortschritt (%)</label>
+                        <input type="number" id="goal-progress" min="0" max="100" value="0" required autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancel-goal-btn" class="btn secondary">Abbrechen</button>
+                    <button type="submit" class="btn">Ziel erstellen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- === AUTH SCREEN === -->
     <div id="auth-screen" class="auth-screen hide">
         <div class="auth-container">
@@ -1213,6 +1265,13 @@
             if (tabId === 'tab-home') {
                 TodoManager.updateHomeTodos();
             }
+            
+            // If switching to ziele tab, load the active category
+            if (tabId === 'tab-ziele') {
+                const activeTab = document.querySelector('.ziel-tab.active');
+                const activeCategory = activeTab ? activeTab.getAttribute('data-ziel-category') : 'monat';
+                GoalManager.displayGoalsForCategory(activeCategory);
+            }
         }
 
         // === ROUTINE PROGRESS ===
@@ -1276,8 +1335,8 @@
             // Activate selected category tab
             parentTab.querySelector(`[data-ziel-category="${categoryId}"]`).classList.add('active');
             
-            // TODO: Load ziele for this category when ZielManager is implemented
-            console.log('Switched to ziel category:', categoryId);
+            // Load goals for this category
+            GoalManager.displayGoalsForCategory(categoryId);
         }
 
         // === EVENT LISTENERS ===
@@ -1507,6 +1566,144 @@
             }
         };
 
+        // === GOAL MANAGEMENT ===
+        const GoalManager = {
+            goals: [], // In-memory storage for demo
+            
+            showAddGoalModal() {
+                const modal = document.getElementById('add-goal-modal');
+                modal.classList.remove('hide');
+            },
+            
+            hideAddGoalModal() {
+                const modal = document.getElementById('add-goal-modal');
+                modal.classList.add('hide');
+                // Reset form
+                document.getElementById('add-goal-form').reset();
+                document.getElementById('goal-progress').value = '0';
+            },
+            
+            addGoal(goalData) {
+                const goal = {
+                    id: Date.now().toString(),
+                    name: goalData.name,
+                    description: goalData.description,
+                    category: goalData.category,
+                    timeframe: goalData.timeframe,
+                    deadline: goalData.deadline,
+                    progress: parseInt(goalData.progress),
+                    completed: parseInt(goalData.progress) >= 100,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.goals.push(goal);
+                console.log('Goal added:', goal);
+                console.log('All goals:', this.goals);
+                
+                // Refresh current view
+                this.refreshCurrentView();
+            },
+            
+            refreshCurrentView() {
+                // Get current active category
+                const activeTab = document.querySelector('.ziel-tab.active');
+                const activeCategory = activeTab ? activeTab.getAttribute('data-ziel-category') : 'monat';
+                
+                this.displayGoalsForCategory(activeCategory);
+            },
+            
+            displayGoalsForCategory(category) {
+                const container = document.getElementById(`ziel-${category}`);
+                if (!container) return;
+                
+                let filteredGoals = [];
+                
+                switch(category) {
+                    case 'monat':
+                        filteredGoals = this.goals.filter(goal => 
+                            goal.timeframe === 'monat' && !goal.completed
+                        );
+                        break;
+                    case 'quartal':
+                        filteredGoals = this.goals.filter(goal => 
+                            goal.timeframe === 'quartal' && !goal.completed
+                        );
+                        break;
+                    case 'jahr':
+                        filteredGoals = this.goals.filter(goal => 
+                            goal.timeframe === 'jahr' && !goal.completed
+                        );
+                        break;
+                    case 'alle':
+                        filteredGoals = this.goals.filter(goal => !goal.completed);
+                        break;
+                    case 'archiv':
+                        filteredGoals = this.goals.filter(goal => goal.completed);
+                        break;
+                }
+                
+                // Sort by deadline
+                filteredGoals.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+                
+                // Clear container
+                container.innerHTML = '';
+                
+                if (filteredGoals.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Keine Ziele vorhanden</p>';
+                    return;
+                }
+                
+                // Create grid for goals
+                const grid = document.createElement('div');
+                grid.className = 'grid-2';
+                
+                // Display goals
+                filteredGoals.forEach(goal => {
+                    const goalElement = this.createGoalElement(goal);
+                    grid.appendChild(goalElement);
+                });
+                
+                container.appendChild(grid);
+            },
+            
+            createGoalElement(goal) {
+                const goalCard = document.createElement('div');
+                goalCard.className = `ziel-card${goal.completed ? ' completed' : ''}`;
+                goalCard.dataset.goalId = goal.id;
+                
+                goalCard.innerHTML = `
+                    <div class="ziel-kategorie">${goal.category}</div>
+                    <div class="ziel-header">
+                        <div class="ziel-name">${goal.name}</div>
+                        <div class="ziel-beschreibung">${goal.description}</div>
+                    </div>
+                    <div class="ziel-progress-section">
+                        <div class="ziel-progress-header">
+                            <span class="ziel-progress-label">Fortschritt</span>
+                            <span class="ziel-percentage">${goal.progress}%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${goal.progress}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                return goalCard;
+            },
+            
+            updateGoalProgress(goalId, newProgress) {
+                const goal = this.goals.find(g => g.id === goalId);
+                if (goal) {
+                    goal.progress = parseInt(newProgress);
+                    goal.completed = goal.progress >= 100;
+                    console.log('Goal progress updated:', goal);
+                    this.refreshCurrentView();
+                }
+            }
+        };
+
         // === INITIALIZE ===
         document.addEventListener('DOMContentLoaded', () => {
             updateRoutineProgress();
@@ -1579,6 +1776,54 @@
                 addTodoModal.addEventListener('click', (e) => {
                     if (e.target === addTodoModal) {
                         TodoManager.hideAddTodoModal();
+                    }
+                });
+            }
+            
+            // === GOAL EVENT LISTENERS ===
+            
+            // Add Goal Button
+            const addGoalBtn = document.getElementById('add-goal-btn');
+            if (addGoalBtn) {
+                addGoalBtn.addEventListener('click', () => {
+                    GoalManager.showAddGoalModal();
+                });
+            }
+            
+            // Cancel Goal Button
+            const cancelGoalBtn = document.getElementById('cancel-goal-btn');
+            if (cancelGoalBtn) {
+                cancelGoalBtn.addEventListener('click', () => {
+                    GoalManager.hideAddGoalModal();
+                });
+            }
+            
+            // Add Goal Form Submission
+            const addGoalForm = document.getElementById('add-goal-form');
+            if (addGoalForm) {
+                addGoalForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const goalData = {
+                        name: document.getElementById('goal-name').value,
+                        description: document.getElementById('goal-description').value,
+                        category: document.getElementById('goal-category').value,
+                        timeframe: document.getElementById('goal-timeframe').value,
+                        deadline: document.getElementById('goal-deadline').value,
+                        progress: document.getElementById('goal-progress').value
+                    };
+                    
+                    GoalManager.addGoal(goalData);
+                    GoalManager.hideAddGoalModal();
+                });
+            }
+            
+            // Close goal modal when clicking outside
+            const addGoalModal = document.getElementById('add-goal-modal');
+            if (addGoalModal) {
+                addGoalModal.addEventListener('click', (e) => {
+                    if (e.target === addGoalModal) {
+                        GoalManager.hideAddGoalModal();
                     }
                 });
             }
