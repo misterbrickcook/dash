@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeOS Dashboard</title>
+    <style>
+        /* === RESET & BASE === */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            padding-top: 80px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* === STICKY NAVIGATION === */
+        .sticky-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+        }
+        .nav-tab {
+            text-decoration: none;
+            color: #666666;
+            font-size: 0.9rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            background: none;
+            font-family: inherit;
+        }
+        .nav-tab:hover { border-color: #000000; color: #000000; }
+        .nav-tab.active {
+            border-color: #000000;
+            background: #000000;
+            color: #ffffff;
+        }
+
+        /* === MAIN CONTENT === */
+        .main-content { padding: 0 20px 40px 20px; }
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+
+        /* === SHARED COMPONENTS === */
+        .section-title {
+            font-size: 2rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 1rem;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 2rem;
+            transition: border-color 0.2s ease;
+        }
+        .card:hover { border-color: #000000; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #000000;
+            background: #ffffff;
+            color: #000000;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background: #000000; color: #ffffff; }
+        .btn.secondary { border-color: #e0e0e0; color: #666666; }
+        .btn.secondary:hover { border-color: #000000; background: #f0f0f0; color: #000000; }
+
+        /* === CHECKBOX COMPONENT === */
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #000000;
+            appearance: none;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .checkbox-item input[type="checkbox"]:checked {
+            background-color: #000000;
+            position: relative;
+        }
+        .checkbox-item input[type="checkbox"]:checked::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: -2px;
+            left: 2px;
+            font-size: 12px;
+        }
+        .checkbox-item label {
+            font-size: 0.95rem;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+
+        /* === PROGRESS BAR === */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background-color: #f0f0f0;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #000000;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* === ROUTINE SPECIFIC === */
+        .routine-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+            height: 500px;
+        }
+        .routine-section {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 2rem;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100%;
+        }
+        .routine-section h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .routine-section .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-self: start;
+            justify-content: flex-start;
+        }
+
+        /* === TODO SPECIFIC === */
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        .category-tab {
+            padding: 0.75rem 2rem;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            color: #666666;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .category-tab:hover { border-color: #000000; color: #000000; }
+        .category-tab.active {
+            background: #000000;
+            border-color: #000000;
+            color: #ffffff;
+        }
+        .category-content { display: none; }
+        .category-content.active { display: block; }
+        .todo-section {
+            margin-bottom: 2rem;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .section-header h3 {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #444444;
+        }
+        .section-divider {
+            flex: 1;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        .section-count {
+            font-size: 0.8rem;
+            color: #666666;
+            background: #f0f0f0;
+            padding: 0.25rem 0.75rem;
+            border: 1px solid #e0e0e0;
+        }
+        .todo-item {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s ease;
+        }
+        .todo-item:hover { border-color: #000000; }
+        .todo-item.completed { opacity: 0.6; background: #fafafa; }
+        .todo-item.completed .todo-title { text-decoration: line-through; }
+        .todo-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .todo-content { flex: 1; }
+        .todo-title {
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+        }
+        .todo-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .todo-deadline {
+            font-size: 0.8rem;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .todo-deadline.today { color: #000000; font-weight: 500; }
+        .todo-deadline.overdue { color: #cc0000; font-weight: 500; }
+        .todo-deadline.soon { color: #ff6600; font-weight: 500; }
+        .todo-tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.25rem 0.75rem;
+            border: 1px solid;
+            color: #ffffff;
+            font-weight: 500;
+        }
+        .todo-tag.wichtig { background-color: #ff6600; border-color: #ff6600; }
+        .todo-tag.dringend { background-color: #cc0000; border-color: #cc0000; }
+        .todo-tag.normal { background-color: #666666; border-color: #666666; }
+
+        /* === ZIELE SPECIFIC === */
+        .ziel-card {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 2rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+        }
+        .ziel-kategorie {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666666;
+            border: 1px solid #e0e0e0;
+            padding: 0.25rem 0.75rem;
+            background: #fafafa;
+        }
+        .ziel-header {
+            margin-bottom: 1rem;
+            margin-right: 6rem;
+        }
+        .ziel-name {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+        .ziel-beschreibung {
+            font-size: 0.9rem;
+            color: #666666;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+        .ziel-progress-section { margin-top: auto; }
+        .ziel-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        .ziel-progress-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #444444;
+        }
+        .ziel-percentage {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* === JOURNAL SPECIFIC === */
+        .quick-journal {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        .quick-journal h2 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .journal-form {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .journal-input {
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid #d0d0d0;
+            background: #ffffff;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+        .journal-input:focus { outline: none; border-color: #000000; }
+        .journal-entry {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .journal-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+        .journal-date {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #000000;
+        }
+        .journal-kategorie {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666666;
+            border: 1px solid #e0e0e0;
+            padding: 0.4rem 1rem;
+            background: #fafafa;
+        }
+        .journal-content {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #333333;
+        }
+
+        /* === TERMINE SPECIFIC === */
+        .termin-card {
+            border: 1px solid #e0e0e0;
+            padding: 2rem;
+            background: #fafafa;
+        }
+        .termin-date {
+            font-size: 0.85rem;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        .termin-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        .termin-description {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #444444;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .routine-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .routine-grid { height: auto; }
+            .routine-section { height: auto; min-height: 350px; }
+            .main-content { padding: 0 15px 40px 15px; }
+            .nav-container { flex-wrap: wrap; gap: 1rem; }
+            .nav-tab { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+            .ziel-kategorie { position: static; align-self: flex-start; margin-bottom: 1rem; }
+            .ziel-header { margin-right: 0; }
+            .journal-form { flex-direction: column; align-items: stretch; }
+            .journal-entry-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <!-- === STICKY NAVIGATION === -->
+    <nav class="sticky-nav">
+        <div class="nav-container">
+            <button class="nav-tab active" data-tab="tab-routine">Routine</button>
+            <button class="nav-tab" data-tab="tab-todos">ToDos</button>
+            <button class="nav-tab" data-tab="tab-ziele">Ziele</button>
+            <button class="nav-tab" data-tab="tab-journal">Journal</button>
+            <button class="nav-tab" data-tab="tab-termine">Termine</button>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <!-- === ROUTINE TAB === -->
+        <section id="tab-routine" class="tab-section active">
+            <h1 class="section-title">Routinen</h1>
+            
+            <div class="routine-grid">
+                <div class="routine-section">
+                    <h2>Morgenroutine</h2>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="wasser" checked>
+                            <label for="wasser">Wasser trinken (500ml)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="dehnen" checked>
+                            <label for="dehnen">Dehnen & Mobilität</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="kreatin">
+                            <label for="kreatin">Kreatin einnehmen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="meditation">
+                            <label for="meditation">Meditation (10 Min)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="lesen">
+                            <label for="lesen">Lesen (20 Min)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="planung">
+                            <label for="planung">Tag planen</label>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 33%;"></div>
+                        </div>
+                        <span class="progress-text">33%</span>
+                    </div>
+                </div>
+
+                <div class="routine-section">
+                    <h2>Abendroutine</h2>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="reflexion" checked>
+                            <label for="reflexion">Tag reflektieren</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="morgen-prep">
+                            <label for="morgen-prep">Morgen vorbereiten</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="handy-weg">
+                            <label for="handy-weg">Handy wegräumen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="lesen-abend">
+                            <label for="lesen-abend">Lesen vor dem Schlafen</label>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 25%;"></div>
+                        </div>
+                        <span class="progress-text">25%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === TODOS TAB === -->
+        <section id="tab-todos" class="tab-section">
+            <h1 class="section-title">ToDos verwalten</h1>
+            
+            <div class="category-tabs">
+                <button class="category-tab active" data-category="privat">Privat</button>
+                <button class="category-tab" data-category="uni">Uni</button>
+                <button class="category-tab" data-category="arbeit">Arbeit</button>
+            </div>
+
+            <!-- PRIVAT KATEGORIE -->
+            <div class="category-content active" id="privat">
+                <div class="todo-section">
+                    <div class="section-header">
+                        <h3>Heute</h3>
+                        <div class="section-divider"></div>
+                        <span class="section-count">2</span>
+                    </div>
+                    <div class="todo-item completed">
+                        <div class="todo-header">
+                            <input type="checkbox" class="todo-checkbox" checked>
+                            <div class="todo-content">
+                                <div class="todo-title">Wäsche waschen und aufhängen</div>
+                                <div class="todo-meta">
+                                    <span class="todo-deadline today">Heute</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-header">
+                            <input type="checkbox" class="todo-checkbox">
+                            <div class="todo-content">
+                                <div class="todo-title">Einkaufen gehen für Wochenende</div>
+                                <div class="todo-meta">
+                                    <span class="todo-deadline today">Heute</span>
+                                    <span class="todo-tag wichtig">Wichtig</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="todo-section">
+                    <div class="section-header">
+                        <h3>Bald fällig</h3>
+                        <div class="section-divider"></div>
+                        <span class="section-count">2</span>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-header">
+                            <input type="checkbox" class="todo-checkbox">
+                            <div class="todo-content">
+                                <div class="todo-title">Zahnarzttermin für Kontrolle vereinbaren</div>
+                                <div class="todo-meta">
+                                    <span class="todo-deadline soon">26.07.2025</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-header">
+                            <input type="checkbox" class="todo-checkbox">
+                            <div class="todo-content">
+                                <div class="todo-title">Geburtstagsgeschenk für Lisa kaufen</div>
+                                <div class="todo-meta">
+                                    <span class="todo-deadline overdue">Überfällig</span>
+                                    <span class="todo-tag dringend">Dringend</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNI KATEGORIE -->
+            <div class="category-content" id="uni">
+                <div class="todo-section">
+                    <div class="section-header">
+                        <h3>Heute</h3>
+                        <div class="section-divider"></div>
+                        <span class="section-count">1</span>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-header">
+                            <input type="checkbox" class="todo-checkbox">
+                            <div class="todo-content">
+                                <div class="todo-title">Bachelorarbeit Kapitel 2 schreiben</div>
+                                <div class="todo-meta">
+                                    <span class="todo-deadline today">Heute</span>
+                                    <span class="todo-tag wichtig">Wichtig</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ARBEIT KATEGORIE -->
+            <div class="category-content" id="arbeit">
+                <div class="todo-section">
+                    <div class="section-header">
+                        <h3>Heute</h3>
+                        <div class="section-divider"></div>
+                        <span class="section-count">1</span>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-header">
+                            <input type="checkbox" class="todo-checkbox">
+                            <div class="todo-content">
+                                <div class="todo-title">Excel-Auswertung für Q2 erstellen</div>
+                                <div class="todo-meta">
+                                    <span class="todo-deadline today">Heute</span>
+                                    <span class="todo-tag dringend">Dringend</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === ZIELE TAB === -->
+        <section id="tab-ziele" class="tab-section">
+            <h1 class="section-title">Ziele verfolgen</h1>
+            
+            <div class="grid-2">
+                <div class="ziel-card">
+                    <div class="ziel-kategorie">Fitness</div>
+                    <div class="ziel-header">
+                        <div class="ziel-name">5 kg abnehmen bis 01.09.2025</div>
+                        <div class="ziel-beschreibung">Aktuell: 83 kg → Ziel: 78 kg<br>Durch gesunde Ernährung und regelmäßigen Sport</div>
+                    </div>
+                    <div class="ziel-progress-section">
+                        <div class="ziel-progress-header">
+                            <span class="ziel-progress-label">Fortschritt</span>
+                            <span class="ziel-percentage">40%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 40%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ziel-card">
+                    <div class="ziel-kategorie">Karriere</div>
+                    <div class="ziel-header">
+                        <div class="ziel-name">Bachelorarbeit schreiben bis 01.10.2025</div>
+                        <div class="ziel-beschreibung">Thema: "Digitale Transformation in KMU"<br>80 Seiten, inkl. empirische Studie</div>
+                    </div>
+                    <div class="ziel-progress-section">
+                        <div class="ziel-progress-header">
+                            <span class="ziel-progress-label">Fortschritt</span>
+                            <span class="ziel-percentage">20%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 20%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ziel-card">
+                    <div class="ziel-kategorie">Finanzen</div>
+                    <div class="ziel-header">
+                        <div class="ziel-name">10.000 € Investment-Portfolio aufbauen</div>
+                        <div class="ziel-beschreibung">Aktuell: 6.500 € → Ziel: 10.000 €<br>Diversifiziert in ETFs und Einzelaktien</div>
+                    </div>
+                    <div class="ziel-progress-section">
+                        <div class="ziel-progress-header">
+                            <span class="ziel-progress-label">Fortschritt</span>
+                            <span class="ziel-percentage">65%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ziel-card">
+                    <div class="ziel-kategorie">Bildung</div>
+                    <div class="ziel-header">
+                        <div class="ziel-name">Spanisch B2-Level erreichen bis 31.12.2025</div>
+                        <div class="ziel-beschreibung">Täglich 30 Min lernen + Konversationskurs<br>Aktuell: A2-Level</div>
+                    </div>
+                    <div class="ziel-progress-section">
+                        <div class="ziel-progress-header">
+                            <span class="ziel-progress-label">Fortschritt</span>
+                            <span class="ziel-percentage">30%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 30%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === JOURNAL TAB === -->
+        <section id="tab-journal" class="tab-section">
+            <h1 class="section-title">Journal</h1>
+            
+            <div class="quick-journal">
+                <h2>Quick Journal</h2>
+                <form class="journal-form">
+                    <input type="text" class="journal-input" placeholder="Was beschäftigt dich heute...?" maxlength="200">
+                    <button type="submit" class="btn">Speichern</button>
+                </form>
+            </div>
+
+            <div class="journal-entry">
+                <div class="journal-entry-header">
+                    <div class="journal-date">24. Juli 2025</div>
+                    <div class="journal-kategorie">Leben</div>
+                </div>
+                <div class="journal-content">
+                    Heute war ein besonders produktiver Tag. Morgens bin ich früh aufgestanden und habe eine Runde joggen gemacht. Das Wetter war perfekt - nicht zu heiß, leicht bewölkt. Beim Laufen konnte ich richtig gut nachdenken und neue Ideen für meine Bachelorarbeit entwickeln.
+                </div>
+            </div>
+
+            <div class="journal-entry">
+                <div class="journal-entry-header">
+                    <div class="journal-date">22. Juli 2025</div>
+                    <div class="journal-kategorie">Crypto</div>
+                </div>
+                <div class="journal-content">
+                    Bitcoin ist heute wieder stark gestiegen. Mein Portfolio hat sich um 8% verbessert, was mich dem 10.000€ Ziel deutlich näher bringt. Ich überlege, ob ich noch mehr in ETH investieren sollte, aber ich will nicht zu gierig werden.
+                </div>
+            </div>
+
+            <div class="journal-entry">
+                <div class="journal-entry-header">
+                    <div class="journal-date">20. Juli 2025</div>
+                    <div class="journal-kategorie">Gesundheit</div>
+                </div>
+                <div class="journal-content">
+                    Ernährungsumstellung zeigt erste Erfolge! Heute morgen habe ich mich gewogen: 81,5 kg. Das sind schon 1,5 kg weniger als zu Beginn. Ich fühle mich energiegeladener und fitter.
+                </div>
+            </div>
+        </section>
+
+        <!-- === TERMINE TAB === -->
+        <section id="tab-termine" class="tab-section">
+            <h1 class="section-title">Anstehende Termine</h1>
+            
+            <div class="grid-3">
+                <div class="termin-card">
+                    <div class="termin-date">Montag, 28.07.2025</div>
+                    <div class="termin-title">Präsentation Projekt X</div>
+                    <div class="termin-description">Finale Präsentation des Quartalsprojekts vor der Geschäftsleitung. Vorbereitung und letzte Details prüfen.</div>
+                </div>
+                <div class="termin-card">
+                    <div class="termin-date">Mittwoch, 30.07.2025</div>
+                    <div class="termin-title">Zahnarzt Kontrolle</div>
+                    <div class="termin-description">Halbjährliche Kontrolluntersuchung. Termin um 14:30 Uhr, ca. 30-45 Minuten einplanen.</div>
+                </div>
+                <div class="termin-card">
+                    <div class="termin-date">Samstag, 02.08.2025</div>
+                    <div class="termin-title">Geburtstag Lisa</div>
+                    <div class="termin-description">Geburtstagsfeier bei Lisa zu Hause. Geschenk nicht vergessen! Ab 18:00 Uhr.</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // === MODULAR TAB SYSTEM ===
+        function switchTab(tabId) {
+            // Hide all sections
+            document.querySelectorAll('.tab-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            // Remove active from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Show selected section
+            document.getElementById(tabId).classList.add('active');
+            // Activate selected nav tab
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        }
+
+        function switchCategory(categoryId) {
+            const parentTab = document.querySelector('#tab-todos');
+            // Hide all category contents within todos
+            parentTab.querySelectorAll('.category-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            // Remove active from all category tabs
+            parentTab.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Show selected category
+            parentTab.querySelector(`#${categoryId}`).classList.add('active');
+            // Activate selected category tab
+            parentTab.querySelector(`[data-category="${categoryId}"]`).classList.add('active');
+        }
+
+        // === EVENT LISTENERS ===
+        // Main navigation tabs
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                switchTab(tabId);
+            });
+        });
+
+        // Todo category tabs
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const categoryId = tab.getAttribute('data-category');
+                switchCategory(categoryId);
+            });
+        });
+
+        // === ROUTINE PROGRESS SYSTEM ===
+        function updateRoutineProgress() {
+            // Nur Routine-Sections innerhalb des tab-routine beachten
+            const routineTab = document.getElementById('tab-routine');
+            if (!routineTab) return;
+            
+            const routineSections = routineTab.querySelectorAll('.routine-section');
+            
+            routineSections.forEach(section => {
+                // Alle Checkboxen in dieser Routine-Sektion finden
+                const checkboxes = section.querySelectorAll('input[type="checkbox"]');
+                const checkedBoxes = section.querySelectorAll('input[type="checkbox"]:checked');
+                
+                // Prüfen ob Checkboxen vorhanden sind (defensive Programmierung)
+                if (checkboxes.length === 0) return;
+                
+                // Prozentualen Fortschritt berechnen
+                const checkedCount = checkedBoxes.length;
+                const totalCount = checkboxes.length;
+                const percentage = Math.round((checkedCount / totalCount) * 100);
+                
+                // Progress-Elemente finden
+                const progressFill = section.querySelector('.progress-fill');
+                const progressText = section.querySelector('.progress-text');
+                
+                // UI aktualisieren (nur wenn Elemente existieren)
+                if (progressFill) {
+                    progressFill.style.width = percentage + '%';
+                }
+                if (progressText) {
+                    progressText.textContent = percentage + '%';
+                }
+            });
+        }
+
+        // Checkbox functionality
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                // ToDo-Items als completed markieren (andere Tabs)
+                const todoItem = this.closest('.todo-item');
+                if (todoItem) {
+                    todoItem.classList.toggle('completed', this.checked);
+                }
+                
+                // Routine-Progress aktualisieren (nur bei Routine-Checkboxen)
+                const routineSection = this.closest('.routine-section');
+                if (routineSection) {
+                    updateRoutineProgress();
+                }
+            });
+        });
+
+        // Journal form submission
+        document.querySelector('.journal-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = this.querySelector('.journal-input');
+            if (input.value.trim()) {
+                // Here would be logic to save the entry
+                console.log('Journal entry:', input.value);
+                input.value = '';
+            }
+        });
+
+        // Initialize progress on load
+        updateRoutineProgress();
+    </script>
+</body>
+</html>

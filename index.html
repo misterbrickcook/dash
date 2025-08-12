@@ -479,23 +479,76 @@
                 </div>
             </section>
 
-            <!-- ☀️ Routines Section -->
-            <section class="section">
-                <div class="card-header">
-                    <h2 id="routine-title">☀️ Morgenroutine</h2>
-                    <div class="focus-toggle">
-                        <div class="focus-option active" data-routine="morning">☀️</div>
-                        <div class="focus-option" data-routine="evening">🌙</div>
+            <!-- Routinen Section - Ultra Clean Style -->
+            <h1 class="section-title">Routinen</h1>
+            
+            <div class="routine-grid">
+                <!-- Morning Routine -->
+                <div class="routine-section">
+                    <h2>MORGENROUTINE</h2>
+                    <div class="checkbox-group" id="morning-routine">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="morning-water" data-task="Wasser trinken (500ml)">
+                            <label for="morning-water">Wasser trinken (500ml)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="morning-stretch" data-task="Dehnen & Mobilität">
+                            <label for="morning-stretch">Dehnen & Mobilität</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="morning-creatine" data-task="Kreatin einnehmen">
+                            <label for="morning-creatine">Kreatin einnehmen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="morning-meditation" data-task="Meditation (10 Min)">
+                            <label for="morning-meditation">Meditation (10 Min)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="morning-reading" data-task="Lesen (20 Min)">
+                            <label for="morning-reading">Lesen (20 Min)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="morning-planning" data-task="Tag planen">
+                            <label for="morning-planning">Tag planen</label>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="morning-progress" style="width: 33%"></div>
+                        </div>
+                        <div class="progress-text" id="morning-percentage">33%</div>
                     </div>
                 </div>
-                
-                <!-- Cloud-synced routines -->
-                <div class="checkbox-group" id="current-routine">
-                    <div class="loading-placeholder" style="text-align: center; padding: 1rem; color: #666;">
-                        ☁️ Loading routines from cloud...
+
+                <!-- Evening Routine -->
+                <div class="routine-section">
+                    <h2>ABENDROUTINE</h2>
+                    <div class="checkbox-group" id="evening-routine">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="evening-reflect" data-task="Tag reflektieren">
+                            <label for="evening-reflect">Tag reflektieren</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="evening-prepare" data-task="Morgen vorbereiten">
+                            <label for="evening-prepare">Morgen vorbereiten</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="evening-phone" data-task="Handy wegräumen">
+                            <label for="evening-phone">Handy wegräumen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="evening-reading" data-task="Lesen vor dem Schlafen">
+                            <label for="evening-reading">Lesen vor dem Schlafen</label>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="evening-progress" style="width: 25%"></div>
+                        </div>
+                        <div class="progress-text" id="evening-percentage">25%</div>
                     </div>
                 </div>
-            </section>
+            </div>
 
             <!-- 📋 Heutige Aufgaben (Cloud-Synced) -->
             <section class="card">
@@ -833,7 +886,7 @@
     <!-- Scripts -->
     <script src="supabase-config.js?v=5"></script>
     <script src="cloud-storage.js?v=5"></script>
-    <script src="script.js?v=9"></script>
+    <script src="script.js?v=10"></script>
     
     <!-- HYBRID SYSTEM: Beautiful UI + Working Cloud Sync -->
     <script>
