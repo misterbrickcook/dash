@@ -1515,7 +1515,6 @@
                 try {
                     const data = await supabase.select('todos', '*');
                     if (data && Array.isArray(data)) {
-                        console.log('Raw todos data from database:', data);
                         // Transform database data to match UI expectations
                         this.todos = data.map(todo => {
                             // Convert priority integer back to string
@@ -1527,14 +1526,12 @@
                                 default: priorityString = 'niedrig';
                             }
                             
-                            const transformedTodo = {
+                            return {
                                 ...todo,
                                 title: todo.text, // Map text to title for UI
                                 deadline: todo.due_date || todo.date, // Map due_date to deadline for UI
                                 priority: priorityString // Convert integer to string
                             };
-                            console.log('Transformed todo:', transformedTodo);
-                            return transformedTodo;
                         });
                         this.refreshCurrentView();
                         this.updateHomeTodos();
@@ -1585,11 +1582,6 @@
                     completed: false,
                     user_id: supabase?.user?.id || 'anonymous'
                 };
-                
-                // TEMPORARY FIX: Add manual ID until database is fixed
-                if (supabase?.isAuthenticated()) {
-                    todo.id = Date.now(); // Use timestamp as ID
-                }
                 
                 if (supabase?.isAuthenticated()) {
                     try {
@@ -1649,8 +1641,6 @@
             },
             
             displayTodosForCategory(category) {
-                console.log('Displaying todos for category:', category);
-                console.log('All todos:', this.todos);
                 const container = document.getElementById(category);
                 if (!container) return;
                 
@@ -1660,7 +1650,7 @@
                     case 'heute':
                         const today = new Date().toISOString().split('T')[0];
                         filteredTodos = this.todos.filter(todo => 
-                            todo.deadline && todo.deadline.startsWith(today) && !todo.completed
+                            (todo.date === today || (todo.deadline && todo.deadline.startsWith(today))) && !todo.completed
                         );
                         break;
                     case 'alle':
@@ -1674,8 +1664,6 @@
                             todo.category === category && !todo.completed
                         );
                 }
-                
-                console.log('Filtered todos for', category, ':', filteredTodos);
                 // Sort by deadline (earliest first)
                 filteredTodos.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
                 
@@ -1705,23 +1693,49 @@
                 todoCard.className = `ziel-card${todo.completed ? ' completed' : ''}`;
                 todoCard.dataset.todoId = todo.id;
                 
-                const deadline = new Date(todo.deadline);
-                const now = new Date();
-                const isToday = deadline.toDateString() === now.toDateString();
-                const isOverdue = deadline < now && !todo.completed;
-                
+                // Fix timezone issues by using the separate date and time fields
                 let deadlineClass = '';
                 let deadlineText = '';
                 
-                if (isToday) {
-                    deadlineClass = 'today';
-                    deadlineText = `Heute ${deadline.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}`;
-                } else if (isOverdue) {
-                    deadlineClass = 'overdue';
-                    deadlineText = 'Überfällig';
+                if (todo.date && todo.time) {
+                    // Use separate date and time to avoid timezone issues
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const isToday = todo.date === todayStr;
+                    const deadlineDateTime = new Date(`${todo.date}T${todo.time}:00`);
+                    const now = new Date();
+                    const isOverdue = deadlineDateTime < now && !todo.completed;
+                    
+                    if (isToday) {
+                        deadlineClass = 'today';
+                        deadlineText = `Heute ${todo.time}`; // Use the stored time directly
+                    } else if (isOverdue) {
+                        deadlineClass = 'overdue';
+                        deadlineText = 'Überfällig';
+                    } else {
+                        const dateObj = new Date(todo.date);
+                        deadlineText = dateObj.toLocaleDateString('de-DE') + ' ' + todo.time;
+                        deadlineClass = 'soon';
+                    }
+                } else if (todo.deadline) {
+                    // Fallback to deadline field if date/time not available
+                    const deadline = new Date(todo.deadline);
+                    const now = new Date();
+                    const isToday = deadline.toDateString() === now.toDateString();
+                    const isOverdue = deadline < now && !todo.completed;
+                    
+                    if (isToday) {
+                        deadlineClass = 'today';
+                        deadlineText = `Heute ${deadline.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}`;
+                    } else if (isOverdue) {
+                        deadlineClass = 'overdue';
+                        deadlineText = 'Überfällig';
+                    } else {
+                        deadlineClass = 'soon';
+                        deadlineText = deadline.toLocaleDateString('de-DE') + ' ' + deadline.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+                    }
                 } else {
-                    deadlineClass = 'soon';
-                    deadlineText = deadline.toLocaleDateString('de-DE') + ' ' + deadline.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+                    deadlineText = 'Kein Termin';
+                    deadlineClass = 'none';
                 }
                 
                 todoCard.innerHTML = `
@@ -1764,25 +1778,25 @@
             },
             
             async toggleTodo(todoId) {
-                const todo = this.todos.find(t => t.id === todoId);
+                const todo = this.todos.find(t => t.id == todoId); // Use == instead of === for type flexibility
                 if (todo) {
                     todo.completed = !todo.completed;
+                    console.log(`Todo ${todo.title} ${todo.completed ? 'completed' : 'uncompleted'}`);
                     
                     if (supabase?.isAuthenticated()) {
                         try {
                             await supabase.update('todos', { completed: todo.completed }, todo.id);
                         } catch (error) {
-                            console.error('Error updating todo:', error);
+                            console.error('Error updating todo in database:', error);
                             // Revert on error
                             todo.completed = !todo.completed;
                         }
                     }
                     
-                    console.log('Todo toggled:', todo);
                     this.refreshCurrentView();
-                    
-                    // Also update home todos if we're on the home tab
                     this.updateHomeTodos();
+                } else {
+                    console.error('Todo not found for ID:', todoId);
                 }
             },
             
@@ -1793,8 +1807,12 @@
                 // Show today's uncompleted todos on home
                 const today = new Date().toISOString().split('T')[0];
                 const todayTodos = this.todos.filter(todo => 
-                    todo.deadline && todo.deadline.startsWith(today) && !todo.completed
-                ).sort((a, b) => new Date(a.deadline || '1970-01-01') - new Date(b.deadline || '1970-01-01'));
+                    (todo.date === today || (todo.deadline && todo.deadline.startsWith(today))) && !todo.completed
+                ).sort((a, b) => {
+                    const timeA = todo => todo.time || '23:59';
+                    const timeB = todo => todo.time || '23:59';
+                    return timeA(a).localeCompare(timeB(b));
+                });
                 
                 homeContainer.innerHTML = '';
                 
@@ -1811,7 +1829,7 @@
                         <label for="home-todo-${todo.id}">
                             ${todo.title} 
                             <span class="todo-tag ${TodoManager.getPriorityString(todo.priority)}" style="margin-left: 0.5rem;">${TodoManager.getPriorityDisplay(todo.priority)}</span>
-                            (${new Date(todo.deadline).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})})
+                            (${todo.time || new Date(todo.deadline).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})})
                         </label>
                     `;
                     homeContainer.appendChild(todoItem);
