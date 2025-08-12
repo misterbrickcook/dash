@@ -1977,48 +1977,21 @@
             
             async addGoal(goalData) {
                 const progressPercent = parseInt(goalData.progress);
+                // TEMPORARY: Skip database, just use local storage until schema is fixed
                 const goal = {
-                    title: goalData.name,
+                    id: Date.now().toString(),
+                    name: goalData.name,
                     description: goalData.description,
                     category: goalData.category,
-                    target_date: goalData.deadline,
-                    current_value: progressPercent, // Use current_value instead of progress
-                    target_value: 100, // Always 100% for percentage-based goals
-                    unit: '%', // Percentage unit
-                    user_id: supabase?.user?.id
+                    deadline: goalData.deadline,
+                    progress: progressPercent,
+                    completed: progressPercent >= 100,
+                    createdAt: new Date().toISOString()
                 };
                 
-                if (supabase?.isAuthenticated()) {
-                    try {
-                        const result = await supabase.insert('goals', goal);
-                        if (result && result.length > 0) {
-                            // Transform database result to UI format
-                            const dbGoal = result[0];
-                            const uiGoal = {
-                                ...dbGoal,
-                                name: dbGoal.title,
-                                deadline: dbGoal.target_date,
-                                progress: dbGoal.current_value || 0,
-                                completed: (dbGoal.current_value || 0) >= (dbGoal.target_value || 100)
-                            };
-                            this.goals.push(uiGoal);
-                        } else {
-                            goal.id = Date.now().toString();
-                            goal.name = goal.title;
-                            goal.deadline = goal.target_date;
-                            goal.progress = goal.current_value || 0;
-                            goal.completed = goal.progress >= 100;
-                            this.goals.push(goal);
-                        }
-                    } catch (error) {
-                        console.error('Error saving goal:', error);
-                        goal.id = Date.now().toString();
-                        this.goals.push(goal);
-                    }
-                } else {
-                    goal.id = Date.now().toString();
-                    this.goals.push(goal);
-                }
+                // TEMPORARY: Skip database until schema is fixed
+                console.warn('⚠️ Goals temporarily saved locally only (database schema needs fixing)');
+                this.goals.push(goal);
                 
                 console.log('Goal added:', goal);
                 
@@ -2123,18 +2096,8 @@
                     goal.progress = parseInt(newProgress);
                     goal.completed = goal.progress >= 100;
                     
-                    if (supabase?.isAuthenticated()) {
-                        try {
-                            await supabase.update('goals', { 
-                                current_value: goal.progress
-                            }, goal.id);
-                        } catch (error) {
-                            console.error('Error updating goal:', error);
-                            // Revert on error
-                            goal.progress = oldProgress;
-                            goal.completed = oldProgress >= 100;
-                        }
-                    }
+                    // TEMPORARY: Skip database update until schema is fixed
+                    console.warn('⚠️ Goal progress update saved locally only');
                     
                     console.log('Goal progress updated:', goal);
                     this.refreshCurrentView();
