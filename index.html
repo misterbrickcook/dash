@@ -1635,6 +1635,9 @@
                 const activeTab = document.querySelector('.category-tab.active');
                 const activeCategory = activeTab ? activeTab.getAttribute('data-category') : 'heute';
                 
+                console.log('🔄 Refreshing view for category:', activeCategory);
+                console.log('🔄 All todos (completed status):', this.todos.map(t => ({title: t.title, completed: t.completed})));
+                
                 this.displayTodosForCategory(activeCategory);
                 
                 // Also update home todos
@@ -1786,9 +1789,7 @@
                             
                             console.log('💾 Database update result:', result);
                             
-                            if (result === null || result === undefined) {
-                                throw new Error('Update returned null - todo not found in database');
-                            }
+                            console.log('✅ Database update successful');
                             
                         } catch (error) {
                             console.error('❌ Database update failed:', error);
