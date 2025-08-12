@@ -1412,7 +1412,11 @@
                     todoItem.className = 'checkbox-item';
                     todoItem.innerHTML = `
                         <input type="checkbox" id="home-todo-${todo.id}" onchange="TodoManager.toggleTodo('${todo.id}')">
-                        <label for="home-todo-${todo.id}">${todo.title} (${new Date(todo.deadline).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})})</label>
+                        <label for="home-todo-${todo.id}">
+                            ${todo.title} 
+                            <span class="todo-tag ${todo.priority}" style="margin-left: 0.5rem;">${todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}</span>
+                            (${new Date(todo.deadline).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})})
+                        </label>
                     `;
                     homeContainer.appendChild(todoItem);
                 });
