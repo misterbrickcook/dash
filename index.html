@@ -584,11 +584,16 @@
             },
             
             async handleLogout() {
+                console.log('🚪 Logout clicked');
                 try {
-                    await supabase.signOut();
+                    if (supabase) {
+                        await supabase.signOut();
+                    }
                     localStorage.clear();
+                    console.log('✅ Logout successful, reloading...');
                     window.location.reload();
                 } catch (error) {
+                    console.error('❌ Logout error:', error);
                     localStorage.clear();
                     window.location.reload();
                 }
@@ -650,6 +655,9 @@
         // === EVENT LISTENERS ===
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => {
+                // Skip logout button - it has its own handler
+                if (tab.id === 'logout-btn') return;
+                
                 const tabId = tab.getAttribute('data-tab');
                 if (tabId) switchTab(tabId);
             });
@@ -668,6 +676,16 @@
         document.addEventListener('DOMContentLoaded', () => {
             updateRoutineProgress();
             Auth.init();
+            
+            // Ensure logout button works
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    Auth.handleLogout();
+                });
+            }
         });
     </script>
 </body>
