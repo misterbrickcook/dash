@@ -1489,6 +1489,15 @@
         const TodoManager = {
             todos: [], // In-memory storage for demo
             
+            priorityIntToString(priorityInt) {
+                switch(priorityInt) {
+                    case 1: return 'niedrig';
+                    case 2: return 'mittel';
+                    case 3: return 'wichtig';
+                    default: return 'niedrig';
+                }
+            },
+            
             async loadTodos() {
                 if (!supabase?.isAuthenticated()) return;
                 try {
@@ -1565,22 +1574,40 @@
                 if (supabase?.isAuthenticated()) {
                     try {
                         const result = await supabase.insert('todos', todo);
-                        if (result && result.length > 0) {
-                            this.todos.push(result[0]);
+                        console.log('Supabase insert result:', result);
+                        if (result && Array.isArray(result) && result.length > 0) {
+                            // Transform the database result to match UI expectations
+                            const dbTodo = result[0];
+                            const uiTodo = {
+                                ...dbTodo,
+                                title: dbTodo.text,
+                                deadline: dbTodo.due_date || dbTodo.date,
+                                priority: this.priorityIntToString(dbTodo.priority || 1)
+                            };
+                            this.todos.push(uiTodo);
                         } else {
                             // If insert doesn't return data, add with generated id
                             todo.id = Date.now().toString();
+                            todo.title = todo.text;
+                            todo.deadline = todo.due_date || todo.date;
+                            todo.priority = this.priorityIntToString(todo.priority);
                             this.todos.push(todo);
                         }
                     } catch (error) {
                         console.error('Error saving todo:', error);
                         // Fall back to local storage
                         todo.id = Date.now().toString();
+                        todo.title = todo.text;
+                        todo.deadline = todo.due_date || todo.date;
+                        todo.priority = this.priorityIntToString(todo.priority);
                         this.todos.push(todo);
                     }
                 } else {
                     // Local storage fallback
                     todo.id = Date.now().toString();
+                    todo.title = todo.text;
+                    todo.deadline = todo.due_date || todo.date;
+                    todo.priority = this.priorityIntToString(todo.priority);
                     this.todos.push(todo);
                 }
                 

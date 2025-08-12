@@ -244,7 +244,7 @@ class SupabaseClient {
     }
 
     async insert(table, data) {
-        return this.query(table, 'POST', data);
+        return this.query(`${table}?select=*`, 'POST', data);
     }
 
     async update(table, data, id) {
