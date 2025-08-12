@@ -1495,11 +1495,23 @@
                     const data = await supabase.select('todos', '*');
                     if (data && Array.isArray(data)) {
                         // Transform database data to match UI expectations
-                        this.todos = data.map(todo => ({
-                            ...todo,
-                            title: todo.text, // Map text to title for UI
-                            deadline: todo.due_date // Map due_date to deadline for UI
-                        }));
+                        this.todos = data.map(todo => {
+                            // Convert priority integer back to string
+                            let priorityString = 'niedrig';
+                            switch(todo.priority) {
+                                case 1: priorityString = 'niedrig'; break;
+                                case 2: priorityString = 'mittel'; break;
+                                case 3: priorityString = 'wichtig'; break;
+                                default: priorityString = 'niedrig';
+                            }
+                            
+                            return {
+                                ...todo,
+                                title: todo.text, // Map text to title for UI
+                                deadline: todo.due_date || todo.date, // Map due_date to deadline for UI
+                                priority: priorityString // Convert integer to string
+                            };
+                        });
                         this.refreshCurrentView();
                         this.updateHomeTodos();
                     }
@@ -1530,10 +1542,19 @@
                 // Combine date and time into a full datetime for due_date
                 const deadlineDateTime = `${todoData.deadline}T${todoData.time}:00`;
                 
+                // Convert priority string to integer
+                let priorityInt = 1;
+                switch(todoData.priority) {
+                    case 'niedrig': priorityInt = 1; break;
+                    case 'mittel': priorityInt = 2; break;
+                    case 'wichtig': priorityInt = 3; break;
+                    default: priorityInt = 1;
+                }
+                
                 const todo = {
                     text: todoData.title,
                     category: todoData.category,
-                    priority: todoData.priority,
+                    priority: priorityInt,
                     date: todoData.deadline,
                     time: todoData.time,
                     due_date: deadlineDateTime,
@@ -1590,7 +1611,7 @@
                     case 'heute':
                         const today = new Date().toISOString().split('T')[0];
                         filteredTodos = this.todos.filter(todo => 
-                            todo.deadline.startsWith(today) && !todo.completed
+                            todo.deadline && todo.deadline.startsWith(today) && !todo.completed
                         );
                         break;
                     case 'alle':
@@ -1722,8 +1743,8 @@
                 // Show today's uncompleted todos on home
                 const today = new Date().toISOString().split('T')[0];
                 const todayTodos = this.todos.filter(todo => 
-                    todo.deadline.startsWith(today) && !todo.completed
-                ).sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+                    todo.deadline && todo.deadline.startsWith(today) && !todo.completed
+                ).sort((a, b) => new Date(a.deadline || '1970-01-01') - new Date(b.deadline || '1970-01-01'));
                 
                 homeContainer.innerHTML = '';
                 
