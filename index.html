@@ -895,6 +895,43 @@
         </div>
     </div>
 
+    <!-- === ADD TERMIN MODAL === -->
+    <div id="add-termin-modal" class="add-todo-modal hide">
+        <div class="add-todo-container">
+            <div class="add-todo-header">
+                <h2>Termin hinzufügen</h2>
+            </div>
+            
+            <form id="add-termin-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="termin-title">Titel</label>
+                    <input type="text" id="termin-title" placeholder="z.B. Zahnarzt Termin..." required autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label for="termin-description">Beschreibung</label>
+                    <textarea id="termin-description" placeholder="Weitere Details zum Termin..." rows="3" required autocomplete="off" style="width: 100%; padding: 1rem; border: 1px solid #d0d0d0; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="termin-date">Datum</label>
+                        <input type="date" id="termin-date" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="termin-time">Uhrzeit</label>
+                        <input type="time" id="termin-time" required autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancel-termin-btn" class="btn secondary">Abbrechen</button>
+                    <button type="submit" class="btn">Termin erstellen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- === AUTH SCREEN === -->
     <div id="auth-screen" class="auth-screen hide">
         <div class="auth-container">
@@ -1020,8 +1057,11 @@
 
             <!-- Anstehende Termine -->
             <section style="margin-bottom: 3rem;">
-                <h2 style="font-size: 1.2rem; font-weight: 500; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; text-align: center;">Anstehende Termine</h2>
-                <div class="grid-3">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 1.5rem;">
+                    <h2 style="font-size: 1.2rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">Anstehende Termine</h2>
+                    <button id="add-termin-btn" class="btn" style="font-size: 0.7rem; padding: 0.5rem 1rem;">+ Add Termin</button>
+                </div>
+                <div class="grid-3" id="termine-container">
                     <div class="termin-card">
                         <div class="termin-date">Montag, 28.07.2025</div>
                         <div class="termin-title">Präsentation Projekt X</div>
@@ -2056,6 +2096,102 @@
             }
         };
 
+        // === TERMIN MANAGEMENT ===
+        const TerminManager = {
+            termine: [], // In-memory storage for demo
+            
+            showAddTerminModal() {
+                const modal = document.getElementById('add-termin-modal');
+                modal.classList.remove('hide');
+                
+                // Set today's date as default
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('termin-date').value = today;
+                
+                // Set current time + 1 hour as default
+                const now = new Date();
+                now.setHours(now.getHours() + 1);
+                const timeString = now.toTimeString().slice(0, 5);
+                document.getElementById('termin-time').value = timeString;
+            },
+            
+            hideAddTerminModal() {
+                const modal = document.getElementById('add-termin-modal');
+                modal.classList.add('hide');
+                // Reset form
+                document.getElementById('add-termin-form').reset();
+            },
+            
+            addTermin(terminData) {
+                const termin = {
+                    id: Date.now().toString(),
+                    title: terminData.title,
+                    description: terminData.description,
+                    date: terminData.date,
+                    time: terminData.time,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.termine.push(termin);
+                console.log('Termin added:', termin);
+                console.log('All termine:', this.termine);
+                
+                // Refresh display
+                this.displayTermine();
+            },
+            
+            displayTermine() {
+                const container = document.getElementById('termine-container');
+                if (!container) return;
+                
+                // Sort by date/time (earliest first)
+                const sortedTermine = this.termine.sort((a, b) => {
+                    const dateTimeA = new Date(`${a.date}T${a.time}`);
+                    const dateTimeB = new Date(`${b.date}T${b.time}`);
+                    return dateTimeA - dateTimeB;
+                });
+                
+                // Clear container but keep original hardcoded ones for demo
+                const existingCards = container.querySelectorAll('.termin-card:not([data-termin-id])');
+                container.innerHTML = '';
+                
+                // Re-add original cards
+                existingCards.forEach(card => container.appendChild(card));
+                
+                // Add new termine
+                sortedTermine.forEach(termin => {
+                    const terminElement = this.createTerminElement(termin);
+                    container.appendChild(terminElement);
+                });
+            },
+            
+            createTerminElement(termin) {
+                const terminCard = document.createElement('div');
+                terminCard.className = 'termin-card';
+                terminCard.dataset.terminId = termin.id;
+                
+                const terminDate = new Date(`${termin.date}T${termin.time}`);
+                const formattedDate = terminDate.toLocaleDateString('de-DE', {
+                    weekday: 'long',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                const formattedTime = terminDate.toLocaleTimeString('de-DE', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                terminCard.innerHTML = `
+                    <div class="termin-date">${formattedDate}, ${formattedTime}</div>
+                    <div class="termin-title">${termin.title}</div>
+                    <div class="termin-description">${termin.description}</div>
+                `;
+                
+                return terminCard;
+            }
+        };
+
         // === INITIALIZE ===
         document.addEventListener('DOMContentLoaded', () => {
             updateRoutineProgress();
@@ -2285,6 +2421,52 @@
                 addJournalModal.addEventListener('click', (e) => {
                     if (e.target === addJournalModal) {
                         JournalManager.hideAddJournalModal();
+                    }
+                });
+            }
+            
+            // === TERMIN EVENT LISTENERS ===
+            
+            // Add Termin Button
+            const addTerminBtn = document.getElementById('add-termin-btn');
+            if (addTerminBtn) {
+                addTerminBtn.addEventListener('click', () => {
+                    TerminManager.showAddTerminModal();
+                });
+            }
+            
+            // Cancel Termin Button
+            const cancelTerminBtn = document.getElementById('cancel-termin-btn');
+            if (cancelTerminBtn) {
+                cancelTerminBtn.addEventListener('click', () => {
+                    TerminManager.hideAddTerminModal();
+                });
+            }
+            
+            // Add Termin Form Submission
+            const addTerminForm = document.getElementById('add-termin-form');
+            if (addTerminForm) {
+                addTerminForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const terminData = {
+                        title: document.getElementById('termin-title').value,
+                        description: document.getElementById('termin-description').value,
+                        date: document.getElementById('termin-date').value,
+                        time: document.getElementById('termin-time').value
+                    };
+                    
+                    TerminManager.addTermin(terminData);
+                    TerminManager.hideAddTerminModal();
+                });
+            }
+            
+            // Close termin modal when clicking outside
+            const addTerminModal = document.getElementById('add-termin-modal');
+            if (addTerminModal) {
+                addTerminModal.addEventListener('click', (e) => {
+                    if (e.target === addTerminModal) {
+                        TerminManager.hideAddTerminModal();
                     }
                 });
             }
