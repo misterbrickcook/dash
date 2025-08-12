@@ -217,9 +217,9 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 3rem;
-            margin-bottom: 3rem;
+            margin-bottom: 4rem;
             height: auto;
-            min-height: 400px;
+            min-height: 300px;
         }
         .routine-section {
             background: #ffffff;
@@ -227,7 +227,7 @@
             padding: 2rem;
             display: flex;
             flex-direction: column;
-            min-height: 300px;
+            min-height: 250px;
         }
         .routine-section h2 {
             font-size: 1.2rem;
@@ -1102,15 +1102,17 @@
             async handleLogout() {
                 console.log('🚪 Logout clicked');
                 try {
-                    if (supabase) {
+                    if (supabase && typeof supabase.signOut === 'function') {
                         await supabase.signOut();
                     }
                     localStorage.clear();
+                    sessionStorage.clear();
                     console.log('✅ Logout successful, reloading...');
                     window.location.reload();
                 } catch (error) {
                     console.error('❌ Logout error:', error);
                     localStorage.clear();
+                    sessionStorage.clear();
                     window.location.reload();
                 }
             },
@@ -1267,8 +1269,135 @@
             },
             
             refreshCurrentView() {
-                // This will be implemented to reload the current filter view
-                console.log('Refreshing current view...');
+                // Get current active category
+                const activeTab = document.querySelector('.category-tab.active');
+                const activeCategory = activeTab ? activeTab.getAttribute('data-category') : 'heute';
+                
+                this.displayTodosForCategory(activeCategory);
+            },
+            
+            displayTodosForCategory(category) {
+                const container = document.getElementById(category);
+                if (!container) return;
+                
+                let filteredTodos = [];
+                
+                switch(category) {
+                    case 'heute':
+                        const today = new Date().toISOString().split('T')[0];
+                        filteredTodos = this.todos.filter(todo => 
+                            todo.deadline.startsWith(today) && !todo.completed
+                        );
+                        break;
+                    case 'alle':
+                        filteredTodos = this.todos.filter(todo => !todo.completed);
+                        break;
+                    case 'archiv':
+                        filteredTodos = this.todos.filter(todo => todo.completed);
+                        break;
+                    default:
+                        filteredTodos = this.todos.filter(todo => 
+                            todo.category === category && !todo.completed
+                        );
+                }
+                
+                // Sort by deadline (earliest first)
+                filteredTodos.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+                
+                // Clear container
+                container.innerHTML = '';
+                
+                if (filteredTodos.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Keine Todos vorhanden</p>';
+                    return;
+                }
+                
+                // Display todos
+                filteredTodos.forEach(todo => {
+                    const todoElement = this.createTodoElement(todo);
+                    container.appendChild(todoElement);
+                });
+            },
+            
+            createTodoElement(todo) {
+                const todoItem = document.createElement('div');
+                todoItem.className = `todo-item${todo.completed ? ' completed' : ''}`;
+                todoItem.dataset.todoId = todo.id;
+                
+                const deadline = new Date(todo.deadline);
+                const now = new Date();
+                const isToday = deadline.toDateString() === now.toDateString();
+                const isOverdue = deadline < now && !todo.completed;
+                
+                let deadlineClass = '';
+                let deadlineText = '';
+                
+                if (isToday) {
+                    deadlineClass = 'today';
+                    deadlineText = `Heute ${deadline.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}`;
+                } else if (isOverdue) {
+                    deadlineClass = 'overdue';
+                    deadlineText = 'Überfällig';
+                } else {
+                    deadlineClass = 'soon';
+                    deadlineText = deadline.toLocaleDateString('de-DE') + ' ' + deadline.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+                }
+                
+                todoItem.innerHTML = `
+                    <div class="todo-header">
+                        <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} 
+                               onchange="TodoManager.toggleTodo('${todo.id}')">
+                        <div class="todo-content">
+                            <div class="todo-title">${todo.title}</div>
+                            <div class="todo-meta">
+                                <span class="todo-deadline ${deadlineClass}">${deadlineText}</span>
+                                <span class="todo-tag ${todo.priority}">${todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                return todoItem;
+            },
+            
+            toggleTodo(todoId) {
+                const todo = this.todos.find(t => t.id === todoId);
+                if (todo) {
+                    todo.completed = !todo.completed;
+                    console.log('Todo toggled:', todo);
+                    this.refreshCurrentView();
+                    
+                    // Also update home todos if we're on the home tab
+                    this.updateHomeTodos();
+                }
+            },
+            
+            updateHomeTodos() {
+                const homeContainer = document.getElementById('home-todos');
+                if (!homeContainer) return;
+                
+                // Show today's uncompleted todos on home
+                const today = new Date().toISOString().split('T')[0];
+                const todayTodos = this.todos.filter(todo => 
+                    todo.deadline.startsWith(today) && !todo.completed
+                ).sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+                
+                homeContainer.innerHTML = '';
+                
+                if (todayTodos.length === 0) {
+                    homeContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">Keine Todos für heute</p>';
+                    return;
+                }
+                
+                todayTodos.forEach(todo => {
+                    const todoItem = document.createElement('div');
+                    todoItem.className = 'checkbox-item';
+                    todoItem.innerHTML = `
+                        <input type="checkbox" id="home-todo-${todo.id}" onchange="TodoManager.toggleTodo('${todo.id}')">
+                        <label for="home-todo-${todo.id}">${todo.title} (${new Date(todo.deadline).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})})</label>
+                    `;
+                    homeContainer.appendChild(todoItem);
+                });
             }
         };
 
