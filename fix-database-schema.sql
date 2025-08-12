@@ -8,8 +8,13 @@ UPDATE todos SET
         WHEN time = '23:00' THEN '21:00'
         WHEN time = '23:30' THEN '21:30' 
         ELSE time
-    END
-WHERE completed = false;
+    END;
 
 -- Show current table structure
-\d todos;
+SELECT column_name, data_type, column_default 
+FROM information_schema.columns 
+WHERE table_name = 'todos' 
+ORDER BY ordinal_position;
+
+-- Show current todos data
+SELECT id, text, completed, date, time, created_at FROM todos LIMIT 10;
