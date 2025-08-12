@@ -255,27 +255,22 @@ body {
     letter-spacing: 0.05em;
 }
 
-/* === ROUTINE SYSTEM === */
+/* === ROUTINE SYSTEM (Original vorschlag2.html) === */
 .routine-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
-    height: 350px;
+    gap: 3rem;
+    margin-bottom: 3rem;
+    height: 400px;
 }
 
 .routine-section {
     background: #ffffff;
     border: 1px solid #e0e0e0;
-    padding: 1.5rem;
+    padding: 2rem;
     display: grid;
     grid-template-rows: auto 1fr auto;
     height: 100%;
-    transition: border-color 0.2s ease;
-}
-
-.routine-section:hover {
-    border-color: #000000;
 }
 
 .routine-section h2 {
@@ -284,7 +279,6 @@ body {
     margin-bottom: 1.5rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #000000;
 }
 
 .routine-section .checkbox-group {
@@ -623,7 +617,7 @@ input:focus, textarea:focus, select:focus {
     
     .routine-section {
         height: auto;
-        min-height: 250px;
+        min-height: 350px;
     }
     
     .card, .section {
