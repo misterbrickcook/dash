@@ -36,7 +36,9 @@
             padding: 0 20px;
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 3rem;
+            position: relative;
         }
         .nav-tab {
             text-decoration: none;
@@ -54,15 +56,16 @@
         }
         .nav-tab:hover { border-color: #000000; color: #000000; }
         .nav-tab.active {
-            border-color: #000000;
-            background: #000000;
-            color: #ffffff;
+            color: #000000;
+            font-weight: 700;
+            border: 1px solid transparent;
+            background: transparent;
         }
         
         /* === LOGOUT BUTTON === */
         .logout-btn {
-            margin-left: auto;
-            padding-left: 2rem;
+            position: absolute;
+            right: 0;
             color: #666666 !important;
             font-weight: 400 !important;
         }
