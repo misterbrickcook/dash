@@ -1590,7 +1590,7 @@
                         if (result && Array.isArray(result) && result.length > 0) {
                             // Transform the database result to match UI expectations
                             const dbTodo = result[0];
-                            console.log('Database returned todo:', dbTodo);
+                            console.log('Database returned todo with ID:', dbTodo.id, dbTodo);
                             const uiTodo = {
                                 ...dbTodo,
                                 title: dbTodo.text,
