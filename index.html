@@ -1913,8 +1913,8 @@
                                 ...goal,
                                 name: goal.title, // Map title to name for UI
                                 deadline: goal.target_date, // Map target_date to deadline for UI
-                                progress: 0, // No progress field in DB, default to 0
-                                timeframe: 'monat', // No timeframe in DB, default to monat
+                                progress: goal.progress || 0, // Use DB progress field
+                                timeframe: goal.timeframe || 'monat', // Use DB timeframe field
                                 completed: goal.completed // Use DB completed field
                             };
                         });
@@ -1998,15 +1998,16 @@
                 
                 if (supabase?.isAuthenticated()) {
                     try {
-                        // Map UI fields to exact database schema
+                        // Map UI fields to database schema (with new progress/timeframe fields)
                         const dbGoal = {
                             title: goal.name,
                             description: goal.description,
                             category: goal.category,
                             target_date: goal.deadline,
+                            progress: goal.progress,
+                            timeframe: goal.timeframe,
                             completed: goal.completed,
                             user_id: supabase?.user?.id
-                            // Note: No progress field in DB, using completed instead
                         };
                         
                         console.log('💾 Attempting to save goal to database:', dbGoal);
@@ -2019,8 +2020,8 @@
                                 ...result[0],
                                 name: result[0].title,
                                 deadline: result[0].target_date,
-                                timeframe: goal.timeframe, // Not in DB, keep from UI
-                                progress: goal.progress, // Not in DB, keep from UI
+                                timeframe: result[0].timeframe,
+                                progress: result[0].progress,
                                 completed: result[0].completed
                             };
                             this.goals.push(savedGoal);
@@ -2145,8 +2146,20 @@
                     goal.progress = parseInt(newProgress);
                     goal.completed = goal.progress >= 100;
                     
-                    // TEMPORARY: Skip database update until schema is fixed
-                    console.warn('⚠️ Goal progress update saved locally only');
+                    if (supabase?.isAuthenticated()) {
+                        try {
+                            await supabase.update('goals', { 
+                                progress: goal.progress,
+                                completed: goal.completed
+                            }, goal.id);
+                            console.log('✅ Goal progress updated in database');
+                        } catch (error) {
+                            console.error('Error updating goal progress:', error);
+                            // Revert on error
+                            goal.progress = oldProgress;
+                            goal.completed = oldProgress >= 100;
+                        }
+                    }
                     
                     console.log('Goal progress updated:', goal);
                     this.refreshCurrentView();
