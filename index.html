@@ -1086,6 +1086,7 @@
                 <button class="category-tab" data-category="alle">Alle</button>
                 <button class="category-tab" data-category="archiv">Archiv</button>
                 <button id="add-todo-btn" class="btn" style="margin-left: 2rem;">+ Add Todo</button>
+                <button id="clear-archive-btn" class="btn secondary" style="margin-left: 1rem; display: none;">🗑️ Archiv leeren</button>
             </div>
 
             <!-- HEUTE KATEGORIE -->
@@ -1389,6 +1390,16 @@
             parentTab.querySelector(`#${categoryId}`).classList.add('active');
             // Activate selected category tab
             parentTab.querySelector(`[data-category="${categoryId}"]`).classList.add('active');
+            
+            // Show/hide clear archive button
+            const clearArchiveBtn = document.getElementById('clear-archive-btn');
+            if (clearArchiveBtn) {
+                if (categoryId === 'archiv') {
+                    clearArchiveBtn.style.display = 'inline-block';
+                } else {
+                    clearArchiveBtn.style.display = 'none';
+                }
+            }
             
             // Load todos for this category
             TodoManager.displayTodosForCategory(categoryId);
@@ -1811,6 +1822,37 @@
                     console.error('❌ Todo not found for ID:', todoId);
                     alert('Todo nicht gefunden! ID: ' + todoId);
                 }
+            },
+            
+            async clearArchive() {
+                if (!confirm('Wirklich alle erledigten Todos dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden!')) {
+                    return;
+                }
+                
+                const completedTodos = this.todos.filter(todo => todo.completed);
+                console.log('🗑️ Deleting', completedTodos.length, 'completed todos from archive');
+                
+                if (supabase?.isAuthenticated()) {
+                    try {
+                        // Delete from database
+                        for (const todo of completedTodos) {
+                            await supabase.delete('todos', todo.id);
+                        }
+                        console.log('✅ All completed todos deleted from database');
+                    } catch (error) {
+                        console.error('❌ Error deleting todos from database:', error);
+                        alert('Fehler beim Löschen aus der Datenbank: ' + error.message);
+                        return;
+                    }
+                }
+                
+                // Remove from local array
+                this.todos = this.todos.filter(todo => !todo.completed);
+                
+                // Refresh current view
+                this.refreshCurrentView();
+                
+                alert(`✅ ${completedTodos.length} erledigte Todos wurden gelöscht!`);
             },
             
             updateHomeTodos() {
@@ -2522,6 +2564,14 @@
             if (addTodoBtn) {
                 addTodoBtn.addEventListener('click', () => {
                     TodoManager.showAddTodoModal();
+                });
+            }
+            
+            // Clear Archive Button
+            const clearArchiveBtn = document.getElementById('clear-archive-btn');
+            if (clearArchiveBtn) {
+                clearArchiveBtn.addEventListener('click', () => {
+                    TodoManager.clearArchive();
                 });
             }
             
