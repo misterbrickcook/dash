@@ -758,7 +758,7 @@
                     <div class="form-group">
                         <label for="todo-priority">Priorität</label>
                         <select id="todo-priority" required autocomplete="off">
-                            <option value="niedrig">Niedrig</option>
+                            <option value="niedrig" selected>Niedrig</option>
                             <option value="mittel">Mittel</option>
                             <option value="wichtig">Wichtig</option>
                             <option value="dringend">Dringend</option>
@@ -1558,8 +1558,9 @@
                 modal.classList.add('hide');
                 // Reset form
                 document.getElementById('add-todo-form').reset();
-                // Reset time back to 21:00
+                // Reset to default values
                 document.getElementById('todo-time').value = '21:00';
+                document.getElementById('todo-priority').value = 'niedrig';
             },
             
             async addTodo(todoData) {
@@ -2546,6 +2547,10 @@
                         deadline: document.getElementById('todo-deadline').value,
                         time: document.getElementById('todo-time').value
                     };
+                    
+                    console.log('📝 Form data being sent:', todoData);
+                    console.log('📝 Priority element value:', document.getElementById('todo-priority').value);
+                    console.log('📝 Priority element selectedIndex:', document.getElementById('todo-priority').selectedIndex);
                     
                     await TodoManager.addTodo(todoData);
                     TodoManager.hideAddTodoModal();
