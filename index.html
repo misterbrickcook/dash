@@ -1840,7 +1840,7 @@
                         <label for="home-todo-${todo.id}">
                             ${todo.title} 
                             <span class="todo-tag ${TodoManager.getPriorityString(todo.priority)}" style="margin-left: 0.5rem;">${TodoManager.getPriorityDisplay(todo.priority)}</span>
-                            (${todo.time || new Date(todo.deadline).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})})
+                            (${todo.time || '21:00'})
                         </label>
                     `;
                     homeContainer.appendChild(todoItem);
