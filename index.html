@@ -2175,17 +2175,35 @@
                 const percentageElement = goalCard.querySelector('.ziel-percentage');
                 const progressFill = goalCard.querySelector('.progress-fill');
                 
-                // Create inline input field
+                // Create inline edit container
+                const editContainer = document.createElement('div');
+                editContainer.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; background: #f9f9f9; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;';
+                
+                // Create progress input
                 const input = document.createElement('input');
                 input.type = 'number';
                 input.min = '0';
                 input.max = '100';
                 input.value = goal.progress;
-                input.style.cssText = 'width: 50px; padding: 2px 4px; border: 1px solid #ccc; font-size: 1rem; font-weight: 500; text-align: center; background: #fff;';
+                input.style.cssText = 'width: 50px; padding: 2px 4px; border: 1px solid #ccc; font-size: 0.9rem; text-align: center;';
                 
-                // Replace percentage display with input
+                // Create complete button
+                const completeBtn = document.createElement('button');
+                completeBtn.textContent = '✓ Erledigt';
+                completeBtn.style.cssText = 'padding: 2px 6px; font-size: 0.8rem; border: 1px solid #28a745; background: #28a745; color: white; border-radius: 3px; cursor: pointer;';
+                
+                // Create cancel button
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = '×';
+                cancelBtn.style.cssText = 'padding: 2px 6px; font-size: 0.8rem; border: 1px solid #ccc; background: #f8f9fa; border-radius: 3px; cursor: pointer;';
+                
+                editContainer.appendChild(input);
+                editContainer.appendChild(completeBtn);
+                editContainer.appendChild(cancelBtn);
+                
+                // Replace percentage display with edit container
                 const originalText = percentageElement.textContent;
-                percentageElement.replaceWith(input);
+                percentageElement.replaceWith(editContainer);
                 input.focus();
                 input.select();
                 
@@ -2193,32 +2211,49 @@
                 let isHandled = false;
                 
                 // Handle save/cancel
-                const saveProgress = () => {
+                const saveProgress = async () => {
                     if (isHandled) return;
                     isHandled = true;
                     
                     const newValue = parseInt(input.value);
                     if (!isNaN(newValue) && newValue >= 0 && newValue <= 100) {
-                        goal.progress = newValue;
-                        goal.completed = newValue >= 100;
+                        await this.updateGoalProgress(goalId, newValue);
                         
-                        // Update UI immediately
+                        // Update UI
                         const newPercentageElement = document.createElement('span');
                         newPercentageElement.className = 'ziel-percentage';
                         newPercentageElement.textContent = `${newValue}%`;
-                        input.replaceWith(newPercentageElement);
+                        editContainer.replaceWith(newPercentageElement);
                         
                         // Update progress bar
                         progressFill.style.width = `${newValue}%`;
                         
-                        console.log('Goal progress updated:', goal);
+                        // Refresh view if goal completed
+                        if (newValue >= 100) {
+                            this.refreshCurrentView();
+                        }
                     } else {
-                        // Restore original
-                        const newPercentageElement = document.createElement('span');
-                        newPercentageElement.className = 'ziel-percentage';
-                        newPercentageElement.textContent = originalText;
-                        input.replaceWith(newPercentageElement);
+                        cancelEdit();
                     }
+                };
+                
+                const markComplete = async () => {
+                    if (isHandled) return;
+                    isHandled = true;
+                    
+                    await this.updateGoalProgress(goalId, 100);
+                    
+                    // Update UI
+                    const newPercentageElement = document.createElement('span');
+                    newPercentageElement.className = 'ziel-percentage';
+                    newPercentageElement.textContent = '100%';
+                    editContainer.replaceWith(newPercentageElement);
+                    
+                    // Update progress bar
+                    progressFill.style.width = '100%';
+                    
+                    // Refresh view to move to archive
+                    this.refreshCurrentView();
                 };
                 
                 const cancelEdit = () => {
@@ -2228,7 +2263,7 @@
                     const newPercentageElement = document.createElement('span');
                     newPercentageElement.className = 'ziel-percentage';
                     newPercentageElement.textContent = originalText;
-                    input.replaceWith(newPercentageElement);
+                    editContainer.replaceWith(newPercentageElement);
                 };
                 
                 // Event listeners
@@ -2242,7 +2277,19 @@
                         cancelEdit();
                     }
                 });
-                input.addEventListener('blur', saveProgress);
+                
+                completeBtn.addEventListener('click', markComplete);
+                cancelBtn.addEventListener('click', cancelEdit);
+                
+                // Auto-save on blur for input
+                input.addEventListener('blur', (e) => {
+                    // Only if user didn't click on buttons
+                    setTimeout(() => {
+                        if (!isHandled && document.contains(editContainer)) {
+                            saveProgress();
+                        }
+                    }, 100);
+                });
             }
         };
 
