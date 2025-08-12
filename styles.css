@@ -259,15 +259,15 @@ body {
 .routine-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    margin-bottom: 3rem;
-    height: 500px;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    height: 350px;
 }
 
 .routine-section {
     background: #ffffff;
     border: 1px solid #e0e0e0;
-    padding: 2rem;
+    padding: 1.5rem;
     display: grid;
     grid-template-rows: auto 1fr auto;
     height: 100%;
@@ -623,7 +623,7 @@ input:focus, textarea:focus, select:focus {
     
     .routine-section {
         height: auto;
-        min-height: 350px;
+        min-height: 250px;
     }
     
     .card, .section {
