@@ -682,9 +682,15 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="todo-deadline">Deadline (optional)</label>
-                    <input type="date" id="todo-deadline">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="todo-deadline">Deadline</label>
+                        <input type="date" id="todo-deadline" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="todo-time">Uhrzeit</label>
+                        <input type="time" id="todo-time" value="21:00" required>
+                    </div>
                 </div>
                 
                 <div class="form-actions">
@@ -1223,6 +1229,10 @@
             showAddTodoModal() {
                 const modal = document.getElementById('add-todo-modal');
                 modal.classList.remove('hide');
+                
+                // Set today's date as default
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('todo-deadline').value = today;
             },
             
             hideAddTodoModal() {
@@ -1230,15 +1240,20 @@
                 modal.classList.add('hide');
                 // Reset form
                 document.getElementById('add-todo-form').reset();
+                // Reset time back to 21:00
+                document.getElementById('todo-time').value = '21:00';
             },
             
             addTodo(todoData) {
+                // Combine date and time into a full datetime
+                const deadlineDateTime = `${todoData.deadline}T${todoData.time}:00`;
+                
                 const todo = {
                     id: Date.now().toString(),
                     title: todoData.title,
                     category: todoData.category,
                     priority: todoData.priority,
-                    deadline: todoData.deadline || null,
+                    deadline: deadlineDateTime,
                     completed: false,
                     createdAt: new Date().toISOString()
                 };
@@ -1311,7 +1326,8 @@
                         title: document.getElementById('todo-title').value,
                         category: document.getElementById('todo-category').value,
                         priority: document.getElementById('todo-priority').value,
-                        deadline: document.getElementById('todo-deadline').value
+                        deadline: document.getElementById('todo-deadline').value,
+                        time: document.getElementById('todo-time').value
                     };
                     
                     TodoManager.addTodo(todoData);
