@@ -174,6 +174,47 @@
             text-align: right;
         }
 
+        /* === STREAK TILES === */
+        .streak-overview {
+            margin-bottom: 3rem;
+        }
+        .streak-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+        .streak-tile {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 2rem;
+            text-align: center;
+            transition: border-color 0.2s ease;
+        }
+        .streak-tile:hover {
+            border-color: #000000;
+        }
+        .streak-number {
+            font-size: 3rem;
+            font-weight: 300;
+            color: #000000;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+        .streak-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #000000;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+        .streak-date {
+            font-size: 0.8rem;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         /* === ROUTINE SPECIFIC === */
         .routine-grid {
             display: grid;
@@ -290,7 +331,7 @@
 
         /* === RESPONSIVE === */
         @media (max-width: 768px) {
-            .grid-2, .grid-3, .routine-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .grid-2, .grid-3, .routine-grid, .streak-grid { grid-template-columns: 1fr; gap: 2rem; }
             .routine-grid { height: auto; }
             .routine-section { height: auto; min-height: 350px; }
             .main-content { padding: 0 15px 40px 15px; }
@@ -324,7 +365,7 @@
     <!-- === STICKY NAVIGATION === -->
     <nav class="sticky-nav">
         <div class="nav-container">
-            <button class="nav-tab active" data-tab="tab-routine">Routine</button>
+            <button class="nav-tab active" data-tab="tab-home">Home</button>
             <button class="nav-tab" data-tab="tab-todos">ToDos</button>
             <button class="nav-tab" data-tab="tab-ziele">Ziele</button>
             <button class="nav-tab" data-tab="tab-journal">Journal</button>
@@ -336,10 +377,30 @@
     </nav>
 
     <div class="main-content">
-        <!-- === ROUTINE TAB === -->
-        <section id="tab-routine" class="tab-section active">
-            <h1 class="section-title">Routinen</h1>
-            
+        <!-- === HOME TAB === -->
+        <section id="tab-home" class="tab-section active">
+            <!-- Streak Kacheln -->
+            <section class="streak-overview">
+                <div class="streak-grid">
+                    <div class="streak-tile">
+                        <div class="streak-number">5</div>
+                        <div class="streak-label">Morgenroutine</div>
+                        <div class="streak-date">August 2025</div>
+                    </div>
+                    <div class="streak-tile">
+                        <div class="streak-number">3</div>
+                        <div class="streak-label">Abendroutine</div>
+                        <div class="streak-date">August 2025</div>
+                    </div>
+                    <div class="streak-tile">
+                        <div class="streak-number">12</div>
+                        <div class="streak-label">Todo Streak</div>
+                        <div class="streak-date">August 2025</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Routinen Section -->
             <div class="routine-grid">
                 <div class="routine-section">
                     <h2>Morgenroutine</h2>
@@ -405,6 +466,25 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Heutige Aufgaben -->
+            <section class="card">
+                <h2 style="font-size: 1.2rem; font-weight: 500; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Heutige Aufgaben</h2>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="todo1" checked>
+                        <label for="todo1">Einkaufen gehen</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="todo2">
+                        <label for="todo2">Wäsche waschen</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="todo3">
+                        <label for="todo3">Projekt fertigstellen</label>
+                    </div>
+                </div>
+            </section>
         </section>
 
         <!-- === TODOS TAB === -->
