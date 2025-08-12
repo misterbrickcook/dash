@@ -1586,7 +1586,7 @@
                 if (supabase?.isAuthenticated()) {
                     try {
                         const result = await supabase.insert('todos', todo);
-                        console.log('Supabase insert result:', result);
+                        console.log('💾 Supabase insert result:', result);
                         if (result && Array.isArray(result) && result.length > 0) {
                             // Transform the database result to match UI expectations
                             const dbTodo = result[0];
@@ -1779,31 +1779,43 @@
             },
             
             async toggleTodo(todoId) {
-                const todo = this.todos.find(t => t.id == todoId); // Use == instead of === for type flexibility
+                console.log('🔍 Looking for todo with ID:', todoId, 'Type:', typeof todoId);
+                console.log('🔍 Available todos:', this.todos.map(t => ({id: t.id, type: typeof t.id, title: t.title})));
+                
+                const todo = this.todos.find(t => String(t.id) === String(todoId));
                 if (todo) {
+                    const wasCompleted = todo.completed;
                     todo.completed = !todo.completed;
-                    console.log(`Todo ${todo.title} ${todo.completed ? 'completed' : 'uncompleted'}`);
+                    console.log(`✅ Todo "${todo.title}" ${todo.completed ? 'completed' : 'uncompleted'}`);
                     
                     if (supabase?.isAuthenticated()) {
                         try {
-                            console.log('Updating todo ID:', todo.id, 'to completed:', todo.completed);
-                            const result = await supabase.update('todos', { completed: todo.completed }, todo.id);
-                            console.log('Update result:', result);
-                            if (!result) {
-                                console.warn('Update returned null - todo might not have been updated');
+                            console.log('💾 Updating in database - ID:', todo.id, 'Type:', typeof todo.id, 'Completed:', todo.completed);
+                            
+                            // Make sure we use the right ID type
+                            const updateId = Number.isInteger(Number(todo.id)) ? Number(todo.id) : todo.id;
+                            const result = await supabase.update('todos', { completed: todo.completed }, updateId);
+                            
+                            console.log('💾 Database update result:', result);
+                            
+                            if (result === null || result === undefined) {
+                                throw new Error('Update returned null - todo not found in database');
                             }
+                            
                         } catch (error) {
-                            console.error('Error updating todo in database:', error);
-                            alert('Fehler beim Speichern in Datenbank: ' + error.message);
+                            console.error('❌ Database update failed:', error);
+                            alert('Fehler: ' + error.message + '\nTodo wird nicht gespeichert!');
                             // Revert on error
-                            todo.completed = !todo.completed;
+                            todo.completed = wasCompleted;
+                            return; // Don't refresh if update failed
                         }
                     }
                     
                     this.refreshCurrentView();
                     this.updateHomeTodos();
                 } else {
-                    console.error('Todo not found for ID:', todoId);
+                    console.error('❌ Todo not found for ID:', todoId);
+                    alert('Todo nicht gefunden! ID: ' + todoId);
                 }
             },
             
