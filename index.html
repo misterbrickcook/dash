@@ -1570,9 +1570,39 @@
         const GoalManager = {
             goals: [], // In-memory storage for demo
             
+            // Calculate automatic deadlines based on timeframe
+            calculateDeadline(timeframe) {
+                const now = new Date();
+                
+                switch(timeframe) {
+                    case 'monat': {
+                        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                        return endOfMonth.toISOString().split('T')[0];
+                    }
+                    case 'quartal': {
+                        const currentQuarter = Math.floor(now.getMonth() / 3);
+                        const endOfQuarter = new Date(now.getFullYear(), (currentQuarter + 1) * 3, 0);
+                        return endOfQuarter.toISOString().split('T')[0];
+                    }
+                    case 'jahr': {
+                        const endOfYear = new Date(now.getFullYear(), 11, 31);
+                        return endOfYear.toISOString().split('T')[0];
+                    }
+                    default:
+                        return now.toISOString().split('T')[0];
+                }
+            },
+            
             showAddGoalModal() {
                 const modal = document.getElementById('add-goal-modal');
                 modal.classList.remove('hide');
+                
+                // Set default deadline based on current timeframe selection
+                const timeframeSelect = document.getElementById('goal-timeframe');
+                const deadlineInput = document.getElementById('goal-deadline');
+                if (timeframeSelect && deadlineInput) {
+                    deadlineInput.value = this.calculateDeadline(timeframeSelect.value);
+                }
             },
             
             hideAddGoalModal() {
@@ -1815,6 +1845,17 @@
                     
                     GoalManager.addGoal(goalData);
                     GoalManager.hideAddGoalModal();
+                });
+            }
+            
+            // Timeframe change listener - automatically update deadline
+            const goalTimeframeSelect = document.getElementById('goal-timeframe');
+            if (goalTimeframeSelect) {
+                goalTimeframeSelect.addEventListener('change', (e) => {
+                    const deadlineInput = document.getElementById('goal-deadline');
+                    if (deadlineInput) {
+                        deadlineInput.value = GoalManager.calculateDeadline(e.target.value);
+                    }
                 });
             }
             
