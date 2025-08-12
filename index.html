@@ -1998,15 +1998,14 @@
                 
                 if (supabase?.isAuthenticated()) {
                     try {
-                        // Map UI fields to database fields
+                        // Map UI fields to database fields - try minimal set first
                         const dbGoal = {
                             title: goal.name,
                             description: goal.description,
                             category: goal.category,
-                            // Try common field names that might exist
-                            progress: goal.progress,
                             target_date: goal.deadline,
                             user_id: supabase?.user?.id
+                            // Removed progress - field doesn't exist
                         };
                         
                         console.log('💾 Attempting to save goal to database:', dbGoal);
