@@ -919,8 +919,8 @@
                         <input type="date" id="termin-date" required autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label for="termin-time">Uhrzeit</label>
-                        <input type="time" id="termin-time" required autocomplete="off">
+                        <label for="termin-time">Uhrzeit (optional)</label>
+                        <input type="time" id="termin-time" autocomplete="off">
                     </div>
                 </div>
                 
@@ -1062,21 +1062,7 @@
                     <button id="add-termin-btn" class="btn" style="font-size: 0.7rem; padding: 0.5rem 1rem;">+ Add Termin</button>
                 </div>
                 <div class="grid-3" id="termine-container">
-                    <div class="termin-card">
-                        <div class="termin-date">Montag, 28.07.2025</div>
-                        <div class="termin-title">Präsentation Projekt X</div>
-                        <div class="termin-description">Finale Präsentation des Quartalsprojekts vor der Geschäftsleitung. Vorbereitung und letzte Details prüfen.</div>
-                    </div>
-                    <div class="termin-card">
-                        <div class="termin-date">Mittwoch, 30.07.2025</div>
-                        <div class="termin-title">Zahnarzt Kontrolle</div>
-                        <div class="termin-description">Halbjährliche Kontrolluntersuchung. Termin um 14:30 Uhr, ca. 30-45 Minuten einplanen.</div>
-                    </div>
-                    <div class="termin-card">
-                        <div class="termin-date">Samstag, 02.08.2025</div>
-                        <div class="termin-title">Geburtstag Lisa</div>
-                        <div class="termin-description">Geburtstagsfeier bei Lisa zu Hause. Geschenk nicht vergessen! Ab 18:00 Uhr.</div>
-                    </div>
+                    <!-- Termine will be loaded from TerminManager -->
                 </div>
             </section>
 
@@ -2144,21 +2130,22 @@
                 const container = document.getElementById('termine-container');
                 if (!container) return;
                 
+                // Clear container
+                container.innerHTML = '';
+                
+                if (this.termine.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem; grid-column: 1 / -1;">Keine Termine vorhanden</p>';
+                    return;
+                }
+                
                 // Sort by date/time (earliest first)
                 const sortedTermine = this.termine.sort((a, b) => {
-                    const dateTimeA = new Date(`${a.date}T${a.time}`);
-                    const dateTimeB = new Date(`${b.date}T${b.time}`);
+                    const dateTimeA = new Date(`${a.date}T${a.time || '00:00'}`);
+                    const dateTimeB = new Date(`${b.date}T${b.time || '00:00'}`);
                     return dateTimeA - dateTimeB;
                 });
                 
-                // Clear container but keep original hardcoded ones for demo
-                const existingCards = container.querySelectorAll('.termin-card:not([data-termin-id])');
-                container.innerHTML = '';
-                
-                // Re-add original cards
-                existingCards.forEach(card => container.appendChild(card));
-                
-                // Add new termine
+                // Add termine
                 sortedTermine.forEach(termin => {
                     const terminElement = this.createTerminElement(termin);
                     container.appendChild(terminElement);
@@ -2170,20 +2157,26 @@
                 terminCard.className = 'termin-card';
                 terminCard.dataset.terminId = termin.id;
                 
-                const terminDate = new Date(`${termin.date}T${termin.time}`);
+                const terminDate = new Date(termin.date);
                 const formattedDate = terminDate.toLocaleDateString('de-DE', {
                     weekday: 'long',
                     day: '2-digit',
                     month: '2-digit',
                     year: 'numeric'
                 });
-                const formattedTime = terminDate.toLocaleTimeString('de-DE', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+                
+                let displayDate = formattedDate;
+                if (termin.time) {
+                    const timeDate = new Date(`${termin.date}T${termin.time}`);
+                    const formattedTime = timeDate.toLocaleTimeString('de-DE', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    displayDate += `, ${formattedTime}`;
+                }
                 
                 terminCard.innerHTML = `
-                    <div class="termin-date">${formattedDate}, ${formattedTime}</div>
+                    <div class="termin-date">${displayDate}</div>
                     <div class="termin-title">${termin.title}</div>
                     <div class="termin-description">${termin.description}</div>
                 `;
@@ -2199,6 +2192,9 @@
             
             // Initialize home todos display
             TodoManager.updateHomeTodos();
+            
+            // Initialize termine display
+            TerminManager.displayTermine();
             
             // Ensure logout button works
             const logoutBtn = document.getElementById('logout-btn');
