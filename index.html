@@ -763,7 +763,7 @@
                         <input type="date" id="goal-deadline" required autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label for="goal-progress">Aktueller Fortschritt (%)</label>
+                        <label for="goal-progress">Fortschritt (%)</label>
                         <input type="number" id="goal-progress" min="0" max="100" value="0" required autocomplete="off">
                     </div>
                 </div>
@@ -990,84 +990,6 @@
                 <!-- Completed/archived ziele will be loaded from database -->
             </div>
 
-            <!-- TEMPORARY: Original cards for now -->
-            <div class="grid-2">
-                <div class="ziel-card">
-                    <div class="ziel-kategorie">Fitness</div>
-                    <div class="ziel-header">
-                        <div class="ziel-name">5 kg abnehmen bis 01.09.2025</div>
-                        <div class="ziel-beschreibung">Aktuell: 83 kg → Ziel: 78 kg<br>Durch gesunde Ernährung und regelmäßigen Sport</div>
-                    </div>
-                    <div class="ziel-progress-section">
-                        <div class="ziel-progress-header">
-                            <span class="ziel-progress-label">Fortschritt</span>
-                            <span class="ziel-percentage">40%</span>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 40%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ziel-card">
-                    <div class="ziel-kategorie">Karriere</div>
-                    <div class="ziel-header">
-                        <div class="ziel-name">Bachelorarbeit schreiben bis 01.10.2025</div>
-                        <div class="ziel-beschreibung">Thema: "Digitale Transformation in KMU"<br>80 Seiten, inkl. empirische Studie</div>
-                    </div>
-                    <div class="ziel-progress-section">
-                        <div class="ziel-progress-header">
-                            <span class="ziel-progress-label">Fortschritt</span>
-                            <span class="ziel-percentage">20%</span>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 20%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ziel-card">
-                    <div class="ziel-kategorie">Finanzen</div>
-                    <div class="ziel-header">
-                        <div class="ziel-name">10.000 € Investment-Portfolio aufbauen</div>
-                        <div class="ziel-beschreibung">Aktuell: 6.500 € → Ziel: 10.000 €<br>Diversifiziert in ETFs und Einzelaktien</div>
-                    </div>
-                    <div class="ziel-progress-section">
-                        <div class="ziel-progress-header">
-                            <span class="ziel-progress-label">Fortschritt</span>
-                            <span class="ziel-percentage">65%</span>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 65%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ziel-card">
-                    <div class="ziel-kategorie">Bildung</div>
-                    <div class="ziel-header">
-                        <div class="ziel-name">Spanisch B2-Level erreichen bis 31.12.2025</div>
-                        <div class="ziel-beschreibung">Täglich 30 Min lernen + Konversationskurs<br>Aktuell: A2-Level</div>
-                    </div>
-                    <div class="ziel-progress-section">
-                        <div class="ziel-progress-header">
-                            <span class="ziel-progress-label">Fortschritt</span>
-                            <span class="ziel-percentage">30%</span>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 30%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </section>
 
         <!-- === JOURNAL TAB === -->
@@ -1729,6 +1651,7 @@
                                 <div class="progress-fill" style="width: ${goal.progress}%;"></div>
                             </div>
                         </div>
+                        <button class="btn secondary" style="margin-top: 1rem; font-size: 0.7rem; padding: 0.5rem 1rem;" onclick="GoalManager.editGoalProgress('${goal.id}')">Fortschritt bearbeiten</button>
                     </div>
                 `;
                 
@@ -1742,6 +1665,16 @@
                     goal.completed = goal.progress >= 100;
                     console.log('Goal progress updated:', goal);
                     this.refreshCurrentView();
+                }
+            },
+            
+            editGoalProgress(goalId) {
+                const goal = this.goals.find(g => g.id === goalId);
+                if (goal) {
+                    const newProgress = prompt(`Fortschritt für "${goal.name}" eingeben (0-100%):`, goal.progress);
+                    if (newProgress !== null && !isNaN(newProgress) && newProgress >= 0 && newProgress <= 100) {
+                        this.updateGoalProgress(goalId, parseInt(newProgress));
+                    }
                 }
             }
         };
