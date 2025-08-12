@@ -1289,6 +1289,9 @@
                 const activeCategory = activeTab ? activeTab.getAttribute('data-category') : 'heute';
                 
                 this.displayTodosForCategory(activeCategory);
+                
+                // Also update home todos
+                this.updateHomeTodos();
             },
             
             displayTodosForCategory(category) {
@@ -1420,6 +1423,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             updateRoutineProgress();
             Auth.init();
+            
+            // Initialize home todos display
+            TodoManager.updateHomeTodos();
             
             // Ensure logout button works
             const logoutBtn = document.getElementById('logout-btn');
