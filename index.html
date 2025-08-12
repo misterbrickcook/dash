@@ -1130,6 +1130,7 @@
                 <button class="ziel-tab" data-ziel-category="alle">Alle</button>
                 <button class="ziel-tab" data-ziel-category="archiv">Archiv</button>
                 <button id="add-goal-btn" class="btn" style="margin-left: 2rem;">+ Add Goal</button>
+                <button id="clear-goal-archive-btn" class="btn secondary" style="margin-left: 1rem; display: none;">🗑️ Archiv leeren</button>
             </div>
 
             <!-- MONAT KATEGORIE -->
@@ -1420,6 +1421,16 @@
             parentTab.querySelector(`#ziel-${categoryId}`).classList.add('active');
             // Activate selected category tab
             parentTab.querySelector(`[data-ziel-category="${categoryId}"]`).classList.add('active');
+            
+            // Show/hide clear goal archive button
+            const clearGoalArchiveBtn = document.getElementById('clear-goal-archive-btn');
+            if (clearGoalArchiveBtn) {
+                if (categoryId === 'archiv') {
+                    clearGoalArchiveBtn.style.display = 'inline-block';
+                } else {
+                    clearGoalArchiveBtn.style.display = 'none';
+                }
+            }
             
             // Load goals for this category
             GoalManager.displayGoalsForCategory(categoryId);
@@ -2175,6 +2186,43 @@
                 }
             },
             
+            async clearGoalArchive() {
+                if (!confirm('Wirklich alle erledigten Ziele dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden!')) {
+                    return;
+                }
+                
+                const completedGoals = this.goals.filter(goal => goal.completed);
+                console.log('🗑️ Deleting', completedGoals.length, 'completed goals from archive');
+                
+                if (supabase?.isAuthenticated()) {
+                    try {
+                        // Delete from database (only goals with database IDs)
+                        for (const goal of completedGoals) {
+                            const hasDbId = goal.id && !isNaN(goal.id) && goal.id.toString().length < 10;
+                            if (hasDbId) {
+                                await supabase.delete('goals', goal.id);
+                                console.log('💾 Deleted goal from database:', goal.name);
+                            } else {
+                                console.log('💾 Skipped local-only goal:', goal.name);
+                            }
+                        }
+                        console.log('✅ All database goals deleted');
+                    } catch (error) {
+                        console.error('❌ Error deleting goals from database:', error);
+                        alert('Fehler beim Löschen aus der Datenbank: ' + error.message);
+                        return;
+                    }
+                }
+                
+                // Remove from local array
+                this.goals = this.goals.filter(goal => !goal.completed);
+                
+                // Refresh current view
+                this.refreshCurrentView();
+                
+                alert(`✅ ${completedGoals.length} erledigte Ziele wurden gelöscht!`);
+            },
+            
             clearLocalGoals() {
                 if (confirm('Alle lokalen Ziele löschen? (Nur Ziele die nicht in der Datenbank sind)\n\nDas kann alte/kaputte Ziele entfernen.')) {
                     const before = this.goals.length;
@@ -2791,6 +2839,14 @@
                     if (e.target === addGoalModal) {
                         GoalManager.hideAddGoalModal();
                     }
+                });
+            }
+            
+            // Clear Goal Archive Button
+            const clearGoalArchiveBtn = document.getElementById('clear-goal-archive-btn');
+            if (clearGoalArchiveBtn) {
+                clearGoalArchiveBtn.addEventListener('click', () => {
+                    GoalManager.clearGoalArchive();
                 });
             }
             
