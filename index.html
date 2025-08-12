@@ -1691,8 +1691,14 @@
                 input.focus();
                 input.select();
                 
+                // Prevent double execution
+                let isHandled = false;
+                
                 // Handle save/cancel
                 const saveProgress = () => {
+                    if (isHandled) return;
+                    isHandled = true;
+                    
                     const newValue = parseInt(input.value);
                     if (!isNaN(newValue) && newValue >= 0 && newValue <= 100) {
                         goal.progress = newValue;
@@ -1717,14 +1723,25 @@
                     }
                 };
                 
-                // Save on Enter or blur
+                const cancelEdit = () => {
+                    if (isHandled) return;
+                    isHandled = true;
+                    
+                    const newPercentageElement = document.createElement('span');
+                    newPercentageElement.className = 'ziel-percentage';
+                    newPercentageElement.textContent = originalText;
+                    input.replaceWith(newPercentageElement);
+                };
+                
+                // Event listeners
                 input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') saveProgress();
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        saveProgress();
+                    }
                     if (e.key === 'Escape') {
-                        const newPercentageElement = document.createElement('span');
-                        newPercentageElement.className = 'ziel-percentage';
-                        newPercentageElement.textContent = originalText;
-                        input.replaceWith(newPercentageElement);
+                        e.preventDefault();
+                        cancelEdit();
                     }
                 });
                 input.addEventListener('blur', saveProgress);
