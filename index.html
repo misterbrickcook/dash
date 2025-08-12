@@ -1489,6 +1489,20 @@
         const TodoManager = {
             todos: [], // In-memory storage for demo
             
+            async loadTodos() {
+                if (!supabase?.isAuthenticated()) return;
+                try {
+                    const data = await supabase.select('todos', '*');
+                    if (data && Array.isArray(data)) {
+                        this.todos = data;
+                        this.refreshCurrentView();
+                        this.updateHomeTodos();
+                    }
+                } catch (error) {
+                    console.error('Error loading todos:', error);
+                }
+            },
+            
             showAddTodoModal() {
                 const modal = document.getElementById('add-todo-modal');
                 modal.classList.remove('hide');
@@ -1507,23 +1521,43 @@
                 document.getElementById('todo-time').value = '21:00';
             },
             
-            addTodo(todoData) {
+            async addTodo(todoData) {
                 // Combine date and time into a full datetime
                 const deadlineDateTime = `${todoData.deadline}T${todoData.time}:00`;
                 
                 const todo = {
-                    id: Date.now().toString(),
                     title: todoData.title,
                     category: todoData.category,
                     priority: todoData.priority,
                     deadline: deadlineDateTime,
                     completed: false,
-                    createdAt: new Date().toISOString()
+                    user_id: supabase?.user?.id,
+                    created_at: new Date().toISOString()
                 };
                 
-                this.todos.push(todo);
+                if (supabase?.isAuthenticated()) {
+                    try {
+                        const result = await supabase.insert('todos', todo);
+                        if (result && result.length > 0) {
+                            this.todos.push(result[0]);
+                        } else {
+                            // If insert doesn't return data, add with generated id
+                            todo.id = Date.now().toString();
+                            this.todos.push(todo);
+                        }
+                    } catch (error) {
+                        console.error('Error saving todo:', error);
+                        // Fall back to local storage
+                        todo.id = Date.now().toString();
+                        this.todos.push(todo);
+                    }
+                } else {
+                    // Local storage fallback
+                    todo.id = Date.now().toString();
+                    this.todos.push(todo);
+                }
+                
                 console.log('Todo added:', todo);
-                console.log('All todos:', this.todos);
                 
                 // Refresh current view
                 this.refreshCurrentView();
@@ -1652,10 +1686,21 @@
                 return todoCard;
             },
             
-            toggleTodo(todoId) {
+            async toggleTodo(todoId) {
                 const todo = this.todos.find(t => t.id === todoId);
                 if (todo) {
                     todo.completed = !todo.completed;
+                    
+                    if (supabase?.isAuthenticated()) {
+                        try {
+                            await supabase.update('todos', { completed: todo.completed }, todo.id);
+                        } catch (error) {
+                            console.error('Error updating todo:', error);
+                            // Revert on error
+                            todo.completed = !todo.completed;
+                        }
+                    }
+                    
                     console.log('Todo toggled:', todo);
                     this.refreshCurrentView();
                     
@@ -1700,6 +1745,19 @@
         // === GOAL MANAGEMENT ===
         const GoalManager = {
             goals: [], // In-memory storage for demo
+            
+            async loadGoals() {
+                if (!supabase?.isAuthenticated()) return;
+                try {
+                    const data = await supabase.select('goals', '*');
+                    if (data && Array.isArray(data)) {
+                        this.goals = data;
+                        this.refreshCurrentView();
+                    }
+                } catch (error) {
+                    console.error('Error loading goals:', error);
+                }
+            },
             
             // Calculate automatic deadlines based on timeframe
             calculateDeadline(timeframe) {
@@ -1756,9 +1814,8 @@
                 document.getElementById('goal-progress').value = '0';
             },
             
-            addGoal(goalData) {
+            async addGoal(goalData) {
                 const goal = {
-                    id: Date.now().toString(),
                     name: goalData.name,
                     description: goalData.description,
                     category: goalData.category,
@@ -1766,12 +1823,30 @@
                     deadline: goalData.deadline,
                     progress: parseInt(goalData.progress),
                     completed: parseInt(goalData.progress) >= 100,
-                    createdAt: new Date().toISOString()
+                    user_id: supabase?.user?.id,
+                    created_at: new Date().toISOString()
                 };
                 
-                this.goals.push(goal);
+                if (supabase?.isAuthenticated()) {
+                    try {
+                        const result = await supabase.insert('goals', goal);
+                        if (result && result.length > 0) {
+                            this.goals.push(result[0]);
+                        } else {
+                            goal.id = Date.now().toString();
+                            this.goals.push(goal);
+                        }
+                    } catch (error) {
+                        console.error('Error saving goal:', error);
+                        goal.id = Date.now().toString();
+                        this.goals.push(goal);
+                    }
+                } else {
+                    goal.id = Date.now().toString();
+                    this.goals.push(goal);
+                }
+                
                 console.log('Goal added:', goal);
-                console.log('All goals:', this.goals);
                 
                 // Refresh current view
                 this.refreshCurrentView();
@@ -1867,11 +1942,27 @@
                 return goalCard;
             },
             
-            updateGoalProgress(goalId, newProgress) {
+            async updateGoalProgress(goalId, newProgress) {
                 const goal = this.goals.find(g => g.id === goalId);
                 if (goal) {
+                    const oldProgress = goal.progress;
                     goal.progress = parseInt(newProgress);
                     goal.completed = goal.progress >= 100;
+                    
+                    if (supabase?.isAuthenticated()) {
+                        try {
+                            await supabase.update('goals', { 
+                                progress: goal.progress, 
+                                completed: goal.completed 
+                            }, goal.id);
+                        } catch (error) {
+                            console.error('Error updating goal:', error);
+                            // Revert on error
+                            goal.progress = oldProgress;
+                            goal.completed = oldProgress >= 100;
+                        }
+                    }
+                    
                     console.log('Goal progress updated:', goal);
                     this.refreshCurrentView();
                 }
@@ -1961,6 +2052,19 @@
         const JournalManager = {
             entries: [], // In-memory storage for demo
             
+            async loadEntries() {
+                if (!supabase?.isAuthenticated()) return;
+                try {
+                    const data = await supabase.select('journal_entries', '*');
+                    if (data && Array.isArray(data)) {
+                        this.entries = data;
+                        this.refreshCurrentView();
+                    }
+                } catch (error) {
+                    console.error('Error loading journal entries:', error);
+                }
+            },
+            
             showAddJournalModal() {
                 const modal = document.getElementById('add-journal-modal');
                 modal.classList.remove('hide');
@@ -1980,19 +2084,36 @@
                 document.getElementById('journal-date').value = today;
             },
             
-            addEntry(entryData) {
+            async addEntry(entryData) {
                 const entry = {
-                    id: Date.now().toString(),
                     title: entryData.title,
                     content: entryData.content,
                     tags: entryData.tags || [], // Array of tags
                     date: entryData.date,
-                    createdAt: new Date().toISOString()
+                    user_id: supabase?.user?.id,
+                    created_at: new Date().toISOString()
                 };
                 
-                this.entries.push(entry);
+                if (supabase?.isAuthenticated()) {
+                    try {
+                        const result = await supabase.insert('journal_entries', entry);
+                        if (result && result.length > 0) {
+                            this.entries.push(result[0]);
+                        } else {
+                            entry.id = Date.now().toString();
+                            this.entries.push(entry);
+                        }
+                    } catch (error) {
+                        console.error('Error saving journal entry:', error);
+                        entry.id = Date.now().toString();
+                        this.entries.push(entry);
+                    }
+                } else {
+                    entry.id = Date.now().toString();
+                    this.entries.push(entry);
+                }
+                
                 console.log('Journal entry added:', entry);
-                console.log('All entries:', this.entries);
                 
                 // Refresh current view
                 this.refreshCurrentView();
@@ -2086,6 +2207,19 @@
         const TerminManager = {
             termine: [], // In-memory storage for demo
             
+            async loadTermine() {
+                if (!supabase?.isAuthenticated()) return;
+                try {
+                    const data = await supabase.select('termine', '*');
+                    if (data && Array.isArray(data)) {
+                        this.termine = data;
+                        this.displayTermine();
+                    }
+                } catch (error) {
+                    console.error('Error loading termine:', error);
+                }
+            },
+            
             showAddTerminModal() {
                 const modal = document.getElementById('add-termin-modal');
                 modal.classList.remove('hide');
@@ -2105,19 +2239,36 @@
                 document.getElementById('add-termin-form').reset();
             },
             
-            addTermin(terminData) {
+            async addTermin(terminData) {
                 const termin = {
-                    id: Date.now().toString(),
                     title: terminData.title,
                     description: terminData.description,
                     date: terminData.date,
                     time: terminData.time,
-                    createdAt: new Date().toISOString()
+                    user_id: supabase?.user?.id,
+                    created_at: new Date().toISOString()
                 };
                 
-                this.termine.push(termin);
+                if (supabase?.isAuthenticated()) {
+                    try {
+                        const result = await supabase.insert('termine', termin);
+                        if (result && result.length > 0) {
+                            this.termine.push(result[0]);
+                        } else {
+                            termin.id = Date.now().toString();
+                            this.termine.push(termin);
+                        }
+                    } catch (error) {
+                        console.error('Error saving termin:', error);
+                        termin.id = Date.now().toString();
+                        this.termine.push(termin);
+                    }
+                } else {
+                    termin.id = Date.now().toString();
+                    this.termine.push(termin);
+                }
+                
                 console.log('Termin added:', termin);
-                console.log('All termine:', this.termine);
                 
                 // Refresh display
                 this.displayTermine();
@@ -2183,25 +2334,32 @@
         };
 
         // === INITIALIZE ===
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             updateRoutineProgress();
-            Auth.init();
             
-            // Initialize home todos display
-            TodoManager.updateHomeTodos();
-            
-            // Initialize termine display
-            TerminManager.displayTermine();
-            
-            // Ensure logout button works
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    Auth.handleLogout();
-                });
+            // Initialize Supabase first
+            if (window.initializeSupabase) {
+                window.initializeSupabase();
             }
+            
+            // Then initialize authentication
+            await Auth.init();
+            
+            // Load all data from database if authenticated
+            if (supabase?.isAuthenticated()) {
+                await Promise.all([
+                    TodoManager.loadTodos(),
+                    GoalManager.loadGoals(),
+                    JournalManager.loadEntries(),
+                    TerminManager.loadTermine()
+                ]);
+            } else {
+                // Initialize displays for local storage mode
+                TodoManager.updateHomeTodos();
+                TerminManager.displayTermine();
+            }
+            
+            // Logout button is already handled by Auth.setupEventListeners()
             
             // Journal form submission
             const journalForm = document.querySelector('.journal-form');
@@ -2235,7 +2393,7 @@
             // Add Todo Form Submission
             const addTodoForm = document.getElementById('add-todo-form');
             if (addTodoForm) {
-                addTodoForm.addEventListener('submit', (e) => {
+                addTodoForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     
                     const todoData = {
@@ -2246,7 +2404,7 @@
                         time: document.getElementById('todo-time').value
                     };
                     
-                    TodoManager.addTodo(todoData);
+                    await TodoManager.addTodo(todoData);
                     TodoManager.hideAddTodoModal();
                 });
             }
@@ -2282,7 +2440,7 @@
             // Add Goal Form Submission
             const addGoalForm = document.getElementById('add-goal-form');
             if (addGoalForm) {
-                addGoalForm.addEventListener('submit', (e) => {
+                addGoalForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     
                     const goalData = {
@@ -2294,7 +2452,7 @@
                         progress: document.getElementById('goal-progress').value
                     };
                     
-                    GoalManager.addGoal(goalData);
+                    await GoalManager.addGoal(goalData);
                     GoalManager.hideAddGoalModal();
                 });
             }
@@ -2384,7 +2542,7 @@
             // Add Journal Form Submission
             const addJournalForm = document.getElementById('add-journal-form');
             if (addJournalForm) {
-                addJournalForm.addEventListener('submit', (e) => {
+                addJournalForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     
                     if (selectedTags.length === 0) {
@@ -2399,7 +2557,7 @@
                         date: document.getElementById('journal-date').value
                     };
                     
-                    JournalManager.addEntry(entryData);
+                    await JournalManager.addEntry(entryData);
                     JournalManager.hideAddJournalModal();
                     
                     // Reset tags
@@ -2439,7 +2597,7 @@
             // Add Termin Form Submission
             const addTerminForm = document.getElementById('add-termin-form');
             if (addTerminForm) {
-                addTerminForm.addEventListener('submit', (e) => {
+                addTerminForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     
                     const terminData = {
@@ -2449,7 +2607,7 @@
                         time: document.getElementById('termin-time').value
                     };
                     
-                    TerminManager.addTermin(terminData);
+                    await TerminManager.addTermin(terminData);
                     TerminManager.hideAddTerminModal();
                 });
             }
