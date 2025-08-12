@@ -1911,11 +1911,11 @@
                             console.log('🔄 Transforming goal:', goal);
                             return {
                                 ...goal,
-                                name: goal.title || goal.name, // Map title to name for UI
-                                deadline: goal.target_date || goal.deadline, // Map target_date to deadline for UI
-                                progress: goal.progress || goal.current_value || 0, // Try multiple field names
-                                timeframe: goal.timeframe || 'monat', // Default timeframe if missing
-                                completed: (goal.progress || goal.current_value || 0) >= 100
+                                name: goal.title, // Map title to name for UI
+                                deadline: goal.target_date, // Map target_date to deadline for UI
+                                progress: 0, // No progress field in DB, default to 0
+                                timeframe: 'monat', // No timeframe in DB, default to monat
+                                completed: goal.completed // Use DB completed field
                             };
                         });
                         console.log('🔄 Transformed goals:', this.goals);
@@ -1998,14 +1998,15 @@
                 
                 if (supabase?.isAuthenticated()) {
                     try {
-                        // Map UI fields to database fields - try minimal set first
+                        // Map UI fields to exact database schema
                         const dbGoal = {
                             title: goal.name,
                             description: goal.description,
                             category: goal.category,
                             target_date: goal.deadline,
+                            completed: goal.completed,
                             user_id: supabase?.user?.id
-                            // Removed progress - field doesn't exist
+                            // Note: No progress field in DB, using completed instead
                         };
                         
                         console.log('💾 Attempting to save goal to database:', dbGoal);
@@ -2018,8 +2019,9 @@
                                 ...result[0],
                                 name: result[0].title,
                                 deadline: result[0].target_date,
-                                timeframe: goal.timeframe,
-                                completed: goal.completed
+                                timeframe: goal.timeframe, // Not in DB, keep from UI
+                                progress: goal.progress, // Not in DB, keep from UI
+                                completed: result[0].completed
                             };
                             this.goals.push(savedGoal);
                         } else {
