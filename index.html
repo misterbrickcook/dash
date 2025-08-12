@@ -1910,7 +1910,8 @@
                             ...goal,
                             name: goal.title, // Map title to name for UI
                             deadline: goal.target_date, // Map target_date to deadline for UI
-                            completed: goal.progress >= 100
+                            progress: goal.current_value || 0, // Map current_value to progress
+                            completed: (goal.current_value || 0) >= (goal.target_value || 100)
                         }));
                         this.refreshCurrentView();
                     }
@@ -1975,12 +1976,15 @@
             },
             
             async addGoal(goalData) {
+                const progressPercent = parseInt(goalData.progress);
                 const goal = {
                     title: goalData.name,
                     description: goalData.description,
                     category: goalData.category,
                     target_date: goalData.deadline,
-                    progress: parseInt(goalData.progress),
+                    current_value: progressPercent, // Use current_value instead of progress
+                    target_value: 100, // Always 100% for percentage-based goals
+                    unit: '%', // Percentage unit
                     user_id: supabase?.user?.id
                 };
                 
@@ -1988,9 +1992,22 @@
                     try {
                         const result = await supabase.insert('goals', goal);
                         if (result && result.length > 0) {
-                            this.goals.push(result[0]);
+                            // Transform database result to UI format
+                            const dbGoal = result[0];
+                            const uiGoal = {
+                                ...dbGoal,
+                                name: dbGoal.title,
+                                deadline: dbGoal.target_date,
+                                progress: dbGoal.current_value || 0,
+                                completed: (dbGoal.current_value || 0) >= (dbGoal.target_value || 100)
+                            };
+                            this.goals.push(uiGoal);
                         } else {
                             goal.id = Date.now().toString();
+                            goal.name = goal.title;
+                            goal.deadline = goal.target_date;
+                            goal.progress = goal.current_value || 0;
+                            goal.completed = goal.progress >= 100;
                             this.goals.push(goal);
                         }
                     } catch (error) {
@@ -2109,7 +2126,7 @@
                     if (supabase?.isAuthenticated()) {
                         try {
                             await supabase.update('goals', { 
-                                progress: goal.progress
+                                current_value: goal.progress
                             }, goal.id);
                         } catch (error) {
                             console.error('Error updating goal:', error);
