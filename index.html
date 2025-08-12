@@ -1649,9 +1649,14 @@
                 
                 switch(category) {
                     case 'heute':
-                        const today = new Date().toISOString().split('T')[0];
+                        // Get today without timezone conversion
+                        const today = new Date();
+                        const todayStr = today.getFullYear() + '-' + 
+                                       String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                                       String(today.getDate()).padStart(2, '0');
+                        
                         filteredTodos = this.todos.filter(todo => 
-                            (todo.date === today || (todo.deadline && todo.deadline.startsWith(today))) && !todo.completed
+                            todo.date === todayStr && !todo.completed
                         );
                         break;
                     case 'alle':
@@ -1694,45 +1699,28 @@
                 todoCard.className = `ziel-card${todo.completed ? ' completed' : ''}`;
                 todoCard.dataset.todoId = todo.id;
                 
-                // Fix timezone issues by using the separate date and time fields
+                // COMPLETELY AVOID DATE PARSING - just use raw strings
                 let deadlineClass = '';
                 let deadlineText = '';
                 
                 if (todo.date && todo.time) {
-                    // Use separate date and time to avoid timezone issues
-                    const todayStr = new Date().toISOString().split('T')[0];
+                    // Get today as YYYY-MM-DD string (no timezone conversion)
+                    const today = new Date();
+                    const todayStr = today.getFullYear() + '-' + 
+                                   String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                                   String(today.getDate()).padStart(2, '0');
+                    
                     const isToday = todo.date === todayStr;
-                    const deadlineDateTime = new Date(`${todo.date}T${todo.time}:00`);
-                    const now = new Date();
-                    const isOverdue = deadlineDateTime < now && !todo.completed;
                     
                     if (isToday) {
                         deadlineClass = 'today';
-                        deadlineText = `Heute ${todo.time}`; // Use the stored time directly
-                    } else if (isOverdue) {
-                        deadlineClass = 'overdue';
-                        deadlineText = 'Überfällig';
+                        deadlineText = `Heute ${todo.time}`; // Use stored time directly
                     } else {
-                        const dateObj = new Date(todo.date);
-                        deadlineText = dateObj.toLocaleDateString('de-DE') + ' ' + todo.time;
+                        // Format date manually to avoid parsing issues
+                        const [year, month, day] = todo.date.split('-');
+                        const germanDate = `${day}.${month}.${year}`;
+                        deadlineText = `${germanDate} ${todo.time}`;
                         deadlineClass = 'soon';
-                    }
-                } else if (todo.deadline) {
-                    // Fallback to deadline field if date/time not available
-                    const deadline = new Date(todo.deadline);
-                    const now = new Date();
-                    const isToday = deadline.toDateString() === now.toDateString();
-                    const isOverdue = deadline < now && !todo.completed;
-                    
-                    if (isToday) {
-                        deadlineClass = 'today';
-                        deadlineText = `Heute ${deadline.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}`;
-                    } else if (isOverdue) {
-                        deadlineClass = 'overdue';
-                        deadlineText = 'Überfällig';
-                    } else {
-                        deadlineClass = 'soon';
-                        deadlineText = deadline.toLocaleDateString('de-DE') + ' ' + deadline.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
                     }
                 } else {
                     deadlineText = 'Kein Termin';
@@ -1824,13 +1812,17 @@
                 if (!homeContainer) return;
                 
                 // Show today's uncompleted todos on home
-                const today = new Date().toISOString().split('T')[0];
+                const today = new Date();
+                const todayStr = today.getFullYear() + '-' + 
+                               String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(today.getDate()).padStart(2, '0');
+                
                 const todayTodos = this.todos.filter(todo => 
-                    (todo.date === today || (todo.deadline && todo.deadline.startsWith(today))) && !todo.completed
+                    todo.date === todayStr && !todo.completed
                 ).sort((a, b) => {
-                    const timeA = todo => todo.time || '23:59';
-                    const timeB = todo => todo.time || '23:59';
-                    return timeA(a).localeCompare(timeB(b));
+                    const timeA = a.time || '23:59';
+                    const timeB = b.time || '23:59';
+                    return timeA.localeCompare(timeB);
                 });
                 
                 homeContainer.innerHTML = '';
