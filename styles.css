@@ -255,7 +255,7 @@ body {
     letter-spacing: 0.05em;
 }
 
-/* === ROUTINE SYSTEM (Clean Style) === */
+/* === ROUTINE SYSTEM (Exact vorschlag2.html Style) === */
 .routine-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -271,11 +271,6 @@ body {
     display: grid;
     grid-template-rows: auto 1fr auto;
     height: 100%;
-    transition: border-color 0.2s ease;
-}
-
-.routine-section:hover {
-    border-color: #000000;
 }
 
 .routine-section h2 {
@@ -284,7 +279,6 @@ body {
     margin-bottom: 1.5rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #000000;
 }
 
 .routine-section .checkbox-group {
@@ -295,7 +289,7 @@ body {
     justify-content: flex-start;
 }
 
-/* === CHECKBOXES === */
+/* === CHECKBOXES (Exact vorschlag2.html Style) === */
 .checkbox-group {
     display: flex;
     flex-direction: column;
@@ -313,7 +307,6 @@ body {
     width: 18px;
     height: 18px;
     border: 2px solid #000000;
-    background: #ffffff;
     appearance: none;
     cursor: pointer;
     flex-shrink: 0;
@@ -337,10 +330,9 @@ body {
     font-size: 0.95rem;
     cursor: pointer;
     line-height: 1.4;
-    flex: 1;
 }
 
-/* === PROGRESS BAR === */
+/* === PROGRESS BAR (Exact vorschlag2.html Style) === */
 .progress-container {
     display: flex;
     align-items: center;
