@@ -1494,7 +1494,12 @@
                 try {
                     const data = await supabase.select('todos', '*');
                     if (data && Array.isArray(data)) {
-                        this.todos = data;
+                        // Transform database data to match UI expectations
+                        this.todos = data.map(todo => ({
+                            ...todo,
+                            title: todo.text, // Map text to title for UI
+                            deadline: todo.due_date // Map due_date to deadline for UI
+                        }));
                         this.refreshCurrentView();
                         this.updateHomeTodos();
                     }
@@ -1522,17 +1527,18 @@
             },
             
             async addTodo(todoData) {
-                // Combine date and time into a full datetime
+                // Combine date and time into a full datetime for due_date
                 const deadlineDateTime = `${todoData.deadline}T${todoData.time}:00`;
                 
                 const todo = {
-                    title: todoData.title,
+                    text: todoData.title,
                     category: todoData.category,
                     priority: todoData.priority,
-                    deadline: deadlineDateTime,
+                    date: todoData.deadline,
+                    time: todoData.time,
+                    due_date: deadlineDateTime,
                     completed: false,
-                    user_id: supabase?.user?.id,
-                    created_at: new Date().toISOString()
+                    user_id: supabase?.user?.id
                 };
                 
                 if (supabase?.isAuthenticated()) {
@@ -1751,7 +1757,13 @@
                 try {
                     const data = await supabase.select('goals', '*');
                     if (data && Array.isArray(data)) {
-                        this.goals = data;
+                        // Transform database data to match UI expectations
+                        this.goals = data.map(goal => ({
+                            ...goal,
+                            name: goal.title, // Map title to name for UI
+                            deadline: goal.target_date, // Map target_date to deadline for UI
+                            completed: goal.progress >= 100
+                        }));
                         this.refreshCurrentView();
                     }
                 } catch (error) {
@@ -1816,15 +1828,12 @@
             
             async addGoal(goalData) {
                 const goal = {
-                    name: goalData.name,
+                    title: goalData.name,
                     description: goalData.description,
                     category: goalData.category,
-                    timeframe: goalData.timeframe,
-                    deadline: goalData.deadline,
+                    target_date: goalData.deadline,
                     progress: parseInt(goalData.progress),
-                    completed: parseInt(goalData.progress) >= 100,
-                    user_id: supabase?.user?.id,
-                    created_at: new Date().toISOString()
+                    user_id: supabase?.user?.id
                 };
                 
                 if (supabase?.isAuthenticated()) {
@@ -1952,8 +1961,7 @@
                     if (supabase?.isAuthenticated()) {
                         try {
                             await supabase.update('goals', { 
-                                progress: goal.progress, 
-                                completed: goal.completed 
+                                progress: goal.progress
                             }, goal.id);
                         } catch (error) {
                             console.error('Error updating goal:', error);
