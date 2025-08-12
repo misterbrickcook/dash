@@ -479,73 +479,70 @@
                 </div>
             </section>
 
-            <!-- Routinen Section - Ultra Clean Style -->
             <h1 class="section-title">Routinen</h1>
             
             <div class="routine-grid">
-                <!-- Morning Routine -->
                 <div class="routine-section">
-                    <h2>MORGENROUTINE</h2>
-                    <div class="checkbox-group" id="morning-routine">
+                    <h2>Morgenroutine</h2>
+                    <div class="checkbox-group">
                         <div class="checkbox-item">
-                            <input type="checkbox" id="morning-water" data-task="Wasser trinken (500ml)">
-                            <label for="morning-water">Wasser trinken (500ml)</label>
+                            <input type="checkbox" id="wasser" checked>
+                            <label for="wasser">Wasser trinken (500ml)</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="morning-stretch" data-task="Dehnen & Mobilität">
-                            <label for="morning-stretch">Dehnen & Mobilität</label>
+                            <input type="checkbox" id="dehnen" checked>
+                            <label for="dehnen">Dehnen & Mobilität</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="morning-creatine" data-task="Kreatin einnehmen">
-                            <label for="morning-creatine">Kreatin einnehmen</label>
+                            <input type="checkbox" id="kreatin">
+                            <label for="kreatin">Kreatin einnehmen</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="morning-meditation" data-task="Meditation (10 Min)">
-                            <label for="morning-meditation">Meditation (10 Min)</label>
+                            <input type="checkbox" id="meditation">
+                            <label for="meditation">Meditation (10 Min)</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="morning-reading" data-task="Lesen (20 Min)">
-                            <label for="morning-reading">Lesen (20 Min)</label>
+                            <input type="checkbox" id="lesen">
+                            <label for="lesen">Lesen (20 Min)</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="morning-planning" data-task="Tag planen">
-                            <label for="morning-planning">Tag planen</label>
+                            <input type="checkbox" id="planung">
+                            <label for="planung">Tag planen</label>
                         </div>
                     </div>
                     <div class="progress-container">
                         <div class="progress-bar">
-                            <div class="progress-fill" id="morning-progress" style="width: 33%"></div>
+                            <div class="progress-fill" style="width: 33%;"></div>
                         </div>
-                        <div class="progress-text" id="morning-percentage">33%</div>
+                        <span class="progress-text">33%</span>
                     </div>
                 </div>
 
-                <!-- Evening Routine -->
                 <div class="routine-section">
-                    <h2>ABENDROUTINE</h2>
-                    <div class="checkbox-group" id="evening-routine">
+                    <h2>Abendroutine</h2>
+                    <div class="checkbox-group">
                         <div class="checkbox-item">
-                            <input type="checkbox" id="evening-reflect" data-task="Tag reflektieren">
-                            <label for="evening-reflect">Tag reflektieren</label>
+                            <input type="checkbox" id="reflexion" checked>
+                            <label for="reflexion">Tag reflektieren</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="evening-prepare" data-task="Morgen vorbereiten">
-                            <label for="evening-prepare">Morgen vorbereiten</label>
+                            <input type="checkbox" id="morgen-prep">
+                            <label for="morgen-prep">Morgen vorbereiten</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="evening-phone" data-task="Handy wegräumen">
-                            <label for="evening-phone">Handy wegräumen</label>
+                            <input type="checkbox" id="handy-weg">
+                            <label for="handy-weg">Handy wegräumen</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="evening-reading" data-task="Lesen vor dem Schlafen">
-                            <label for="evening-reading">Lesen vor dem Schlafen</label>
+                            <input type="checkbox" id="lesen-abend">
+                            <label for="lesen-abend">Lesen vor dem Schlafen</label>
                         </div>
                     </div>
                     <div class="progress-container">
                         <div class="progress-bar">
-                            <div class="progress-fill" id="evening-progress" style="width: 25%"></div>
+                            <div class="progress-fill" style="width: 25%;"></div>
                         </div>
-                        <div class="progress-text" id="evening-percentage">25%</div>
+                        <span class="progress-text">25%</span>
                     </div>
                 </div>
             </div>
@@ -886,7 +883,7 @@
     <!-- Scripts -->
     <script src="supabase-config.js?v=5"></script>
     <script src="cloud-storage.js?v=5"></script>
-    <script src="script.js?v=11"></script>
+    <script src="script.js?v=12"></script>
     
     <!-- HYBRID SYSTEM: Beautiful UI + Working Cloud Sync -->
     <script>
