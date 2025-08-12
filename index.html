@@ -1529,7 +1529,7 @@
                             return {
                                 ...todo,
                                 title: todo.text, // Map text to title for UI
-                                deadline: todo.due_date || todo.date, // Map due_date to deadline for UI
+                                deadline: todo.date, // Use date field only (no due_date)
                                 priority: priorityString // Convert integer to string
                             };
                         });
@@ -1560,8 +1560,8 @@
             },
             
             async addTodo(todoData) {
-                // Combine date and time into a full datetime for due_date
-                const deadlineDateTime = `${todoData.deadline}T${todoData.time}:00`;
+                // DON'T create due_date with timezone - it causes issues
+                // Just store date and time separately
                 
                 // Convert priority string to integer
                 let priorityInt = 1;
@@ -1578,7 +1578,7 @@
                     priority: priorityInt,
                     date: todoData.deadline,
                     time: todoData.time,
-                    due_date: deadlineDateTime,
+                    // Remove due_date field to avoid timezone issues
                     completed: false,
                     user_id: supabase?.user?.id || 'anonymous'
                 };
@@ -1590,10 +1590,11 @@
                         if (result && Array.isArray(result) && result.length > 0) {
                             // Transform the database result to match UI expectations
                             const dbTodo = result[0];
+                            console.log('Database returned todo:', dbTodo);
                             const uiTodo = {
                                 ...dbTodo,
                                 title: dbTodo.text,
-                                deadline: dbTodo.due_date || dbTodo.date,
+                                deadline: dbTodo.date, // Use date field only
                                 priority: this.priorityIntToString(dbTodo.priority || 1)
                             };
                             this.todos.push(uiTodo);
@@ -1601,7 +1602,7 @@
                             // If insert doesn't return data, add with generated id
                             todo.id = Date.now().toString();
                             todo.title = todo.text;
-                            todo.deadline = todo.due_date || todo.date;
+                            todo.deadline = todo.date;
                             todo.priority = this.priorityIntToString(todo.priority);
                             this.todos.push(todo);
                         }
@@ -1785,9 +1786,15 @@
                     
                     if (supabase?.isAuthenticated()) {
                         try {
-                            await supabase.update('todos', { completed: todo.completed }, todo.id);
+                            console.log('Updating todo ID:', todo.id, 'to completed:', todo.completed);
+                            const result = await supabase.update('todos', { completed: todo.completed }, todo.id);
+                            console.log('Update result:', result);
+                            if (!result) {
+                                console.warn('Update returned null - todo might not have been updated');
+                            }
                         } catch (error) {
                             console.error('Error updating todo in database:', error);
+                            alert('Fehler beim Speichern in Datenbank: ' + error.message);
                             // Revert on error
                             todo.completed = !todo.completed;
                         }
