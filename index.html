@@ -758,8 +758,7 @@
                     <div class="form-group">
                         <label for="todo-priority">Priorität</label>
                         <select id="todo-priority" required autocomplete="off">
-                            <option value="niedrig" selected>Niedrig</option>
-                            <option value="mittel">Mittel</option>
+                            <option value="mittel" selected>Normal</option>
                             <option value="wichtig">Wichtig</option>
                             <option value="dringend">Dringend</option>
                         </select>
@@ -1492,11 +1491,11 @@
             
             priorityIntToString(priorityInt) {
                 switch(priorityInt) {
-                    case 1: return 'niedrig';
+                    case 1: return 'mittel'; // Map old niedrig to mittel
                     case 2: return 'mittel';
                     case 3: return 'wichtig';
                     case 4: return 'dringend';
-                    default: return 'niedrig';
+                    default: return 'mittel';
                 }
             },
             
@@ -1520,13 +1519,13 @@
                         // Transform database data to match UI expectations
                         this.todos = data.map(todo => {
                             // Convert priority integer back to string
-                            let priorityString = 'niedrig';
+                            let priorityString = 'mittel';
                             switch(todo.priority) {
-                                case 1: priorityString = 'niedrig'; break;
+                                case 1: priorityString = 'mittel'; break; // Map old niedrig to mittel
                                 case 2: priorityString = 'mittel'; break;
                                 case 3: priorityString = 'wichtig'; break;
                                 case 4: priorityString = 'dringend'; break;
-                                default: priorityString = 'niedrig';
+                                default: priorityString = 'mittel';
                             }
                             
                             return {
@@ -1560,7 +1559,7 @@
                 document.getElementById('add-todo-form').reset();
                 // Reset to default values
                 document.getElementById('todo-time').value = '21:00';
-                document.getElementById('todo-priority').value = 'niedrig';
+                document.getElementById('todo-priority').value = 'mittel';
             },
             
             async addTodo(todoData) {
@@ -1568,13 +1567,13 @@
                 // Just store date and time separately
                 
                 // Convert priority string to integer
-                let priorityInt = 1;
+                let priorityInt = 2; // Default to mittel
                 switch(todoData.priority) {
-                    case 'niedrig': priorityInt = 1; break;
+                    case 'niedrig': priorityInt = 1; break; // Keep for backwards compatibility
                     case 'mittel': priorityInt = 2; break;
                     case 'wichtig': priorityInt = 3; break;
-                    case 'dringend': priorityInt = 4; break; // Higher than wichtig
-                    default: priorityInt = 1;
+                    case 'dringend': priorityInt = 4; break;
+                    default: priorityInt = 2;
                 }
                 console.log('🎯 Priority conversion:', todoData.priority, '→', priorityInt);
                 
