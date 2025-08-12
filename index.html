@@ -1904,15 +1904,21 @@
                 if (!supabase?.isAuthenticated()) return;
                 try {
                     const data = await supabase.select('goals', '*');
+                    console.log('💾 Raw goals from database:', data);
                     if (data && Array.isArray(data)) {
                         // Transform database data to match UI expectations
-                        this.goals = data.map(goal => ({
-                            ...goal,
-                            name: goal.title, // Map title to name for UI
-                            deadline: goal.target_date, // Map target_date to deadline for UI
-                            progress: goal.current_value || 0, // Map current_value to progress
-                            completed: (goal.current_value || 0) >= (goal.target_value || 100)
-                        }));
+                        this.goals = data.map(goal => {
+                            console.log('🔄 Transforming goal:', goal);
+                            return {
+                                ...goal,
+                                name: goal.title || goal.name, // Map title to name for UI
+                                deadline: goal.target_date || goal.deadline, // Map target_date to deadline for UI
+                                progress: goal.progress || goal.current_value || 0, // Try multiple field names
+                                timeframe: goal.timeframe || 'monat', // Default timeframe if missing
+                                completed: (goal.progress || goal.current_value || 0) >= 100
+                            };
+                        });
+                        console.log('🔄 Transformed goals:', this.goals);
                         this.refreshCurrentView();
                     }
                 } catch (error) {
@@ -1990,9 +1996,46 @@
                     createdAt: new Date().toISOString()
                 };
                 
-                // TEMPORARY: Skip database until schema is fixed
-                console.warn('⚠️ Goals temporarily saved locally only (database schema needs fixing)');
-                this.goals.push(goal);
+                if (supabase?.isAuthenticated()) {
+                    try {
+                        // Map UI fields to database fields
+                        const dbGoal = {
+                            title: goal.name,
+                            description: goal.description,
+                            category: goal.category,
+                            // Try common field names that might exist
+                            progress: goal.progress,
+                            target_date: goal.deadline,
+                            user_id: supabase?.user?.id
+                        };
+                        
+                        console.log('💾 Attempting to save goal to database:', dbGoal);
+                        const result = await supabase.insert('goals', dbGoal);
+                        console.log('💾 Database result:', result);
+                        
+                        if (result && result.length > 0) {
+                            // Use database result and transform back to UI format
+                            const savedGoal = {
+                                ...result[0],
+                                name: result[0].title,
+                                deadline: result[0].target_date,
+                                timeframe: goal.timeframe,
+                                completed: goal.completed
+                            };
+                            this.goals.push(savedGoal);
+                        } else {
+                            // Fallback to local storage
+                            this.goals.push(goal);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error saving goal to database:', error);
+                        console.log('💾 Falling back to local storage');
+                        this.goals.push(goal);
+                    }
+                } else {
+                    // Not authenticated, use local storage
+                    this.goals.push(goal);
+                }
                 
                 console.log('Goal added:', goal);
                 console.log('All goals after adding:', this.goals);
