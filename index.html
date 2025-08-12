@@ -1145,6 +1145,18 @@
             });
             document.getElementById(tabId).classList.add('active');
             document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            
+            // If switching to todos tab, load the active category
+            if (tabId === 'tab-todos') {
+                const activeTab = document.querySelector('.category-tab.active');
+                const activeCategory = activeTab ? activeTab.getAttribute('data-category') : 'heute';
+                TodoManager.displayTodosForCategory(activeCategory);
+            }
+            
+            // If switching to home tab, update home todos
+            if (tabId === 'tab-home') {
+                TodoManager.updateHomeTodos();
+            }
         }
 
         // === ROUTINE PROGRESS ===
@@ -1187,6 +1199,9 @@
             parentTab.querySelector(`#${categoryId}`).classList.add('active');
             // Activate selected category tab
             parentTab.querySelector(`[data-category="${categoryId}"]`).classList.add('active');
+            
+            // Load todos for this category
+            TodoManager.displayTodosForCategory(categoryId);
         }
 
         // === EVENT LISTENERS ===
