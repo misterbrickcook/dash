@@ -1498,6 +1498,18 @@
                 }
             },
             
+            getPriorityString(priority) {
+                if (typeof priority === 'string') {
+                    return priority;
+                }
+                return this.priorityIntToString(priority);
+            },
+            
+            getPriorityDisplay(priority) {
+                const priorityStr = this.getPriorityString(priority);
+                return priorityStr.charAt(0).toUpperCase() + priorityStr.slice(1);
+            },
+            
             async loadTodos() {
                 if (!supabase?.isAuthenticated()) return;
                 try {
@@ -1568,8 +1580,13 @@
                     time: todoData.time,
                     due_date: deadlineDateTime,
                     completed: false,
-                    user_id: supabase?.user?.id
+                    user_id: supabase?.user?.id || 'anonymous'
                 };
+                
+                // TEMPORARY FIX: Add manual ID until database is fixed
+                if (supabase?.isAuthenticated()) {
+                    todo.id = Date.now(); // Use timestamp as ID
+                }
                 
                 if (supabase?.isAuthenticated()) {
                     try {
@@ -1714,7 +1731,7 @@
                             <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} 
                                    onchange="TodoManager.toggleTodo('${todo.id}')"
                                    style="width: 20px; height: 20px; border: 2px solid #000; appearance: none; cursor: pointer;">
-                            <span class="todo-tag ${todo.priority}" style="margin-left: auto;">${todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}</span>
+                            <span class="todo-tag ${TodoManager.getPriorityString(todo.priority)}" style="margin-left: auto;">${TodoManager.getPriorityDisplay(todo.priority)}</span>
                         </div>
                     </div>
                 `;
@@ -1787,7 +1804,7 @@
                         <input type="checkbox" id="home-todo-${todo.id}" onchange="TodoManager.toggleTodo('${todo.id}')">
                         <label for="home-todo-${todo.id}">
                             ${todo.title} 
-                            <span class="todo-tag ${todo.priority}" style="margin-left: 0.5rem;">${todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}</span>
+                            <span class="todo-tag ${TodoManager.getPriorityString(todo.priority)}" style="margin-left: 0.5rem;">${TodoManager.getPriorityDisplay(todo.priority)}</span>
                             (${new Date(todo.deadline).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})})
                         </label>
                     `;
