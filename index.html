@@ -493,6 +493,63 @@
             color: #444444;
         }
 
+        /* === ADD TODO MODAL === */
+        .add-todo-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 1rem;
+        }
+        .add-todo-modal.hide { display: none; }
+        .add-todo-container {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+        }
+        .add-todo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .add-todo-header h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #000000;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #d0d0d0;
+            background: #ffffff;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+        .form-group select:focus { outline: none; border-color: #000000; }
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
         /* === AUTH SCREEN === */
         .auth-screen {
             position: fixed;
@@ -592,6 +649,52 @@
     </style>
 </head>
 <body>
+    <!-- === ADD TODO MODAL === -->
+    <div id="add-todo-modal" class="add-todo-modal hide">
+        <div class="add-todo-container">
+            <div class="add-todo-header">
+                <h2>Todo hinzufügen</h2>
+            </div>
+            
+            <form id="add-todo-form">
+                <div class="form-group">
+                    <label for="todo-title">Aufgabe</label>
+                    <input type="text" id="todo-title" placeholder="Was möchtest du erledigen?" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="todo-category">Kategorie</label>
+                        <select id="todo-category" required>
+                            <option value="">Kategorie wählen</option>
+                            <option value="privat">Privat</option>
+                            <option value="uni">Uni</option>
+                            <option value="arbeit">Arbeit</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="todo-priority">Priorität</label>
+                        <select id="todo-priority" required>
+                            <option value="normal">Normal</option>
+                            <option value="wichtig">Wichtig</option>
+                            <option value="dringend">Dringend</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="todo-deadline">Deadline (optional)</label>
+                    <input type="date" id="todo-deadline">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancel-todo-btn" class="btn secondary">Abbrechen</button>
+                    <button type="submit" class="btn">Todo erstellen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- === AUTH SCREEN === -->
     <div id="auth-screen" class="auth-screen hide">
         <div class="auth-container">
@@ -736,6 +839,7 @@
                 <button class="category-tab" data-category="arbeit">Arbeit</button>
                 <button class="category-tab" data-category="alle">Alle</button>
                 <button class="category-tab" data-category="archiv">Archiv</button>
+                <button id="add-todo-btn" class="btn" style="margin-left: 2rem;">+ Add Todo</button>
             </div>
 
             <!-- HEUTE KATEGORIE -->
@@ -1112,6 +1216,47 @@
             });
         });
 
+        // === TODO MANAGEMENT ===
+        const TodoManager = {
+            todos: [], // In-memory storage for demo
+            
+            showAddTodoModal() {
+                const modal = document.getElementById('add-todo-modal');
+                modal.classList.remove('hide');
+            },
+            
+            hideAddTodoModal() {
+                const modal = document.getElementById('add-todo-modal');
+                modal.classList.add('hide');
+                // Reset form
+                document.getElementById('add-todo-form').reset();
+            },
+            
+            addTodo(todoData) {
+                const todo = {
+                    id: Date.now().toString(),
+                    title: todoData.title,
+                    category: todoData.category,
+                    priority: todoData.priority,
+                    deadline: todoData.deadline || null,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.todos.push(todo);
+                console.log('Todo added:', todo);
+                console.log('All todos:', this.todos);
+                
+                // Refresh current view
+                this.refreshCurrentView();
+            },
+            
+            refreshCurrentView() {
+                // This will be implemented to reload the current filter view
+                console.log('Refreshing current view...');
+            }
+        };
+
         // === INITIALIZE ===
         document.addEventListener('DOMContentLoaded', () => {
             updateRoutineProgress();
@@ -1136,6 +1281,50 @@
                     if (input.value.trim()) {
                         console.log('Journal entry:', input.value);
                         input.value = '';
+                    }
+                });
+            }
+            
+            // Add Todo Button
+            const addTodoBtn = document.getElementById('add-todo-btn');
+            if (addTodoBtn) {
+                addTodoBtn.addEventListener('click', () => {
+                    TodoManager.showAddTodoModal();
+                });
+            }
+            
+            // Cancel Todo Button
+            const cancelTodoBtn = document.getElementById('cancel-todo-btn');
+            if (cancelTodoBtn) {
+                cancelTodoBtn.addEventListener('click', () => {
+                    TodoManager.hideAddTodoModal();
+                });
+            }
+            
+            // Add Todo Form Submission
+            const addTodoForm = document.getElementById('add-todo-form');
+            if (addTodoForm) {
+                addTodoForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const todoData = {
+                        title: document.getElementById('todo-title').value,
+                        category: document.getElementById('todo-category').value,
+                        priority: document.getElementById('todo-priority').value,
+                        deadline: document.getElementById('todo-deadline').value
+                    };
+                    
+                    TodoManager.addTodo(todoData);
+                    TodoManager.hideAddTodoModal();
+                });
+            }
+            
+            // Close modal when clicking outside
+            const addTodoModal = document.getElementById('add-todo-modal');
+            if (addTodoModal) {
+                addTodoModal.addEventListener('click', (e) => {
+                    if (e.target === addTodoModal) {
+                        TodoManager.hideAddTodoModal();
                     }
                 });
             }
