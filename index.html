@@ -730,24 +730,42 @@
             <h1 class="section-title">ToDos verwalten</h1>
             
             <div class="category-tabs">
-                <button class="category-tab active" data-category="privat">Privat</button>
+                <button class="category-tab active" data-category="heute">Heute</button>
+                <button class="category-tab" data-category="privat">Privat</button>
                 <button class="category-tab" data-category="uni">Uni</button>
                 <button class="category-tab" data-category="arbeit">Arbeit</button>
+                <button class="category-tab" data-category="alle">Alle</button>
+                <button class="category-tab" data-category="archiv">Archiv</button>
+            </div>
+
+            <!-- HEUTE KATEGORIE -->
+            <div class="category-content active" id="heute">
+                <!-- Todos for today will be loaded from database -->
             </div>
 
             <!-- PRIVAT KATEGORIE -->
-            <div class="category-content active" id="privat">
-                <!-- Todos will be loaded from database -->
+            <div class="category-content" id="privat">
+                <!-- Private todos will be loaded from database -->
             </div>
 
             <!-- UNI KATEGORIE -->
             <div class="category-content" id="uni">
-                <!-- Todos will be loaded from database -->
+                <!-- Uni todos will be loaded from database -->
             </div>
 
             <!-- ARBEIT KATEGORIE -->
             <div class="category-content" id="arbeit">
-                <!-- Todos will be loaded from database -->
+                <!-- Work todos will be loaded from database -->
+            </div>
+
+            <!-- ALLE KATEGORIE -->
+            <div class="category-content" id="alle">
+                <!-- All todos will be loaded from database -->
+            </div>
+
+            <!-- ARCHIV KATEGORIE -->
+            <div class="category-content" id="archiv">
+                <!-- Completed/archived todos will be loaded from database -->
             </div>
         </section>
 
