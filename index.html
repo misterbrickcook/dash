@@ -1515,6 +1515,7 @@
                 try {
                     const data = await supabase.select('todos', '*');
                     if (data && Array.isArray(data)) {
+                        console.log('Raw todos data from database:', data);
                         // Transform database data to match UI expectations
                         this.todos = data.map(todo => {
                             // Convert priority integer back to string
@@ -1526,12 +1527,14 @@
                                 default: priorityString = 'niedrig';
                             }
                             
-                            return {
+                            const transformedTodo = {
                                 ...todo,
                                 title: todo.text, // Map text to title for UI
                                 deadline: todo.due_date || todo.date, // Map due_date to deadline for UI
                                 priority: priorityString // Convert integer to string
                             };
+                            console.log('Transformed todo:', transformedTodo);
+                            return transformedTodo;
                         });
                         this.refreshCurrentView();
                         this.updateHomeTodos();
@@ -1646,6 +1649,8 @@
             },
             
             displayTodosForCategory(category) {
+                console.log('Displaying todos for category:', category);
+                console.log('All todos:', this.todos);
                 const container = document.getElementById(category);
                 if (!container) return;
                 
@@ -1670,6 +1675,7 @@
                         );
                 }
                 
+                console.log('Filtered todos for', category, ':', filteredTodos);
                 // Sort by deadline (earliest first)
                 filteredTodos.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
                 
