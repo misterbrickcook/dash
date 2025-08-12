@@ -2065,7 +2065,12 @@
                 try {
                     const data = await supabase.select('journal_entries', '*');
                     if (data && Array.isArray(data)) {
-                        this.entries = data;
+                        // Transform database data to ensure tags is always an array
+                        this.entries = data.map(entry => ({
+                            ...entry,
+                            tags: Array.isArray(entry.tags) ? entry.tags : 
+                                  (entry.tags ? JSON.parse(entry.tags) : [])
+                        }));
                         this.refreshCurrentView();
                     }
                 } catch (error) {
@@ -2188,8 +2193,11 @@
                     year: 'numeric'
                 });
                 
-                const tagsHtml = entry.tags && entry.tags.length > 0 
-                    ? entry.tags.map(tag => `<span class="todo-tag normal" style="margin-right: 0.5rem;">${tag}</span>`).join('')
+                // Ensure tags is always an array before mapping
+                const tags = Array.isArray(entry.tags) ? entry.tags : 
+                           (entry.tags ? (typeof entry.tags === 'string' ? JSON.parse(entry.tags) : []) : []);
+                const tagsHtml = tags.length > 0 
+                    ? tags.map(tag => `<span class="todo-tag normal" style="margin-right: 0.5rem;">${tag}</span>`).join('')
                     : '';
                 
                 entryCard.innerHTML = `
