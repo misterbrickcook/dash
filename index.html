@@ -799,6 +799,49 @@
         </div>
     </div>
 
+    <!-- === ADD JOURNAL MODAL === -->
+    <div id="add-journal-modal" class="add-todo-modal hide">
+        <div class="add-todo-container">
+            <div class="add-todo-header">
+                <h2>Journal Eintrag hinzufügen</h2>
+            </div>
+            
+            <form id="add-journal-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="journal-title">Titel</label>
+                    <input type="text" id="journal-title" placeholder="Titel für den Eintrag..." required autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label for="journal-content">Inhalt</label>
+                    <textarea id="journal-content" placeholder="Was beschäftigt dich heute...?" rows="6" required autocomplete="off" style="width: 100%; padding: 1rem; border: 1px solid #d0d0d0; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="journal-category">Kategorie</label>
+                        <select id="journal-category" required autocomplete="off">
+                            <option value="allgemein">Allgemein</option>
+                            <option value="fitness">Fitness</option>
+                            <option value="uni">Uni</option>
+                            <option value="crypto">Crypto</option>
+                            <option value="lesen">Lesen</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="journal-date">Datum</label>
+                        <input type="date" id="journal-date" required autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancel-journal-btn" class="btn secondary">Abbrechen</button>
+                    <button type="submit" class="btn">Journal erstellen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- === AUTH SCREEN === -->
     <div id="auth-screen" class="auth-screen hide">
         <div class="auth-container">
@@ -1058,44 +1101,6 @@
                 <!-- Lesen entries will be loaded from database -->
             </div>
 
-            <!-- TEMPORARY: Original entries for now -->
-            <div class="quick-journal">
-                <h2>Quick Journal</h2>
-                <form class="journal-form">
-                    <input type="text" class="journal-input" placeholder="Was beschäftigt dich heute...?" maxlength="200">
-                    <button type="submit" class="btn">Speichern</button>
-                </form>
-            </div>
-
-            <div class="journal-entry">
-                <div class="journal-entry-header">
-                    <div class="journal-date">24. Juli 2025</div>
-                    <div class="journal-kategorie">Leben</div>
-                </div>
-                <div class="journal-content">
-                    Heute war ein besonders produktiver Tag. Morgens bin ich früh aufgestanden und habe eine Runde joggen gemacht. Das Wetter war perfekt - nicht zu heiß, leicht bewölkt. Beim Laufen konnte ich richtig gut nachdenken und neue Ideen für meine Bachelorarbeit entwickeln.
-                </div>
-            </div>
-
-            <div class="journal-entry">
-                <div class="journal-entry-header">
-                    <div class="journal-date">22. Juli 2025</div>
-                    <div class="journal-kategorie">Crypto</div>
-                </div>
-                <div class="journal-content">
-                    Bitcoin ist heute wieder stark gestiegen. Mein Portfolio hat sich um 8% verbessert, was mich dem 10.000€ Ziel deutlich näher bringt. Ich überlege, ob ich noch mehr in ETH investieren sollte, aber ich will nicht zu gierig werden.
-                </div>
-            </div>
-
-            <div class="journal-entry">
-                <div class="journal-entry-header">
-                    <div class="journal-date">20. Juli 2025</div>
-                    <div class="journal-kategorie">Gesundheit</div>
-                </div>
-                <div class="journal-content">
-                    Ernährungsumstellung zeigt erste Erfolge! Heute morgen habe ich mich gewogen: 81,5 kg. Das sind schon 1,5 kg weniger als zu Beginn. Ich fühle mich energiegeladener und fitter.
-                </div>
-            </div>
         </section>
 
         <!-- === TERMINE TAB === -->
@@ -1257,6 +1262,13 @@
                 const activeCategory = activeTab ? activeTab.getAttribute('data-ziel-category') : 'monat';
                 GoalManager.displayGoalsForCategory(activeCategory);
             }
+            
+            // If switching to journal tab, load the active category
+            if (tabId === 'tab-journal') {
+                const activeTab = document.querySelector('.journal-tab.active');
+                const activeCategory = activeTab ? activeTab.getAttribute('data-journal-category') : 'alle';
+                JournalManager.displayEntriesForCategory(activeCategory);
+            }
         }
 
         // === ROUTINE PROGRESS ===
@@ -1341,7 +1353,7 @@
             parentTab.querySelector(`[data-journal-category="${categoryId}"]`).classList.add('active');
             
             // Load journal entries for this category
-            // JournalManager.displayEntriesForCategory(categoryId); // TODO: Implement later
+            JournalManager.displayEntriesForCategory(categoryId);
         }
 
         // === EVENT LISTENERS ===
@@ -1867,6 +1879,122 @@
             }
         };
 
+        // === JOURNAL MANAGEMENT ===
+        const JournalManager = {
+            entries: [], // In-memory storage for demo
+            
+            showAddJournalModal() {
+                const modal = document.getElementById('add-journal-modal');
+                modal.classList.remove('hide');
+                
+                // Set today's date as default
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('journal-date').value = today;
+            },
+            
+            hideAddJournalModal() {
+                const modal = document.getElementById('add-journal-modal');
+                modal.classList.add('hide');
+                // Reset form
+                document.getElementById('add-journal-form').reset();
+                // Reset date back to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('journal-date').value = today;
+            },
+            
+            addEntry(entryData) {
+                const entry = {
+                    id: Date.now().toString(),
+                    title: entryData.title,
+                    content: entryData.content,
+                    category: entryData.category,
+                    date: entryData.date,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.entries.push(entry);
+                console.log('Journal entry added:', entry);
+                console.log('All entries:', this.entries);
+                
+                // Refresh current view
+                this.refreshCurrentView();
+            },
+            
+            refreshCurrentView() {
+                // Get current active category
+                const activeTab = document.querySelector('.journal-tab.active');
+                const activeCategory = activeTab ? activeTab.getAttribute('data-journal-category') : 'alle';
+                
+                this.displayEntriesForCategory(activeCategory);
+            },
+            
+            displayEntriesForCategory(category) {
+                const container = document.getElementById(`journal-${category}`);
+                if (!container) return;
+                
+                let filteredEntries = [];
+                
+                switch(category) {
+                    case 'alle':
+                        filteredEntries = this.entries;
+                        break;
+                    default:
+                        filteredEntries = this.entries.filter(entry => entry.category === category);
+                }
+                
+                // Sort by date (newest first)
+                filteredEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                // Clear container
+                container.innerHTML = '';
+                
+                if (filteredEntries.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Keine Journal-Einträge vorhanden</p>';
+                    return;
+                }
+                
+                // Create grid for entries
+                const grid = document.createElement('div');
+                grid.className = 'grid-2'; // 2-spaltig für Journal-Einträge
+                
+                // Display entries
+                filteredEntries.forEach(entry => {
+                    const entryElement = this.createEntryElement(entry);
+                    grid.appendChild(entryElement);
+                });
+                
+                container.appendChild(grid);
+            },
+            
+            createEntryElement(entry) {
+                const entryCard = document.createElement('div');
+                entryCard.className = 'ziel-card';
+                entryCard.dataset.entryId = entry.id;
+                
+                const entryDate = new Date(entry.date);
+                const formattedDate = entryDate.toLocaleDateString('de-DE', {
+                    day: '2-digit',
+                    month: '2-digit', 
+                    year: 'numeric'
+                });
+                
+                entryCard.innerHTML = `
+                    <div class="ziel-kategorie">${entry.category}</div>
+                    <div class="ziel-header">
+                        <div class="ziel-name">${entry.title}</div>
+                        <div class="ziel-beschreibung">${entry.content}</div>
+                    </div>
+                    <div class="ziel-progress-section">
+                        <div class="ziel-progress-header">
+                            <span class="ziel-progress-label">${formattedDate}</span>
+                        </div>
+                    </div>
+                `;
+                
+                return entryCard;
+            }
+        };
+
         // === INITIALIZE ===
         document.addEventListener('DOMContentLoaded', () => {
             updateRoutineProgress();
@@ -1998,6 +2126,52 @@
                 addGoalModal.addEventListener('click', (e) => {
                     if (e.target === addGoalModal) {
                         GoalManager.hideAddGoalModal();
+                    }
+                });
+            }
+            
+            // === JOURNAL EVENT LISTENERS ===
+            
+            // Add Journal Button
+            const addJournalBtn = document.getElementById('add-journal-btn');
+            if (addJournalBtn) {
+                addJournalBtn.addEventListener('click', () => {
+                    JournalManager.showAddJournalModal();
+                });
+            }
+            
+            // Cancel Journal Button
+            const cancelJournalBtn = document.getElementById('cancel-journal-btn');
+            if (cancelJournalBtn) {
+                cancelJournalBtn.addEventListener('click', () => {
+                    JournalManager.hideAddJournalModal();
+                });
+            }
+            
+            // Add Journal Form Submission
+            const addJournalForm = document.getElementById('add-journal-form');
+            if (addJournalForm) {
+                addJournalForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const entryData = {
+                        title: document.getElementById('journal-title').value,
+                        content: document.getElementById('journal-content').value,
+                        category: document.getElementById('journal-category').value,
+                        date: document.getElementById('journal-date').value
+                    };
+                    
+                    JournalManager.addEntry(entryData);
+                    JournalManager.hideAddJournalModal();
+                });
+            }
+            
+            // Close journal modal when clicking outside
+            const addJournalModal = document.getElementById('add-journal-modal');
+            if (addJournalModal) {
+                addJournalModal.addEventListener('click', (e) => {
+                    if (e.target === addJournalModal) {
+                        JournalManager.hideAddJournalModal();
                     }
                 });
             }
