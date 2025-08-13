@@ -1603,19 +1603,48 @@ document.addEventListener('DOMContentLoaded', async function() {
             let monthlyCount = 0;
             const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
             
-            // Check storage data
+            // Check legacy storage data first (mobile compatibility)
             const completionData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
-            console.log(`🔍 DEBUG: routineCompletionData:`, completionData);
+            console.log(`🔍 DEBUG: routineCompletionData (legacy):`, completionData);
+            
+            // Also check new cloud completion data (desktop compatibility)  
+            const cloudCompletions = (window.cloudStorage && window.cloudStorage.getLocalRoutineCompletions) 
+                ? window.cloudStorage.getLocalRoutineCompletions() : [];
+            console.log(`🔍 DEBUG: cloudCompletions (new):`, cloudCompletions.length, 'items');
             
             // Check each day of the target month
             for (let day = 1; day <= daysInMonth; day++) {
                 const checkDate = new Date(targetYear, targetMonth, day);
                 const dateStr = checkDate.toISOString().split('T')[0];
                 
-                const dayData = completionData[dateStr];
+                let dayComplete = false;
                 
+                // First, check legacy format
+                const dayData = completionData[dateStr];
                 if (dayData && dayData[routineType] === true) {
-                    console.log(`🔍 DEBUG: Found completion for ${routineType} on ${dateStr}`);
+                    dayComplete = true;
+                    console.log(`🔍 DEBUG: Found legacy completion for ${routineType} on ${dateStr}`);
+                }
+                
+                // If not found in legacy, check new cloud format
+                if (!dayComplete && cloudCompletions.length > 0) {
+                    const dayCompletions = cloudCompletions.filter(c => 
+                        c.date === dateStr && 
+                        c.template_id.startsWith(routineType) && 
+                        c.completed
+                    );
+                    
+                    // Count unique completed items for this day
+                    const completedItems = new Set(dayCompletions.map(c => c.template_id)).size;
+                    const totalItems = 5; // We have 5 items per routine
+                    
+                    if (completedItems === totalItems) {
+                        dayComplete = true;
+                        console.log(`🔍 DEBUG: Found cloud completion for ${routineType} on ${dateStr} (${completedItems}/${totalItems})`);
+                    }
+                }
+                
+                if (dayComplete) {
                     monthlyCount++;
                 }
             }
