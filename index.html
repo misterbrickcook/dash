@@ -1378,6 +1378,25 @@
                 
                 // Optional: Log progress for debugging
                 console.log(`Routine progress: ${percentage}% (${checkedBoxes.length}/${checkboxes.length})`);
+                
+                // Update monthly streaks when 100% is reached
+                if (percentage === 100) {
+                    console.log('🔍 DEBUG: 100% reached, updating monthly streaks');
+                    const today = new Date().toISOString().split('T')[0];
+                    const routineType = checkbox.closest('.routine-section').querySelector('h2').textContent.includes('Morgen') ? 'morning' : 'evening';
+                    
+                    // Save completion to localStorage
+                    const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+                    if (!localData[today]) localData[today] = {};
+                    localData[today][routineType] = true;
+                    localStorage.setItem('routineCompletionData', JSON.stringify(localData));
+                    console.log(`🔍 DEBUG: Saved ${routineType} completion`);
+                    
+                    // Update streak displays
+                    if (window.updateMonthlyStreakDisplays) {
+                        window.updateMonthlyStreakDisplays();
+                    }
+                }
             });
         }
 
