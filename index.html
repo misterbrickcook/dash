@@ -3471,8 +3471,6 @@
         document.addEventListener('DOMContentLoaded', async () => {
             // Logout is now handled by separate logout.html page
             
-            updateRoutineProgress();
-            
             // Initialize Supabase first
             if (window.initializeSupabase) {
                 window.initializeSupabase();
@@ -3802,7 +3800,7 @@
             console.log('✅ Logout is now URL-based, no JavaScript needed');
             
             // Mobile-specific debug for Chrome iOS issues - ALWAYS show on mobile browsers
-            const isMobile = true; // Force mobile debug for now
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             const userAgent = navigator.userAgent;
             if (isMobile || userAgent.includes('Mobile') || userAgent.includes('iPhone') || userAgent.includes('iPad')) {
                 console.log(`📱 Mobile detected: ${navigator.userAgent}`);
