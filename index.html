@@ -1443,7 +1443,8 @@
                     if (supabase && typeof supabase.signOut === 'function') {
                         await supabase.signOut();
                     }
-                    localStorage.clear();
+                    // Only clear auth-related data, preserve routine/todo data
+                    localStorage.removeItem('supabase.auth.token');
                     sessionStorage.clear();
                     console.log('✅ Logout successful, reloading...');
                     window.location.reload();
@@ -3799,67 +3800,7 @@
             // === SIMPLE LOGOUT (URL-based) ===
             console.log('✅ Logout is now URL-based, no JavaScript needed');
             
-            // Mobile-specific debug for Chrome iOS issues - ALWAYS show on mobile browsers
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            const userAgent = navigator.userAgent;
-            if (isMobile || userAgent.includes('Mobile') || userAgent.includes('iPhone') || userAgent.includes('iPad')) {
-                console.log(`📱 Mobile detected: ${navigator.userAgent}`);
-                
-                setTimeout(() => {
-                    try {
-                        const debugDiv = document.createElement('div');
-                        debugDiv.id = 'mobile-debug';
-                        debugDiv.style.cssText = 'position:fixed!important;top:0!important;left:0!important;background:rgba(255,0,0,0.9)!important;color:white!important;font-size:14px!important;z-index:99999!important;padding:15px!important;width:100%!important;border:3px solid yellow!important;max-height:300px!important;overflow:auto!important;';
-                    debugDiv.innerHTML = `
-                        📱 CHROME MOBILE DEBUG:<br>
-                        Browser: ${navigator.userAgent.includes('Chrome') ? 'Chrome Mobile iOS' : navigator.userAgent.includes('Safari') ? 'Safari iOS' : 'Other'}<br>
-                        LocalStorage: ${typeof localStorage !== 'undefined' ? 'Available ✅' : 'BLOCKED ❌'}<br>
-                        Private Mode: ${(() => { try { localStorage.setItem('test', '1'); localStorage.removeItem('test'); return 'NO ✅'; } catch(e) { return 'YES ❌ (THIS IS THE PROBLEM!)'; } })()}<br>
-                        Auth Status: ${window.supabase?.isAuthenticated() ? 'Authenticated ✅' : 'Not Auth ❌'}<br>
-                        Session Storage: ${typeof sessionStorage !== 'undefined' ? 'Available ✅' : 'BLOCKED ❌'}<br>
-                        Routine Cache: ${localStorage.getItem('routine_completions_cache') ? 'Data Found ✅' : 'Empty/Null ❌'}<br>
-                        URL: ${window.location.href}<br>
-                        <button onclick="location.reload()" style="background:blue;color:white;border:none;padding:5px 15px;margin:2px;border-radius:4px;">RELOAD PAGE</button><br>
-                        <button onclick="this.parentElement.remove()" style="background:red;color:white;border:none;padding:5px 15px;margin-top:8px;border-radius:4px;">CLOSE</button>
-                    `;
-                    document.body.appendChild(debugDiv);
-                    
-                    // Log key localStorage items for debugging
-                    console.log('📱 Mobile localStorage debug:');
-                    console.log('- routine_completions_cache:', localStorage.getItem('routine_completions_cache'));
-                    console.log('- routineCompletionData:', localStorage.getItem('routineCompletionData'));
-                    console.log('- monthlyRoutineCompletions:', localStorage.getItem('monthlyRoutineCompletions'));
-                    console.log('- supabase session:', localStorage.getItem('supabase-session'));
-                    
-                    // Test the counter update functions directly
-                    setTimeout(() => {
-                        console.log('🔧 Testing counter functions directly...');
-                        if (typeof window.updateMonthlyStreakDisplays === 'function') {
-                            console.log('✅ updateMonthlyStreakDisplays available, calling...');
-                            window.updateMonthlyStreakDisplays();
-                        } else {
-                            console.error('❌ updateMonthlyStreakDisplays not available');
-                        }
-                        
-                        if (typeof window.initializeTodoCounter === 'function') {
-                            console.log('✅ initializeTodoCounter available, calling...');
-                            window.initializeTodoCounter();
-                        } else {
-                            console.error('❌ initializeTodoCounter not available');
-                        }
-                    }, 1000);
-                    
-                    document.body.appendChild(debugDiv);
-                    console.log('✅ Debug overlay added to page');
-                } catch (error) {
-                    console.error('❌ Failed to create debug overlay:', error);
-                    // Fallback: add as alert
-                    alert('CHROME MOBILE DEBUG: localStorage=' + (typeof localStorage !== 'undefined') + ' auth=' + (window.supabase?.isAuthenticated() || false));
-                }
-            }, 1000); // Reduced timeout
-        } else {
-            console.log('🖥️ Desktop browser detected, no mobile debug needed');
-        }
+            // Mobile debug removed for cleaner console output
         });
     </script>
 </body>
