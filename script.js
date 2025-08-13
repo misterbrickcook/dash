@@ -83,6 +83,31 @@ const Auth = {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile) {
             console.log(`📱 Mobile detected: ${navigator.userAgent.substring(0, 50)}...`);
+            console.log('📱 Mobile sync debug - checking localStorage and counters');
+            
+            // Debug localStorage
+            console.log('💾 LocalStorage contents:');
+            console.log('- Monthly routine completions:', localStorage.getItem('monthlyRoutineCompletions'));
+            console.log('- Monthly todo completions:', localStorage.getItem('monthlyTodoCompletions'));
+            console.log('- Routine completion data:', localStorage.getItem('routineCompletionData'));
+            
+            // Debug counter elements after DOM loads
+            setTimeout(() => {
+                const morningCounter = document.getElementById('morning-routine-count');
+                const eveningCounter = document.getElementById('evening-routine-count');
+                const todoCounter = document.getElementById('todo-streak-count');
+                
+                console.log('🔢 Counter elements found:');
+                console.log('- Morning counter:', morningCounter?.textContent, morningCounter);
+                console.log('- Evening counter:', eveningCounter?.textContent, eveningCounter);
+                console.log('- Todo counter:', todoCounter?.textContent, todoCounter);
+                
+                // Check if monthly streak functions are available
+                console.log('🔧 Monthly streak functions available:');
+                console.log('- updateMonthlyStreakDisplays:', typeof window.updateMonthlyStreakDisplays);
+                console.log('- calculateMonthlyRoutineCount:', typeof window.calculateMonthlyRoutineCount);
+                console.log('- calculateMonthlyTodoCount:', typeof window.calculateMonthlyTodoCount);
+            }, 3000);
         }
         
         if (loginBtn) {
@@ -266,7 +291,25 @@ const Auth = {
     },
     
     showDashboard() {
+        console.log('📊 Showing dashboard, initializing monthly streak displays...');
         document.querySelector('.layout').style.display = 'flex';
+        
+        // Initialize monthly streak displays after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            if (typeof window.updateMonthlyStreakDisplays === 'function') {
+                console.log('🔄 Calling updateMonthlyStreakDisplays...');
+                window.updateMonthlyStreakDisplays();
+            } else {
+                console.warn('⚠️ updateMonthlyStreakDisplays function not available');
+            }
+            
+            if (typeof window.initializeTodoCounter === 'function') {
+                console.log('🔄 Calling initializeTodoCounter...');
+                window.initializeTodoCounter();
+            } else {
+                console.warn('⚠️ initializeTodoCounter function not available');
+            }
+        }, 500);
     },
     
     showAuthError(form, message) {
