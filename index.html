@@ -3107,7 +3107,7 @@
                     title: entryData.title,
                     content: entryData.content,
                     tags: entryData.tags || [], // Array of tags
-                    date: entryData.date,
+                    entry_date: entryData.date, // Use entry_date instead of date  
                     user_id: supabase?.user?.id,
                     created_at: new Date().toISOString()
                 };
@@ -3163,7 +3163,7 @@
                 }
                 
                 // Sort by date (newest first)
-                filteredEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+                filteredEntries.sort((a, b) => new Date(b.entry_date || b.date) - new Date(a.entry_date || a.date));
                 
                 // Clear container
                 container.innerHTML = '';
@@ -3191,7 +3191,7 @@
                 entryCard.className = 'ziel-card';
                 entryCard.dataset.entryId = entry.id;
                 
-                const entryDate = new Date(entry.date);
+                const entryDate = new Date(entry.entry_date || entry.date);
                 const formattedDate = entryDate.toLocaleDateString('de-DE', {
                     day: '2-digit',
                     month: '2-digit', 
