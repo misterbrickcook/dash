@@ -2699,9 +2699,11 @@
                                 deadline: result[0].target_date,
                                 timeframe: result[0].timeframe,
                                 progress: result[0].progress,
-                                completed: result[0].completed
+                                completed: result[0].completed,
+                                database_id: result[0].id // Store real DB ID for updates
                             };
                             this.goals.push(savedGoal);
+                            console.log('✅ Goal saved to cloud with database_id:', result[0].id);
                         } else {
                             // Fallback to local storage
                             this.goals.push(goal);
@@ -2825,17 +2827,17 @@
                     
                     console.log('🎯 Updating goal:', goal.name, 'to progress:', goal.progress);
                     
-                    // Only try database update if goal has database ID (not timestamp)
-                    const hasDbId = goal.id && !isNaN(goal.id) && goal.id.toString().length < 10;
+                    // Check if goal has real database ID or use database_id field
+                    const dbId = goal.database_id || (goal.id && !isNaN(goal.id) && goal.id.toString().length < 10 ? goal.id : null);
                     
-                    if (supabase?.isAuthenticated() && hasDbId) {
+                    if (supabase?.isAuthenticated() && dbId) {
                         try {
-                            console.log('💾 Updating goal in database with ID:', goal.id);
-                            await supabase.update('goals', { 
+                            console.log('💾 Updating goal in database with ID:', dbId);
+                            const result = await supabase.update('goals', { 
                                 progress: goal.progress,
                                 completed: goal.completed
-                            }, goal.id);
-                            console.log('✅ Goal progress updated in database');
+                            }, dbId);
+                            console.log('✅ Goal progress updated in cloud database:', result);
                         } catch (error) {
                             console.error('❌ Error updating goal progress:', error);
                             // Don't revert - keep local change even if DB fails
