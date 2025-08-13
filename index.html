@@ -1877,6 +1877,11 @@
                 localStorage.setItem('routine_completions_cache', JSON.stringify([]));
             }
         }
+        
+        // === MAKE FUNCTIONS GLOBALLY AVAILABLE ===
+        window.updateMonthlyStreakDisplays = updateMonthlyStreakDisplays;
+        window.initializeTodoCounter = initializeTodoCounter;
+        window.loadRoutineCompletions = loadRoutineCompletions;
 
         // === EVENT LISTENERS ===
         document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -3663,6 +3668,24 @@
                     console.log('- routineCompletionData:', localStorage.getItem('routineCompletionData'));
                     console.log('- monthlyRoutineCompletions:', localStorage.getItem('monthlyRoutineCompletions'));
                     console.log('- supabase session:', localStorage.getItem('supabase-session'));
+                    
+                    // Test the counter update functions directly
+                    setTimeout(() => {
+                        console.log('🔧 Testing counter functions directly...');
+                        if (typeof window.updateMonthlyStreakDisplays === 'function') {
+                            console.log('✅ updateMonthlyStreakDisplays available, calling...');
+                            window.updateMonthlyStreakDisplays();
+                        } else {
+                            console.error('❌ updateMonthlyStreakDisplays not available');
+                        }
+                        
+                        if (typeof window.initializeTodoCounter === 'function') {
+                            console.log('✅ initializeTodoCounter available, calling...');
+                            window.initializeTodoCounter();
+                        } else {
+                            console.error('❌ initializeTodoCounter not available');
+                        }
+                    }, 1000);
                 }, 3000);
             }
         });
