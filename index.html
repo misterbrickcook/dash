@@ -3652,12 +3652,15 @@
                     debugDiv.id = 'mobile-debug';
                     debugDiv.style.cssText = 'position:fixed;top:0;left:0;background:rgba(0,0,0,0.95);color:lime;font-size:12px;z-index:9999;padding:10px;width:100%;border-bottom:2px solid lime;max-height:200px;overflow:auto;';
                     debugDiv.innerHTML = `
-                        📱 MOBILE DEBUG (Chrome iOS Issue):<br>
+                        📱 CHROME MOBILE DEBUG:<br>
                         Browser: ${navigator.userAgent.includes('Chrome') ? 'Chrome Mobile iOS' : navigator.userAgent.includes('Safari') ? 'Safari iOS' : 'Other'}<br>
                         LocalStorage: ${typeof localStorage !== 'undefined' ? 'Available ✅' : 'BLOCKED ❌'}<br>
+                        Private Mode: ${(() => { try { localStorage.setItem('test', '1'); localStorage.removeItem('test'); return 'NO ✅'; } catch(e) { return 'YES ❌ (THIS IS THE PROBLEM!)'; } })()}<br>
                         Auth Status: ${window.supabase?.isAuthenticated() ? 'Authenticated ✅' : 'Not Auth ❌'}<br>
+                        Session Storage: ${typeof sessionStorage !== 'undefined' ? 'Available ✅' : 'BLOCKED ❌'}<br>
                         Routine Cache: ${localStorage.getItem('routine_completions_cache') ? 'Data Found ✅' : 'Empty/Null ❌'}<br>
-                        Current URL: ${window.location.href}<br>
+                        URL: ${window.location.href}<br>
+                        <button onclick="location.reload()" style="background:blue;color:white;border:none;padding:5px 15px;margin:2px;border-radius:4px;">RELOAD PAGE</button><br>
                         <button onclick="this.parentElement.remove()" style="background:red;color:white;border:none;padding:5px 15px;margin-top:8px;border-radius:4px;">CLOSE</button>
                     `;
                     document.body.appendChild(debugDiv);
