@@ -1075,9 +1075,9 @@
                 <button id="settings-btn" class="nav-tab settings-btn">
                     <span>⚙</span>
                 </button>
-                <button id="logout-btn" class="nav-tab logout-btn">
+                <a href="?logout=1" id="logout-btn" class="nav-tab logout-btn" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">
                     <span>⏻</span>
-                </button>
+                </a>
             </div>
         </div>
     </nav>
@@ -3774,102 +3774,8 @@
             // Initialize todo counter display
             initializeTodoCounter();
             
-            // === MOBILE-SAFE LOGOUT HANDLER ===
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) {
-                // Remove any existing listeners first
-                logoutBtn.replaceWith(logoutBtn.cloneNode(true));
-                const newLogoutBtn = document.getElementById('logout-btn');
-                
-                // Add mobile-compatible logout handler
-                const handleLogout = async () => {
-                    console.log('🚪 Mobile-safe logout initiated...');
-                    
-                    // Show immediate visual feedback
-                    newLogoutBtn.style.opacity = '0.5';
-                    newLogoutBtn.style.pointerEvents = 'none';
-                    
-                    // Optional: Show alert for testing
-                    if (confirm('🚪 Logout wird ausgeführt. Fortfahren?')) {
-                        try {
-                        // Clear Supabase session
-                        if (supabase && typeof supabase.signOut === 'function') {
-                            await supabase.signOut();
-                            console.log('✅ Supabase session cleared');
-                        }
-                        
-                        // Clear all storage (with try/catch for Chrome Mobile)
-                        try {
-                            localStorage.clear();
-                            sessionStorage.clear();
-                            console.log('✅ Storage cleared');
-                        } catch (storageError) {
-                            console.warn('⚠️ Storage clear failed (Chrome Mobile):', storageError);
-                        }
-                        
-                        // Clear global variables
-                        globalRoutineCompletions = [];
-                        console.log('✅ Memory cleared');
-                        
-                            // Force page reload to login screen
-                            console.log('🔄 Forcing page reload...');
-                            window.location.href = window.location.href.split('?')[0] + '?logout=1';
-                            
-                        } catch (error) {
-                            console.error('❌ Logout error:', error);
-                            alert('Logout Error: ' + error.message + ' - Seite wird trotzdem neu geladen');
-                            // Force reload anyway
-                            window.location.reload(true);
-                        }
-                    } else {
-                        // User cancelled, reset button
-                        newLogoutBtn.style.opacity = '1';
-                        newLogoutBtn.style.pointerEvents = 'auto';
-                    }
-                };
-                
-                // Mobile-first event handling (fix touch conflicts)
-                let touchStarted = false;
-                
-                // Touch events first (mobile)
-                newLogoutBtn.addEventListener('touchstart', (e) => {
-                    touchStarted = true;
-                    console.log('👆 Touch started on logout button');
-                    e.preventDefault();
-                });
-                
-                newLogoutBtn.addEventListener('touchend', async (e) => {
-                    if (touchStarted) {
-                        console.log('👆 Touch ended - triggering logout');
-                        e.preventDefault();
-                        e.stopPropagation();
-                        await handleLogout();
-                    }
-                    touchStarted = false;
-                    
-                    // Reset hover state
-                    const span = newLogoutBtn.querySelector('span');
-                    if (span) {
-                        span.style.color = '#666666';
-                        setTimeout(() => span.style.color = '', 100);
-                    }
-                });
-                
-                // Click event for desktop (but prevent if touch was used)
-                newLogoutBtn.addEventListener('click', async (e) => {
-                    if (!touchStarted) {
-                        console.log('🖱️ Click detected - triggering logout');
-                        e.preventDefault();
-                        e.stopPropagation();
-                        await handleLogout();
-                    }
-                });
-                
-                // Prevent context menu on long press
-                newLogoutBtn.addEventListener('contextmenu', (e) => e.preventDefault());
-                
-                console.log('✅ Mobile-safe logout handler attached with hover fix');
-            }
+            // === SIMPLE LOGOUT (URL-based) ===
+            console.log('✅ Logout is now URL-based, no JavaScript needed');
             
             // Mobile-specific debug for Chrome iOS issues - ALWAYS show on mobile browsers
             const isMobile = true; // Force mobile debug for now
