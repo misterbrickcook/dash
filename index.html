@@ -3785,7 +3785,13 @@
                 const handleLogout = async () => {
                     console.log('🚪 Mobile-safe logout initiated...');
                     
-                    try {
+                    // Show immediate visual feedback
+                    newLogoutBtn.style.opacity = '0.5';
+                    newLogoutBtn.style.pointerEvents = 'none';
+                    
+                    // Optional: Show alert for testing
+                    if (confirm('🚪 Logout wird ausgeführt. Fortfahren?')) {
+                        try {
                         // Clear Supabase session
                         if (supabase && typeof supabase.signOut === 'function') {
                             await supabase.signOut();
@@ -3805,37 +3811,62 @@
                         globalRoutineCompletions = [];
                         console.log('✅ Memory cleared');
                         
-                        // Force page reload to login screen
-                        console.log('🔄 Forcing page reload...');
-                        window.location.href = window.location.href.split('?')[0] + '?logout=1';
-                        
-                    } catch (error) {
-                        console.error('❌ Logout error:', error);
-                        // Force reload anyway
-                        window.location.reload(true);
+                            // Force page reload to login screen
+                            console.log('🔄 Forcing page reload...');
+                            window.location.href = window.location.href.split('?')[0] + '?logout=1';
+                            
+                        } catch (error) {
+                            console.error('❌ Logout error:', error);
+                            alert('Logout Error: ' + error.message + ' - Seite wird trotzdem neu geladen');
+                            // Force reload anyway
+                            window.location.reload(true);
+                        }
+                    } else {
+                        // User cancelled, reset button
+                        newLogoutBtn.style.opacity = '1';
+                        newLogoutBtn.style.pointerEvents = 'auto';
                     }
                 };
                 
-                // Multiple event handlers for mobile compatibility
-                newLogoutBtn.addEventListener('click', handleLogout);
-                newLogoutBtn.addEventListener('touchstart', handleLogout);
-                newLogoutBtn.addEventListener('touchend', (e) => {
-                    e.preventDefault(); // Prevent stuck hover state
+                // Mobile-first event handling (fix touch conflicts)
+                let touchStarted = false;
+                
+                // Touch events first (mobile)
+                newLogoutBtn.addEventListener('touchstart', (e) => {
+                    touchStarted = true;
+                    console.log('👆 Touch started on logout button');
+                    e.preventDefault();
                 });
                 
-                // Force remove stuck hover state on mobile
-                const resetHoverState = () => {
+                newLogoutBtn.addEventListener('touchend', async (e) => {
+                    if (touchStarted) {
+                        console.log('👆 Touch ended - triggering logout');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        await handleLogout();
+                    }
+                    touchStarted = false;
+                    
+                    // Reset hover state
                     const span = newLogoutBtn.querySelector('span');
                     if (span) {
                         span.style.color = '#666666';
-                        setTimeout(() => {
-                            span.style.color = '';
-                        }, 100);
+                        setTimeout(() => span.style.color = '', 100);
                     }
-                };
+                });
                 
-                newLogoutBtn.addEventListener('touchend', resetHoverState);
-                newLogoutBtn.addEventListener('touchcancel', resetHoverState);
+                // Click event for desktop (but prevent if touch was used)
+                newLogoutBtn.addEventListener('click', async (e) => {
+                    if (!touchStarted) {
+                        console.log('🖱️ Click detected - triggering logout');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        await handleLogout();
+                    }
+                });
+                
+                // Prevent context menu on long press
+                newLogoutBtn.addEventListener('contextmenu', (e) => e.preventDefault());
                 
                 console.log('✅ Mobile-safe logout handler attached with hover fix');
             }
