@@ -646,6 +646,7 @@
 
         /* === TERMINE SPECIFIC === */
         .termin-card {
+            position: relative;
             border: 1px solid #e0e0e0;
             padding: 2rem;
             background: #fafafa;
@@ -3074,16 +3075,23 @@
             },
             
             displayTermine() {
+                console.log('📅 Displaying termine:', this.termine);
                 const container = document.getElementById('termine-container');
-                if (!container) return;
+                if (!container) {
+                    console.error('❌ Termine container not found');
+                    return;
+                }
                 
                 // Clear container
                 container.innerHTML = '';
                 
                 if (this.termine.length === 0) {
+                    console.log('ℹ️ No termine to display');
                     container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem; grid-column: 1 / -1;">Keine Termine vorhanden</p>';
                     return;
                 }
+                
+                console.log(`📊 Displaying ${this.termine.length} termine`);
                 
                 // Sort by date/time (earliest first)
                 const sortedTermine = this.termine.sort((a, b) => {
@@ -3134,11 +3142,17 @@
             },
             
             async editTermin(terminId) {
+                console.log('🖊️ Edit termin clicked:', terminId);
+                console.log('📋 Available termine:', this.termine);
+                
                 const termin = this.termine.find(t => t.id == terminId);
                 if (!termin) {
+                    console.error('❌ Termin not found:', terminId);
                     alert('Termin nicht gefunden!');
                     return;
                 }
+                
+                console.log('✅ Found termin for editing:', termin);
                 
                 // Pre-fill the form with existing values
                 document.getElementById('termin-title').value = termin.title;
@@ -3153,6 +3167,8 @@
                 // Change button text
                 const submitBtn = form.querySelector('button[type="submit"]');
                 submitBtn.textContent = 'Termin aktualisieren';
+                
+                console.log('📝 Form prepared for editing, opening modal...');
                 
                 // Show modal
                 this.showAddTerminModal();
