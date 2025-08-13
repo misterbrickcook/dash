@@ -2100,6 +2100,7 @@
                     const wasCompleted = todo.completed;
                     todo.completed = !todo.completed;
                     console.log(`✅ Todo "${todo.title}" ${todo.completed ? 'completed' : 'uncompleted'}`);
+                    console.log(`🔍 DEBUG: wasCompleted = ${wasCompleted}, todo.completed = ${todo.completed}`);
                     
                     // Track todo completion for monthly count ONLY when completing (not uncompleting)
                     if (todo.completed && !wasCompleted) {
