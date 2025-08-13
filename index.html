@@ -3115,7 +3115,10 @@
                 
                 if (supabase?.isAuthenticated()) {
                     try {
-                        const result = await supabase.insert('journal_entries', entry);
+                        // Create database entry without 'date' field (only 'entry_date')
+                        const dbEntry = { ...entry };
+                        delete dbEntry.date;
+                        const result = await supabase.insert('journal_entries', dbEntry);
                         if (result && result.length > 0) {
                             this.entries.push(result[0]);
                         } else {
