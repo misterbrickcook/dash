@@ -198,6 +198,22 @@
             gap: 0.75rem;
             margin-bottom: 1rem;
         }
+        .checkbox-item.todo-item {
+            justify-content: space-between;
+        }
+        .checkbox-item.todo-item .todo-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+        .checkbox-item.todo-item .todo-time {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 500;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
         .checkbox-item input[type="checkbox"] {
             width: 18px;
             height: 18px;
@@ -2263,14 +2279,16 @@
                 
                 todayTodos.forEach(todo => {
                     const todoItem = document.createElement('div');
-                    todoItem.className = 'checkbox-item';
+                    todoItem.className = 'checkbox-item todo-item';
                     todoItem.innerHTML = `
-                        <input type="checkbox" id="home-todo-${todo.id}" onchange="TodoManager.toggleTodo('${todo.id}')">
-                        <label for="home-todo-${todo.id}">
-                            ${todo.title} 
-                            <span class="todo-tag ${TodoManager.getPriorityString(todo.priority)}" style="margin-left: 0.5rem;">${TodoManager.getPriorityDisplay(todo.priority)}</span>
-                            (${todo.time || '21:00'})
-                        </label>
+                        <div class="todo-left">
+                            <input type="checkbox" id="home-todo-${todo.id}" onchange="TodoManager.toggleTodo('${todo.id}')">
+                            <label for="home-todo-${todo.id}">
+                                ${todo.title} 
+                                <span class="todo-tag ${TodoManager.getPriorityString(todo.priority)}" style="margin-left: 0.5rem;">${TodoManager.getPriorityDisplay(todo.priority)}</span>
+                            </label>
+                        </div>
+                        <span class="todo-time">${todo.time || '21:00'}</span>
                     `;
                     homeContainer.appendChild(todoItem);
                 });
