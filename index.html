@@ -1848,10 +1848,12 @@
             }
         }
         
-        // === ROUTINE COMPLETIONS LOADER ===
+        // === MOBILE-FIRST ROUTINE COMPLETIONS ===
+        let globalRoutineCompletions = []; // Always keep in memory for mobile
+        
         async function loadRoutineCompletions() {
             try {
-                console.log('🔄 Loading routine completions from Supabase...');
+                console.log('🔄 Loading routine completions (Mobile-First approach)...');
                 
                 if (!supabase?.isAuthenticated()) {
                     console.log('⚠️ Not authenticated, skipping routine completions load');
@@ -1860,26 +1862,117 @@
                 
                 // Query routine completions from Supabase
                 const routineCompletions = await supabase.query('routine_completions?select=*');
-                console.log(`✅ Loaded ${routineCompletions?.length || 0} routine completions from database:`, routineCompletions);
+                console.log(`✅ Loaded ${routineCompletions?.length || 0} routine completions from database`);
                 
                 if (routineCompletions && routineCompletions.length > 0) {
-                    // Cache in localStorage for offline access
-                    localStorage.setItem('routine_completions_cache', JSON.stringify(routineCompletions));
-                    console.log('💾 Cached routine completions in localStorage');
+                    // ALWAYS store in global variable first (works on all browsers)
+                    globalRoutineCompletions = routineCompletions;
+                    console.log('💾 Stored routine completions in memory');
+                    
+                    // Try localStorage as secondary cache (may fail on Chrome Mobile)
+                    try {
+                        localStorage.setItem('routine_completions_cache', JSON.stringify(routineCompletions));
+                        console.log('💾 Also cached in localStorage (if supported)');
+                    } catch (storageError) {
+                        console.warn('⚠️ localStorage failed (Chrome Mobile issue), using memory only:', storageError);
+                    }
                 } else {
+                    globalRoutineCompletions = [];
                     console.log('ℹ️ No routine completions found in database');
-                    // Ensure empty cache if no data
-                    localStorage.setItem('routine_completions_cache', JSON.stringify([]));
                 }
+                
+                // Update counters immediately after loading
+                updateMonthlyStreakDisplaysFromMemory();
+                
             } catch (error) {
                 console.error('❌ Error loading routine completions:', error);
-                // Set empty cache on error
-                localStorage.setItem('routine_completions_cache', JSON.stringify([]));
+                globalRoutineCompletions = [];
+            }
+        }
+        
+        // Mobile-safe function that uses memory first, localStorage as fallback
+        function getRoutineCompletions() {
+            if (globalRoutineCompletions && globalRoutineCompletions.length > 0) {
+                console.log('📱 Using routine completions from memory (Mobile-safe)');
+                return globalRoutineCompletions;
+            }
+            
+            // Fallback to localStorage if available
+            try {
+                const cached = localStorage.getItem('routine_completions_cache');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    console.log('💾 Using routine completions from localStorage fallback');
+                    return parsed;
+                }
+            } catch (e) {
+                console.warn('⚠️ localStorage read failed, using empty array');
+            }
+            
+            return [];
+        }
+        
+        // === MOBILE-SAFE STREAK DISPLAY UPDATER ===
+        function updateMonthlyStreakDisplaysFromMemory() {
+            try {
+                console.log('🔄 Updating streak displays from memory (Mobile-safe)...');
+                const routineCompletions = getRoutineCompletions();
+                const currentDate = new Date();
+                const currentMonthPrefix = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
+                
+                console.log(`📊 Checking ${routineCompletions.length} routine completions for ${currentMonthPrefix}`);
+                
+                // Count morning routine completions this month
+                const morningCompletions = routineCompletions.filter(c => 
+                    c.date && c.date.startsWith(currentMonthPrefix) && 
+                    c.template_id && c.template_id.includes('morning') && 
+                    c.completed === true
+                );
+                const morningDates = new Set(morningCompletions.map(c => c.date));
+                const morningCount = morningDates.size;
+                
+                // Count evening routine completions this month  
+                const eveningCompletions = routineCompletions.filter(c =>
+                    c.date && c.date.startsWith(currentMonthPrefix) && 
+                    c.template_id && c.template_id.includes('evening') && 
+                    c.completed === true
+                );
+                const eveningDates = new Set(eveningCompletions.map(c => c.date));
+                const eveningCount = eveningDates.size;
+                
+                console.log(`📊 Monthly counts: Morning=${morningCount}, Evening=${eveningCount}`);
+                
+                // Update streak tiles
+                const streakTiles = document.querySelectorAll('.streak-tile');
+                if (streakTiles.length >= 2) {
+                    // Morning (tile 0)
+                    const morningTile = streakTiles[0];
+                    const morningNumber = morningTile?.querySelector('.streak-number');
+                    if (morningNumber) {
+                        morningNumber.textContent = morningCount;
+                        console.log(`✅ Updated morning counter to ${morningCount}`);
+                    }
+                    
+                    // Evening (tile 1)  
+                    const eveningTile = streakTiles[1];
+                    const eveningNumber = eveningTile?.querySelector('.streak-number');
+                    if (eveningNumber) {
+                        eveningNumber.textContent = eveningCount;
+                        console.log(`✅ Updated evening counter to ${eveningCount}`);
+                    }
+                } else {
+                    console.warn('⚠️ Streak tiles not found');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error updating streak displays:', error);
             }
         }
         
         // === MAKE FUNCTIONS GLOBALLY AVAILABLE ===
         window.updateMonthlyStreakDisplays = updateMonthlyStreakDisplays;
+        window.updateMonthlyStreakDisplaysFromMemory = updateMonthlyStreakDisplaysFromMemory;
+        window.getRoutineCompletions = getRoutineCompletions;
         window.initializeTodoCounter = initializeTodoCounter;
         window.loadRoutineCompletions = loadRoutineCompletions;
 
