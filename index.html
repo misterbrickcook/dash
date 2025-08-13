@@ -1727,6 +1727,38 @@
             alert(`Todo-Zähler für ${monthName} ${now.getFullYear()} wurde auf 0 zurückgesetzt!`);
             console.log(`Monthly todos reset for ${monthKey}`);
         }
+        
+        // === TODO COUNTER INITIALIZATION ===
+        function initializeTodoCounter() {
+            try {
+                const now = new Date();
+                const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
+                
+                const monthlyData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
+                const todoCount = monthlyData[monthKey] || 0;
+                
+                console.log(`🔍 DEBUG: Initializing todo counter for ${['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                         'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()]} ${now.getFullYear()}: ${todoCount}`);
+                
+                // Update the third streak tile (todos)
+                const streakTiles = document.querySelectorAll('.streak-tile');
+                const todoTile = streakTiles[2]; // Third tile is todos
+                if (todoTile) {
+                    const numberElement = todoTile.querySelector('.streak-number');
+                    const dateElement = todoTile.querySelector('.streak-date');
+                    if (numberElement && dateElement) {
+                        numberElement.textContent = todoCount;
+                        dateElement.textContent = `${['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                                                    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()]} ${now.getFullYear()}`;
+                        console.log(`🔍 DEBUG: Todo counter initialized to ${todoCount}`);
+                    }
+                } else {
+                    console.error('Todo tile not found');
+                }
+            } catch (error) {
+                console.error('Error initializing todo counter:', error);
+            }
+        }
 
         // === EVENT LISTENERS ===
         document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -3338,6 +3370,9 @@
             
             // Initialize settings functionality
             initializeSettings();
+            
+            // Initialize todo counter display
+            initializeTodoCounter();
         });
     </script>
 </body>
