@@ -1596,6 +1596,18 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             console.log(`🔍 DEBUG: Target month: ${targetMonth} (${MONTH_NAMES[targetMonth]}), year: ${targetYear}`);
             
+            // First, ALWAYS check dedicated tracking
+            const monthlyTodoData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
+            const monthKey = `${targetYear}-${targetMonth}`;
+            console.log(`🔍 DEBUG: monthlyTodoData:`, monthlyTodoData);
+            console.log(`🔍 DEBUG: monthKey: ${monthKey}`);
+            
+            if (monthlyTodoData[monthKey] !== undefined) {
+                const monthlyCount = monthlyTodoData[monthKey];
+                console.log(`✅ ${monthlyCount} todos completed in ${MONTH_NAMES[targetMonth]} ${targetYear} (from dedicated tracking)`);
+                return monthlyCount;
+            }
+            
             // Try multiple data sources for todos
             let todos = [];
             
@@ -1625,15 +1637,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
             
-            // 3. Use dedicated monthly todo completion tracking
-            const monthlyTodoData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
-            const monthKey = `${targetYear}-${targetMonth}`;
-            
-            if (monthlyTodoData[monthKey] !== undefined) {
-                const monthlyCount = monthlyTodoData[monthKey];
-                console.log(`✅ ${monthlyCount} todos completed in ${MONTH_NAMES[targetMonth]} ${targetYear} (from dedicated tracking)`);
-                return monthlyCount;
-            }
+            // 3. Dedicated tracking was already checked above, continue with fallback
             
             // Fallback: count from todo data if available
             if (todos.length > 0) {
