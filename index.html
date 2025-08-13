@@ -1553,7 +1553,50 @@
                 // Update streak display directly
                 console.log('🔍 DEBUG: Updating streak display');
                 console.log('🔍 DEBUG: localData:', localData);
-                const monthlyCount = Object.values(localData).filter(day => day[routineType] === true).length;
+                
+                // Calculate monthly count from both legacy localStorage and new cloud cache
+                const currentDate = new Date();
+                const currentYear = currentDate.getFullYear();
+                const currentMonth = currentDate.getMonth() + 1; // getMonth() is 0-indexed
+                const currentMonthPrefix = `${currentYear}-${currentMonth.toString().padStart(2, '0')}`;
+                
+                console.log(`🔍 DEBUG: Current month prefix: ${currentMonthPrefix}`);
+                
+                // First try legacy format (mobile compatibility)
+                const currentMonthDates = Object.keys(localData).filter(date => date.startsWith(currentMonthPrefix));
+                let monthlyCount = currentMonthDates.filter(date => localData[date][routineType] === true).length;
+                console.log(`🔍 DEBUG: Legacy format count for ${routineType}: ${monthlyCount}`);
+                
+                // Also check cloud completions cache (Supabase routine completions)
+                try {
+                    const cloudCompletionsCache = localStorage.getItem('routine_completions_cache');
+                    if (cloudCompletionsCache) {
+                        const cloudCompletions = JSON.parse(cloudCompletionsCache);
+                        console.log(`🔍 DEBUG: Found cloud completions cache with ${cloudCompletions.length} entries`);
+                        
+                        // Filter for current month and routine type
+                        const currentMonthCloudCompletions = cloudCompletions.filter(completion => {
+                            if (!completion.date || !completion.template_id) return false;
+                            const completionMonth = completion.date.substring(0, 7); // "2025-08-13" -> "2025-08"
+                            const expectedPrefix = currentMonthPrefix.substring(0, 7); // "2025-08-13" -> "2025-08" 
+                            return completionMonth === expectedPrefix && 
+                                   completion.template_id.includes(routineType) && 
+                                   completion.completed === true;
+                        });
+                        
+                        console.log(`🔍 DEBUG: Current month cloud completions for ${routineType}:`, currentMonthCloudCompletions.length);
+                        
+                        // Count days with completed routines (group by date)
+                        const completionDates = new Set(currentMonthCloudCompletions.map(c => c.date));
+                        const cloudMonthlyCount = completionDates.size;
+                        console.log(`🔍 DEBUG: Cloud format count for ${routineType}: ${cloudMonthlyCount}`);
+                        
+                        // Use the higher count (in case data exists in both formats)
+                        monthlyCount = Math.max(monthlyCount, cloudMonthlyCount);
+                    }
+                } catch (error) {
+                    console.warn(`⚠️ Error checking cloud completions:`, error);
+                }
                 console.log(`🔍 DEBUG: monthlyCount for ${routineType}:`, monthlyCount);
                 const streakTiles = document.querySelectorAll('.streak-tile');
                 console.log(`🔍 DEBUG: Found ${streakTiles.length} streak tiles`);
