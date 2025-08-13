@@ -76,19 +76,37 @@
             font-weight: 400 !important;
             background: transparent !important;
             border: none !important;
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            position: relative !important;
+            z-index: 1000 !important;
         }
-        .logout-btn:hover, .settings-btn:hover {
+        
+        /* Mobile-safe hover states */
+        .logout-btn:hover, .settings-btn:hover,
+        .logout-btn:active, .settings-btn:active,
+        .logout-btn:focus, .settings-btn:focus {
             background: transparent !important;
             border: none !important;
         }
-        .logout-btn:hover span {
+        
+        .logout-btn:hover span, .logout-btn:active span, .logout-btn:focus span {
             color: #dc2626 !important;
         }
-        .settings-btn:hover span {
-            color: #22c55e !important;
+        
+        /* Force reset any stuck hover states on mobile */
+        @media (max-width: 768px) {
+            .logout-btn span {
+                color: #666666 !important;
+            }
+            .logout-btn:hover span {
+                color: #dc2626 !important;
+            }
         }
+        
         .logout-btn span, .settings-btn span {
             font-size: 1.2rem;
+            pointer-events: none !important;
         }
 
         /* === SETTINGS PAGE === */
@@ -3801,7 +3819,25 @@
                 // Multiple event handlers for mobile compatibility
                 newLogoutBtn.addEventListener('click', handleLogout);
                 newLogoutBtn.addEventListener('touchstart', handleLogout);
-                console.log('✅ Mobile-safe logout handler attached');
+                newLogoutBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault(); // Prevent stuck hover state
+                });
+                
+                // Force remove stuck hover state on mobile
+                const resetHoverState = () => {
+                    const span = newLogoutBtn.querySelector('span');
+                    if (span) {
+                        span.style.color = '#666666';
+                        setTimeout(() => {
+                            span.style.color = '';
+                        }, 100);
+                    }
+                };
+                
+                newLogoutBtn.addEventListener('touchend', resetHoverState);
+                newLogoutBtn.addEventListener('touchcancel', resetHoverState);
+                
+                console.log('✅ Mobile-safe logout handler attached with hover fix');
             }
             
             // Mobile-specific debug for Chrome iOS issues - ALWAYS show on mobile browsers
