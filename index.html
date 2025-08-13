@@ -2690,8 +2690,9 @@
                         console.log('💾 Attempting to save goal to database:', dbGoal);
                         const result = await supabase.insert('goals', dbGoal);
                         console.log('💾 Database result:', result);
+                        console.log('💾 Database result type:', typeof result, 'Array?', Array.isArray(result));
                         
-                        if (result && result.length > 0) {
+                        if (result && Array.isArray(result) && result.length > 0) {
                             // Use database result and transform back to UI format
                             const savedGoal = {
                                 ...result[0],
