@@ -1383,8 +1383,7 @@
                 if (percentage === 100) {
                     console.log('🔍 DEBUG: 100% reached, updating monthly streaks');
                     const today = new Date().toISOString().split('T')[0];
-                    const routineSection = routineContainer.closest('.routine-section');
-                    const routineType = routineSection.querySelector('h2').textContent.includes('Morgen') ? 'morning' : 'evening';
+                    const routineType = section.querySelector('h2').textContent.includes('Morgen') ? 'morning' : 'evening';
                     
                     // Save completion to localStorage
                     const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
