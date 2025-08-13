@@ -91,6 +91,22 @@ const Auth = {
             console.log('- Monthly todo completions:', localStorage.getItem('monthlyTodoCompletions'));
             console.log('- Routine completion data:', localStorage.getItem('routineCompletionData'));
             
+            // Add visible mobile debug for Chrome iOS issues
+            setTimeout(() => {
+                const debugDiv = document.createElement('div');
+                debugDiv.id = 'mobile-debug';
+                debugDiv.style.cssText = 'position:fixed;top:0;left:0;background:rgba(0,0,0,0.9);color:lime;font-size:11px;z-index:9999;padding:8px;max-height:150px;overflow:auto;width:100%;border-bottom:2px solid lime;';
+                debugDiv.innerHTML = `
+                    📱 MOBILE DEBUG (Chrome iOS):<br>
+                    Browser: ${navigator.userAgent.includes('Chrome') ? 'Chrome Mobile' : 'Safari'}<br>
+                    LocalStorage: ${typeof localStorage !== 'undefined' ? 'Available' : 'BLOCKED'}<br>
+                    Auth Status: ${window.supabase?.isAuthenticated() ? 'Authenticated' : 'Not Auth'}<br>
+                    Routine Cache: ${localStorage.getItem('routine_completions_cache') ? 'EXISTS' : 'EMPTY'}<br>
+                    <button onclick="this.parentElement.remove()" style="background:red;color:white;border:none;padding:2px 8px;margin-top:5px;">CLOSE DEBUG</button>
+                `;
+                document.body.appendChild(debugDiv);
+            }, 3000);
+            
             // Debug counter elements after DOM loads
             setTimeout(() => {
                 const morningCounter = document.getElementById('morning-routine-count');
@@ -107,7 +123,7 @@ const Auth = {
                 console.log('- updateMonthlyStreakDisplays:', typeof window.updateMonthlyStreakDisplays);
                 console.log('- calculateMonthlyRoutineCount:', typeof window.calculateMonthlyRoutineCount);
                 console.log('- calculateMonthlyTodoCount:', typeof window.calculateMonthlyTodoCount);
-            }, 3000);
+            }, 4000);
         }
         
         if (loginBtn) {

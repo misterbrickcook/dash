@@ -3636,6 +3636,35 @@
             
             // Initialize todo counter display
             initializeTodoCounter();
+            
+            // Mobile-specific debug for Chrome iOS issues
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                console.log(`📱 Mobile detected: ${navigator.userAgent}`);
+                
+                setTimeout(() => {
+                    const debugDiv = document.createElement('div');
+                    debugDiv.id = 'mobile-debug';
+                    debugDiv.style.cssText = 'position:fixed;top:0;left:0;background:rgba(0,0,0,0.95);color:lime;font-size:12px;z-index:9999;padding:10px;width:100%;border-bottom:2px solid lime;max-height:200px;overflow:auto;';
+                    debugDiv.innerHTML = `
+                        📱 MOBILE DEBUG (Chrome iOS Issue):<br>
+                        Browser: ${navigator.userAgent.includes('Chrome') ? 'Chrome Mobile iOS' : navigator.userAgent.includes('Safari') ? 'Safari iOS' : 'Other'}<br>
+                        LocalStorage: ${typeof localStorage !== 'undefined' ? 'Available ✅' : 'BLOCKED ❌'}<br>
+                        Auth Status: ${window.supabase?.isAuthenticated() ? 'Authenticated ✅' : 'Not Auth ❌'}<br>
+                        Routine Cache: ${localStorage.getItem('routine_completions_cache') ? 'Data Found ✅' : 'Empty/Null ❌'}<br>
+                        Current URL: ${window.location.href}<br>
+                        <button onclick="this.parentElement.remove()" style="background:red;color:white;border:none;padding:5px 15px;margin-top:8px;border-radius:4px;">CLOSE</button>
+                    `;
+                    document.body.appendChild(debugDiv);
+                    
+                    // Log key localStorage items for debugging
+                    console.log('📱 Mobile localStorage debug:');
+                    console.log('- routine_completions_cache:', localStorage.getItem('routine_completions_cache'));
+                    console.log('- routineCompletionData:', localStorage.getItem('routineCompletionData'));
+                    console.log('- monthlyRoutineCompletions:', localStorage.getItem('monthlyRoutineCompletions'));
+                    console.log('- supabase session:', localStorage.getItem('supabase-session'));
+                }, 3000);
+            }
         });
     </script>
 </body>
