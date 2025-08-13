@@ -3408,6 +3408,27 @@
 
         // === INITIALIZE ===
         document.addEventListener('DOMContentLoaded', async () => {
+            // Check for logout parameter first (Chrome Mobile fix)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('logout') === '1') {
+                console.log('🚪 Logout parameter detected, forcing session clear...');
+                try {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    globalRoutineCompletions = [];
+                    if (window.supabase && typeof window.supabase.signOut === 'function') {
+                        await window.supabase.signOut();
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Logout cleanup failed:', e);
+                }
+                // Remove parameter and reload clean
+                window.history.replaceState({}, document.title, window.location.href.split('?')[0]);
+                console.log('🔄 Reloading page clean after logout...');
+                window.location.reload();
+                return;
+            }
+            
             updateRoutineProgress();
             
             // Initialize Supabase first
@@ -3734,6 +3755,54 @@
             
             // Initialize todo counter display
             initializeTodoCounter();
+            
+            // === MOBILE-SAFE LOGOUT HANDLER ===
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                // Remove any existing listeners first
+                logoutBtn.replaceWith(logoutBtn.cloneNode(true));
+                const newLogoutBtn = document.getElementById('logout-btn');
+                
+                // Add mobile-compatible logout handler
+                const handleLogout = async () => {
+                    console.log('🚪 Mobile-safe logout initiated...');
+                    
+                    try {
+                        // Clear Supabase session
+                        if (supabase && typeof supabase.signOut === 'function') {
+                            await supabase.signOut();
+                            console.log('✅ Supabase session cleared');
+                        }
+                        
+                        // Clear all storage (with try/catch for Chrome Mobile)
+                        try {
+                            localStorage.clear();
+                            sessionStorage.clear();
+                            console.log('✅ Storage cleared');
+                        } catch (storageError) {
+                            console.warn('⚠️ Storage clear failed (Chrome Mobile):', storageError);
+                        }
+                        
+                        // Clear global variables
+                        globalRoutineCompletions = [];
+                        console.log('✅ Memory cleared');
+                        
+                        // Force page reload to login screen
+                        console.log('🔄 Forcing page reload...');
+                        window.location.href = window.location.href.split('?')[0] + '?logout=1';
+                        
+                    } catch (error) {
+                        console.error('❌ Logout error:', error);
+                        // Force reload anyway
+                        window.location.reload(true);
+                    }
+                };
+                
+                // Multiple event handlers for mobile compatibility
+                newLogoutBtn.addEventListener('click', handleLogout);
+                newLogoutBtn.addEventListener('touchstart', handleLogout);
+                console.log('✅ Mobile-safe logout handler attached');
+            }
             
             // Mobile-specific debug for Chrome iOS issues - ALWAYS show on mobile browsers
             const isMobile = true; // Force mobile debug for now
