@@ -244,9 +244,34 @@ class SupabaseClient {
     }
 
     async insert(table, data) {
-        const result = await this.query(`${table}?select=*`, 'POST', data);
-        console.log('🔍 Insert result for', table, ':', result);
-        return result;
+        // Use Prefer: return=representation header to get the inserted data back
+        const url = `${this.url}/rest/v1/${table}?select=*`;
+        const options = {
+            method: 'POST',
+            headers: {
+                ...this.headers,
+                'Prefer': 'return=representation'
+            },
+            body: JSON.stringify(data)
+        };
+
+        try {
+            const response = await fetch(url, options);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Supabase ${response.status} Error:`, errorText);
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            
+            const text = await response.text();
+            const result = text ? JSON.parse(text) : [];
+            console.log('🔍 Insert result for', table, ':', result);
+            return result;
+        } catch (error) {
+            console.error('Insert error:', error);
+            return null;
+        }
     }
 
     async update(table, data, id) {
