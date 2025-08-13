@@ -1575,6 +1575,18 @@
                 // Routine-Progress aktualisieren (nur bei Routine-Checkboxen)
                 const routineSection = this.closest('.routine-section');
                 if (routineSection) {
+                    // Apply visual styling immediately
+                    const label = this.nextElementSibling;
+                    if (label) {
+                        if (this.checked) {
+                            label.style.textDecoration = 'line-through';
+                            label.style.color = '#999';
+                        } else {
+                            label.style.textDecoration = 'none';
+                            label.style.color = 'inherit';
+                        }
+                    }
+                    
                     // Save checkbox state
                     saveCheckboxState(this.id, this.checked);
                     updateRoutineProgress();
