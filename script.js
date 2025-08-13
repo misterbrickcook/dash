@@ -1499,11 +1499,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             const targetMonth = month !== null ? month : now.getMonth();
             const targetYear = year !== null ? year : now.getFullYear();
             
-            const completions = cloudStorage.getLocalRoutineCompletions();
-            if (!completions || completions.length === 0) {
-                return 0;
-            }
-            
             let monthlyCount = 0;
             const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
             
@@ -1512,17 +1507,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const checkDate = new Date(targetYear, targetMonth, day);
                 const dateStr = checkDate.toISOString().split('T')[0];
                 
-                // Check if all routine items were completed for this date
-                const dayCompletions = completions.filter(c => 
-                    c.date === dateStr && 
-                    c.template_id.startsWith(routineType) && 
-                    c.completed
-                );
+                // Check if routine was completed on this day using the legacy storage method
+                const completionData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+                const dayData = completionData[dateStr];
                 
-                const completedItems = new Set(dayCompletions.map(c => c.template_id)).size;
-                const totalItems = 5; // We have 5 items per routine
-                
-                if (completedItems === totalItems) {
+                if (dayData && dayData[routineType] === true) {
                     monthlyCount++;
                 }
             }
