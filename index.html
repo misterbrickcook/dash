@@ -1379,31 +1379,34 @@
                 // Optional: Log progress for debugging
                 console.log(`Routine progress: ${percentage}% (${checkedBoxes.length}/${checkboxes.length})`);
                 
-                // Update monthly streaks when 100% is reached
+                // Update monthly streaks based on completion status
+                const today = new Date().toISOString().split('T')[0];
+                const routineType = section.querySelector('h2').textContent.includes('Morgen') ? 'morning' : 'evening';
+                const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+                if (!localData[today]) localData[today] = {};
+                
                 if (percentage === 100) {
-                    console.log('🔍 DEBUG: 100% reached, updating monthly streaks');
-                    const today = new Date().toISOString().split('T')[0];
-                    const routineType = section.querySelector('h2').textContent.includes('Morgen') ? 'morning' : 'evening';
-                    
-                    // Save completion to localStorage
-                    const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
-                    if (!localData[today]) localData[today] = {};
+                    console.log('🔍 DEBUG: 100% reached, marking as complete');
                     localData[today][routineType] = true;
-                    localStorage.setItem('routineCompletionData', JSON.stringify(localData));
-                    console.log(`🔍 DEBUG: Saved ${routineType} completion`);
-                    
-                    // Update streak display directly
-                    console.log('🔍 DEBUG: Updating streak display directly');
-                    const monthlyCount = Object.values(localData).filter(day => day[routineType] === true).length;
-                    const streakTiles = document.querySelectorAll('.streak-tile');
-                    const tileIndex = routineType === 'morning' ? 0 : 1;
-                    const targetTile = streakTiles[tileIndex];
-                    if (targetTile) {
-                        const numberElement = targetTile.querySelector('.streak-number');
-                        if (numberElement) {
-                            numberElement.textContent = monthlyCount;
-                            console.log(`🔍 DEBUG: Set ${routineType} counter to ${monthlyCount}`);
-                        }
+                } else {
+                    console.log('🔍 DEBUG: Less than 100%, marking as incomplete');
+                    localData[today][routineType] = false;
+                }
+                
+                localStorage.setItem('routineCompletionData', JSON.stringify(localData));
+                console.log(`🔍 DEBUG: Saved ${routineType} completion: ${localData[today][routineType]}`);
+                
+                // Update streak display directly
+                console.log('🔍 DEBUG: Updating streak display');
+                const monthlyCount = Object.values(localData).filter(day => day[routineType] === true).length;
+                const streakTiles = document.querySelectorAll('.streak-tile');
+                const tileIndex = routineType === 'morning' ? 0 : 1;
+                const targetTile = streakTiles[tileIndex];
+                if (targetTile) {
+                    const numberElement = targetTile.querySelector('.streak-number');
+                    if (numberElement) {
+                        numberElement.textContent = monthlyCount;
+                        console.log(`🔍 DEBUG: Set ${routineType} counter to ${monthlyCount}`);
                     }
                 }
             });
