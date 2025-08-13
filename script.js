@@ -1340,16 +1340,30 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Initialize routine progress tracking
     function initializeRoutineProgress() {
+        console.log('🔍 DEBUG: initializeRoutineProgress called');
+        
         const morningRoutine = document.getElementById('morning-routine');
         const eveningRoutine = document.getElementById('evening-routine');
         
+        console.log(`🔍 DEBUG: morningRoutine found: ${!!morningRoutine}`);
+        console.log(`🔍 DEBUG: eveningRoutine found: ${!!eveningRoutine}`);
+        
         // Add event listeners to routine checkboxes
-        [morningRoutine, eveningRoutine].forEach(routine => {
-            if (!routine) return;
+        [morningRoutine, eveningRoutine].forEach((routine, index) => {
+            if (!routine) {
+                console.log(`🔍 DEBUG: Routine ${index} not found`);
+                return;
+            }
             
             const checkboxes = routine.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
+            console.log(`🔍 DEBUG: Routine ${index} has ${checkboxes.length} checkboxes`);
+            
+            checkboxes.forEach((checkbox, cbIndex) => {
+                console.log(`🔍 DEBUG: Adding event listener to checkbox ${cbIndex} (id: ${checkbox.id})`);
+                
                 checkbox.addEventListener('change', function() {
+                    console.log(`🔍 DEBUG: Checkbox changed: ${this.id} = ${this.checked}`);
+                    
                     const label = this.nextElementSibling;
                     
                     // Handle visual styling
@@ -1366,6 +1380,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     
                     // Check if routine is completed and update monthly streaks
                     setTimeout(async () => {
+                        console.log('🔍 DEBUG: About to call checkAndSaveRoutineCompletion');
                         await checkAndSaveRoutineCompletion();
                     }, 100);
                 });
