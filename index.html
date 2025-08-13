@@ -1357,6 +1357,38 @@
         }
 
         // === ROUTINE PROGRESS ===
+        // Load saved checkbox states on page load
+        function loadRoutineStates() {
+            const today = new Date().toISOString().split('T')[0];
+            const savedStates = JSON.parse(localStorage.getItem(`routineStates_${today}`) || '{}');
+            
+            Object.keys(savedStates).forEach(checkboxId => {
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) {
+                    checkbox.checked = savedStates[checkboxId];
+                    // Apply visual styling
+                    const label = checkbox.nextElementSibling;
+                    if (label) {
+                        if (checkbox.checked) {
+                            label.style.textDecoration = 'line-through';
+                            label.style.color = '#999';
+                        } else {
+                            label.style.textDecoration = 'none';
+                            label.style.color = 'inherit';
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Save checkbox state
+        function saveCheckboxState(checkboxId, isChecked) {
+            const today = new Date().toISOString().split('T')[0];
+            const savedStates = JSON.parse(localStorage.getItem(`routineStates_${today}`) || '{}');
+            savedStates[checkboxId] = isChecked;
+            localStorage.setItem(`routineStates_${today}`, JSON.stringify(savedStates));
+        }
+
         function updateRoutineProgress() {
             const routineTab = document.getElementById('tab-home');
             if (!routineTab) return;
@@ -1543,6 +1575,8 @@
                 // Routine-Progress aktualisieren (nur bei Routine-Checkboxen)
                 const routineSection = this.closest('.routine-section');
                 if (routineSection) {
+                    // Save checkbox state
+                    saveCheckboxState(this.id, this.checked);
                     updateRoutineProgress();
                 }
             });
@@ -3034,6 +3068,12 @@
                     }
                 });
             }
+            
+            // Load routine states on page load
+            loadRoutineStates();
+            
+            // Update routine progress to reflect loaded states
+            updateRoutineProgress();
         });
     </script>
 </body>
