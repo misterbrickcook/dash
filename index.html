@@ -1610,30 +1610,8 @@
                                 
                                 console.log(`🔍 DEBUG: Querying Supabase for routine completions from ${currentMonthStart} to ${nextMonthStart}`);
                                 
-                                // Execute the actual Supabase query
-                                console.log(`🔍 DEBUG: Executing Supabase query: routine_completions?date=gte.${currentMonthStart}&date=lt.${nextMonthStart}`);
-                                
-                                const routineCompletions = await supabase.query(`routine_completions?date=gte.${currentMonthStart}&date=lt.${nextMonthStart}`);
-                                console.log(`🔍 DEBUG: Supabase returned ${routineCompletions?.length || 0} routine completions:`, routineCompletions);
-                                
-                                if (routineCompletions && routineCompletions.length > 0) {
-                                    // Filter for current routine type and count unique dates
-                                    const currentRoutineCompletions = routineCompletions.filter(completion => {
-                                        return completion.template_id && 
-                                               completion.template_id.includes(routineType) && 
-                                               completion.completed === true;
-                                    });
-                                    
-                                    console.log(`🔍 DEBUG: Found ${currentRoutineCompletions.length} ${routineType} completions from Supabase`);
-                                    
-                                    // Count unique dates (each day counts as 1 completion regardless of how many routine items)
-                                    const uniqueDates = new Set(currentRoutineCompletions.map(c => c.date));
-                                    const supabaseMonthlyCount = uniqueDates.size;
-                                    console.log(`🔍 DEBUG: Supabase ${routineType} count: ${supabaseMonthlyCount}`);
-                                    
-                                    // Use the higher count
-                                    monthlyCount = Math.max(monthlyCount, supabaseMonthlyCount);
-                                }
+                                // Direct Supabase query not needed here - data should be loaded via loadRoutineCompletions()
+                                console.log(`🔍 DEBUG: Cache is empty - data should be loaded by loadRoutineCompletions() on login`);
                             } catch (error) {
                                 console.warn(`⚠️ Error querying Supabase directly:`, error);
                             }
