@@ -2207,7 +2207,9 @@
                     try {
                         // Delete from database
                         for (const todo of completedTodos) {
-                            await supabase.delete('todos', todo.id);
+                            console.log(`🗑️ Deleting todo from database: ID ${todo.id}, Title: "${todo.title}"`);
+                            const result = await supabase.delete('todos', todo.id);
+                            console.log(`🗑️ Delete result for ${todo.id}:`, result);
                         }
                         console.log('✅ All completed todos deleted from database');
                     } catch (error) {
