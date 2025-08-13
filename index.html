@@ -1398,12 +1398,17 @@
                 
                 // Update streak display directly
                 console.log('🔍 DEBUG: Updating streak display');
+                console.log('🔍 DEBUG: localData:', localData);
                 const monthlyCount = Object.values(localData).filter(day => day[routineType] === true).length;
+                console.log(`🔍 DEBUG: monthlyCount for ${routineType}:`, monthlyCount);
                 const streakTiles = document.querySelectorAll('.streak-tile');
+                console.log(`🔍 DEBUG: Found ${streakTiles.length} streak tiles`);
                 const tileIndex = routineType === 'morning' ? 0 : 1;
                 const targetTile = streakTiles[tileIndex];
+                console.log(`🔍 DEBUG: targetTile at index ${tileIndex}:`, targetTile);
                 if (targetTile) {
                     const numberElement = targetTile.querySelector('.streak-number');
+                    console.log(`🔍 DEBUG: numberElement:`, numberElement);
                     if (numberElement) {
                         numberElement.textContent = monthlyCount;
                         console.log(`🔍 DEBUG: Set ${routineType} counter to ${monthlyCount}`);
