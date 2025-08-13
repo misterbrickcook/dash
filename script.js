@@ -1336,6 +1336,29 @@ document.addEventListener('DOMContentLoaded', async function() {
         progressBar.style.width = percentage + '%';
         
         console.log(`Routine progress updated: ${completed}/${total} (${percentage}%)`);
+        
+        // Update monthly streaks when routines are completed
+        setTimeout(async () => {
+            console.log('🔍 DEBUG: Checking routine completion for monthly streaks');
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Check if morning routine is complete
+            const morningComplete = isRoutineComplete('morning');
+            if (morningComplete) {
+                console.log('🔍 DEBUG: Morning routine complete, saving and updating streaks');
+                await saveRoutineCompletion('morning', today, true);
+            }
+            
+            // Check if evening routine is complete  
+            const eveningComplete = isRoutineComplete('evening');
+            if (eveningComplete) {
+                console.log('🔍 DEBUG: Evening routine complete, saving and updating streaks');
+                await saveRoutineCompletion('evening', today, true);
+            }
+            
+            // Always update displays
+            await updateMonthlyStreakDisplays();
+        }, 200);
     }
     
     // Initialize routine progress tracking
