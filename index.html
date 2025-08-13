@@ -1567,11 +1567,14 @@
                 let monthlyCount = currentMonthDates.filter(date => localData[date][routineType] === true).length;
                 console.log(`🔍 DEBUG: Legacy format count for ${routineType}: ${monthlyCount}`);
                 
-                // Also check cloud completions cache (Supabase routine completions)
+                // Also check cloud completions - first try cache, then direct Supabase query
+                let cloudCompletions = [];
                 try {
                     const cloudCompletionsCache = localStorage.getItem('routine_completions_cache');
+                    console.log(`🔍 DEBUG: Cloud completions cache raw:`, cloudCompletionsCache);
+                    
                     if (cloudCompletionsCache) {
-                        const cloudCompletions = JSON.parse(cloudCompletionsCache);
+                        cloudCompletions = JSON.parse(cloudCompletionsCache);
                         console.log(`🔍 DEBUG: Found cloud completions cache with ${cloudCompletions.length} entries`);
                         
                         // Filter for current month and routine type
@@ -1593,6 +1596,29 @@
                         
                         // Use the higher count (in case data exists in both formats)
                         monthlyCount = Math.max(monthlyCount, cloudMonthlyCount);
+                    } else {
+                        console.log(`🔍 DEBUG: No cloud completions cache found, trying direct Supabase query...`);
+                        
+                        // Try direct Supabase query if authenticated and cache is empty
+                        if (supabase?.isAuthenticated()) {
+                            try {
+                                // Query routine completions directly from Supabase
+                                const currentMonthStart = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
+                                const nextMonth = currentMonth === 12 ? 1 : currentMonth + 1;
+                                const nextYear = currentMonth === 12 ? currentYear + 1 : currentYear;
+                                const nextMonthStart = `${nextYear}-${nextMonth.toString().padStart(2, '0')}-01`;
+                                
+                                console.log(`🔍 DEBUG: Querying Supabase for routine completions from ${currentMonthStart} to ${nextMonthStart}`);
+                                
+                                // This is a simplified approach - we'll add the full Supabase integration later
+                                // For now, just log that we're trying
+                                console.log(`🔍 DEBUG: Supabase query would be: routine_completions?date=gte.${currentMonthStart}&date=lt.${nextMonthStart}`);
+                            } catch (error) {
+                                console.warn(`⚠️ Error querying Supabase directly:`, error);
+                            }
+                        } else {
+                            console.log(`🔍 DEBUG: Not authenticated for direct Supabase query`);
+                        }
                     }
                 } catch (error) {
                     console.warn(`⚠️ Error checking cloud completions:`, error);
