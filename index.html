@@ -62,23 +62,32 @@
             background: transparent;
         }
         
-        /* === LOGOUT BUTTON === */
-        .logout-btn {
+        /* === LOGOUT & SETTINGS BUTTONS === */
+        .nav-actions {
             position: absolute;
             right: 0;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .logout-btn, .settings-btn {
             color: #666666 !important;
             font-weight: 400 !important;
             background: transparent !important;
             border: none !important;
         }
-        .logout-btn:hover {
+        .logout-btn:hover, .settings-btn:hover {
             background: transparent !important;
             border: none !important;
         }
         .logout-btn:hover span {
             color: #dc2626 !important;
         }
-        .logout-btn span {
+        .settings-btn:hover span {
+            color: #000000 !important;
+        }
+        .logout-btn span, .settings-btn span {
             font-size: 1.2rem;
         }
 
@@ -965,9 +974,14 @@
             <button class="nav-tab" data-tab="tab-todos">ToDos</button>
             <button class="nav-tab" data-tab="tab-ziele">Ziele</button>
             <button class="nav-tab" data-tab="tab-journal">Journal</button>
-            <button id="logout-btn" class="nav-tab logout-btn">
-                <span>⏻</span>
-            </button>
+            <div class="nav-actions">
+                <button id="settings-btn" class="nav-tab settings-btn">
+                    <span>⚙</span>
+                </button>
+                <button id="logout-btn" class="nav-tab logout-btn">
+                    <span>⏻</span>
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -1532,13 +1546,23 @@
         // === EVENT LISTENERS ===
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => {
-                // Skip logout button - it has its own handler
-                if (tab.id === 'logout-btn') return;
+                // Skip logout and settings buttons - they have their own handlers
+                if (tab.id === 'logout-btn' || tab.id === 'settings-btn') return;
                 
                 const tabId = tab.getAttribute('data-tab');
                 if (tabId) switchTab(tabId);
             });
         });
+        
+        // Settings button event listener
+        const settingsBtn = document.getElementById('settings-btn');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                console.log('Settings clicked');
+                // Placeholder for settings functionality
+                alert('Settings feature coming soon!');
+            });
+        }
 
         // Todo category tabs
         document.querySelectorAll('.category-tab').forEach(tab => {
