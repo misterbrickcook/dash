@@ -892,6 +892,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 // Continue with local sync even if cloud fails
             }
         }
+        
+        // Update monthly streak displays
+        await updateMonthlyStreakDisplays();
     }
     
     // Legacy handler for backward compatibility (will be phased out)
@@ -926,6 +929,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             label.style.color = 'inherit';
             console.log(`Task unchecked on ${currentTab} tab:`, taskText, 'ID:', taskId);
         }
+        
+        // Update monthly streak displays
+        updateMonthlyStreakDisplays();
     }
     
     // Archive completed task
@@ -1385,6 +1391,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Update monthly streak counters
         await updateMonthlyRoutineStreak('morning');
         await updateMonthlyRoutineStreak('evening');
+        
+        // Update monthly streak displays
+        await updateMonthlyStreakDisplays();
     }
     
     function isRoutineComplete(routineType) {
@@ -1482,10 +1491,161 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
     
+    // === MONTHLY STREAK SYSTEM ===
+    
+    function calculateMonthlyRoutineCount(routineType, month = null, year = null) {
+        try {
+            const now = new Date();
+            const targetMonth = month !== null ? month : now.getMonth();
+            const targetYear = year !== null ? year : now.getFullYear();
+            
+            const completions = cloudStorage.getLocalRoutineCompletions();
+            if (!completions || completions.length === 0) {
+                return 0;
+            }
+            
+            let monthlyCount = 0;
+            const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+            
+            // Check each day of the target month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const checkDate = new Date(targetYear, targetMonth, day);
+                const dateStr = checkDate.toISOString().split('T')[0];
+                
+                // Check if all routine items were completed for this date
+                const dayCompletions = completions.filter(c => 
+                    c.date === dateStr && 
+                    c.template_id.startsWith(routineType) && 
+                    c.completed
+                );
+                
+                const completedItems = new Set(dayCompletions.map(c => c.template_id)).size;
+                const totalItems = 5; // We have 5 items per routine
+                
+                if (completedItems === totalItems) {
+                    monthlyCount++;
+                }
+            }
+            
+            console.log(`📅 ${routineType} routine completed ${monthlyCount} times in ${MONTH_NAMES[targetMonth]} ${targetYear}`);
+            return monthlyCount;
+            
+        } catch (error) {
+            console.error('Error calculating monthly routine count:', error);
+            return 0;
+        }
+    }
+    
+    function calculateMonthlyTodoCount(month = null, year = null) {
+        try {
+            const now = new Date();
+            const targetMonth = month !== null ? month : now.getMonth();
+            const targetYear = year !== null ? year : now.getFullYear();
+            
+            const todos = cloudStorage.getLocalTodos();
+            if (!todos || todos.length === 0) {
+                return 0;
+            }
+            
+            // Count completed todos in the target month
+            const monthlyTodos = todos.filter(todo => {
+                if (!todo.completed || !todo.updated_at) return false;
+                
+                const todoDate = new Date(todo.updated_at);
+                return todoDate.getMonth() === targetMonth && 
+                       todoDate.getFullYear() === targetYear;
+            });
+            
+            console.log(`✅ ${monthlyTodos.length} todos completed in ${MONTH_NAMES[targetMonth]} ${targetYear}`);
+            return monthlyTodos.length;
+            
+        } catch (error) {
+            console.error('Error calculating monthly todo count:', error);
+            return 0;
+        }
+    }
+    
+    async function updateMonthlyStreakDisplays() {
+        try {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            // Calculate monthly counts
+            const morningCount = calculateMonthlyRoutineCount('morning', currentMonth, currentYear);
+            const eveningCount = calculateMonthlyRoutineCount('evening', currentMonth, currentYear);
+            const todoCount = calculateMonthlyTodoCount(currentMonth, currentYear);
+            
+            // Update HTML elements - get all streak tiles
+            const streakTiles = document.querySelectorAll('.streak-tile');
+            
+            streakTiles.forEach((tile, index) => {
+                const numberElement = tile.querySelector('.streak-number');
+                const dateElement = tile.querySelector('.streak-date');
+                
+                if (numberElement && dateElement) {
+                    let count = 0;
+                    
+                    // Map tiles to their respective counts based on position
+                    switch (index) {
+                        case 0: // Morgenroutine
+                            count = morningCount;
+                            break;
+                        case 1: // Abendroutine  
+                            count = eveningCount;
+                            break;
+                        case 2: // Todos Erledigt
+                            count = todoCount;
+                            break;
+                    }
+                    
+                    numberElement.textContent = count;
+                    dateElement.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+                }
+            });
+            
+            console.log(`🔥 Monthly streaks updated: Morning: ${morningCount}, Evening: ${eveningCount}, Todos: ${todoCount}`);
+            
+        } catch (error) {
+            console.error('Error updating monthly streak displays:', error);
+        }
+    }
+    
+    function checkForMonthlyReset() {
+        const today = new Date();
+        const lastResetKey = 'lastMonthlyReset';
+        const lastReset = localStorage.getItem(lastResetKey);
+        
+        if (!lastReset) {
+            // First time running, just set the current month
+            localStorage.setItem(lastResetKey, `${today.getFullYear()}-${today.getMonth()}`);
+            return false;
+        }
+        
+        const [lastYear, lastMonth] = lastReset.split('-').map(Number);
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        
+        // Check if we've moved to a new month
+        if (currentYear > lastYear || (currentYear === lastYear && currentMonth > lastMonth)) {
+            console.log(`🔄 New month detected! Resetting streaks for ${MONTH_NAMES[currentMonth]} ${currentYear}`);
+            localStorage.setItem(lastResetKey, `${currentYear}-${currentMonth}`);
+            return true;
+        }
+        
+        return false;
+    }
+    
     // Initialize routine streak counting
     function initializeRoutineStreaks() {
         updateMonthlyRoutineStreak('morning');
         updateMonthlyRoutineStreak('evening');
+        
+        // Check for monthly reset
+        checkForMonthlyReset();
+        
+        // Update monthly displays
+        updateMonthlyStreakDisplays();
     }
     
     // Goals System with Edit Buttons
