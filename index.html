@@ -3429,21 +3429,41 @@
             // Check for logout parameter first (Chrome Mobile fix)
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('logout') === '1') {
-                console.log('🚪 Logout parameter detected, forcing session clear...');
+                console.log('🚪 Logout parameter detected, forcing complete logout...');
+                
+                // Show loading indicator
+                document.body.innerHTML = '<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;color:#666;">🚪 Logging out...</div>';
+                
                 try {
+                    // Initialize Supabase first to have access to signOut
+                    if (window.initializeSupabase) {
+                        window.initializeSupabase();
+                    }
+                    
+                    // Clear everything aggressively
                     localStorage.clear();
                     sessionStorage.clear();
                     globalRoutineCompletions = [];
+                    
+                    // Clear Supabase session
                     if (window.supabase && typeof window.supabase.signOut === 'function') {
                         await window.supabase.signOut();
+                        console.log('✅ Supabase session cleared');
                     }
+                    
+                    // Clear all cookies for this domain
+                    document.cookie.split(";").forEach(function(c) { 
+                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                    });
+                    
                 } catch (e) {
                     console.warn('⚠️ Logout cleanup failed:', e);
                 }
-                // Remove parameter and reload clean
-                window.history.replaceState({}, document.title, window.location.href.split('?')[0]);
-                console.log('🔄 Reloading page clean after logout...');
-                window.location.reload();
+                
+                // Force complete page refresh to login screen after a delay
+                setTimeout(() => {
+                    window.location.href = window.location.href.split('?')[0];
+                }, 1000);
                 return;
             }
             
