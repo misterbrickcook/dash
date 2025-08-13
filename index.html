@@ -2103,13 +2103,31 @@
                     
                     // Track todo completion for monthly count
                     if (todo.completed && !wasCompleted) {
+                        console.log('🔍 DEBUG: Todo completed, tracking...');
                         // Only track when going from uncompleted to completed
-                        if (window.trackTodoCompletion) {
-                            window.trackTodoCompletion();
-                        }
-                        // Update streak displays
-                        if (window.updateMonthlyStreakDisplays) {
-                            window.updateMonthlyStreakDisplays();
+                        try {
+                            const now = new Date();
+                            const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
+                            
+                            const monthlyData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
+                            monthlyData[monthKey] = (monthlyData[monthKey] || 0) + 1;
+                            
+                            localStorage.setItem('monthlyTodoCompletions', JSON.stringify(monthlyData));
+                            console.log(`🔍 DEBUG: Todo completion tracked for ${['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                                     'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()]} ${now.getFullYear()}, total: ${monthlyData[monthKey]}`);
+                            
+                            // Update streak displays immediately
+                            const streakTiles = document.querySelectorAll('.streak-tile');
+                            const todoTile = streakTiles[2]; // Third tile is todos
+                            if (todoTile) {
+                                const numberElement = todoTile.querySelector('.streak-number');
+                                if (numberElement) {
+                                    numberElement.textContent = monthlyData[monthKey];
+                                    console.log(`🔍 DEBUG: Updated todo counter to ${monthlyData[monthKey]}`);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error tracking todo completion:', error);
                         }
                     }
                     
