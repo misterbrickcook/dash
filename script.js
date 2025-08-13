@@ -1378,14 +1378,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Routine Completion Tracking for Monthly Streaks
     async function checkAndSaveRoutineCompletion() {
+        console.log('🔍 DEBUG: checkAndSaveRoutineCompletion called');
         const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
         
         // Check morning routine completion
         const morningComplete = isRoutineComplete('morning');
+        console.log(`🔍 DEBUG: morningComplete = ${morningComplete}`);
         await saveRoutineCompletion('morning', today, morningComplete);
         
         // Check evening routine completion
         const eveningComplete = isRoutineComplete('evening');
+        console.log(`🔍 DEBUG: eveningComplete = ${eveningComplete}`);
         await saveRoutineCompletion('evening', today, eveningComplete);
         
         // Update monthly streak counters
@@ -1411,11 +1414,21 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     
     async function saveRoutineCompletion(routineType, date, completed) {
+        console.log(`🔍 DEBUG: saveRoutineCompletion called: ${routineType}, ${date}, ${completed}`);
+        
+        // Save to both cloud and localStorage for monthly streak system
         const completionData = await getRoutineCompletionData();
         if (!completionData[date]) completionData[date] = {};
         completionData[date][routineType] = completed;
         await cloudStorage.saveRoutineCompletionData(completionData);
         
+        // Also save to localStorage for monthly streak calculations
+        const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+        if (!localData[date]) localData[date] = {};
+        localData[date][routineType] = completed;
+        localStorage.setItem('routineCompletionData', JSON.stringify(localData));
+        
+        console.log(`🔍 DEBUG: Saved to both cloud and localStorage`);
         console.log(`Saved ${routineType} routine completion for ${date}: ${completed}`);
     }
     
