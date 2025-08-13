@@ -893,6 +893,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         }
         
+        // Track todo completion for monthly count
+        if (checked) {
+            trackTodoCompletion();
+        }
+        
         // Update monthly streak displays
         await updateMonthlyStreakDisplays();
     }
@@ -928,6 +933,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             label.style.textDecoration = 'none';
             label.style.color = 'inherit';
             console.log(`Task unchecked on ${currentTab} tab:`, taskText, 'ID:', taskId);
+        }
+        
+        // Track todo completion for monthly count
+        if (checkbox.checked) {
+            trackTodoCompletion();
         }
         
         // Update monthly streak displays
@@ -1578,29 +1588,102 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     function calculateMonthlyTodoCount(month = null, year = null) {
         try {
+            console.log(`🔍 DEBUG: calculateMonthlyTodoCount called`);
+            
             const now = new Date();
             const targetMonth = month !== null ? month : now.getMonth();
             const targetYear = year !== null ? year : now.getFullYear();
             
-            const todos = cloudStorage.getLocalTodos();
-            if (!todos || todos.length === 0) {
-                return 0;
+            console.log(`🔍 DEBUG: Target month: ${targetMonth} (${MONTH_NAMES[targetMonth]}), year: ${targetYear}`);
+            
+            // Try multiple data sources for todos
+            let todos = [];
+            
+            // 1. Try cloud storage todos
+            try {
+                if (window.cloudStorage) {
+                    const cloudTodos = cloudStorage.getLocalTodos();
+                    if (cloudTodos && cloudTodos.length > 0) {
+                        todos = cloudTodos;
+                        console.log(`🔍 DEBUG: Found ${todos.length} todos from cloud storage`);
+                    }
+                }
+            } catch (error) {
+                console.log(`🔍 DEBUG: Cloud storage todos not available:`, error);
             }
             
-            // Count completed todos in the target month
-            const monthlyTodos = todos.filter(todo => {
-                if (!todo.completed || !todo.updated_at) return false;
-                
-                const todoDate = new Date(todo.updated_at);
-                return todoDate.getMonth() === targetMonth && 
-                       todoDate.getFullYear() === targetYear;
-            });
+            // 2. Try localStorage cached todos
+            if (todos.length === 0) {
+                try {
+                    const cachedTodos = JSON.parse(localStorage.getItem('todos_cache') || '[]');
+                    if (cachedTodos.length > 0) {
+                        todos = cachedTodos;
+                        console.log(`🔍 DEBUG: Found ${todos.length} todos from localStorage cache`);
+                    }
+                } catch (error) {
+                    console.log(`🔍 DEBUG: localStorage todos not available:`, error);
+                }
+            }
             
-            console.log(`✅ ${monthlyTodos.length} todos completed in ${MONTH_NAMES[targetMonth]} ${targetYear}`);
-            return monthlyTodos.length;
+            // 3. Use dedicated monthly todo completion tracking
+            const monthlyTodoData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
+            const monthKey = `${targetYear}-${targetMonth}`;
+            
+            if (monthlyTodoData[monthKey]) {
+                const monthlyCount = monthlyTodoData[monthKey];
+                console.log(`✅ ${monthlyCount} todos completed in ${MONTH_NAMES[targetMonth]} ${targetYear} (from dedicated tracking)`);
+                return monthlyCount;
+            }
+            
+            // Fallback: count from todo data if available
+            if (todos.length > 0) {
+                const monthlyTodos = todos.filter(todo => {
+                    if (!todo.completed) return false;
+                    
+                    // Check multiple date fields
+                    let todoDate = null;
+                    if (todo.updated_at) {
+                        todoDate = new Date(todo.updated_at);
+                    } else if (todo.created_at) {
+                        todoDate = new Date(todo.created_at);
+                    } else if (todo.date) {
+                        todoDate = new Date(todo.date);
+                    }
+                    
+                    if (!todoDate || isNaN(todoDate.getTime())) return false;
+                    
+                    return todoDate.getMonth() === targetMonth && 
+                           todoDate.getFullYear() === targetYear;
+                });
+                
+                console.log(`✅ ${monthlyTodos.length} todos completed in ${MONTH_NAMES[targetMonth]} ${targetYear} (from todo data)`);
+                return monthlyTodos.length;
+            }
+            
+            console.log(`✅ 0 todos completed in ${MONTH_NAMES[targetMonth]} ${targetYear} (no data found)`);
+            return 0;
             
         } catch (error) {
             console.error('Error calculating monthly todo count:', error);
+            return 0;
+        }
+    }
+    
+    // Function to track todo completions
+    function trackTodoCompletion() {
+        try {
+            const now = new Date();
+            const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
+            
+            const monthlyData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
+            monthlyData[monthKey] = (monthlyData[monthKey] || 0) + 1;
+            
+            localStorage.setItem('monthlyTodoCompletions', JSON.stringify(monthlyData));
+            console.log(`🔍 DEBUG: Todo completion tracked for ${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}, total: ${monthlyData[monthKey]}`);
+            
+            return monthlyData[monthKey];
+        } catch (error) {
+            console.error('Error tracking todo completion:', error);
             return 0;
         }
     }

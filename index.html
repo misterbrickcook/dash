@@ -1304,6 +1304,10 @@
                         <button id="reset-routines-today" class="btn btn-secondary">Routinen heute zurücksetzen</button>
                         <span class="setting-description">Setzt alle Routine-Checkboxes für heute zurück</span>
                     </div>
+                    <div class="setting-item">
+                        <button id="reset-monthly-todos" class="btn btn-secondary">Todo-Zähler für aktuellen Monat zurücksetzen</button>
+                        <span class="setting-description">Setzt den monatlichen Todo-Counter auf 0 zurück</span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1656,6 +1660,19 @@
                     }
                 });
             }
+            
+            // Reset monthly todos button
+            const resetTodosBtn = document.getElementById('reset-monthly-todos');
+            if (resetTodosBtn) {
+                resetTodosBtn.addEventListener('click', () => {
+                    const now = new Date();
+                    const monthName = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                                     'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()];
+                    if (confirm(`Möchtest du wirklich den Todo-Zähler für ${monthName} ${now.getFullYear()} zurücksetzen?`)) {
+                        resetMonthlyTodos();
+                    }
+                });
+            }
         }
         
         function resetRoutinesToday() {
@@ -1689,6 +1706,26 @@
             
             alert('Routinen für heute wurden zurückgesetzt!');
             console.log('Routines reset for today');
+        }
+        
+        function resetMonthlyTodos() {
+            const now = new Date();
+            const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
+            
+            // Reset monthly todo completions
+            const monthlyData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
+            monthlyData[monthKey] = 0;
+            localStorage.setItem('monthlyTodoCompletions', JSON.stringify(monthlyData));
+            
+            // Update streak displays
+            if (window.updateMonthlyStreakDisplays) {
+                updateMonthlyStreakDisplays();
+            }
+            
+            const monthName = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                             'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()];
+            alert(`Todo-Zähler für ${monthName} ${now.getFullYear()} wurde auf 0 zurückgesetzt!`);
+            console.log(`Monthly todos reset for ${monthKey}`);
         }
 
         // === EVENT LISTENERS ===
