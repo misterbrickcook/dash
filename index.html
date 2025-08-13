@@ -1610,9 +1610,30 @@
                                 
                                 console.log(`🔍 DEBUG: Querying Supabase for routine completions from ${currentMonthStart} to ${nextMonthStart}`);
                                 
-                                // This is a simplified approach - we'll add the full Supabase integration later
-                                // For now, just log that we're trying
-                                console.log(`🔍 DEBUG: Supabase query would be: routine_completions?date=gte.${currentMonthStart}&date=lt.${nextMonthStart}`);
+                                // Execute the actual Supabase query
+                                console.log(`🔍 DEBUG: Executing Supabase query: routine_completions?date=gte.${currentMonthStart}&date=lt.${nextMonthStart}`);
+                                
+                                const routineCompletions = await supabase.query(`routine_completions?date=gte.${currentMonthStart}&date=lt.${nextMonthStart}`);
+                                console.log(`🔍 DEBUG: Supabase returned ${routineCompletions?.length || 0} routine completions:`, routineCompletions);
+                                
+                                if (routineCompletions && routineCompletions.length > 0) {
+                                    // Filter for current routine type and count unique dates
+                                    const currentRoutineCompletions = routineCompletions.filter(completion => {
+                                        return completion.template_id && 
+                                               completion.template_id.includes(routineType) && 
+                                               completion.completed === true;
+                                    });
+                                    
+                                    console.log(`🔍 DEBUG: Found ${currentRoutineCompletions.length} ${routineType} completions from Supabase`);
+                                    
+                                    // Count unique dates (each day counts as 1 completion regardless of how many routine items)
+                                    const uniqueDates = new Set(currentRoutineCompletions.map(c => c.date));
+                                    const supabaseMonthlyCount = uniqueDates.size;
+                                    console.log(`🔍 DEBUG: Supabase ${routineType} count: ${supabaseMonthlyCount}`);
+                                    
+                                    // Use the higher count
+                                    monthlyCount = Math.max(monthlyCount, supabaseMonthlyCount);
+                                }
                             } catch (error) {
                                 console.warn(`⚠️ Error querying Supabase directly:`, error);
                             }
@@ -1846,6 +1867,36 @@
                 }
             } catch (error) {
                 console.error('Error initializing todo counter:', error);
+            }
+        }
+        
+        // === ROUTINE COMPLETIONS LOADER ===
+        async function loadRoutineCompletions() {
+            try {
+                console.log('🔄 Loading routine completions from Supabase...');
+                
+                if (!supabase?.isAuthenticated()) {
+                    console.log('⚠️ Not authenticated, skipping routine completions load');
+                    return;
+                }
+                
+                // Query routine completions from Supabase
+                const routineCompletions = await supabase.query('routine_completions?select=*');
+                console.log(`✅ Loaded ${routineCompletions?.length || 0} routine completions from database:`, routineCompletions);
+                
+                if (routineCompletions && routineCompletions.length > 0) {
+                    // Cache in localStorage for offline access
+                    localStorage.setItem('routine_completions_cache', JSON.stringify(routineCompletions));
+                    console.log('💾 Cached routine completions in localStorage');
+                } else {
+                    console.log('ℹ️ No routine completions found in database');
+                    // Ensure empty cache if no data
+                    localStorage.setItem('routine_completions_cache', JSON.stringify([]));
+                }
+            } catch (error) {
+                console.error('❌ Error loading routine completions:', error);
+                // Set empty cache on error
+                localStorage.setItem('routine_completions_cache', JSON.stringify([]));
             }
         }
 
@@ -3297,7 +3348,8 @@
                     TodoManager.loadTodos(),
                     GoalManager.loadGoals(),
                     JournalManager.loadEntries(),
-                    TerminManager.loadTermine()
+                    TerminManager.loadTermine(),
+                    loadRoutineCompletions()
                 ]);
             } else {
                 // Initialize displays for local storage mode
