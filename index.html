@@ -2993,9 +2993,15 @@
             
             hideAddTerminModal() {
                 const modal = document.getElementById('add-termin-modal');
+                const form = document.getElementById('add-termin-form');
+                const submitBtn = form.querySelector('button[type="submit"]');
+                
                 modal.classList.add('hide');
-                // Reset form
-                document.getElementById('add-termin-form').reset();
+                form.reset();
+                delete form.dataset.editId; // Clear edit mode
+                if (submitBtn) {
+                    submitBtn.textContent = 'Hinzufügen'; // Reset button text
+                }
             },
             
             async addTermin(terminData) {
@@ -3028,6 +3034,40 @@
                 }
                 
                 console.log('Termin added:', termin);
+                
+                // Refresh display
+                this.displayTermine();
+            },
+            
+            async updateTermin(terminId, terminData) {
+                const terminIndex = this.termine.findIndex(t => t.id == terminId);
+                if (terminIndex === -1) {
+                    console.error('Termin not found for update:', terminId);
+                    return;
+                }
+                
+                const updatedTermin = {
+                    ...this.termine[terminIndex],
+                    title: terminData.title,
+                    description: terminData.description,
+                    date: terminData.date,
+                    time: terminData.time,
+                    updated_at: new Date().toISOString()
+                };
+                
+                if (supabase?.isAuthenticated()) {
+                    try {
+                        await supabase.update('termine', updatedTermin, terminId);
+                        this.termine[terminIndex] = updatedTermin;
+                    } catch (error) {
+                        console.error('Error updating termin:', error);
+                        this.termine[terminIndex] = updatedTermin;
+                    }
+                } else {
+                    this.termine[terminIndex] = updatedTermin;
+                }
+                
+                console.log('Termin updated:', updatedTermin);
                 
                 // Refresh display
                 this.displayTermine();
@@ -3083,12 +3123,74 @@
                 }
                 
                 terminCard.innerHTML = `
+                    <div class="termin-edit-icon" onclick="TerminManager.editTermin('${termin.id}')" style="position: absolute; top: 1rem; right: 1rem; cursor: pointer; color: #666; font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s ease;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">✎</div>
+                    <div class="termin-delete-icon" onclick="TerminManager.deleteTermin('${termin.id}')" style="position: absolute; top: 1rem; right: 2.5rem; cursor: pointer; color: #dc2626; font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s ease;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🗑</div>
                     <div class="termin-date">${displayDate}</div>
                     <div class="termin-title">${termin.title}</div>
                     <div class="termin-description">${termin.description}</div>
                 `;
                 
                 return terminCard;
+            },
+            
+            async editTermin(terminId) {
+                const termin = this.termine.find(t => t.id == terminId);
+                if (!termin) {
+                    alert('Termin nicht gefunden!');
+                    return;
+                }
+                
+                // Pre-fill the form with existing values
+                document.getElementById('termin-title').value = termin.title;
+                document.getElementById('termin-description').value = termin.description;
+                document.getElementById('termin-date').value = termin.date;
+                document.getElementById('termin-time').value = termin.time || '';
+                
+                // Store the ID for updating
+                const form = document.getElementById('add-termin-form');
+                form.dataset.editId = terminId;
+                
+                // Change button text
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Termin aktualisieren';
+                
+                // Show modal
+                this.showAddTerminModal();
+            },
+            
+            async deleteTermin(terminId) {
+                if (!confirm('Möchtest du diesen Termin wirklich löschen?')) {
+                    return;
+                }
+                
+                console.log('🗑️ Deleting termin:', terminId);
+                
+                if (supabase?.isAuthenticated()) {
+                    try {
+                        await supabase.delete('termine', terminId);
+                        console.log('✅ Termin deleted from database');
+                    } catch (error) {
+                        console.error('❌ Error deleting termin from database:', error);
+                        alert('Fehler beim Löschen: ' + error.message);
+                        return;
+                    }
+                }
+                
+                // Remove from local array
+                this.termine = this.termine.filter(t => t.id != terminId);
+                
+                // Update localStorage cache
+                try {
+                    localStorage.setItem('termine_cache', JSON.stringify(this.termine));
+                    console.log('🔄 Updated local termine cache');
+                } catch (error) {
+                    console.error('Error updating local termine cache:', error);
+                }
+                
+                // Refresh view
+                this.displayTermine();
+                
+                console.log('✅ Termin deleted successfully');
             }
         };
 
@@ -3386,7 +3488,14 @@
                         time: document.getElementById('termin-time').value
                     };
                     
-                    await TerminManager.addTermin(terminData);
+                    // Check if we're editing an existing termin
+                    const editId = addTerminForm.dataset.editId;
+                    if (editId) {
+                        await TerminManager.updateTermin(editId, terminData);
+                    } else {
+                        await TerminManager.addTermin(terminData);
+                    }
+                    
                     TerminManager.hideAddTerminModal();
                 });
             }
