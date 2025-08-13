@@ -1355,6 +1355,17 @@
     <!-- Scripts -->
     <script src="supabase-config.js"></script>
     <script>
+        // Debug: Check if basic JavaScript works
+        console.log('🔧 JavaScript loading started...');
+        
+        window.addEventListener('error', function(e) {
+            console.error('❌ JavaScript Error:', e.error);
+            alert('JavaScript Error: ' + e.message + ' at line ' + e.lineno);
+        });
+        
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM loaded');
+        });
         // === AUTHENTICATION ===
         const Auth = {
             isAuthenticated: false,
