@@ -2101,7 +2101,7 @@
                     todo.completed = !todo.completed;
                     console.log(`✅ Todo "${todo.title}" ${todo.completed ? 'completed' : 'uncompleted'}`);
                     
-                    // Track todo completion for monthly count
+                    // Track todo completion for monthly count ONLY when completing (not uncompleting)
                     if (todo.completed && !wasCompleted) {
                         console.log('🔍 DEBUG: Todo completed, tracking...');
                         // Only track when going from uncompleted to completed
@@ -2129,6 +2129,8 @@
                         } catch (error) {
                             console.error('Error tracking todo completion:', error);
                         }
+                    } else if (!todo.completed && wasCompleted) {
+                        console.log('🔍 DEBUG: Todo uncompleted - counter stays the same (once completed todos stay in monthly count)');
                     }
                     
                     if (supabase?.isAuthenticated()) {

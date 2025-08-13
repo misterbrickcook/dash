@@ -1629,7 +1629,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const monthlyTodoData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
             const monthKey = `${targetYear}-${targetMonth}`;
             
-            if (monthlyTodoData[monthKey]) {
+            if (monthlyTodoData[monthKey] !== undefined) {
                 const monthlyCount = monthlyTodoData[monthKey];
                 console.log(`✅ ${monthlyCount} todos completed in ${MONTH_NAMES[targetMonth]} ${targetYear} (from dedicated tracking)`);
                 return monthlyCount;
