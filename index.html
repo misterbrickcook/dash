@@ -2229,7 +2229,9 @@
             },
             
             async clearArchive() {
+                console.log('🔍 DEBUG: clearArchive() called');
                 if (!confirm('Wirklich alle erledigten Todos dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden!')) {
+                    console.log('🔍 DEBUG: Archive clear cancelled by user');
                     return;
                 }
                 
