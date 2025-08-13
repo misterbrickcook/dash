@@ -200,19 +200,22 @@
         }
         .checkbox-item.todo-item {
             justify-content: space-between;
+            width: 100%;
         }
         .checkbox-item.todo-item .todo-left {
             display: flex;
             align-items: center;
             gap: 0.75rem;
             flex: 1;
+            min-width: 0; /* Allow shrinking */
         }
         .checkbox-item.todo-item .todo-time {
             font-size: 0.85rem;
             color: #666;
             font-weight: 500;
             flex-shrink: 0;
-            margin-left: auto;
+            margin-left: 1rem;
+            text-align: right;
         }
         .checkbox-item input[type="checkbox"] {
             width: 18px;
@@ -2043,8 +2046,22 @@
                             todo.category === category && !todo.completed
                         );
                 }
-                // Sort by deadline (earliest first)
-                filteredTodos.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+                // Sort by date first, then by time
+                filteredTodos.sort((a, b) => {
+                    // First by date
+                    const dateA = a.date || '9999-12-31';
+                    const dateB = b.date || '9999-12-31';
+                    const dateComparison = dateA.localeCompare(dateB);
+                    
+                    if (dateComparison !== 0) {
+                        return dateComparison;
+                    }
+                    
+                    // Then by time
+                    const timeA = a.time || '23:59';
+                    const timeB = b.time || '23:59';
+                    return timeA.localeCompare(timeB);
+                });
                 
                 // Clear container
                 container.innerHTML = '';
