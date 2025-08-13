@@ -1337,28 +1337,23 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         console.log(`Routine progress updated: ${completed}/${total} (${percentage}%)`);
         
-        // Update monthly streaks when routines are completed
-        setTimeout(async () => {
-            console.log('🔍 DEBUG: Checking routine completion for monthly streaks');
+        // Direct monthly streak update - no setTimeout
+        console.log('🔍 DEBUG: Direct monthly streak check');
+        if (percentage === 100) {
+            console.log('🔍 DEBUG: 100% reached, updating monthly streaks');
             const today = new Date().toISOString().split('T')[0];
+            const routineType = isEveningVisible ? 'evening' : 'morning';
             
-            // Check if morning routine is complete
-            const morningComplete = isRoutineComplete('morning');
-            if (morningComplete) {
-                console.log('🔍 DEBUG: Morning routine complete, saving and updating streaks');
-                await saveRoutineCompletion('morning', today, true);
-            }
+            // Save completion
+            const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+            if (!localData[today]) localData[today] = {};
+            localData[today][routineType] = true;
+            localStorage.setItem('routineCompletionData', JSON.stringify(localData));
+            console.log(`🔍 DEBUG: Saved ${routineType} completion to localStorage`);
             
-            // Check if evening routine is complete  
-            const eveningComplete = isRoutineComplete('evening');
-            if (eveningComplete) {
-                console.log('🔍 DEBUG: Evening routine complete, saving and updating streaks');
-                await saveRoutineCompletion('evening', today, true);
-            }
-            
-            // Always update displays
-            await updateMonthlyStreakDisplays();
-        }, 200);
+            // Update display immediately
+            updateMonthlyStreakDisplays();
+        }
     }
     
     // Initialize routine progress tracking
