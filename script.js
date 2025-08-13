@@ -1495,6 +1495,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     function calculateMonthlyRoutineCount(routineType, month = null, year = null) {
         try {
+            console.log(`🔍 DEBUG: calculateMonthlyRoutineCount called for ${routineType}`);
+            
             const now = new Date();
             const targetMonth = month !== null ? month : now.getMonth();
             const targetYear = year !== null ? year : now.getFullYear();
@@ -1502,16 +1504,19 @@ document.addEventListener('DOMContentLoaded', async function() {
             let monthlyCount = 0;
             const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
             
+            // Check storage data
+            const completionData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+            console.log(`🔍 DEBUG: routineCompletionData:`, completionData);
+            
             // Check each day of the target month
             for (let day = 1; day <= daysInMonth; day++) {
                 const checkDate = new Date(targetYear, targetMonth, day);
                 const dateStr = checkDate.toISOString().split('T')[0];
                 
-                // Check if routine was completed on this day using the legacy storage method
-                const completionData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
                 const dayData = completionData[dateStr];
                 
                 if (dayData && dayData[routineType] === true) {
+                    console.log(`🔍 DEBUG: Found completion for ${routineType} on ${dateStr}`);
                     monthlyCount++;
                 }
             }
@@ -1556,21 +1561,30 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     async function updateMonthlyStreakDisplays() {
         try {
+            console.log('🔍 DEBUG: updateMonthlyStreakDisplays called');
+            
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
+            
+            console.log(`🔍 DEBUG: Current month: ${currentMonth}, year: ${currentYear}`);
             
             // Calculate monthly counts
             const morningCount = calculateMonthlyRoutineCount('morning', currentMonth, currentYear);
             const eveningCount = calculateMonthlyRoutineCount('evening', currentMonth, currentYear);
             const todoCount = calculateMonthlyTodoCount(currentMonth, currentYear);
             
+            console.log(`🔍 DEBUG: Counts - Morning: ${morningCount}, Evening: ${eveningCount}, Todos: ${todoCount}`);
+            
             // Update HTML elements - get all streak tiles
             const streakTiles = document.querySelectorAll('.streak-tile');
+            console.log(`🔍 DEBUG: Found ${streakTiles.length} streak tiles`);
             
             streakTiles.forEach((tile, index) => {
                 const numberElement = tile.querySelector('.streak-number');
                 const dateElement = tile.querySelector('.streak-date');
+                
+                console.log(`🔍 DEBUG: Tile ${index} - numberElement: ${!!numberElement}, dateElement: ${!!dateElement}`);
                 
                 if (numberElement && dateElement) {
                     let count = 0;
@@ -1588,6 +1602,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                             break;
                     }
                     
+                    console.log(`🔍 DEBUG: Setting tile ${index} to count ${count}`);
                     numberElement.textContent = count;
                     dateElement.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
                 }
