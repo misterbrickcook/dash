@@ -1660,8 +1660,16 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return monthlyTodos.length;
             }
             
-            console.log(`✅ 0 todos completed in ${MONTH_NAMES[targetMonth]} ${targetYear} (no data found)`);
-            return 0;
+            // If no dedicated tracking exists, initialize with 0 but don't return 0
+            // This prevents overwriting existing counts
+            console.log(`📊 No todo data found - initializing monthly tracking for ${MONTH_NAMES[targetMonth]} ${targetYear}`);
+            const monthlyData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
+            const monthKey = `${targetYear}-${targetMonth}`;
+            if (monthlyData[monthKey] === undefined) {
+                monthlyData[monthKey] = 0;
+                localStorage.setItem('monthlyTodoCompletions', JSON.stringify(monthlyData));
+            }
+            return monthlyData[monthKey];
             
         } catch (error) {
             console.error('Error calculating monthly todo count:', error);

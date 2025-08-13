@@ -2188,6 +2188,14 @@
                 // Remove from local array
                 this.todos = this.todos.filter(todo => !todo.completed);
                 
+                // Update localStorage cache
+                try {
+                    localStorage.setItem('todos_cache', JSON.stringify(this.todos));
+                    console.log('🔄 Updated local todos cache');
+                } catch (error) {
+                    console.error('Error updating local todos cache:', error);
+                }
+                
                 // Refresh current view
                 this.refreshCurrentView();
                 
