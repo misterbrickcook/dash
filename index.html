@@ -3118,6 +3118,7 @@
                         // Create database entry without 'date' field (only 'entry_date')
                         const dbEntry = { ...entry };
                         delete dbEntry.date;
+                        console.log('💾 Sending to database:', dbEntry);
                         const result = await supabase.insert('journal_entries', dbEntry);
                         if (result && result.length > 0) {
                             this.entries.push(result[0]);
