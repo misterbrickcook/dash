@@ -1998,6 +1998,34 @@
             }
         }
         
+        // === MONTHLY STREAK DISPLAY FUNCTION (FIXED) ===
+        function updateMonthlyStreakDisplays() {
+            console.log('🔄 Updating monthly streak displays...');
+            // Simple implementation for now
+            const now = new Date();
+            const monthName = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                             'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()];
+            
+            // Update streak tiles with current month
+            const streakTiles = document.querySelectorAll('.streak-tile');
+            streakTiles.forEach((tile, index) => {
+                const dateElement = tile.querySelector('.streak-date');
+                if (dateElement) {
+                    dateElement.textContent = `${monthName} ${now.getFullYear()}`;
+                }
+            });
+        }
+        
+        function updateMonthlyStreakDisplaysFromMemory() {
+            // Fallback to basic function for now
+            updateMonthlyStreakDisplays();
+        }
+        
+        function getRoutineCompletions() {
+            // Return empty array for now
+            return [];
+        }
+        
         // === MAKE FUNCTIONS GLOBALLY AVAILABLE ===
         window.updateMonthlyStreakDisplays = updateMonthlyStreakDisplays;
         window.updateMonthlyStreakDisplaysFromMemory = updateMonthlyStreakDisplaysFromMemory;
