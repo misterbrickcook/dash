@@ -91,6 +91,64 @@
             font-size: 1.2rem;
         }
 
+        /* === SETTINGS PAGE === */
+        .settings-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .setting-group {
+            background: #f8f9fa;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .setting-group h3 {
+            margin: 0 0 1.5rem 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .setting-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .setting-item label {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .setting-item input[type="time"] {
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            max-width: 200px;
+        }
+        
+        .setting-description {
+            font-size: 0.85rem;
+            color: #666666;
+            margin-top: 0.25rem;
+        }
+        
+        .btn-secondary {
+            background: #6b7280 !important;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563 !important;
+        }
+
         /* === MAIN CONTENT === */
         .main-content { padding: 0 20px 40px 20px; }
         .tab-section { display: none; }
@@ -974,6 +1032,7 @@
             <button class="nav-tab" data-tab="tab-todos">ToDos</button>
             <button class="nav-tab" data-tab="tab-ziele">Ziele</button>
             <button class="nav-tab" data-tab="tab-journal">Journal</button>
+            <button class="nav-tab" data-tab="tab-settings" style="display: none;">Settings</button>
             <div class="nav-actions">
                 <button id="settings-btn" class="nav-tab settings-btn">
                     <span>⚙</span>
@@ -1222,6 +1281,31 @@
                 <!-- Lesen entries will be loaded from database -->
             </div>
 
+        </section>
+
+        <!-- === SETTINGS TAB === -->
+        <section id="tab-settings" class="tab-section">
+            <h1 class="section-title">Einstellungen</h1>
+            
+            <div class="settings-container">
+                <div class="setting-group">
+                    <h3>Routinen</h3>
+                    <div class="setting-item">
+                        <label for="routine-reset-time">Routine Reset Zeit:</label>
+                        <input type="time" id="routine-reset-time" value="06:00">
+                        <span class="setting-description">Zeit, zu der die Routinen täglich zurückgesetzt werden</span>
+                    </div>
+                    <button id="save-routine-settings" class="btn">Speichern</button>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>Daten</h3>
+                    <div class="setting-item">
+                        <button id="reset-routines-today" class="btn btn-secondary">Routinen heute zurücksetzen</button>
+                        <span class="setting-description">Setzt alle Routine-Checkboxes für heute zurück</span>
+                    </div>
+                </div>
+            </div>
         </section>
 
     </div>
@@ -1543,6 +1627,70 @@
             JournalManager.displayEntriesForCategory(categoryId);
         }
 
+        // === SETTINGS FUNCTIONALITY ===
+        function initializeSettings() {
+            // Load saved routine reset time
+            const savedResetTime = localStorage.getItem('routineResetTime') || '06:00';
+            const timeInput = document.getElementById('routine-reset-time');
+            if (timeInput) {
+                timeInput.value = savedResetTime;
+            }
+            
+            // Save routine settings button
+            const saveBtn = document.getElementById('save-routine-settings');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    const resetTime = timeInput.value;
+                    localStorage.setItem('routineResetTime', resetTime);
+                    alert(`Routine Reset Zeit auf ${resetTime} gesetzt!`);
+                    console.log(`Routine reset time saved: ${resetTime}`);
+                });
+            }
+            
+            // Reset routines today button
+            const resetBtn = document.getElementById('reset-routines-today');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    if (confirm('Möchtest du wirklich alle Routinen für heute zurücksetzen?')) {
+                        resetRoutinesToday();
+                    }
+                });
+            }
+        }
+        
+        function resetRoutinesToday() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Clear routine states for today
+            localStorage.removeItem(`routineStates_${today}`);
+            
+            // Clear routine completion data for today
+            const completionData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+            if (completionData[today]) {
+                delete completionData[today];
+                localStorage.setItem('routineCompletionData', JSON.stringify(completionData));
+            }
+            
+            // Uncheck all routine checkboxes
+            document.querySelectorAll('.routine-section input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+                const label = checkbox.nextElementSibling;
+                if (label) {
+                    label.style.textDecoration = 'none';
+                    label.style.color = 'inherit';
+                }
+            });
+            
+            // Update progress and streak displays
+            updateRoutineProgress();
+            if (window.updateMonthlyStreakDisplays) {
+                updateMonthlyStreakDisplays();
+            }
+            
+            alert('Routinen für heute wurden zurückgesetzt!');
+            console.log('Routines reset for today');
+        }
+
         // === EVENT LISTENERS ===
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => {
@@ -1559,8 +1707,7 @@
         if (settingsBtn) {
             settingsBtn.addEventListener('click', () => {
                 console.log('Settings clicked');
-                // Placeholder for settings functionality
-                alert('Settings feature coming soon!');
+                switchTab('tab-settings');
             });
         }
 
@@ -3110,6 +3257,9 @@
             
             // Update routine progress to reflect loaded states
             updateRoutineProgress();
+            
+            // Initialize settings functionality
+            initializeSettings();
         });
     </script>
 </body>
