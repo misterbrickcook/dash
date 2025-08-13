@@ -2101,6 +2101,18 @@
                     todo.completed = !todo.completed;
                     console.log(`✅ Todo "${todo.title}" ${todo.completed ? 'completed' : 'uncompleted'}`);
                     
+                    // Track todo completion for monthly count
+                    if (todo.completed && !wasCompleted) {
+                        // Only track when going from uncompleted to completed
+                        if (window.trackTodoCompletion) {
+                            window.trackTodoCompletion();
+                        }
+                        // Update streak displays
+                        if (window.updateMonthlyStreakDisplays) {
+                            window.updateMonthlyStreakDisplays();
+                        }
+                    }
+                    
                     if (supabase?.isAuthenticated()) {
                         try {
                             console.log('💾 Updating in database - ID:', todo.id, 'Type:', typeof todo.id, 'Completed:', todo.completed);

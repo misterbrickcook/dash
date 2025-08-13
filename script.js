@@ -4865,8 +4865,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize dark mode
     darkMode.init();
     
-    // Make monthly streak function globally available for HTML
+    // Make monthly streak functions globally available for HTML
     window.updateMonthlyStreakDisplays = updateMonthlyStreakDisplays;
+    window.trackTodoCompletion = trackTodoCompletion;
     
     // Add hover effects to monthly overview tiles
     function initializeMonthlyOverviewHover() {
