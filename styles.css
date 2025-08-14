@@ -723,44 +723,47 @@ input:focus, textarea:focus, select:focus {
 
 /* === TODO CARDS === */
 .todo-card {
-    position: relative;
     background: #ffffff;
     border: 1px solid #e0e0e0;
-    padding: 1rem;
+    padding: 0.5rem 1rem 1rem 1rem;
     margin-bottom: 1rem;
     transition: border-color 0.2s ease;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 80px;
 }
 
 .todo-card:hover {
     border-color: #000000;
 }
 
+/* Header with category - takes first row */
 .todo-card-header {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    z-index: 10;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    min-height: 24px;
+    margin-bottom: 0.5rem;
 }
 
 .todo-category-badge {
     background: #f0f0f0;
     border: 1px solid #e0e0e0;
-    padding: 0.2rem 0.4rem;
-    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+    font-size: 0.6rem;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: #666666;
-    display: inline-block;
-    white-space: nowrap;
+    line-height: 1;
 }
 
+/* Content with checkbox and text - takes second row */
 .todo-card-content {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
     margin-bottom: 0.5rem;
-    padding-right: 4rem; /* Space for category badge */
 }
 
 .todo-card-content input[type="checkbox"] {
@@ -770,7 +773,7 @@ input:focus, textarea:focus, select:focus {
     appearance: none;
     cursor: pointer;
     flex-shrink: 0;
-    margin-top: 0.1rem; /* Align with text baseline */
+    margin-top: 0.1rem;
 }
 
 .todo-card-content input[type="checkbox"]:checked {
@@ -795,8 +798,9 @@ input:focus, textarea:focus, select:focus {
     word-wrap: break-word;
 }
 
+/* Footer with date/time - takes third row */
 .todo-card-footer {
-    margin-left: 2.5rem; /* Align with label text */
+    margin-left: 2.5rem;
     margin-top: 0.25rem;
     opacity: 0.7;
 }
@@ -819,20 +823,17 @@ input:focus, textarea:focus, select:focus {
 
 @media (max-width: 768px) {
     .todo-card {
-        padding: 0.75rem;
-    }
-    
-    .todo-card-content {
-        padding-right: 3rem; /* Less space on mobile */
+        padding: 0.4rem 0.75rem 0.75rem 0.75rem;
+        min-height: 70px;
     }
     
     .todo-category-badge {
-        font-size: 0.6rem;
-        padding: 0.15rem 0.3rem;
+        font-size: 0.55rem;
+        padding: 0.1rem 0.3rem;
     }
     
     .todo-card-header {
-        top: 0.4rem;
-        right: 0.4rem;
+        min-height: 20px;
+        margin-bottom: 0.4rem;
     }
 }
