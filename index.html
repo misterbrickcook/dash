@@ -3043,12 +3043,15 @@
             
             createGoalElement(goal) {
                 const goalCard = document.createElement('div');
-                goalCard.className = `ziel-card${goal.completed ? ' completed' : ''}`;
+                goalCard.className = `termin-card${goal.completed ? ' completed' : ''}`;
                 goalCard.dataset.goalId = goal.id;
                 
-                // Calculate days until deadline (similar to termine)
-                let deadlineText = '';
-                let deadlineBadge = '';
+                // Calculate days until deadline (exactly like termine)
+                let daysUntilText = '';
+                let badgeColor1 = '';
+                let badgeColor2 = '';
+                let formattedDeadline = '';
+                
                 if (goal.deadline) {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
@@ -3056,44 +3059,49 @@
                     goalDate.setHours(0, 0, 0, 0);
                     const daysDifference = Math.ceil((goalDate - today) / (1000 * 60 * 60 * 24));
                     
-                    // Format German date - handle both YYYY-MM-DD and full ISO dates
-                    let germanDate = '';
-                    try {
-                        const dateOnly = goal.deadline.split('T')[0]; // Remove time part if exists
-                        const [year, month, day] = dateOnly.split('-');
-                        germanDate = `${day}.${month}.${year}`;
-                    } catch (error) {
-                        // Fallback: use the date object
-                        germanDate = goalDate.toLocaleDateString('de-DE');
-                    }
-                    deadlineText = `Deadline: ${germanDate}`;
+                    // Format deadline like termine
+                    formattedDeadline = goalDate.toLocaleDateString('de-DE', {
+                        weekday: 'long',
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
                     
+                    // Badge styling (exactly like termine)
                     if (daysDifference === 0) {
-                        deadlineBadge = `<span class="days-until-badge heute">Heute</span>`;
+                        daysUntilText = 'Heute';
+                        badgeColor1 = '#ef4444';
+                        badgeColor2 = '#dc2626';
                     } else if (daysDifference === 1) {
-                        deadlineBadge = `<span class="days-until-badge morgen">Morgen</span>`;
+                        daysUntilText = 'Morgen';
+                        badgeColor1 = '#f97316';
+                        badgeColor2 = '#ea580c';
                     } else if (daysDifference === -1) {
-                        deadlineBadge = `<span class="days-until-badge overdue">1 Tag überfällig</span>`;
+                        daysUntilText = 'Gestern';
+                        badgeColor1 = '#6b7280';
+                        badgeColor2 = '#4b5563';
                     } else if (daysDifference > 1) {
-                        deadlineBadge = `<span class="days-until-badge future">${daysDifference} Tage</span>`;
+                        daysUntilText = `in ${daysDifference} Tagen`;
+                        badgeColor1 = '#3b82f6';
+                        badgeColor2 = '#2563eb';
                     } else if (daysDifference < -1) {
-                        deadlineBadge = `<span class="days-until-badge overdue">${Math.abs(daysDifference)} Tage überfällig</span>`;
+                        daysUntilText = `vor ${Math.abs(daysDifference)} Tagen`;
+                        badgeColor1 = '#6b7280';
+                        badgeColor2 = '#4b5563';
                     }
                 }
                 
+                // Set CSS custom properties for badge colors (like terme)
+                const badgeColorVars = `--badge-color-1: ${badgeColor1}; --badge-color-2: ${badgeColor2};`;
+                goalCard.style.cssText += badgeColorVars;
+                
                 goalCard.innerHTML = `
                     <div class="ziel-kategorie">${goal.category}</div>
-                    <div class="ziel-edit-icon" onclick="GoalManager.editGoalProgress('${goal.id}')" style="position: absolute; top: 1rem; left: 1rem; cursor: pointer; color: #666; font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s ease;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">✎</div>
-                    <div class="ziel-header">
-                        <div class="ziel-name">${goal.name}</div>
-                        <div class="ziel-beschreibung">
-                            ${goal.description}
-                            ${deadlineText ? `<div class="goal-deadline" style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
-                                ${deadlineText} ${deadlineBadge}
-                            </div>` : ''}
-                        </div>
-                    </div>
-                    <div class="ziel-progress-section">
+                    ${daysUntilText ? `<div class="termin-days-until">${daysUntilText}</div>` : ''}
+                    ${formattedDeadline ? `<div class="termin-date">🎯 ${formattedDeadline}</div>` : ''}
+                    <div class="termin-title">${goal.name}</div>
+                    <div class="termin-description">${goal.description}</div>
+                    <div class="ziel-progress-section" style="margin-top: 1rem;">
                         <div class="ziel-progress-header">
                             <span class="ziel-progress-label">Fortschritt</span>
                             <span class="ziel-percentage">${goal.progress}%</span>
@@ -3104,6 +3112,7 @@
                             </div>
                         </div>
                     </div>
+                    <div class="termin-edit-icon" onclick="GoalManager.editGoalProgress('${goal.id}')">✎</div>
                 `;
                 
                 return goalCard;
