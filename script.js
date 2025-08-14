@@ -369,7 +369,37 @@ const Auth = {
                         console.log('✅ Notes loaded from database');
                     }
                     
-                    console.log('🎉 All user data restored from database!');
+                    // Load termine/appointments
+                    if (window.TerminManager && window.TerminManager.loadTermine) {
+                        await window.TerminManager.loadTermine();
+                        console.log('✅ Termine loaded from database');
+                    }
+                    
+                    // Load todos
+                    if (window.TodoManager && window.TodoManager.loadTodos) {
+                        await window.TodoManager.loadTodos();
+                        console.log('✅ TodoManager loaded from database');
+                    }
+                    
+                    // Load goals
+                    if (window.GoalManager && window.GoalManager.loadGoals) {
+                        await window.GoalManager.loadGoals();
+                        console.log('✅ GoalManager loaded from database');
+                    }
+                    
+                    // Load journal entries
+                    if (window.JournalManager && window.JournalManager.loadEntries) {
+                        await window.JournalManager.loadEntries();
+                        console.log('✅ JournalManager loaded from database');
+                    }
+                    
+                    // Load routine completions
+                    if (window.loadRoutineCompletions) {
+                        await window.loadRoutineCompletions();
+                        console.log('✅ Routine completions loaded');
+                    }
+                    
+                    console.log('🎉 All user data and managers restored from database!');
                 } catch (error) {
                     console.error('⚠️ Error loading user data:', error);
                 }
