@@ -1057,9 +1057,26 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="goal-deadline">Deadline</label>
-                    <input type="date" id="goal-deadline" required autocomplete="off">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="goal-deadline">Deadline</label>
+                        <input type="date" id="goal-deadline" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-unit">Einheit</label>
+                        <input type="text" id="goal-unit" placeholder="z.B. kg, €, Bücher, Stunden..." autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="goal-start-value">Startwert</label>
+                        <input type="number" id="goal-start-value" placeholder="z.B. 80" step="0.01" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-target-value">Zielwert</label>
+                        <input type="number" id="goal-target-value" placeholder="z.B. 70" step="0.01" required autocomplete="off">
+                    </div>
                 </div>
                 
                 <div class="form-actions">
@@ -2903,6 +2920,12 @@
                 document.getElementById('add-goal-form').reset();
             },
             
+            calculateProgress(startValue, targetValue, currentValue) {
+                if (startValue === targetValue) return 100; // Edge case
+                const progress = ((currentValue - startValue) / (targetValue - startValue)) * 100;
+                return Math.max(0, Math.min(100, Math.round(progress))); // Clamp between 0-100
+            },
+            
             async addGoal(goalData) {
                 // TEMPORARY: Skip database, just use local storage until schema is fixed
                 const goal = {
@@ -2912,10 +2935,17 @@
                     category: goalData.category,
                     timeframe: goalData.timeframe, // WICHTIG: timeframe für Filterung
                     deadline: goalData.deadline,
-                    progress: 0, // Always start at 0%
-                    completed: false, // Always start as not completed
+                    unit: goalData.unit || '',
+                    startValue: goalData.startValue || 0,
+                    targetValue: goalData.targetValue,
+                    currentValue: goalData.startValue || 0, // Start with start value
+                    progress: 0, // Will be calculated
+                    completed: false,
                     createdAt: new Date().toISOString()
                 };
+                
+                // Calculate initial progress
+                goal.progress = this.calculateProgress(goal.startValue, goal.targetValue, goal.currentValue);
                 
                 if (supabase?.isAuthenticated()) {
                     try {
@@ -3089,13 +3119,32 @@
                 const badgeColorVars = `--badge-color-1: ${badgeColor1}; --badge-color-2: ${badgeColor2};`;
                 goalCard.style.cssText += badgeColorVars;
                 
+                // Prepare progress display
+                const hasProgressData = goal.startValue !== undefined && goal.targetValue !== undefined;
+                const progressSection = hasProgressData ? `
+                    <div class="goal-progress-section" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0;">
+                        <div class="goal-values" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
+                            <span>${goal.startValue}${goal.unit ? ' ' + goal.unit : ''}</span>
+                            <span style="font-weight: 600; color: #000;">${goal.currentValue || goal.startValue}${goal.unit ? ' ' + goal.unit : ''}</span>
+                            <span>${goal.targetValue}${goal.unit ? ' ' + goal.unit : ''}</span>
+                        </div>
+                        <div class="progress-container" style="background: #f0f0f0; height: 6px; border-radius: 3px; overflow: hidden;">
+                            <div class="progress-fill" style="background: linear-gradient(90deg, #3b82f6, #1d4ed8); height: 100%; width: ${goal.progress || 0}%; transition: width 0.3s ease;"></div>
+                        </div>
+                        <div style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem; font-weight: 600; color: #1d4ed8;">
+                            ${goal.progress || 0}%
+                        </div>
+                    </div>
+                ` : '';
+
                 goalCard.innerHTML = `
                     ${daysUntilText ? `<div class="termin-days-until">${daysUntilText}</div>` : ''}
                     <div class="ziel-kategorie">${goal.category}</div>
                     ${formattedDeadline ? `<div class="termin-date">🎯 ${formattedDeadline}</div>` : ''}
                     <div class="termin-title">${goal.name}</div>
                     <div class="termin-description">${goal.description}</div>
-                    <div class="termin-edit-icon" onclick="GoalManager.editGoalProgress('${goal.id}')">✎</div>
+                    ${progressSection}
+                    <div class="termin-edit-icon" onclick="GoalManager.editGoalValue('${goal.id}')">✎</div>
                     <div class="termin-delete-icon" onclick="GoalManager.deleteGoal('${goal.id}')">🗑</div>
                 `;
                 
@@ -3136,6 +3185,62 @@
                 } else {
                     console.error('❌ Goal not found for ID:', goalId);
                 }
+            },
+            
+            async editGoalValue(goalId) {
+                const goal = this.goals.find(g => g.id == goalId);
+                if (!goal) {
+                    alert('Ziel nicht gefunden!');
+                    return;
+                }
+                
+                const currentValue = goal.currentValue || goal.startValue || 0;
+                const unit = goal.unit ? ` ${goal.unit}` : '';
+                
+                const newValue = prompt(
+                    `Aktueller Wert für "${goal.name}":\n\n` +
+                    `Start: ${goal.startValue}${unit}\n` +
+                    `Ziel: ${goal.targetValue}${unit}\n` +
+                    `Aktuell: ${currentValue}${unit}\n\n` +
+                    `Neuer aktueller Wert:`,
+                    currentValue
+                );
+                
+                if (newValue === null) return; // Cancelled
+                
+                const parsedValue = parseFloat(newValue);
+                if (isNaN(parsedValue)) {
+                    alert('Bitte eine gültige Zahl eingeben!');
+                    return;
+                }
+                
+                // Update values
+                goal.currentValue = parsedValue;
+                goal.progress = this.calculateProgress(goal.startValue, goal.targetValue, goal.currentValue);
+                goal.completed = goal.progress >= 100;
+                
+                // Update in database if authenticated
+                const dbId = goal.database_id || (goal.id && !isNaN(goal.id) && goal.id.toString().length < 10 ? goal.id : null);
+                
+                if (supabase?.isAuthenticated() && dbId) {
+                    try {
+                        await supabase.update('goals', { 
+                            currentValue: goal.currentValue,
+                            progress: goal.progress,
+                            completed: goal.completed
+                        }, dbId);
+                        console.log('✅ Goal value updated in database');
+                    } catch (error) {
+                        console.error('❌ Error updating goal value:', error);
+                        alert('Fehler beim Speichern: ' + error.message);
+                        return;
+                    }
+                }
+                
+                // Refresh view
+                this.refreshCurrentView();
+                
+                console.log('✅ Goal value updated:', goal.name, `${goal.currentValue}${unit}`, `${goal.progress}%`);
             },
             
             async deleteGoal(goalId) {
@@ -4015,7 +4120,9 @@
                         category: document.getElementById('goal-category').value,
                         timeframe: document.getElementById('goal-timeframe').value,
                         deadline: document.getElementById('goal-deadline').value,
-                        progress: 0
+                        unit: document.getElementById('goal-unit').value,
+                        startValue: parseFloat(document.getElementById('goal-start-value').value) || 0,
+                        targetValue: parseFloat(document.getElementById('goal-target-value').value)
                     };
                     
                     await GoalManager.addGoal(goalData);
