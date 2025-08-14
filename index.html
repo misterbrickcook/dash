@@ -831,6 +831,8 @@
             background: #f8f8f8;
             border: 1px solid #e0e0e0;
             border-radius: 4px;
+            position: relative;
+            z-index: 1;
         }
         
         .emoji-btn {
@@ -1113,7 +1115,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 3000;
+            z-index: 4000;
             padding: 1rem;
         }
         .modal.hide { display: none; }
@@ -1124,6 +1126,7 @@
             width: 100%;
             max-width: 500px;
             position: relative;
+            z-index: 4001;
         }
         .modal-content .close {
             position: absolute;
