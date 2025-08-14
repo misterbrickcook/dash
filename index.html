@@ -685,11 +685,11 @@
         /* === TERMINE SPECIFIC === */
         .termin-card {
             position: relative;
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border: none;
-            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid #000000;
+            border-radius: 0;
             padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: none;
             transition: all 0.3s ease;
             overflow: hidden;
         }
@@ -697,16 +697,6 @@
         .termin-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-        }
-        
-        .termin-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
         }
         
         .termin-days-until {
