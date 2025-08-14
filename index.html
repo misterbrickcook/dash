@@ -1362,10 +1362,10 @@
         <section id="tab-ziele" class="tab-section">
             
             <div class="category-tabs">
+                <button class="ziel-tab active" data-ziel-category="alle">Alle</button>
                 <button class="ziel-tab" data-ziel-category="monat">Monat</button>
                 <button class="ziel-tab" data-ziel-category="quartal">Quartal</button>
                 <button class="ziel-tab" data-ziel-category="jahr">Jahr</button>
-                <button class="ziel-tab active" data-ziel-category="alle">Alle</button>
                 <button class="ziel-tab" data-ziel-category="archiv">Archiv</button>
                 <button id="add-goal-btn" class="btn" style="margin-left: 2rem;">+ Add Goal</button>
                 <button id="clear-goal-archive-btn" class="btn secondary" style="margin-left: 1rem; display: none;">🗑️ Archiv leeren</button>
@@ -3046,12 +3046,45 @@
                 goalCard.className = `ziel-card${goal.completed ? ' completed' : ''}`;
                 goalCard.dataset.goalId = goal.id;
                 
+                // Calculate days until deadline (similar to termine)
+                let deadlineText = '';
+                let deadlineBadge = '';
+                if (goal.deadline) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const goalDate = new Date(goal.deadline);
+                    goalDate.setHours(0, 0, 0, 0);
+                    const daysDifference = Math.ceil((goalDate - today) / (1000 * 60 * 60 * 24));
+                    
+                    // Format German date
+                    const [year, month, day] = goal.deadline.split('-');
+                    const germanDate = `${day}.${month}.${year}`;
+                    deadlineText = `Deadline: ${germanDate}`;
+                    
+                    if (daysDifference === 0) {
+                        deadlineBadge = `<span class="days-until-badge heute">Heute</span>`;
+                    } else if (daysDifference === 1) {
+                        deadlineBadge = `<span class="days-until-badge morgen">Morgen</span>`;
+                    } else if (daysDifference === -1) {
+                        deadlineBadge = `<span class="days-until-badge overdue">1 Tag überfällig</span>`;
+                    } else if (daysDifference > 1) {
+                        deadlineBadge = `<span class="days-until-badge future">${daysDifference} Tage</span>`;
+                    } else if (daysDifference < -1) {
+                        deadlineBadge = `<span class="days-until-badge overdue">${Math.abs(daysDifference)} Tage überfällig</span>`;
+                    }
+                }
+                
                 goalCard.innerHTML = `
                     <div class="ziel-kategorie">${goal.category}</div>
                     <div class="ziel-edit-icon" onclick="GoalManager.editGoalProgress('${goal.id}')" style="position: absolute; top: 1rem; left: 1rem; cursor: pointer; color: #666; font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s ease;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">✎</div>
                     <div class="ziel-header">
                         <div class="ziel-name">${goal.name}</div>
-                        <div class="ziel-beschreibung">${goal.description}</div>
+                        <div class="ziel-beschreibung">
+                            ${goal.description}
+                            ${deadlineText ? `<div class="goal-deadline" style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
+                                ${deadlineText} ${deadlineBadge}
+                            </div>` : ''}
+                        </div>
                     </div>
                     <div class="ziel-progress-section">
                         <div class="ziel-progress-header">
