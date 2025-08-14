@@ -552,6 +552,35 @@
         .todo-deadline.today { color: #000000; font-weight: 500; }
         .todo-deadline.overdue { color: #cc0000; font-weight: 500; }
         .todo-deadline.soon { color: #ff6600; font-weight: 500; }
+        
+        /* Days until badge (similar to termine) */
+        .days-until-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-left: 0.5rem;
+        }
+        .days-until-badge.heute {
+            background: #000000;
+            color: #ffffff;
+        }
+        .days-until-badge.morgen {
+            background: #ff6600;
+            color: #ffffff;
+        }
+        .days-until-badge.future {
+            background: #3b82f6;
+            color: #ffffff;
+        }
+        .days-until-badge.overdue {
+            background: #cc0000;
+            color: #ffffff;
+        }
+        
         .todo-tag {
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -1333,17 +1362,17 @@
         <section id="tab-ziele" class="tab-section">
             
             <div class="category-tabs">
-                <button class="ziel-tab active" data-ziel-category="monat">Monat</button>
+                <button class="ziel-tab" data-ziel-category="monat">Monat</button>
                 <button class="ziel-tab" data-ziel-category="quartal">Quartal</button>
                 <button class="ziel-tab" data-ziel-category="jahr">Jahr</button>
-                <button class="ziel-tab" data-ziel-category="alle">Alle</button>
+                <button class="ziel-tab active" data-ziel-category="alle">Alle</button>
                 <button class="ziel-tab" data-ziel-category="archiv">Archiv</button>
                 <button id="add-goal-btn" class="btn" style="margin-left: 2rem;">+ Add Goal</button>
                 <button id="clear-goal-archive-btn" class="btn secondary" style="margin-left: 1rem; display: none;">🗑️ Archiv leeren</button>
             </div>
 
             <!-- MONAT KATEGORIE -->
-            <div class="ziel-content active" id="ziel-monat">
+            <div class="ziel-content" id="ziel-monat">
                 <!-- Monatsziele will be loaded from database -->
             </div>
 
@@ -1358,7 +1387,7 @@
             </div>
 
             <!-- ALLE KATEGORIE -->
-            <div class="ziel-content" id="ziel-alle">
+            <div class="ziel-content active" id="ziel-alle">
                 <!-- All ziele will be loaded from database -->
             </div>
 
@@ -1604,7 +1633,7 @@
             // If switching to ziele tab, load the active category
             if (tabId === 'tab-ziele') {
                 const activeTab = document.querySelector('.ziel-tab.active');
-                const activeCategory = activeTab ? activeTab.getAttribute('data-ziel-category') : 'monat';
+                const activeCategory = activeTab ? activeTab.getAttribute('data-ziel-category') : 'alle';
                 GoalManager.displayGoalsForCategory(activeCategory);
             }
             
@@ -2568,12 +2597,41 @@
                     deadlineClass = 'none';
                 }
                 
+                // Calculate days until deadline (similar to termine)
+                let daysUntilText = '';
+                let daysUntilBadge = '';
+                if (todo.date) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const todoDateObj = new Date(todo.date);
+                    todoDateObj.setHours(0, 0, 0, 0);
+                    const daysDifference = Math.ceil((todoDateObj - today) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysDifference === 0) {
+                        daysUntilText = 'Heute';
+                        daysUntilBadge = `<span class="days-until-badge heute">Heute</span>`;
+                    } else if (daysDifference === 1) {
+                        daysUntilText = 'Morgen';
+                        daysUntilBadge = `<span class="days-until-badge morgen">Morgen</span>`;
+                    } else if (daysDifference === -1) {
+                        daysUntilText = 'Gestern';
+                        daysUntilBadge = `<span class="days-until-badge overdue">1 Tag überfällig</span>`;
+                    } else if (daysDifference > 1) {
+                        daysUntilText = `in ${daysDifference} Tagen`;
+                        daysUntilBadge = `<span class="days-until-badge future">${daysDifference} Tage</span>`;
+                    } else if (daysDifference < -1) {
+                        daysUntilText = `vor ${Math.abs(daysDifference)} Tagen`;
+                        daysUntilBadge = `<span class="days-until-badge overdue">${Math.abs(daysDifference)} Tage überfällig</span>`;
+                    }
+                }
+
                 todoCard.innerHTML = `
                     <div class="ziel-kategorie">${todo.category}</div>
                     <div class="ziel-header">
                         <div class="ziel-name">${todo.title}</div>
                         <div class="ziel-beschreibung">
                             <span class="todo-deadline ${deadlineClass}">${deadlineText}</span>
+                            ${daysUntilBadge}
                         </div>
                     </div>
                     <div class="ziel-progress-section">
@@ -2921,7 +2979,7 @@
             refreshCurrentView() {
                 // Get current active category
                 const activeTab = document.querySelector('.ziel-tab.active');
-                const activeCategory = activeTab ? activeTab.getAttribute('data-ziel-category') : 'monat';
+                const activeCategory = activeTab ? activeTab.getAttribute('data-ziel-category') : 'alle';
                 
                 console.log('🎯 Goals refresh - active category:', activeCategory);
                 console.log('🎯 All goals:', this.goals.map(g => ({name: g.name, category: g.category, timeframe: g.timeframe})));
