@@ -111,6 +111,9 @@ UPDATE todos SET id = 'todo_' || id::text WHERE id::text NOT LIKE 'todo_%';
 
 -- 10. Update goals table with proper structure  
 ALTER TABLE goals ADD COLUMN IF NOT EXISTS target_date TIMESTAMP WITH TIME ZONE;
+ALTER TABLE goals ADD COLUMN IF NOT EXISTS start_value NUMERIC;
+ALTER TABLE goals ADD COLUMN IF NOT EXISTS completed BOOLEAN DEFAULT FALSE;
+ALTER TABLE goals ADD COLUMN IF NOT EXISTS timeframe TEXT DEFAULT 'monat';
 UPDATE goals SET id = 'goal_' || id::text WHERE id::text NOT LIKE 'goal_%';
 
 -- 11. Update journal_entries table with proper structure

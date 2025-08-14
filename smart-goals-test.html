@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Goals Progress Test</title>
+</head>
+<body>
+    <h1>Smart Goals Progress System Test</h1>
+    
+    <h2>Test calculateProgress Function</h2>
+    <div id="test-results"></div>
+    
+    <script>
+        // Copy the calculateProgress function from the main system
+        function calculateProgress(startValue, targetValue, currentValue) {
+            if (startValue === targetValue) return 100; // Edge case
+            const progress = ((currentValue - startValue) / (targetValue - startValue)) * 100;
+            return Math.max(0, Math.min(100, Math.round(progress))); // Clamp between 0-100
+        }
+        
+        // Test cases
+        const tests = [
+            {
+                name: "Weight Loss Goal: 90→75 (target: 75)",
+                start: 90,
+                target: 75,
+                current: 83,
+                expected: 47 // (83-90)/(75-90) * 100 = (-7)/(-15) * 100 = 46.67 → 47%
+            },
+            {
+                name: "Savings Goal: €0→€1000 (current: €500)",
+                start: 0,
+                target: 1000,
+                current: 500,
+                expected: 50
+            },
+            {
+                name: "Reading Goal: 0→12 books (current: 3)",
+                start: 0,
+                target: 12,
+                current: 3,
+                expected: 25
+            },
+            {
+                name: "Completed Goal: 100→80kg (current: 80kg)",
+                start: 100,
+                target: 80,
+                current: 80,
+                expected: 100
+            },
+            {
+                name: "Over-achieved Goal: 0→10 (current: 12)",
+                start: 0,
+                target: 10,
+                current: 12,
+                expected: 100 // Should be clamped to 100
+            },
+            {
+                name: "Edge case: Same start and target",
+                start: 50,
+                target: 50,
+                current: 50,
+                expected: 100
+            }
+        ];
+        
+        let results = '<table border="1" cellpadding="5"><tr><th>Test</th><th>Expected</th><th>Actual</th><th>Result</th></tr>';
+        let allPassed = true;
+        
+        tests.forEach(test => {
+            const actual = calculateProgress(test.start, test.target, test.current);
+            const passed = actual === test.expected;
+            
+            if (!passed) allPassed = false;
+            
+            results += `<tr style="background: ${passed ? '#d4edda' : '#f8d7da'}">
+                <td>${test.name}</td>
+                <td>${test.expected}%</td>
+                <td>${actual}%</td>
+                <td>${passed ? '✅ PASS' : '❌ FAIL'}</td>
+            </tr>`;
+        });
+        
+        results += '</table>';
+        results += `<h3 style="color: ${allPassed ? 'green' : 'red'}">Overall Result: ${allPassed ? '✅ ALL TESTS PASSED' : '❌ SOME TESTS FAILED'}</h3>`;
+        
+        document.getElementById('test-results').innerHTML = results;
+    </script>
+</body>
+</html>

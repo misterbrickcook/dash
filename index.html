@@ -2957,7 +2957,6 @@
             },
             
             async addGoal(goalData) {
-                // TEMPORARY: Skip database, just use local storage until schema is fixed
                 const goal = {
                     id: Date.now().toString(),
                     name: goalData.name,
@@ -2988,7 +2987,7 @@
                 
                 if (supabase?.isAuthenticated()) {
                     try {
-                        // Map UI fields to database schema (with new progress/timeframe fields)
+                        // Map UI fields to database schema - all progress fields now supported
                         const dbGoal = {
                             title: goal.name,
                             description: goal.description,
@@ -2998,7 +2997,7 @@
                             timeframe: goal.timeframe,
                             completed: goal.completed,
                             start_value: goal.startValue,
-                            target_value: goal.targetValue,
+                            target_value: goal.targetValue, 
                             current_value: goal.currentValue,
                             unit: goal.unit,
                             user_id: supabase?.user?.id
