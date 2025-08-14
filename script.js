@@ -1518,20 +1518,25 @@ document.addEventListener('DOMContentLoaded', async function() {
     async function saveRoutineCompletion(routineType, date, completed) {
         console.log(`🔍 DEBUG: saveRoutineCompletion called: ${routineType}, ${date}, ${completed}`);
         
-        // Save to both cloud and localStorage for monthly streak system
-        const completionData = await getRoutineCompletionData();
-        if (!completionData[date]) completionData[date] = {};
-        completionData[date][routineType] = completed;
-        await cloudStorage.saveRoutineCompletionData(completionData);
-        
-        // Also save to localStorage for monthly streak calculations
-        const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
-        if (!localData[date]) localData[date] = {};
-        localData[date][routineType] = completed;
-        localStorage.setItem('routineCompletionData', JSON.stringify(localData));
-        
-        console.log(`🔍 DEBUG: Saved to both cloud and localStorage`);
-        console.log(`Saved ${routineType} routine completion for ${date}: ${completed}`);
+        try {
+            // Save to both cloud and localStorage for monthly streak system
+            const completionData = await getRoutineCompletionData();
+            if (!completionData[date]) completionData[date] = {};
+            completionData[date][routineType] = completed;
+            await cloudStorage.saveRoutineCompletionData(completionData);
+            
+            // Also save to localStorage for monthly streak calculations
+            const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+            if (!localData[date]) localData[date] = {};
+            localData[date][routineType] = completed;
+            localStorage.setItem('routineCompletionData', JSON.stringify(localData));
+            
+            console.log(`🔍 DEBUG: Saved to both cloud and localStorage`);
+            console.log(`🔍 DEBUG: Current localStorage data:`, JSON.parse(localStorage.getItem('routineCompletionData') || '{}'));
+            console.log(`✅ Saved ${routineType} routine completion for ${date}: ${completed}`);
+        } catch (error) {
+            console.error('❌ Error saving routine completion:', error);
+        }
     }
     
     async function updateMonthlyRoutineStreak(routineType) {
@@ -1622,11 +1627,16 @@ document.addEventListener('DOMContentLoaded', async function() {
             // Check legacy storage data first (mobile compatibility)
             const completionData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
             console.log(`🔍 DEBUG: routineCompletionData (legacy):`, completionData);
+            console.log(`🔍 DEBUG: Available dates in completionData:`, Object.keys(completionData));
             
             // Also check new cloud completion data (desktop compatibility)  
             const cloudCompletions = (window.cloudStorage && window.cloudStorage.getLocalRoutineCompletions) 
                 ? window.cloudStorage.getLocalRoutineCompletions() : [];
             console.log(`🔍 DEBUG: cloudCompletions (new):`, cloudCompletions.length, 'items');
+            
+            // Get today's date for comparison
+            const todayStr = new Date().toISOString().split('T')[0];
+            console.log(`🔍 DEBUG: Today's date string: ${todayStr}`);
             
             // Check each day of the target month
             for (let day = 1; day <= daysInMonth; day++) {
@@ -1639,7 +1649,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const dayData = completionData[dateStr];
                 if (dayData && dayData[routineType] === true) {
                     dayComplete = true;
-                    console.log(`🔍 DEBUG: Found legacy completion for ${routineType} on ${dateStr}`);
+                    console.log(`🔍 DEBUG: Found legacy completion for ${routineType} on ${dateStr} - data:`, dayData);
                 }
                 
                 // If not found in legacy, check new cloud format
@@ -1662,6 +1672,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 
                 if (dayComplete) {
                     monthlyCount++;
+                    console.log(`✅ DEBUG: Day ${day} (${dateStr}) counts as completed for ${routineType}. Running total: ${monthlyCount}`);
                 }
             }
             
@@ -1880,6 +1891,54 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Update monthly displays
         updateMonthlyStreakDisplays();
     }
+    
+    // === DEBUG HELPER FUNCTIONS ===
+    // These can be called from browser console to debug routine counting issues
+    
+    window.debugRoutineCounter = function() {
+        console.log('🔍 === ROUTINE COUNTER DEBUG ===');
+        
+        const today = new Date().toISOString().split('T')[0];
+        const completionData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+        
+        console.log('📅 Today\'s date:', today);
+        console.log('💾 LocalStorage routineCompletionData:', completionData);
+        console.log('🔢 Available dates:', Object.keys(completionData));
+        
+        const morningCount = calculateMonthlyRoutineCount('morning');
+        const eveningCount = calculateMonthlyRoutineCount('evening');
+        
+        console.log('📊 Current counts:');
+        console.log('- Morning routines this month:', morningCount);
+        console.log('- Evening routines this month:', eveningCount);
+        
+        // Check if today has any completions
+        if (completionData[today]) {
+            console.log('✅ Today\'s completions:', completionData[today]);
+        } else {
+            console.log('❌ No completions found for today');
+        }
+        
+        return { today, completionData, morningCount, eveningCount };
+    };
+    
+    window.forceUpdateCounters = function() {
+        console.log('🔄 Forcing counter update...');
+        updateMonthlyStreakDisplays();
+    };
+    
+    window.simulateRoutineComplete = function(routineType) {
+        const today = new Date().toISOString().split('T')[0];
+        console.log(`🧪 Simulating ${routineType} routine completion for ${today}`);
+        
+        const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+        if (!localData[today]) localData[today] = {};
+        localData[today][routineType] = true;
+        localStorage.setItem('routineCompletionData', JSON.stringify(localData));
+        
+        console.log('✅ Simulation complete, updating counters...');
+        updateMonthlyStreakDisplays();
+    };
     
     // Goals System with Edit Buttons
     function openGoalEditModal(goalCard, isNewGoal = false) {

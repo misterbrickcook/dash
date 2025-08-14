@@ -664,6 +664,30 @@ class CloudStorage {
         
         console.log('🔄 Periodic sync started');
     }
+    
+    // === LEGACY ROUTINE COMPLETION METHODS ===
+    // These are needed by script.js for backward compatibility
+    
+    async getRoutineCompletionData() {
+        // Return data from localStorage in the expected format
+        const data = localStorage.getItem('routineCompletionData');
+        return data ? JSON.parse(data) : {};
+    }
+    
+    async saveRoutineCompletionData(data) {
+        // Save to localStorage in the expected format
+        localStorage.setItem('routineCompletionData', JSON.stringify(data));
+        console.log('💾 Saved routine completion data to localStorage');
+        
+        // Also queue for cloud sync if authenticated
+        if (this.isSupabaseAuthenticated()) {
+            this.queueSync('routine_completions', 'save', {
+                user_id: supabase.getCurrentUser()?.id,
+                completion_data: data,
+                updated_at: new Date().toISOString()
+            });
+        }
+    }
 }
 
 // Global cloud storage instance
