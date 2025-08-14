@@ -2419,12 +2419,24 @@
                 // STEP 3: Check if we need to migrate local data to cloud
                 if ((!cloudCompletions || cloudCompletions.length === 0)) {
                     console.log('🔍 Cloud is empty, checking for local data to migrate...');
-                    await migrateLocalDataToCloud();
+                    const migrationSuccess = await migrateLocalDataToCloud();
                     
-                    // Reload after migration
-                    const newCloudCompletions = await supabase.query('routine_completions?select=*');
-                    console.log(`🔄 After migration: ${newCloudCompletions?.length || 0} completions in cloud`);
-                    globalRoutineCompletions = newCloudCompletions || [];
+                    if (migrationSuccess) {
+                        // Reload after successful migration
+                        const newCloudCompletions = await supabase.query('routine_completions?select=*');
+                        console.log(`🔄 After migration: ${newCloudCompletions?.length || 0} completions in cloud`);
+                        globalRoutineCompletions = newCloudCompletions || [];
+                    } else {
+                        // Migration failed - use local data as fallback
+                        console.log('⚠️ Migration failed, using local data as fallback');
+                        try {
+                            const localData = localStorage.getItem('routine_completions_cache');
+                            globalRoutineCompletions = localData ? JSON.parse(localData) : [];
+                            console.log(`📱 Using ${globalRoutineCompletions.length} local completions as fallback`);
+                        } catch (e) {
+                            globalRoutineCompletions = [];
+                        }
+                    }
                 } else {
                     // Use cloud data
                     globalRoutineCompletions = cloudCompletions;
@@ -2516,29 +2528,53 @@
                 
                 console.log(`📊 Found ${allLocalCompletions.length} local completions to migrate`);
                 
-                if (allLocalCompletions.length > 0) {
-                    // Upload to cloud in batches
-                    const batchSize = 50;
-                    let uploaded = 0;
-                    
-                    for (let i = 0; i < allLocalCompletions.length; i += batchSize) {
-                        const batch = allLocalCompletions.slice(i, i + batchSize);
-                        try {
-                            await supabase.insert('routine_completions', batch);
+                if (allLocalCompletions.length === 0) {
+                    console.log('📭 No local data found to migrate');
+                    return true; // No data to migrate is considered success
+                }
+                
+                // Upload to cloud in batches
+                const batchSize = 50;
+                let uploaded = 0;
+                let hasErrors = false;
+                
+                for (let i = 0; i < allLocalCompletions.length; i += batchSize) {
+                    const batch = allLocalCompletions.slice(i, i + batchSize);
+                    try {
+                        const result = await supabase.insert('routine_completions', batch);
+                        if (result) {
                             uploaded += batch.length;
                             console.log(`✅ Uploaded batch: ${uploaded}/${allLocalCompletions.length}`);
-                        } catch (batchError) {
-                            console.error('❌ Batch upload failed:', batchError);
+                        } else {
+                            console.error('❌ Batch upload returned no result');
+                            hasErrors = true;
+                        }
+                    } catch (batchError) {
+                        console.error('❌ Batch upload failed:', batchError);
+                        hasErrors = true;
+                        
+                        // Check if it's an RLS error
+                        if (batchError.message && batchError.message.includes('row-level security')) {
+                            console.error('🔒 RLS Error: Please run the fix-routine-completions-rls.sql file in Supabase');
+                            return false; // Stop migration on RLS error
                         }
                     }
-                    
-                    console.log(`🎉 Migration complete! Uploaded ${uploaded} routine completions to cloud`);
+                }
+                
+                if (hasErrors && uploaded === 0) {
+                    console.log('❌ Migration failed completely');
+                    return false;
+                } else if (hasErrors) {
+                    console.log(`⚠️ Migration partially successful: ${uploaded}/${allLocalCompletions.length} uploaded`);
+                    return uploaded > 0; // Partial success
                 } else {
-                    console.log('📭 No local data found to migrate');
+                    console.log(`🎉 Migration complete! Uploaded ${uploaded} routine completions to cloud`);
+                    return true;
                 }
                 
             } catch (error) {
                 console.error('❌ Migration failed:', error);
+                return false;
             }
         }
         
