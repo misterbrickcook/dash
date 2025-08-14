@@ -337,63 +337,63 @@ const Auth = {
             if (supabase && supabase.isAuthenticated()) {
                 console.log('📡 Loading user data from database...');
                 try {
-                    // Load todos
-                    if (window.cloudStorage && window.cloudStorage.getTodos) {
-                        await window.cloudStorage.getTodos();
-                        console.log('✅ Todos loaded from database');
-                    }
+                    // Wait a bit more for all managers to be fully loaded
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                     
-                    // Load deadlines/appointments  
-                    if (window.cloudStorage && window.cloudStorage.getDeadlines) {
-                        await window.cloudStorage.getDeadlines();
-                        console.log('✅ Deadlines loaded from database');
-                    }
+                    console.log('🔍 Checking available managers...');
+                    console.log('TerminManager available:', !!window.TerminManager);
+                    console.log('TodoManager available:', !!window.TodoManager);
+                    console.log('GoalManager available:', !!window.GoalManager);
+                    console.log('JournalManager available:', !!window.JournalManager);
                     
-                    // Load links
-                    if (window.cloudStorage && window.cloudStorage.getLinks) {
-                        await window.cloudStorage.getLinks();
-                        console.log('✅ Links loaded from database');
-                    }
-                    
-                    // Load routine completions (if method exists)
-                    if (window.cloudStorage && window.cloudStorage.getRoutineCompletions) {
-                        await window.cloudStorage.getRoutineCompletions();
-                        console.log('✅ Routine completions loaded from database');
-                    }
-                    
-                    // Load notes for all categories
-                    if (window.cloudStorage && window.cloudStorage.getNotes) {
-                        await window.cloudStorage.getNotes('personal');
-                        await window.cloudStorage.getNotes('work');
-                        await window.cloudStorage.getNotes('ideas');
-                        console.log('✅ Notes loaded from database');
-                    }
-                    
-                    // Load termine/appointments
+                    // Load termine/appointments FIRST - this is the critical one
                     if (window.TerminManager && window.TerminManager.loadTermine) {
+                        console.log('🔄 Loading termine...');
                         await window.TerminManager.loadTermine();
                         console.log('✅ Termine loaded from database');
+                    } else {
+                        console.error('❌ TerminManager or loadTermine method not available');
                     }
                     
-                    // Load todos
+                    // Force display termine after loading
+                    if (window.TerminManager && window.TerminManager.displayTermine) {
+                        console.log('🔄 Displaying termine...');
+                        await window.TerminManager.displayTermine();
+                        console.log('✅ Termine displayed');
+                    }
+                    
+                    // Load other managers
                     if (window.TodoManager && window.TodoManager.loadTodos) {
                         await window.TodoManager.loadTodos();
                         console.log('✅ TodoManager loaded from database');
                     }
                     
-                    // Load goals
                     if (window.GoalManager && window.GoalManager.loadGoals) {
                         await window.GoalManager.loadGoals();
                         console.log('✅ GoalManager loaded from database');
                     }
                     
-                    // Load journal entries
                     if (window.JournalManager && window.JournalManager.loadEntries) {
                         await window.JournalManager.loadEntries();
                         console.log('✅ JournalManager loaded from database');
                     }
                     
-                    // Load routine completions
+                    // Load cloud storage data
+                    if (window.cloudStorage && window.cloudStorage.getTodos) {
+                        await window.cloudStorage.getTodos();
+                        console.log('✅ CloudStorage todos loaded');
+                    }
+                    
+                    if (window.cloudStorage && window.cloudStorage.getDeadlines) {
+                        await window.cloudStorage.getDeadlines();
+                        console.log('✅ CloudStorage deadlines loaded');
+                    }
+                    
+                    if (window.cloudStorage && window.cloudStorage.getLinks) {
+                        await window.cloudStorage.getLinks();
+                        console.log('✅ CloudStorage links loaded');
+                    }
+                    
                     if (window.loadRoutineCompletions) {
                         await window.loadRoutineCompletions();
                         console.log('✅ Routine completions loaded');
@@ -419,7 +419,7 @@ const Auth = {
             } else {
                 console.warn('⚠️ initializeTodoCounter function not available');
             }
-        }, 500);
+        }, 1500);
     },
     
     showAuthError(form, message) {
