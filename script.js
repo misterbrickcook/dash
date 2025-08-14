@@ -974,7 +974,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             // Remove all DOM elements with this shared ID
             const allElements = document.querySelectorAll(`[data-shared-id="${id}"]`);
             allElements.forEach(element => {
-                const parentItem = element.closest('.checkbox-item');
+                const parentItem = element.closest('.checkbox-item, .todo-card');
                 if (parentItem && !parentItem.closest('[data-filter="archiv"]')) {
                     parentItem.remove();
                 }
@@ -1028,16 +1028,32 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 
         const taskElement = document.createElement('div');
-        taskElement.className = 'checkbox-item';
+        taskElement.className = 'todo-card';
         taskElement.setAttribute('data-category', category);
         taskElement.setAttribute('data-date', date || '');
         taskElement.setAttribute('data-shared-id', todoSharedId);
+        
+        // Get category display name
+        let categoryDisplay = category;
+        switch(category) {
+            case 'privat': categoryDisplay = 'Privat'; break;
+            case 'arbeit': categoryDisplay = 'Arbeit'; break;
+            case 'uni': categoryDisplay = 'Uni'; break;
+        }
+        
         taskElement.innerHTML = `
-            <input type="checkbox" id="${taskId}" data-shared-id="${todoSharedId}">
-            <label for="${taskId}">${taskText}</label>
-            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="${icon}" style="width: 14px; height: 14px; color: #666;"></i>
-                <span style="font-size: 0.8rem; color: #666;">${displayText}</span>
+            <div class="todo-card-header">
+                <span class="todo-category-badge">${categoryDisplay}</span>
+            </div>
+            <div class="todo-card-content">
+                <input type="checkbox" id="${taskId}" data-shared-id="${todoSharedId}">
+                <label for="${taskId}">${taskText}</label>
+            </div>
+            <div class="todo-card-footer">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="${icon}" style="width: 14px; height: 14px; color: #666;"></i>
+                    <span style="font-size: 0.8rem; color: #666;">${displayText}</span>
+                </div>
             </div>
         `;
 
@@ -1134,7 +1150,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Track todo completion for monthly count with deduplication
         if (checkbox.checked) {
-            const todoId = checkbox.closest('.todo-item')?.dataset.sharedId || checkbox.id;
+            const todoId = checkbox.closest('.checkbox-item, .todo-card')?.dataset.sharedId || checkbox.id;
             trackTodoCompletion(todoId);
         }
         
@@ -1153,15 +1169,31 @@ document.addEventListener('DOMContentLoaded', async function() {
             const timestampString = `${dateString} ${timeString}`;
             
             const archivedTaskElement = document.createElement('div');
-            archivedTaskElement.className = 'checkbox-item';
+            archivedTaskElement.className = 'todo-card archived';
             archivedTaskElement.setAttribute('data-category', category);
             archivedTaskElement.setAttribute('data-archived-at', now.toISOString());
+            
+            // Get category display name
+            let categoryDisplay = category;
+            switch(category) {
+                case 'privat': categoryDisplay = 'Privat'; break;
+                case 'arbeit': categoryDisplay = 'Arbeit'; break;
+                case 'uni': categoryDisplay = 'Uni'; break;
+            }
+            
             archivedTaskElement.innerHTML = `
-                <input type="checkbox" checked disabled>
-                <label style="text-decoration: line-through; color: #ccc;">${taskText}</label>
-                <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                    <i data-lucide="${icon}" style="width: 14px; height: 14px; color: #ccc;"></i>
-                    <span style="font-size: 0.8rem; color: #ccc;" title="Archiviert am ${timestampString}">${timestampString}</span>
+                <div class="todo-card-header">
+                    <span class="todo-category-badge archived">${categoryDisplay}</span>
+                </div>
+                <div class="todo-card-content">
+                    <input type="checkbox" checked disabled>
+                    <label style="text-decoration: line-through; color: #ccc;">${taskText}</label>
+                </div>
+                <div class="todo-card-footer">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="${icon}" style="width: 14px; height: 14px; color: #ccc;"></i>
+                        <span style="font-size: 0.8rem; color: #ccc;" title="Archiviert am ${timestampString}">${timestampString}</span>
+                    </div>
                 </div>
             `;
             
@@ -1192,7 +1224,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.log('This function is deprecated - use todoState.archiveTodo() instead');
         
         // For backward compatibility, still remove by DOM ID
-        const allTaskElements = document.querySelectorAll('.checkbox-item');
+        const allTaskElements = document.querySelectorAll('.checkbox-item, .todo-card');
         let removed = 0;
         allTaskElements.forEach(task => {
             const checkbox = task.querySelector('input[type="checkbox"]');
@@ -1433,7 +1465,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // First, identify all existing todos and group them by text content
         const todoGroups = new Map(); // text -> [checkboxes]
         
-        const existingCheckboxes = document.querySelectorAll('.checkbox-item input[type="checkbox"]:not([disabled])');
+        const existingCheckboxes = document.querySelectorAll('.checkbox-item input[type="checkbox"]:not([disabled]), .todo-card input[type="checkbox"]:not([disabled])');
         existingCheckboxes.forEach(checkbox => {
             // Skip routine checkboxes as they have their own specialized handler
             const parentRoutine = checkbox.closest('#morning-routine, #evening-routine');
@@ -1444,7 +1476,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (isArchived) return;
             
             // Extract todo information
-            const checkboxItem = checkbox.closest('.checkbox-item');
+            const checkboxItem = checkbox.closest('.checkbox-item, .todo-card');
             const label = checkbox.nextElementSibling;
             const taskText = label ? label.textContent : 'Unknown Task';
             const category = checkboxItem ? checkboxItem.getAttribute('data-category') || 'privat' : 'privat';
@@ -4192,14 +4224,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Get existing texts in heute to avoid duplicates
         const existingTexts = new Set();
-        const existingTodos = heuteContainer.querySelectorAll('.checkbox-item label');
+        const existingTodos = heuteContainer.querySelectorAll('.checkbox-item label, .todo-card label');
         existingTodos.forEach(label => {
             existingTexts.add(label.textContent.trim());
         });
         
         // Get all todos from privat, arbeit, uni that should appear in heute
         ['privat', 'arbeit', 'uni'].forEach(category => {
-            const categoryTodos = document.querySelectorAll(`[data-filter="${category}"] .checkbox-item`);
+            const categoryTodos = document.querySelectorAll(`[data-filter="${category}"] .checkbox-item, [data-filter="${category}"] .todo-card`);
             categoryTodos.forEach(todo => {
                 const label = todo.querySelector('label');
                 const todoText = label ? label.textContent.trim() : '';
@@ -4308,7 +4340,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Reset progress if it's a new day
         if (dailyProgressData.date !== today) {
-            const currentTodos = heuteContainer.querySelectorAll('.checkbox-item').length;
+            const currentTodos = heuteContainer.querySelectorAll('.checkbox-item, .todo-card').length;
             dailyProgressData = {
                 date: today,
                 totalTodosStarted: currentTodos,
@@ -4319,7 +4351,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         
         // Count current active todos
-        const activeTodos = heuteContainer.querySelectorAll('.checkbox-item');
+        const activeTodos = heuteContainer.querySelectorAll('.checkbox-item, .todo-card');
         dailyProgressData.currentActive = activeTodos.length;
         
         // Update total if new todos were added today
@@ -4408,7 +4440,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Count archived todos from current month
         const archiveContainer = document.querySelector('[data-filter="archiv"] .checkbox-group');
         if (archiveContainer) {
-            const archivedTodos = archiveContainer.querySelectorAll('.checkbox-item[data-archived-at]');
+            const archivedTodos = archiveContainer.querySelectorAll('.checkbox-item[data-archived-at], .todo-card[data-archived-at]');
             let monthlyCount = 0;
             
             archivedTodos.forEach(todo => {
@@ -4450,7 +4482,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!homeContainer || !heuteContainer) return;
         
         // Get all unchecked todos from heute (sorted by date AND time)
-        const allHeuteTodos = Array.from(heuteContainer.querySelectorAll('.checkbox-item'))
+        const allHeuteTodos = Array.from(heuteContainer.querySelectorAll('.checkbox-item, .todo-card'))
             .filter(todo => {
                 const checkbox = todo.querySelector('input[type="checkbox"]');
                 return checkbox && !checkbox.checked;
@@ -4463,7 +4495,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     
                     // Get date from data attribute or assume today
                     const dateAttr = todo.getAttribute('data-date') || 
-                                   todo.closest('.checkbox-item')?.getAttribute('data-date');
+                                   todo.closest('.checkbox-item, .todo-card')?.getAttribute('data-date');
                     
                     let date = new Date();
                     if (dateAttr && dateAttr !== '') {

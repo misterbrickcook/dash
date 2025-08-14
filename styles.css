@@ -332,6 +332,98 @@ body {
     line-height: 1.4;
 }
 
+/* === TODO CARDS === */
+.todo-card {
+    background: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
+    position: relative !important;
+    transition: border-color 0.2s ease !important;
+    display: block !important;
+}
+
+.todo-card:hover {
+    border-color: #000000;
+}
+
+.todo-card-header {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+}
+
+.todo-category-badge {
+    background: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    color: #666666;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+}
+
+.todo-card-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding-right: 4rem; /* Make room for category badge */
+}
+
+.todo-card-content input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #000000;
+    appearance: none;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.todo-card-content input[type="checkbox"]:checked {
+    background-color: #000000;
+    position: relative;
+}
+
+.todo-card-content input[type="checkbox"]:checked::after {
+    content: '✓';
+    color: white;
+    position: absolute;
+    top: -2px;
+    left: 2px;
+    font-size: 12px;
+}
+
+.todo-card-content label {
+    font-size: 0.95rem;
+    cursor: pointer;
+    line-height: 1.4;
+    flex: 1;
+}
+
+.todo-card-footer {
+    padding-left: 2.5rem; /* Align with label */
+    margin-top: 0.5rem;
+}
+
+/* Archived todo cards */
+.todo-card.archived {
+    border-color: #f0f0f0;
+    background: #fafafa;
+}
+
+.todo-card.archived:hover {
+    border-color: #e0e0e0;
+}
+
+.todo-category-badge.archived {
+    background: #f5f5f5;
+    border-color: #e0e0e0;
+    color: #aaa;
+}
+
 /* === PROGRESS BAR (Exact vorschlag2.html Style) === */
 .progress-container {
     display: flex;
@@ -626,5 +718,112 @@ input:focus, textarea:focus, select:focus {
     
     .section-title, h1 {
         font-size: 1.5rem;
+    }
+}
+
+/* === TODO CARDS === */
+.todo-card {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.todo-card:hover {
+    border-color: #000000;
+}
+
+.todo-card-header {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+}
+
+.todo-category-badge {
+    background: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #666666;
+}
+
+.todo-card-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-right: 4rem; /* Space for category badge */
+    margin-bottom: 0.5rem;
+}
+
+.todo-card-content input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #000000;
+    appearance: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 0.1rem; /* Align with text baseline */
+}
+
+.todo-card-content input[type="checkbox"]:checked {
+    background-color: #000000;
+    position: relative;
+}
+
+.todo-card-content input[type="checkbox"]:checked::after {
+    content: '✓';
+    color: white;
+    position: absolute;
+    top: -2px;
+    left: 2px;
+    font-size: 12px;
+}
+
+.todo-card-content label {
+    font-size: 0.95rem;
+    cursor: pointer;
+    line-height: 1.4;
+    flex: 1;
+    word-wrap: break-word;
+}
+
+.todo-card-footer {
+    margin-left: 2.5rem; /* Align with label text */
+    opacity: 0.7;
+}
+
+/* Archived todos */
+.todo-card.archived {
+    opacity: 0.6;
+    background: #f8f8f8;
+}
+
+.todo-card.archived .todo-card-content label {
+    text-decoration: line-through;
+    color: #999999;
+}
+
+.todo-card.archived .todo-category-badge {
+    background: #e8e8e8;
+    color: #999999;
+}
+
+@media (max-width: 768px) {
+    .todo-card {
+        padding: 0.75rem;
+    }
+    
+    .todo-card-content {
+        margin-right: 3rem; /* Less space on mobile */
+    }
+    
+    .todo-category-badge {
+        font-size: 0.6rem;
+        padding: 0.2rem 0.4rem;
     }
 }
