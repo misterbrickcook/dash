@@ -104,8 +104,10 @@
             background: transparent !important;
         }
         
-        .logout-btn:hover span, .logout-btn:active span, .logout-btn:focus span {
+        .logout-btn:hover span, .logout-btn:active span, .logout-btn:focus span,
+        .logout-btn:hover svg, .logout-btn:active svg, .logout-btn:focus svg {
             color: #dc2626 !important;
+            stroke: #dc2626 !important;
         }
         
         .settings-btn:hover span, .settings-btn:active span, .settings-btn:focus span {
@@ -1094,7 +1096,10 @@
                     <span>⚙</span>
                 </button>
                 <button id="logout-btn" class="nav-tab logout-btn" style="display:flex;align-items:center;justify-content:center;">
-                    <span>⏻</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v10"></path>
+                        <circle cx="12" cy="12" r="10"></circle>
+                    </svg>
                 </button>
             </div>
         </div>
