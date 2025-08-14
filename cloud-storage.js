@@ -548,11 +548,10 @@ class CloudStorage {
         
         // Default templates if none cached  
         return [
-            {id: 'morning_1', text: '💧 Glas Wasser trinken', routine_type: 'morning', order_index: 1},
-            {id: 'morning_2', text: '🧘 5 Min Meditation', routine_type: 'morning', order_index: 2},
-            {id: 'morning_3', text: '🏃 10 Min Bewegung', routine_type: 'morning', order_index: 3},
-            {id: 'morning_4', text: '☀️ Tageslicht tanken', routine_type: 'morning', order_index: 4},
-            {id: 'morning_5', text: '📝 3 wichtigste Ziele definieren', routine_type: 'morning', order_index: 5},
+            {id: 'morning_1', text: '💧 Wasser und Kreatin in einem', routine_type: 'morning', order_index: 1},
+            {id: 'morning_2', text: '💪 BBÜ und Sport', routine_type: 'morning', order_index: 2},
+            {id: 'morning_3', text: '📅 Tag planen', routine_type: 'morning', order_index: 3},
+            {id: 'morning_4', text: '✅ Todos checken', routine_type: 'morning', order_index: 4},
             {id: 'evening_1', text: '📱 Alle Geräte weggelegt', routine_type: 'evening', order_index: 1},
             {id: 'evening_2', text: '📖 15 Min lesen', routine_type: 'evening', order_index: 2},
             {id: 'evening_3', text: '✅ Tag reflektieren & dankbar sein', routine_type: 'evening', order_index: 3},

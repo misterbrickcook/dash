@@ -1593,7 +1593,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 
                 // Count unique completed items for this day
                 const completedItems = new Set(dayCompletions.map(c => c.template_id)).size;
-                const totalItems = 5; // We have 5 items per routine
+                const totalItems = routineType === 'morning' ? 4 : 5; // Morning has 4 items, evening has 5
                 
                 if (completedItems === totalItems) {
                     streak++;
@@ -1663,7 +1663,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     
                     // Count unique completed items for this day
                     const completedItems = new Set(dayCompletions.map(c => c.template_id)).size;
-                    const totalItems = 5; // We have 5 items per routine
+                    const totalItems = routineType === 'morning' ? 4 : 5; // Morning has 4 items, evening has 5
                     
                     if (completedItems === totalItems) {
                         dayComplete = true;
