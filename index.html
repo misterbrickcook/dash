@@ -781,7 +781,7 @@
         /* === RESSOURCEN GRID === */
         .resource-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 160px));
+            grid-template-columns: repeat(auto-fill, minmax(200px, 200px));
             gap: 0.5rem;
             margin-top: 1rem;
             justify-content: start;
@@ -812,15 +812,12 @@
         }
         
         .resource-title {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 500;
             color: #000000;
             margin: 0;
             flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1;
+            line-height: 1.2;
         }
         
         
@@ -1279,18 +1276,18 @@
             
             /* Resource mobile optimization */
             .resource-grid { 
-                grid-template-columns: repeat(auto-fill, minmax(140px, 140px)); 
+                grid-template-columns: repeat(auto-fill, minmax(170px, 170px)); 
                 gap: 0.4rem;
             }
             .resource-card { 
-                height: 44px;
-                padding: 0.5rem;
+                height: 46px;
+                padding: 0.6rem;
             }
             .resource-title { 
-                font-size: 0.75rem; 
+                font-size: 0.8rem; 
             }
             .resource-icon {
-                font-size: 0.9rem;
+                font-size: 0.95rem;
                 margin-right: 0.4rem;
             }
             .emoji-palette { 
@@ -5420,11 +5417,13 @@
                         filteredResources.forEach(resource => {
                             const icon = resource.icon || '🔗';
                             const description = resource.description || '';
+                            const truncatedTitle = resource.title.length > 25 ? resource.title.substring(0, 25) + '...' : resource.title;
+                            const fullTitle = `${resource.title}${description ? ` - ${description}` : ''}`;
                             html += `
                                 <div class="resource-card" onclick="window.open('${resource.url}', '_blank')" 
-                                     title="${description}">
+                                     title="${fullTitle}">
                                     <span class="resource-icon">${icon}</span>
-                                    <span class="resource-title">${resource.title}</span>
+                                    <span class="resource-title">${truncatedTitle}</span>
                                     <div class="resource-actions">
                                         <button class="resource-edit-btn" onclick="event.stopPropagation(); ResourceManager.editResource('${resource.id}')" title="Edit">✏️</button>
                                         <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">🗑️</button>
