@@ -1628,6 +1628,91 @@ document.addEventListener('DOMContentLoaded', async function() {
         await updateMonthlyStreakDisplays();
     }
     
+    // Load and restore routine completions from storage
+    async function loadRoutineCompletions() {
+        console.log('🔄 Loading routine completions from storage...');
+        
+        const today = new Date().toISOString().split('T')[0];
+        console.log('📅 Loading completions for:', today);
+        
+        try {
+            // Get today's routine completions from storage
+            let completionData = {};
+            
+            // Try cloud storage first
+            if (window.cloudStorage && typeof window.cloudStorage.getRoutineCompletionData === 'function') {
+                completionData = await window.cloudStorage.getRoutineCompletionData();
+                console.log('☁️ Loaded from cloud storage:', completionData);
+            } else {
+                // Fallback to localStorage
+                const stored = localStorage.getItem('routineCompletionData');
+                if (stored) {
+                    completionData = JSON.parse(stored);
+                    console.log('💾 Loaded from localStorage:', completionData);
+                }
+            }
+            
+            const todayData = completionData[today];
+            if (!todayData) {
+                console.log('📅 No completion data found for today');
+                return;
+            }
+            
+            console.log('✅ Today\'s completion data:', todayData);
+            
+            // Restore morning routine checkboxes
+            if (todayData.morning) {
+                const morningCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"]');
+                console.log('🌅 Found', morningCheckboxes.length, 'morning checkboxes');
+                
+                morningCheckboxes.forEach((checkbox, index) => {
+                    if (todayData.morning[index]) {
+                        console.log('✅ Restoring morning checkbox', index, ':', checkbox.id);
+                        checkbox.checked = true;
+                        
+                        // Apply visual styling
+                        const label = checkbox.nextElementSibling;
+                        if (label) {
+                            label.style.textDecoration = 'line-through';
+                            label.style.color = '#999';
+                        }
+                    }
+                });
+            }
+            
+            // Restore evening routine checkboxes
+            if (todayData.evening) {
+                const eveningCheckboxes = document.querySelectorAll('#evening-routine input[type="checkbox"]');
+                console.log('🌙 Found', eveningCheckboxes.length, 'evening checkboxes');
+                
+                eveningCheckboxes.forEach((checkbox, index) => {
+                    if (todayData.evening[index]) {
+                        console.log('✅ Restoring evening checkbox', index, ':', checkbox.id);
+                        checkbox.checked = true;
+                        
+                        // Apply visual styling
+                        const label = checkbox.nextElementSibling;
+                        if (label) {
+                            label.style.textDecoration = 'line-through';
+                            label.style.color = '#999';
+                        }
+                    }
+                });
+            }
+            
+            // Update progress displays after restoring checkboxes
+            updateRoutineProgress();
+            
+            console.log('✅ Routine completions restored successfully');
+            
+        } catch (error) {
+            console.error('❌ Error loading routine completions:', error);
+        }
+    }
+    
+    // Make loadRoutineCompletions available globally
+    window.loadRoutineCompletions = loadRoutineCompletions;
+    
     function isRoutineComplete(routineType) {
         const routine = document.getElementById(`${routineType}-routine`);
         if (!routine) return false;
