@@ -2091,19 +2091,21 @@
                 localStorage.setItem('routineCompletionData', JSON.stringify(localData));
                 console.log(`🔍 DEBUG: Saved ${routineType} completion: ${localData[today][routineType]}`);
                 
-                // Also save to cloud if authenticated
+                // Also save to cloud if authenticated (async without blocking)
                 if (supabase?.isAuthenticated()) {
-                    try {
-                        console.log(`☁️ Saving routine completion to cloud: ${routineType} = ${localData[today][routineType]}`);
-                        await cloudStorage.saveRoutineCompletion(`${routineType}_routine`, today, localData[today][routineType]);
-                        
-                        // Refresh cloud-based routine counter after saving
-                        setTimeout(() => {
-                            updateMonthlyStreakDisplaysFromMemory();
-                        }, 100);
-                    } catch (error) {
-                        console.warn('⚠️ Could not save routine completion to cloud:', error);
-                    }
+                    (async () => {
+                        try {
+                            console.log(`☁️ Saving routine completion to cloud: ${routineType} = ${localData[today][routineType]}`);
+                            await cloudStorage.saveRoutineCompletion(`${routineType}_routine`, today, localData[today][routineType]);
+                            
+                            // Refresh cloud-based routine counter after saving
+                            setTimeout(() => {
+                                updateMonthlyStreakDisplaysFromMemory();
+                            }, 100);
+                        } catch (error) {
+                            console.warn('⚠️ Could not save routine completion to cloud:', error);
+                        }
+                    })();
                 }
                 
                 // Update streak display directly
