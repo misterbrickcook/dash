@@ -781,89 +781,48 @@
         /* === RESSOURCEN GRID === */
         .resource-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 160px));
+            gap: 0.5rem;
             margin-top: 1rem;
+            justify-content: start;
         }
         
         .resource-card {
             background: #ffffff;
             border: 1px solid #e0e0e0;
-            padding: 1rem;
+            padding: 0.75rem;
             position: relative;
             transition: all 0.2s ease;
-            min-height: 100px;
+            height: 50px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             cursor: pointer;
+            border-radius: 4px;
         }
         
         .resource-card:hover {
             border-color: #000000;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: #f8f8f8;
         }
         
-        .resource-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.5rem;
+        .resource-icon {
+            font-size: 1rem;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
         }
         
         .resource-title {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: #000000;
             margin: 0;
             flex: 1;
-            line-height: 1.2;
-        }
-        
-        .resource-category {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: #fafafa;
-            color: #666666;
-            padding: 0.2rem 0.5rem;
-            border: 1px solid #e0e0e0;
-            font-size: 0.65rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
             white-space: nowrap;
-        }
-        
-        .resource-description {
-            color: #666666;
-            margin-bottom: 0.5rem;
-            flex: 1;
-            line-height: 1.3;
-            font-size: 0.7rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
             overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1;
         }
         
-        .resource-category-tag {
-            background: #f0f0f0;
-            color: #666666;
-            padding: 0.15rem 0.3rem;
-            border-radius: 2px;
-            font-size: 0.6rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: auto;
-            align-self: flex-end;
-        }
-        
-        .resource-icon {
-            font-size: 1.2rem;
-            margin-bottom: 0.25rem;
-        }
         
         /* === EMOJI PALETTE === */
         .emoji-palette {
@@ -936,26 +895,25 @@
         }
         
         .resource-actions {
-            position: absolute;
-            top: 0.25rem;
-            right: 0.25rem;
             display: flex;
-            gap: 0.1rem;
+            gap: 0.25rem;
+            margin-left: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
         }
         
         .resource-edit-btn,
         .resource-delete-btn {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid #e0e0e0;
+            background: none;
+            border: none;
             color: #666666;
             cursor: pointer;
-            padding: 0.15rem;
+            padding: 0.2rem;
             font-size: 0.7rem;
-            opacity: 0;
             transition: all 0.2s ease;
             border-radius: 2px;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1321,19 +1279,19 @@
             
             /* Resource mobile optimization */
             .resource-grid { 
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
-                gap: 0.75rem;
+                grid-template-columns: repeat(auto-fill, minmax(140px, 140px)); 
+                gap: 0.4rem;
             }
             .resource-card { 
-                min-height: 80px; 
-                padding: 0.75rem;
+                height: 44px;
+                padding: 0.5rem;
             }
             .resource-title { 
-                font-size: 0.8rem; 
+                font-size: 0.75rem; 
             }
-            .resource-description { 
-                font-size: 0.65rem; 
-                -webkit-line-clamp: 1;
+            .resource-icon {
+                font-size: 0.9rem;
+                margin-right: 0.4rem;
             }
             .emoji-palette { 
                 grid-template-columns: repeat(8, 1fr); 
@@ -5465,17 +5423,11 @@
                             html += `
                                 <div class="resource-card" onclick="window.open('${resource.url}', '_blank')" 
                                      title="${description}">
-                                    <div class="resource-header">
-                                        <span class="resource-icon">${icon}</span>
-                                        <div class="resource-actions">
-                                            <button class="resource-edit-btn" onclick="event.stopPropagation(); ResourceManager.editResource('${resource.id}')" title="Edit">✏️</button>
-                                            <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">🗑️</button>
-                                        </div>
-                                    </div>
-                                    <div class="resource-body">
-                                        <h3 class="resource-title">${resource.title}</h3>
-                                        ${description ? `<p class="resource-description">${description}</p>` : ''}
-                                        <span class="resource-category-tag">${resource.category}</span>
+                                    <span class="resource-icon">${icon}</span>
+                                    <span class="resource-title">${resource.title}</span>
+                                    <div class="resource-actions">
+                                        <button class="resource-edit-btn" onclick="event.stopPropagation(); ResourceManager.editResource('${resource.id}')" title="Edit">✏️</button>
+                                        <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">🗑️</button>
                                     </div>
                                 </div>
                             `;
