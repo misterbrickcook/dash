@@ -739,23 +739,27 @@ input:focus, textarea:focus, select:focus {
 
 /* Header with category - takes first row */
 .todo-card-header {
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-start;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: flex-start !important;
     min-height: 24px;
     margin-bottom: 0.5rem;
+    text-align: right !important;
+    width: 100% !important;
 }
 
 .todo-category-badge {
-    background: #f0f0f0;
-    border: 1px solid #e0e0e0;
-    padding: 0.15rem 0.4rem;
-    font-size: 0.6rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #666666;
-    line-height: 1;
+    background: #ff0000 !important;  /* RED background to see if it updates */
+    border: 1px solid #000000 !important;
+    padding: 0.15rem 0.4rem !important;
+    font-size: 0.6rem !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    color: #ffffff !important;  /* White text on red background */
+    line-height: 1 !important;
+    float: right !important;
+    margin-left: auto !important;
 }
 
 /* Content with checkbox and text - takes second row */
