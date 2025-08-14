@@ -2947,6 +2947,15 @@
                 // Calculate initial progress
                 goal.progress = this.calculateProgress(goal.startValue, goal.targetValue, goal.currentValue);
                 
+                console.log('🎯 Created goal with progress data:', {
+                    name: goal.name,
+                    startValue: goal.startValue,
+                    targetValue: goal.targetValue,
+                    currentValue: goal.currentValue,
+                    unit: goal.unit,
+                    progress: goal.progress
+                });
+                
                 if (supabase?.isAuthenticated()) {
                     try {
                         // Map UI fields to database schema (with new progress/timeframe fields)
@@ -3119,8 +3128,16 @@
                 const badgeColorVars = `--badge-color-1: ${badgeColor1}; --badge-color-2: ${badgeColor2};`;
                 goalCard.style.cssText += badgeColorVars;
                 
-                // Prepare progress display
-                const hasProgressData = goal.startValue !== undefined && goal.targetValue !== undefined;
+                // Prepare progress display  
+                const hasProgressData = goal.hasOwnProperty('startValue') && goal.hasOwnProperty('targetValue');
+                console.log('🔍 Goal progress check:', {
+                    name: goal.name,
+                    hasProgressData,
+                    startValue: goal.startValue,
+                    targetValue: goal.targetValue,
+                    currentValue: goal.currentValue,
+                    progress: goal.progress
+                });
                 const progressSection = hasProgressData ? `
                     <div class="goal-progress-section" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0;">
                         <div class="goal-values" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
