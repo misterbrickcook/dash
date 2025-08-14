@@ -825,9 +825,9 @@
         .emoji-palette {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
-            gap: 0.5rem;
+            gap: 0.25rem;
             margin: 0.5rem 0;
-            padding: 1rem;
+            padding: 0.5rem;
             background: #f8f8f8;
             border: 1px solid #e0e0e0;
             border-radius: 4px;
@@ -838,15 +838,16 @@
         .emoji-btn {
             background: #ffffff;
             border: 1px solid #e0e0e0;
-            padding: 0.5rem;
+            padding: 0.25rem;
             cursor: pointer;
-            font-size: 1.2rem;
-            border-radius: 4px;
+            font-size: 1rem;
+            border-radius: 2px;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 40px;
+            min-height: 28px;
+            width: 28px;
         }
         
         .emoji-btn:hover {
@@ -1295,8 +1296,13 @@
             }
             .emoji-palette { 
                 grid-template-columns: repeat(8, 1fr); 
-                gap: 0.3rem;
-                padding: 0.5rem;
+                gap: 0.2rem;
+                padding: 0.3rem;
+            }
+            .emoji-btn {
+                min-height: 24px;
+                width: 24px;
+                font-size: 0.9rem;
             }
         }
     </style>
