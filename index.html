@@ -425,6 +425,29 @@
             color: #ffffff;
         }
         .ziel-content { display: none; }
+        
+        /* === RESOURCE TABS === */
+        .resource-tab {
+            padding: 0.75rem 2rem;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            color: #666666;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .resource-tab:hover { border-color: #000000; color: #000000; }
+        .resource-tab.active {
+            background: #000000;
+            border-color: #000000;
+            color: #ffffff;
+        }
+        .resource-content { display: none; }
+        .resource-content.active { display: block; }
         .ziel-content.active { display: block; }
         
         /* === JOURNAL SPECIFIC TABS === */
@@ -1736,16 +1759,39 @@
 
         <!-- === RESSOURCEN TAB === -->
         <section id="tab-ressourcen" class="tab-section">
-            <h1 class="section-title">Ressourcen & Knowledge Base</h1>
             
-            <!-- Add Resource Button -->
-            <div style="text-align: center; margin-bottom: 3rem;">
-                <button id="add-resource-btn" class="btn">+ Add Resource</button>
+            <div class="category-tabs">
+                <button class="resource-tab active" data-resource-category="alle">Alle</button>
+                <button class="resource-tab" data-resource-category="privat">Privat</button>
+                <button class="resource-tab" data-resource-category="arbeit">Arbeit</button>
+                <button class="resource-tab" data-resource-category="uni">Uni</button>
+                <button class="resource-tab" data-resource-category="crypto">Crypto</button>
+                <button id="add-resource-btn" class="btn" style="margin-left: 2rem;">+ Add Resource</button>
             </div>
-            
-            <!-- Resource Cards Grid -->
-            <div class="resource-grid" id="resource-container">
-                <!-- Resources will be dynamically added here -->
+
+            <!-- ALLE KATEGORIE -->
+            <div class="resource-content active" id="resource-alle">
+                <!-- All resources will be loaded from database -->
+            </div>
+
+            <!-- PRIVAT KATEGORIE -->
+            <div class="resource-content" id="resource-privat">
+                <!-- Private resources will be loaded from database -->
+            </div>
+
+            <!-- ARBEIT KATEGORIE -->
+            <div class="resource-content" id="resource-arbeit">
+                <!-- Work resources will be loaded from database -->
+            </div>
+
+            <!-- UNI KATEGORIE -->
+            <div class="resource-content" id="resource-uni">
+                <!-- Uni resources will be loaded from database -->
+            </div>
+
+            <!-- CRYPTO KATEGORIE -->
+            <div class="resource-content" id="resource-crypto">
+                <!-- Crypto resources will be loaded from database -->
             </div>
             
         </section>
@@ -1797,11 +1843,9 @@
                     <select id="resource-category" required>
                         <option value="">Choose category...</option>
                         <option value="Privat">Privat</option>
-                        <option value="Work">Work</option>
-                        <option value="Studium">Studium</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Tools">Tools</option>
-                        <option value="Learning">Learning</option>
+                        <option value="Arbeit">Arbeit</option>
+                        <option value="Uni">Uni</option>
+                        <option value="Crypto">Crypto</option>
                     </select>
                 </div>
                 
@@ -2289,6 +2333,26 @@
             
             // Load goals for this category
             GoalManager.displayGoalsForCategory(categoryId);
+        }
+
+        // === RESOURCE CATEGORY SYSTEM ===
+        function switchResourceCategory(categoryId) {
+            const parentTab = document.querySelector('#tab-ressourcen');
+            // Hide all resource contents
+            parentTab.querySelectorAll('.resource-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            // Remove active from all resource tabs
+            parentTab.querySelectorAll('.resource-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Show selected category
+            parentTab.querySelector(`#resource-${categoryId}`).classList.add('active');
+            // Activate selected category tab
+            parentTab.querySelector(`[data-resource-category="${categoryId}"]`).classList.add('active');
+            
+            // Load resources for this category
+            ResourceManager.displayResourcesForCategory(categoryId);
         }
 
         // === JOURNAL CATEGORY SYSTEM ===
@@ -3055,6 +3119,14 @@
             tab.addEventListener('click', () => {
                 const categoryId = tab.getAttribute('data-ziel-category');
                 switchZielCategory(categoryId);
+            });
+        });
+
+        // Resource category tabs
+        document.querySelectorAll('.resource-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const categoryId = tab.getAttribute('data-resource-category');
+                switchResourceCategory(categoryId);
             });
         });
 
@@ -5214,48 +5286,114 @@
                 },
                 
                 renderResources() {
-                    const container = document.getElementById('resource-container');
+                    // Refresh current view
+                    this.refreshCurrentView();
+                },
+                
+                refreshCurrentView() {
+                    // Get current active category
+                    const activeTab = document.querySelector('.resource-tab.active');
+                    const activeCategory = activeTab ? activeTab.getAttribute('data-resource-category') : 'alle';
+                    
+                    this.displayResourcesForCategory(activeCategory);
+                },
+                
+                displayResourcesForCategory(category) {
+                    const container = document.getElementById(`resource-${category}`);
                     if (!container) return;
                     
-                    // Group resources by category based on bsp1.jpg reference
-                    const groupedResources = {};
-                    this.resources.forEach(resource => {
-                        if (!groupedResources[resource.category]) {
-                            groupedResources[resource.category] = [];
-                        }
-                        groupedResources[resource.category].push(resource);
-                    });
+                    let filteredResources = [];
+                    
+                    switch(category) {
+                        case 'privat':
+                            filteredResources = this.resources.filter(resource => 
+                                resource.category === 'Privat'
+                            );
+                            break;
+                        case 'arbeit':
+                            filteredResources = this.resources.filter(resource => 
+                                resource.category === 'Arbeit'
+                            );
+                            break;
+                        case 'uni':
+                            filteredResources = this.resources.filter(resource => 
+                                resource.category === 'Uni'
+                            );
+                            break;
+                        case 'crypto':
+                            filteredResources = this.resources.filter(resource => 
+                                resource.category === 'Crypto'
+                            );
+                            break;
+                        case 'alle':
+                        default:
+                            filteredResources = this.resources;
+                            break;
+                    }
                     
                     let html = '';
                     
-                    // Render each category section
-                    Object.keys(groupedResources).sort().forEach(category => {
-                        html += `
-                            <div class="resource-category-section">
-                                <h3 class="resource-category-title">${category}</h3>
-                                <div class="resource-buttons">
-                        `;
-                        
-                        groupedResources[category].forEach(resource => {
-                            const icon = resource.icon || '🔗';
-                            html += `
-                                <button class="resource-button" onclick="window.open('${resource.url}', '_blank')" 
-                                        title="${resource.description || resource.title}">
-                                    <span class="resource-icon">${icon}</span>
-                                    <span class="resource-name">${resource.title}</span>
-                                    <div class="resource-actions">
-                                        <button class="resource-edit-btn" onclick="event.stopPropagation(); ResourceManager.editResource('${resource.id}')" title="Edit">✏️</button>
-                                        <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">🗑️</button>
+                    if (filteredResources.length === 0) {
+                        html = '<p style="text-align: center; color: #666; padding: 3rem;">Keine Resources vorhanden</p>';
+                    } else {
+                        // Group by category for "alle" view, or show flat for specific categories
+                        if (category === 'alle') {
+                            const groupedResources = {};
+                            filteredResources.forEach(resource => {
+                                if (!groupedResources[resource.category]) {
+                                    groupedResources[resource.category] = [];
+                                }
+                                groupedResources[resource.category].push(resource);
+                            });
+                            
+                            // Render each category section
+                            Object.keys(groupedResources).sort().forEach(cat => {
+                                html += `
+                                    <div class="resource-category-section">
+                                        <h3 class="resource-category-title">${cat}</h3>
+                                        <div class="resource-buttons">
+                                `;
+                                
+                                groupedResources[cat].forEach(resource => {
+                                    const icon = resource.icon || '🔗';
+                                    html += `
+                                        <button class="resource-button" onclick="window.open('${resource.url}', '_blank')" 
+                                                title="${resource.description || resource.title}">
+                                            <span class="resource-icon">${icon}</span>
+                                            <span class="resource-name">${resource.title}</span>
+                                            <div class="resource-actions">
+                                                <button class="resource-edit-btn" onclick="event.stopPropagation(); ResourceManager.editResource('${resource.id}')" title="Edit">✏️</button>
+                                                <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">🗑️</button>
+                                            </div>
+                                        </button>
+                                    `;
+                                });
+                                
+                                html += `
+                                        </div>
                                     </div>
-                                </button>
-                            `;
-                        });
-                        
-                        html += `
-                                </div>
-                            </div>
-                        `;
-                    });
+                                `;
+                            });
+                        } else {
+                            // Flat view for specific categories
+                            html += '<div class="resource-buttons">';
+                            filteredResources.forEach(resource => {
+                                const icon = resource.icon || '🔗';
+                                html += `
+                                    <button class="resource-button" onclick="window.open('${resource.url}', '_blank')" 
+                                            title="${resource.description || resource.title}">
+                                        <span class="resource-icon">${icon}</span>
+                                        <span class="resource-name">${resource.title}</span>
+                                        <div class="resource-actions">
+                                            <button class="resource-edit-btn" onclick="event.stopPropagation(); ResourceManager.editResource('${resource.id}')" title="Edit">✏️</button>
+                                            <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">🗑️</button>
+                                        </div>
+                                    </button>
+                                `;
+                            });
+                            html += '</div>';
+                        }
+                    }
                     
                     container.innerHTML = html;
                 },
