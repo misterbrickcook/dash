@@ -396,8 +396,12 @@ const Auth = {
                     }
                     
                     if (window.ResourceManager && window.ResourceManager.loadResources) {
+                        console.log('🔍 Calling ResourceManager.loadResources() from showDashboard...');
                         await window.ResourceManager.loadResources();
                         console.log('✅ ResourceManager loaded from database');
+                    } else {
+                        console.warn('⚠️ ResourceManager not available in showDashboard()');
+                        console.log('window.ResourceManager:', window.ResourceManager);
                     }
                     
                     // Load cloud storage data
