@@ -1057,15 +1057,9 @@
                     </div>
                 </div>
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="goal-deadline">Deadline</label>
-                        <input type="date" id="goal-deadline" required autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label for="goal-progress">Fortschritt (%)</label>
-                        <input type="number" id="goal-progress" min="0" max="100" value="0" required autocomplete="off">
-                    </div>
+                <div class="form-group">
+                    <label for="goal-deadline">Deadline</label>
+                    <input type="date" id="goal-deadline" required autocomplete="off">
                 </div>
                 
                 <div class="form-actions">
@@ -2907,11 +2901,9 @@
                 modal.classList.add('hide');
                 // Reset form
                 document.getElementById('add-goal-form').reset();
-                document.getElementById('goal-progress').value = '0';
             },
             
             async addGoal(goalData) {
-                const progressPercent = parseInt(goalData.progress);
                 // TEMPORARY: Skip database, just use local storage until schema is fixed
                 const goal = {
                     id: Date.now().toString(),
@@ -2920,8 +2912,8 @@
                     category: goalData.category,
                     timeframe: goalData.timeframe, // WICHTIG: timeframe für Filterung
                     deadline: goalData.deadline,
-                    progress: progressPercent,
-                    completed: progressPercent >= 100,
+                    progress: 0, // Always start at 0%
+                    completed: false, // Always start as not completed
                     createdAt: new Date().toISOString()
                 };
                 
@@ -4023,7 +4015,7 @@
                         category: document.getElementById('goal-category').value,
                         timeframe: document.getElementById('goal-timeframe').value,
                         deadline: document.getElementById('goal-deadline').value,
-                        progress: document.getElementById('goal-progress').value
+                        progress: 0
                     };
                     
                     await GoalManager.addGoal(goalData);
