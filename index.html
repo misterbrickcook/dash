@@ -2429,13 +2429,44 @@
                     } else {
                         // Migration failed - use local data as fallback
                         console.log('⚠️ Migration failed, using local data as fallback');
-                        try {
-                            const localData = localStorage.getItem('routine_completions_cache');
-                            globalRoutineCompletions = localData ? JSON.parse(localData) : [];
-                            console.log(`📱 Using ${globalRoutineCompletions.length} local completions as fallback`);
-                        } catch (e) {
-                            globalRoutineCompletions = [];
+                        globalRoutineCompletions = [];
+                        
+                        // Try to load from all local sources
+                        const fallbackSources = ['routine_completions_cache', 'routineCompletionData'];
+                        for (const source of fallbackSources) {
+                            try {
+                                const localData = localStorage.getItem(source);
+                                if (localData) {
+                                    const parsed = JSON.parse(localData);
+                                    
+                                    if (source === 'routineCompletionData') {
+                                        // Convert old format
+                                        Object.keys(parsed).forEach(date => {
+                                            const dayData = parsed[date];
+                                            if (dayData.morning !== undefined) {
+                                                globalRoutineCompletions.push({
+                                                    template_id: 'morning_routine',
+                                                    date: date,
+                                                    completed: dayData.morning
+                                                });
+                                            }
+                                            if (dayData.evening !== undefined) {
+                                                globalRoutineCompletions.push({
+                                                    template_id: 'evening_routine',
+                                                    date: date,
+                                                    completed: dayData.evening
+                                                });
+                                            }
+                                        });
+                                    } else if (Array.isArray(parsed)) {
+                                        globalRoutineCompletions.push(...parsed);
+                                    }
+                                }
+                            } catch (e) {
+                                console.warn(`⚠️ Could not load fallback from ${source}:`, e);
+                            }
                         }
+                        console.log(`📱 Using ${globalRoutineCompletions.length} local completions as fallback`);
                     }
                 } else {
                     // Use cloud data
@@ -2502,6 +2533,7 @@
                                             date: date,
                                             completed: dayData.morning,
                                             user_id: supabase.getCurrentUser()?.id
+                                            // NOTE: No 'id' field - BIGSERIAL will auto-generate
                                         });
                                     }
                                     if (dayData.evening !== undefined) {
@@ -2510,14 +2542,21 @@
                                             date: date,
                                             completed: dayData.evening,
                                             user_id: supabase.getCurrentUser()?.id
+                                            // NOTE: No 'id' field - BIGSERIAL will auto-generate
                                         });
                                     }
                                 });
                             } else if (Array.isArray(parsed)) {
-                                // Add user_id to existing completions
+                                // Add user_id to existing completions and remove any existing id
                                 parsed.forEach(completion => {
-                                    completion.user_id = supabase.getCurrentUser()?.id;
-                                    allLocalCompletions.push(completion);
+                                    const cleanCompletion = {
+                                        template_id: completion.template_id,
+                                        date: completion.date,
+                                        completed: completion.completed,
+                                        user_id: supabase.getCurrentUser()?.id
+                                        // NOTE: No 'id' field - BIGSERIAL will auto-generate
+                                    };
+                                    allLocalCompletions.push(cleanCompletion);
                                 });
                             }
                         }
