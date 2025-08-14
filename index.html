@@ -2416,62 +2416,61 @@
                 const cloudCompletions = await supabase.query('routine_completions?select=*');
                 console.log(`☁️ Loaded ${cloudCompletions?.length || 0} routine completions from cloud`);
                 
-                // STEP 3: Check if we need to migrate local data to cloud
-                if ((!cloudCompletions || cloudCompletions.length === 0)) {
-                    console.log('🔍 Cloud is empty, checking for local data to migrate...');
-                    const migrationSuccess = await migrateLocalDataToCloud();
-                    
-                    if (migrationSuccess) {
-                        // Reload after successful migration
-                        const newCloudCompletions = await supabase.query('routine_completions?select=*');
-                        console.log(`🔄 After migration: ${newCloudCompletions?.length || 0} completions in cloud`);
-                        globalRoutineCompletions = newCloudCompletions || [];
-                    } else {
-                        // Migration failed - use local data as fallback
-                        console.log('⚠️ Migration failed, using local data as fallback');
-                        globalRoutineCompletions = [];
-                        
-                        // Try to load from all local sources
-                        const fallbackSources = ['routine_completions_cache', 'routineCompletionData'];
-                        for (const source of fallbackSources) {
-                            try {
-                                const localData = localStorage.getItem(source);
-                                if (localData) {
-                                    const parsed = JSON.parse(localData);
-                                    
-                                    if (source === 'routineCompletionData') {
-                                        // Convert old format
-                                        Object.keys(parsed).forEach(date => {
-                                            const dayData = parsed[date];
-                                            if (dayData.morning !== undefined) {
-                                                globalRoutineCompletions.push({
-                                                    template_id: 'morning_routine',
-                                                    date: date,
-                                                    completed: dayData.morning
-                                                });
-                                            }
-                                            if (dayData.evening !== undefined) {
-                                                globalRoutineCompletions.push({
-                                                    template_id: 'evening_routine',
-                                                    date: date,
-                                                    completed: dayData.evening
-                                                });
-                                            }
+                // STEP 3: Use local-first approach (temporarily disable migration)
+                console.log('📱 Using local-first approach (migration temporarily disabled)');
+                globalRoutineCompletions = [];
+                
+                // Load from all local sources
+                const localSources = ['routine_completions_cache', 'routineCompletionData'];
+                for (const source of localSources) {
+                    try {
+                        const localData = localStorage.getItem(source);
+                        if (localData) {
+                            const parsed = JSON.parse(localData);
+                            
+                            if (source === 'routineCompletionData') {
+                                // Convert old format
+                                Object.keys(parsed).forEach(date => {
+                                    const dayData = parsed[date];
+                                    if (dayData.morning !== undefined) {
+                                        globalRoutineCompletions.push({
+                                            template_id: 'morning_routine',
+                                            date: date,
+                                            completed: dayData.morning
                                         });
-                                    } else if (Array.isArray(parsed)) {
-                                        globalRoutineCompletions.push(...parsed);
                                     }
-                                }
-                            } catch (e) {
-                                console.warn(`⚠️ Could not load fallback from ${source}:`, e);
+                                    if (dayData.evening !== undefined) {
+                                        globalRoutineCompletions.push({
+                                            template_id: 'evening_routine',
+                                            date: date,
+                                            completed: dayData.evening
+                                        });
+                                    }
+                                });
+                            } else if (Array.isArray(parsed)) {
+                                globalRoutineCompletions.push(...parsed);
                             }
                         }
-                        console.log(`📱 Using ${globalRoutineCompletions.length} local completions as fallback`);
+                    } catch (e) {
+                        console.warn(`⚠️ Could not load from ${source}:`, e);
                     }
-                } else {
-                    // Use cloud data
-                    globalRoutineCompletions = cloudCompletions;
-                    console.log(`☁️ Using ${cloudCompletions.length} completions from cloud`);
+                }
+                
+                console.log(`📱 Using ${globalRoutineCompletions.length} local completions (local-first mode)`);
+                
+                // If we have cloud data AND it's more recent, merge it
+                if (cloudCompletions && cloudCompletions.length > 0) {
+                    console.log(`☁️ Found ${cloudCompletions.length} cloud completions, merging with local`);
+                    cloudCompletions.forEach(cloudCompletion => {
+                        const existsLocally = globalRoutineCompletions.some(local => 
+                            local.template_id === cloudCompletion.template_id && 
+                            local.date === cloudCompletion.date
+                        );
+                        if (!existsLocally) {
+                            globalRoutineCompletions.push(cloudCompletion);
+                        }
+                    });
+                    console.log(`🔀 After merge: ${globalRoutineCompletions.length} total completions`);
                 }
                 
                 // STEP 4: Cache locally for offline access
