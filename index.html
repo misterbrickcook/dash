@@ -1469,7 +1469,7 @@
                 
                 if (!supabase) {
                     console.log('⚠️ Demo mode - no authentication');
-                    this.showDashboard();
+                    await this.showDashboard();
                     return;
                 }
                 
@@ -1477,7 +1477,7 @@
                 if (supabase.isAuthenticated()) {
                     console.log('✅ User authenticated:', this.currentUser.email);
                     this.isAuthenticated = true;
-                    this.showDashboard();
+                    await this.showDashboard();
                 } else {
                     this.showAuthScreen();
                 }
@@ -1519,7 +1519,7 @@
                     if (user) {
                         this.currentUser = user;
                         this.isAuthenticated = true;
-                        this.showDashboard();
+                        await this.showDashboard();
                     }
                 } catch (error) {
                     this.showError(error.message);
@@ -1558,8 +1558,23 @@
                 document.getElementById('auth-screen').classList.remove('hide');
             },
             
-            showDashboard() {
+            async showDashboard() {
                 document.getElementById('auth-screen').classList.add('hide');
+                
+                // Load all data after successful login
+                if (supabase?.isAuthenticated()) {
+                    await Promise.all([
+                        TodoManager.loadTodos(),
+                        GoalManager.loadGoals(),
+                        JournalManager.loadEntries(),
+                        TerminManager.loadTermine(),
+                        loadRoutineCompletions()
+                    ]);
+                } else {
+                    // Initialize displays for local storage mode
+                    TodoManager.updateHomeTodos();
+                    TerminManager.displayTermine();
+                }
             }
         };
 
@@ -3374,16 +3389,45 @@
         const TerminManager = {
             termine: [], // In-memory storage for demo
             
-            async loadTermine() {
-                if (!supabase?.isAuthenticated()) return;
+            async loadTermine(forceReload = false) {
+                console.log('🔄 TerminManager.loadTermine() called, forceReload:', forceReload);
+                console.log('🔍 Auth check:', supabase ? 'supabase exists' : 'no supabase', supabase?.isAuthenticated() ? 'authenticated' : 'not authenticated');
+                
+                // Enhanced authentication check with retry
+                if (!supabase?.isAuthenticated()) {
+                    console.log('❌ Not authenticated, checking again in 500ms...');
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    if (!supabase?.isAuthenticated()) {
+                        console.log('❌ Still not authenticated after retry, aborting loadTermine');
+                        return;
+                    }
+                }
+                
                 try {
+                    console.log('📡 Fetching termine from database...');
                     const data = await supabase.select('termine', '*');
+                    console.log('📥 Raw termine data received:', data);
+                    
                     if (data && Array.isArray(data)) {
                         this.termine = data;
+                        console.log('✅ Termine loaded to memory:', this.termine.length, 'items');
+                        this.displayTermine();
+                    } else {
+                        console.warn('⚠️ Invalid termine data format:', data);
+                        this.termine = [];
                         this.displayTermine();
                     }
                 } catch (error) {
-                    console.error('Error loading termine:', error);
+                    console.error('❌ Error loading termine:', error);
+                    
+                    // If error but we had termine before, keep them
+                    if (this.termine.length > 0 && !forceReload) {
+                        console.log('ℹ️ Keeping existing termine after error');
+                    } else {
+                        this.termine = [];
+                        this.displayTermine();
+                    }
                 }
             },
             
@@ -3482,23 +3526,28 @@
             },
             
             displayTermine() {
-                console.log('📅 Displaying termine:', this.termine);
+                console.log('📅 TerminManager.displayTermine() called');
+                console.log('📊 Current termine in memory:', this.termine);
+                console.log('📈 Termine count:', this.termine.length);
+                
                 const container = document.getElementById('termine-container');
                 if (!container) {
-                    console.error('❌ Termine container not found');
+                    console.error('❌ Termine container DOM element not found - check if #termine-container exists');
                     return;
                 }
+                
+                console.log('✅ Termine container found:', container);
                 
                 // Clear container
                 container.innerHTML = '';
                 
                 if (this.termine.length === 0) {
-                    console.log('ℹ️ No termine to display');
+                    console.log('ℹ️ No termine to display - showing empty state message');
                     container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem; grid-column: 1 / -1;">Keine Termine vorhanden</p>';
                     return;
                 }
                 
-                console.log(`📊 Displaying ${this.termine.length} termine`);
+                console.log(`📊 Rendering ${this.termine.length} termine to DOM...`);
                 
                 // Sort by date/time (earliest first)
                 const sortedTermine = this.termine.sort((a, b) => {
@@ -3507,11 +3556,16 @@
                     return dateTimeA - dateTimeB;
                 });
                 
+                console.log('🔄 Termine sorted by date:', sortedTermine.map(t => `${t.title} - ${t.date}`));
+                
                 // Add termine
-                sortedTermine.forEach(termin => {
+                sortedTermine.forEach((termin, index) => {
+                    console.log(`🔄 Creating element for termin ${index + 1}:`, termin.title);
                     const terminElement = this.createTerminElement(termin);
                     container.appendChild(terminElement);
                 });
+                
+                console.log('✅ All termine rendered to DOM');
             },
             
             createTerminElement(termin) {
@@ -3656,6 +3710,9 @@
             }
         };
 
+        // Make TerminManager globally available
+        window.TerminManager = TerminManager;
+
         // === INITIALIZE ===
         document.addEventListener('DOMContentLoaded', async () => {
             // Logout is now handled by separate logout.html page
@@ -3680,7 +3737,8 @@
             } else {
                 // Initialize displays for local storage mode
                 TodoManager.updateHomeTodos();
-                TerminManager.displayTermine();
+                // Don't call TerminManager.displayTermine() here - it will show empty termine
+                // Let it be handled by authentication flow
             }
             
             // Logout button is already handled by Auth.setupEventListeners()

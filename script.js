@@ -349,18 +349,34 @@ const Auth = {
                     
                     // Load termine/appointments FIRST - this is the critical one
                     if (window.TerminManager && window.TerminManager.loadTermine) {
-                        console.log('🔄 Loading termine...');
-                        await window.TerminManager.loadTermine();
-                        console.log('✅ Termine loaded from database');
+                        console.log('🔄 First attempt: Loading termine...');
+                        try {
+                            await window.TerminManager.loadTermine();
+                            console.log('✅ Termine loaded from database (first attempt)');
+                        } catch (error) {
+                            console.error('❌ First attempt failed:', error);
+                            
+                            // Second attempt after 1 second
+                            console.log('🔄 Retrying termine load after 1 second...');
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            
+                            try {
+                                await window.TerminManager.loadTermine(true); // Force reload
+                                console.log('✅ Termine loaded from database (retry attempt)');
+                            } catch (retryError) {
+                                console.error('❌ Retry attempt also failed:', retryError);
+                            }
+                        }
                     } else {
                         console.error('❌ TerminManager or loadTermine method not available');
+                        console.log('🔍 Available window properties:', Object.keys(window).filter(k => k.includes('Termin')));
                     }
                     
-                    // Force display termine after loading
+                    // Explicit display after loading (no longer needed since loadTermine calls displayTermine)
                     if (window.TerminManager && window.TerminManager.displayTermine) {
-                        console.log('🔄 Displaying termine...');
-                        await window.TerminManager.displayTermine();
-                        console.log('✅ Termine displayed');
+                        console.log('🔄 Final explicit display call...');
+                        window.TerminManager.displayTermine();
+                        console.log('✅ Termine display called explicitly');
                     }
                     
                     // Load other managers
@@ -421,21 +437,32 @@ const Auth = {
                 console.warn('⚠️ initializeTodoCounter function not available');
             }
             
-            // FORCE RELOAD TERMINE as final fallback
+            // FINAL FALLBACK - more aggressive
             setTimeout(async () => {
-                console.log('🚨 FINAL FALLBACK: Force reloading termine after everything else...');
-                if (window.TerminManager && window.TerminManager.loadTermine) {
-                    try {
-                        await window.TerminManager.loadTermine();
-                        await window.TerminManager.displayTermine();
-                        console.log('🚨 FALLBACK SUCCESS: Termine force-reloaded');
-                    } catch (error) {
-                        console.error('🚨 FALLBACK FAILED:', error);
+                console.log('🚨 FINAL FALLBACK: Checking if termine were loaded successfully...');
+                
+                if (window.TerminManager) {
+                    console.log('🔍 TerminManager exists, checking termine count:', window.TerminManager.termine.length);
+                    
+                    // If no termine are displayed, try to reload
+                    if (window.TerminManager.termine.length === 0) {
+                        console.log('🚨 No termine found - forcing reload...');
+                        
+                        if (window.TerminManager.loadTermine) {
+                            try {
+                                await window.TerminManager.loadTermine(true); // Force reload
+                                console.log('🚨 FALLBACK SUCCESS: Termine force-reloaded');
+                            } catch (error) {
+                                console.error('🚨 FALLBACK FAILED:', error);
+                            }
+                        }
+                    } else {
+                        console.log('✅ Termine are already loaded, no fallback needed');
                     }
                 } else {
                     console.error('🚨 FALLBACK FAILED: TerminManager not available');
                 }
-            }, 3000);
+            }, 4000);
         }, 1500);
     },
     
@@ -5577,3 +5604,42 @@ if (typeof window !== 'undefined') {
         return { routineData: localData, todoCount: completedThisMonth.length };
     };
 }
+
+// === TERMINE DEBUGGING FUNCTION ===
+window.debugTermineLoading = function() {
+    console.log('🐛 DEBUG: Termine loading status check');
+    console.log('=====================================');
+    
+    // Check authentication
+    console.log('🔍 Auth status:');
+    console.log('- supabase exists:', !!window.supabase);
+    console.log('- isAuthenticated:', window.supabase?.isAuthenticated());
+    console.log('- current user:', window.supabase?.getCurrentUser()?.email);
+    
+    // Check TerminManager
+    console.log('🔍 TerminManager status:');
+    console.log('- TerminManager exists:', !!window.TerminManager);
+    console.log('- loadTermine method exists:', !!(window.TerminManager?.loadTermine));
+    console.log('- displayTermine method exists:', !!(window.TerminManager?.displayTermine));
+    console.log('- termine count in memory:', window.TerminManager?.termine?.length || 0);
+    console.log('- termine data:', window.TerminManager?.termine);
+    
+    // Check DOM
+    console.log('🔍 DOM status:');
+    const container = document.getElementById('termine-container');
+    console.log('- termine-container exists:', !!container);
+    console.log('- container innerHTML length:', container?.innerHTML.length || 0);
+    console.log('- container children count:', container?.children.length || 0);
+    
+    console.log('=====================================');
+    
+    // Manual load attempt
+    if (window.TerminManager && window.TerminManager.loadTermine) {
+        console.log('🔄 Attempting manual termine load...');
+        window.TerminManager.loadTermine(true).then(() => {
+            console.log('✅ Manual load completed');
+        }).catch(error => {
+            console.error('❌ Manual load failed:', error);
+        });
+    }
+};
