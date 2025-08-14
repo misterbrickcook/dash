@@ -3738,6 +3738,9 @@
                     <div class="ziel-progress-section">
                         <div class="ziel-progress-header">
                             <span class="ziel-progress-label">${formattedDate}</span>
+                            <button class="delete-entry-btn" data-entry-id="${entry.id}" style="background: none; border: none; color: #cc0000; cursor: pointer; padding: 0.25rem; font-size: 0.9rem;" title="Eintrag löschen">
+                                🗑️
+                            </button>
                         </div>
                         <div style="margin-top: 0.5rem;">
                             ${tagsHtml}
@@ -3746,6 +3749,31 @@
                 `;
                 
                 return entryCard;
+            },
+            
+            async deleteEntry(entryId) {
+                if (!confirm('Diesen Journal-Eintrag wirklich löschen?')) {
+                    return;
+                }
+                
+                try {
+                    // Delete from database if authenticated
+                    if (supabase?.isAuthenticated()) {
+                        await supabase.delete('journal_entries', entryId);
+                        console.log('✅ Journal entry deleted from database:', entryId);
+                    }
+                    
+                    // Remove from local entries array
+                    this.entries = this.entries.filter(entry => entry.id != entryId);
+                    
+                    // Refresh current view
+                    this.refreshCurrentView();
+                    
+                    console.log('✅ Journal entry deleted:', entryId);
+                } catch (error) {
+                    console.error('❌ Error deleting journal entry:', error);
+                    alert('Fehler beim Löschen des Eintrags: ' + error.message);
+                }
             }
         };
 
@@ -4420,6 +4448,16 @@
                 const goalId = e.target.dataset.goalId;
                 if (goalId) {
                     await GoalManager.editGoalValue(goalId);
+                }
+            });
+            
+            // === JOURNAL DELETE BUTTONS ===
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-entry-btn')) {
+                    const entryId = e.target.dataset.entryId;
+                    if (entryId) {
+                        JournalManager.deleteEntry(entryId);
+                    }
                 }
             });
 
