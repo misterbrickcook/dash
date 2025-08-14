@@ -5356,16 +5356,25 @@
                 
                 async loadResources() {
                     try {
-                        if (cloudStorage) {
+                        console.log('🔄 Loading resources...');
+                        
+                        if (cloudStorage && supabase?.isAuthenticated()) {
+                            console.log('☁️ Attempting to load resources from cloud...');
                             this.resources = await cloudStorage.getResources() || [];
+                            console.log(`☁️ Loaded ${this.resources.length} resources from cloud`);
                         } else {
+                            console.log('📱 Loading resources from localStorage...');
                             const cached = localStorage.getItem('resources');
                             this.resources = cached ? JSON.parse(cached) : [];
+                            console.log(`📱 Loaded ${this.resources.length} resources from localStorage`);
                         }
                         this.renderResources();
                     } catch (error) {
-                        console.error('Error loading resources:', error);
-                        this.resources = [];
+                        console.error('❌ Error loading resources:', error);
+                        console.log('📱 Falling back to localStorage...');
+                        const cached = localStorage.getItem('resources');
+                        this.resources = cached ? JSON.parse(cached) : [];
+                        console.log(`📱 Fallback loaded ${this.resources.length} resources`);
                     }
                 },
                 

@@ -531,17 +531,24 @@ class CloudStorage {
     async getResources() {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
+                console.log('☁️ Not authenticated or offline, using local resources');
                 return this.getLocalResources();
             }
             
+            console.log('☁️ Fetching resources from Supabase...');
             const data = await supabase.select('resources', '*');
+            console.log('☁️ Supabase query result:', data);
+            
             if (data) {
                 localStorage.setItem('resources_cache', JSON.stringify(data));
+                console.log(`☁️ Successfully loaded ${data.length} resources from cloud`);
                 return data;
             }
+            console.log('☁️ No cloud data, falling back to local');
             return this.getLocalResources();
         } catch (error) {
-            console.error('Error fetching resources:', error);
+            console.error('❌ Error fetching resources from cloud:', error);
+            console.log('📱 Falling back to local resources');
             return this.getLocalResources();
         }
     }
