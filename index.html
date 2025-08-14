@@ -2508,7 +2508,7 @@
                 let deadlineClass = '';
                 let deadlineText = '';
                 
-                if (todo.date && todo.time) {
+                if (todo.date) {
                     // Get today as YYYY-MM-DD string (no timezone conversion)
                     const today = new Date();
                     const todayStr = today.getFullYear() + '-' + 
@@ -2517,15 +2517,51 @@
                     
                     const isToday = todo.date === todayStr;
                     
-                    if (isToday) {
-                        deadlineClass = 'today';
-                        deadlineText = `Heute ${todo.time}`; // Use stored time directly
+                    if (todo.time) {
+                        // Todo has both date and time
+                        const todoDate = new Date(todo.date + 'T' + todo.time);
+                        const now = new Date();
+                        
+                        if (isToday) {
+                            // Check if time has passed for today
+                            if (todoDate < now) {
+                                deadlineClass = 'overdue';
+                                deadlineText = `Überfällig ${todo.time}`;
+                            } else {
+                                deadlineClass = 'today';
+                                deadlineText = `Heute ${todo.time}`;
+                            }
+                        } else if (todo.date < todayStr) {
+                            // Past date - definitely overdue
+                            deadlineClass = 'overdue';
+                            const [year, month, day] = todo.date.split('-');
+                            const germanDate = `${day}.${month}.${year}`;
+                            deadlineText = `Überfällig ${germanDate} ${todo.time}`;
+                        } else {
+                            // Future date
+                            deadlineClass = 'soon';
+                            const [year, month, day] = todo.date.split('-');
+                            const germanDate = `${day}.${month}.${year}`;
+                            deadlineText = `${germanDate} ${todo.time}`;
+                        }
                     } else {
-                        // Format date manually to avoid parsing issues
-                        const [year, month, day] = todo.date.split('-');
-                        const germanDate = `${day}.${month}.${year}`;
-                        deadlineText = `${germanDate} ${todo.time}`;
-                        deadlineClass = 'soon';
+                        // Todo has only date, no time
+                        if (isToday) {
+                            deadlineClass = 'today';
+                            deadlineText = 'Heute';
+                        } else if (todo.date < todayStr) {
+                            // Past date - overdue
+                            deadlineClass = 'overdue';
+                            const [year, month, day] = todo.date.split('-');
+                            const germanDate = `${day}.${month}.${year}`;
+                            deadlineText = `Überfällig ${germanDate}`;
+                        } else {
+                            // Future date
+                            deadlineClass = 'soon';
+                            const [year, month, day] = todo.date.split('-');
+                            const germanDate = `${day}.${month}.${year}`;
+                            deadlineText = germanDate;
+                        }
                     }
                 } else {
                     deadlineText = 'Kein Termin';
