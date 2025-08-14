@@ -2572,18 +2572,29 @@
                     return true; // No data to migrate is considered success
                 }
                 
+                // Clean all completions: remove any existing IDs and ensure clean data
+                const cleanedCompletions = allLocalCompletions.map(completion => ({
+                    template_id: completion.template_id,
+                    date: completion.date,
+                    completed: completion.completed,
+                    user_id: completion.user_id || supabase.getCurrentUser()?.id
+                    // Explicitly exclude: id, created_at, updated_at - these will be auto-generated
+                }));
+                
+                console.log(`🧹 Cleaned data, removing ${allLocalCompletions.length - cleanedCompletions.length} invalid entries`);
+                
                 // Upload to cloud in batches
                 const batchSize = 50;
                 let uploaded = 0;
                 let hasErrors = false;
                 
-                for (let i = 0; i < allLocalCompletions.length; i += batchSize) {
-                    const batch = allLocalCompletions.slice(i, i + batchSize);
+                for (let i = 0; i < cleanedCompletions.length; i += batchSize) {
+                    const batch = cleanedCompletions.slice(i, i + batchSize);
                     try {
                         const result = await supabase.insert('routine_completions', batch);
                         if (result) {
                             uploaded += batch.length;
-                            console.log(`✅ Uploaded batch: ${uploaded}/${allLocalCompletions.length}`);
+                            console.log(`✅ Uploaded batch: ${uploaded}/${cleanedCompletions.length}`);
                         } else {
                             console.error('❌ Batch upload returned no result');
                             hasErrors = true;
@@ -2604,7 +2615,7 @@
                     console.log('❌ Migration failed completely');
                     return false;
                 } else if (hasErrors) {
-                    console.log(`⚠️ Migration partially successful: ${uploaded}/${allLocalCompletions.length} uploaded`);
+                    console.log(`⚠️ Migration partially successful: ${uploaded}/${cleanedCompletions.length} uploaded`);
                     return uploaded > 0; // Partial success
                 } else {
                     console.log(`🎉 Migration complete! Uploaded ${uploaded} routine completions to cloud`);
