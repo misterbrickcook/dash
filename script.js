@@ -5248,4 +5248,111 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('- ✅ Shared IDs ensure perfect synchronization');
     console.log('- ✅ 2-second archiving delay with cancellation support');
     console.log(`- 📊 Central state tracks ${todoState.todos.size} todos`);
+    
+    // Make sure debug functions are globally available
+    console.log('🔍 Debug functions available: debugRoutineCounter, debugTodoCounter, fixTodoCounter, createTestData');
 });
+
+// === GLOBAL DEBUG FUNCTIONS ===
+// These must be outside DOMContentLoaded to be accessible in console
+
+if (typeof window !== 'undefined') {
+    window.globalDebugRoutineCounter = function() {
+        console.log('🔍 === ROUTINE COUNTER DEBUG (GLOBAL) ===');
+        
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = new Date(Date.now() - 24*60*60*1000).toISOString().split('T')[0];
+        const completionData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+        
+        console.log('📅 Today\'s date:', today);
+        console.log('📅 Yesterday\'s date:', yesterday);
+        console.log('💾 LocalStorage routineCompletionData:', completionData);
+        console.log('🔢 Available dates:', Object.keys(completionData));
+        
+        // Check specific dates
+        console.log('📊 Date-specific completions:');
+        if (completionData[today]) {
+            console.log(`✅ Today (${today}):`, completionData[today]);
+        } else {
+            console.log(`❌ Today (${today}): No completions`);
+        }
+        
+        if (completionData[yesterday]) {
+            console.log(`✅ Yesterday (${yesterday}):`, completionData[yesterday]);
+        } else {
+            console.log(`❌ Yesterday (${yesterday}): No completions`);
+        }
+        
+        // Show all dates with completions
+        console.log('📋 All completion dates:');
+        Object.keys(completionData).forEach(date => {
+            console.log(`  ${date}:`, completionData[date]);
+        });
+        
+        return { today, yesterday, completionData };
+    };
+    
+    window.globalFixCounters = function() {
+        console.log('🔧 Attempting to fix both counters...');
+        
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = new Date(Date.now() - 24*60*60*1000).toISOString().split('T')[0];
+        
+        // Fix routine data
+        const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+        
+        // Add yesterday's data if missing
+        if (!localData[yesterday]) {
+            localData[yesterday] = { morning: true, evening: true };
+            console.log(`✅ Added yesterday's routine completions`);
+        }
+        
+        // Add today's data based on current checkbox states
+        if (!localData[today]) {
+            localData[today] = {};
+        }
+        
+        // Check current routine states
+        const morningCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"]');
+        const eveningCheckboxes = document.querySelectorAll('#evening-routine input[type="checkbox"]');
+        
+        const morningCompleted = Array.from(morningCheckboxes).every(cb => cb.checked);
+        const eveningCompleted = Array.from(eveningCheckboxes).every(cb => cb.checked);
+        
+        localData[today].morning = morningCompleted;
+        localData[today].evening = eveningCompleted;
+        
+        localStorage.setItem('routineCompletionData', JSON.stringify(localData));
+        console.log('✅ Routine data fixed');
+        
+        // Fix todo counter  
+        const now = new Date();
+        const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
+        const todosCache = JSON.parse(localStorage.getItem('todos_cache') || '[]');
+        
+        const completedThisMonth = todosCache.filter(todo => {
+            if (!todo.completed) return false;
+            let todoDate = null;
+            if (todo.updated_at) todoDate = new Date(todo.updated_at);
+            else if (todo.created_at) todoDate = new Date(todo.created_at);
+            else if (todo.date) todoDate = new Date(todo.date);
+            
+            return todoDate && 
+                   todoDate.getMonth() === now.getMonth() && 
+                   todoDate.getFullYear() === now.getFullYear();
+        });
+        
+        const monthlyTodoData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
+        monthlyTodoData[monthKey] = completedThisMonth.length;
+        localStorage.setItem('monthlyTodoCompletions', JSON.stringify(monthlyTodoData));
+        console.log(`✅ Todo counter fixed: ${completedThisMonth.length} todos`);
+        
+        // Force refresh the displays
+        const event = new CustomEvent('forceUpdateCounters');
+        document.dispatchEvent(event);
+        
+        console.log('🎉 All counters fixed! Refresh the page to see changes.');
+        
+        return { routineData: localData, todoCount: completedThisMonth.length };
+    };
+}
