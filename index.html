@@ -2855,7 +2855,12 @@
                                 deadline: goal.target_date, // Map target_date to deadline for UI
                                 progress: goal.progress || 0, // Use DB progress field
                                 timeframe: goal.timeframe || 'monat', // Use DB timeframe field
-                                completed: goal.completed // Use DB completed field
+                                completed: goal.completed, // Use DB completed field
+                                // Map new progress fields
+                                startValue: goal.start_value,
+                                targetValue: goal.target_value, 
+                                currentValue: goal.current_value,
+                                unit: goal.unit
                             };
                         });
                         console.log('🔄 Transformed goals:', this.goals);
@@ -2967,6 +2972,10 @@
                             progress: goal.progress,
                             timeframe: goal.timeframe,
                             completed: goal.completed,
+                            start_value: goal.startValue,
+                            target_value: goal.targetValue,
+                            current_value: goal.currentValue,
+                            unit: goal.unit,
                             user_id: supabase?.user?.id
                         };
                         
@@ -2984,6 +2993,10 @@
                                 timeframe: result[0].timeframe,
                                 progress: result[0].progress,
                                 completed: result[0].completed,
+                                startValue: result[0].start_value,
+                                targetValue: result[0].target_value,
+                                currentValue: result[0].current_value,
+                                unit: result[0].unit,
                                 database_id: result[0].id // Store real DB ID for updates
                             };
                             this.goals.push(savedGoal);
