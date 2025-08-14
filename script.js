@@ -1668,25 +1668,19 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.log('📅 Loading completions for:', today);
         
         try {
-            // Get today's routine completions from storage
-            let completionData = {};
-            
-            // Try cloud storage first
-            if (window.cloudStorage && typeof window.cloudStorage.getRoutineCompletionData === 'function') {
-                completionData = await window.cloudStorage.getRoutineCompletionData();
-                console.log('☁️ Loaded from cloud storage:', completionData);
-            } else {
-                // Fallback to localStorage
-                const stored = localStorage.getItem('routineCompletionData');
-                if (stored) {
-                    completionData = JSON.parse(stored);
-                    console.log('💾 Loaded from localStorage:', completionData);
-                }
+            // Load from localStorage (the working system)
+            const storedData = localStorage.getItem('routineCompletionData');
+            if (!storedData) {
+                console.log('📅 No routine completion data found in localStorage');
+                return;
             }
+            
+            const completionData = JSON.parse(storedData);
+            console.log('💾 Loaded completion data from localStorage:', completionData);
             
             const todayData = completionData[today];
             if (!todayData) {
-                console.log('📅 No completion data found for today');
+                console.log('📅 No completion data found for today:', today);
                 return;
             }
             
@@ -1736,6 +1730,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             updateRoutineProgress();
             
             console.log('✅ Routine completions restored successfully');
+            
+            // Force update counters after restoration
+            setTimeout(() => {
+                updateMonthlyStreakDisplays();
+            }, 100);
             
         } catch (error) {
             console.error('❌ Error loading routine completions:', error);
