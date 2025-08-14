@@ -242,14 +242,35 @@ const Auth = {
             console.log('🔄 Calling supabase.signOut()...');
             await supabase.signOut();
             
-            console.log('🔄 Clearing localStorage and reloading...');
+            console.log('🔄 Clearing only session data, preserving user data...');
+            // Only clear session-specific data, keep user data for next login
+            const keysToKeep = [
+                'todos_cache', 'deadlines_cache', 'links_cache', 'routine_completions_cache',
+                'routineCompletionData', 'monthlyRoutineCompletions', 'monthlyTodoCompletions',
+                'notes_personal_cache', 'notes_work_cache', 'notes_ideas_cache'
+            ];
+            
+            // Save user data temporarily
+            const userData = {};
+            keysToKeep.forEach(key => {
+                const value = localStorage.getItem(key);
+                if (value) userData[key] = value;
+            });
+            
+            // Clear all localStorage
             localStorage.clear();
+            
+            // Restore user data
+            Object.entries(userData).forEach(([key, value]) => {
+                localStorage.setItem(key, value);
+            });
+            
+            console.log('✅ User data preserved during logout');
             window.location.reload();
             
         } catch (error) {
             console.error('❌ Logout error:', error);
-            // Even if supabase logout fails, clear local data and reload
-            localStorage.clear();
+            // Even if supabase logout fails, still preserve user data
             window.location.reload();
         }
     },
@@ -307,11 +328,54 @@ const Auth = {
     },
     
     showDashboard() {
-        console.log('📊 Showing dashboard, initializing monthly streak displays...');
+        console.log('📊 Showing dashboard, loading user data and initializing...');
         document.querySelector('.layout').style.display = 'flex';
         
-        // Initialize monthly streak displays after a short delay to ensure DOM is ready
-        setTimeout(() => {
+        // Load user data from database and initialize after a short delay
+        setTimeout(async () => {
+            // Load user data from database if authenticated
+            if (supabase && supabase.isAuthenticated()) {
+                console.log('📡 Loading user data from database...');
+                try {
+                    // Load todos
+                    if (window.cloudStorage && window.cloudStorage.getTodos) {
+                        await window.cloudStorage.getTodos();
+                        console.log('✅ Todos loaded from database');
+                    }
+                    
+                    // Load deadlines/appointments  
+                    if (window.cloudStorage && window.cloudStorage.getDeadlines) {
+                        await window.cloudStorage.getDeadlines();
+                        console.log('✅ Deadlines loaded from database');
+                    }
+                    
+                    // Load links
+                    if (window.cloudStorage && window.cloudStorage.getLinks) {
+                        await window.cloudStorage.getLinks();
+                        console.log('✅ Links loaded from database');
+                    }
+                    
+                    // Load routine completions (if method exists)
+                    if (window.cloudStorage && window.cloudStorage.getRoutineCompletions) {
+                        await window.cloudStorage.getRoutineCompletions();
+                        console.log('✅ Routine completions loaded from database');
+                    }
+                    
+                    // Load notes for all categories
+                    if (window.cloudStorage && window.cloudStorage.getNotes) {
+                        await window.cloudStorage.getNotes('personal');
+                        await window.cloudStorage.getNotes('work');
+                        await window.cloudStorage.getNotes('ideas');
+                        console.log('✅ Notes loaded from database');
+                    }
+                    
+                    console.log('🎉 All user data restored from database!');
+                } catch (error) {
+                    console.error('⚠️ Error loading user data:', error);
+                }
+            }
+            
+            // Initialize UI components
             if (typeof window.updateMonthlyStreakDisplays === 'function') {
                 console.log('🔄 Calling updateMonthlyStreakDisplays...');
                 window.updateMonthlyStreakDisplays();
