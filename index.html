@@ -3130,14 +3130,12 @@
                 
                 // Prepare progress display  
                 const hasProgressData = goal.hasOwnProperty('startValue') && goal.hasOwnProperty('targetValue');
-                console.log('🔍 Goal progress check:', {
-                    name: goal.name,
-                    hasProgressData,
-                    startValue: goal.startValue,
-                    targetValue: goal.targetValue,
-                    currentValue: goal.currentValue,
-                    progress: goal.progress
-                });
+                console.log('🔍 Goal progress check for:', goal.name);
+                console.log('🔍 hasProgressData:', hasProgressData);
+                console.log('🔍 startValue:', goal.startValue, typeof goal.startValue);
+                console.log('🔍 targetValue:', goal.targetValue, typeof goal.targetValue);
+                console.log('🔍 currentValue:', goal.currentValue, typeof goal.currentValue);
+                console.log('🔍 progress:', goal.progress);
                 const progressSection = hasProgressData ? `
                     <div class="goal-progress-section" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0;">
                         <div class="goal-values" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
@@ -3153,6 +3151,9 @@
                         </div>
                     </div>
                 ` : '';
+                
+                console.log('🔍 progressSection generated:', hasProgressData ? 'YES' : 'NO');
+                console.log('🔍 progressSection length:', progressSection.length);
 
                 goalCard.innerHTML = `
                     ${daysUntilText ? `<div class="termin-days-until">${daysUntilText}</div>` : ''}
