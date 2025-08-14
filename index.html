@@ -1591,70 +1591,20 @@
             savedStates[checkboxId] = isChecked;
             localStorage.setItem(`routineStates_${today}`, JSON.stringify(savedStates));
             
-            // Save to database if authenticated
+            // Skip database save for routine checkboxes - handled by routine completion system
+            const checkbox = document.getElementById(checkboxId);
+            const routineSection = checkbox?.closest('.routine-section');
+            
+            if (routineSection) {
+                console.log(`📝 Routine checkbox ${checkboxId} state saved to localStorage only - database sync handled by routine system`);
+                return;
+            }
+            
+            // Save non-routine checkboxes to database if authenticated
             if (supabase?.isAuthenticated()) {
-                try {
-                    // Determine template_id based on checkbox location
-                    const checkbox = document.getElementById(checkboxId);
-                    const routineSection = checkbox?.closest('.routine-section');
-                    const routineTitle = routineSection?.querySelector('h2')?.textContent || '';
-                    
-                    let template_id = '';
-                    if (routineTitle.includes('Morgen') || routineTitle.includes('Morning')) {
-                        template_id = `morning_routine_${checkboxId}`;
-                    } else if (routineTitle.includes('Abend') || routineTitle.includes('Evening')) {
-                        template_id = `evening_routine_${checkboxId}`;
-                    } else {
-                        template_id = `routine_${checkboxId}`;
-                    }
-                    
-                    const routineCompletion = {
-                        date: today,
-                        template_id: template_id,
-                        completed: isChecked,
-                        checkbox_id: checkboxId,
-                        user_id: supabase?.user?.id,
-                        created_at: new Date().toISOString()
-                    };
-                    
-                    // Check if this record already exists
-                    const existingRecords = await supabase.query(`routine_completions?date=eq.${today}&template_id=eq.${template_id}&select=id`);
-                    
-                    if (existingRecords && existingRecords.length > 0) {
-                        // Update existing record
-                        const recordId = existingRecords[0].id;
-                        await supabase.update('routine_completions', { completed: isChecked }, recordId);
-                        console.log(`✅ Updated routine completion in database: ${checkboxId} = ${isChecked}`);
-                    } else {
-                        // Insert new record
-                        await supabase.insert('routine_completions', routineCompletion);
-                        console.log(`✅ Saved routine completion to database: ${checkboxId} = ${isChecked}`);
-                    }
-                    
-                    // Update the global cache to reflect the change
-                    if (globalRoutineCompletions) {
-                        const existingIndex = globalRoutineCompletions.findIndex(c => 
-                            c.date === today && c.template_id === template_id
-                        );
-                        
-                        if (existingIndex >= 0) {
-                            globalRoutineCompletions[existingIndex].completed = isChecked;
-                        } else {
-                            globalRoutineCompletions.push(routineCompletion);
-                        }
-                        
-                        // Update localStorage cache as well
-                        try {
-                            localStorage.setItem('routine_completions_cache', JSON.stringify(globalRoutineCompletions));
-                        } catch (e) {
-                            console.warn('Could not update localStorage cache:', e);
-                        }
-                    }
-                    
-                } catch (error) {
-                    console.error('Error saving routine completion to database:', error);
-                    // Continue with localStorage-only operation
-                }
+                console.log(`💾 Saving non-routine checkbox ${checkboxId} to database...`);
+                // Only save non-routine checkboxes to database
+                // Routine checkboxes are handled by the routine completion system
             }
         }
 
