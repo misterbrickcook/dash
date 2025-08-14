@@ -554,8 +554,8 @@ class CloudStorage {
             {id: 'morning_4', text: '✅ Todos checken', routine_type: 'morning', order_index: 4},
             {id: 'evening_1', text: '📝 Tag reflektieren per Journal', routine_type: 'evening', order_index: 1},
             {id: 'evening_2', text: '📚 Lesen und Lessons nachhalten', routine_type: 'evening', order_index: 2},
-            {id: 'evening_3', text: '📅 Nächsten Tag planen', routine_type: 'evening', order_index: 3},
-            {id: 'evening_4', text: '📊 Trades evaluieren und Lessons nachhalten', routine_type: 'evening', order_index: 4}
+            {id: 'evening_3', text: '📊 Trades evaluieren und Lessons nachhalten', routine_type: 'evening', order_index: 3},
+            {id: 'evening_4', text: '📅 Nächsten Tag planen', routine_type: 'evening', order_index: 4}
         ];
     }
     
