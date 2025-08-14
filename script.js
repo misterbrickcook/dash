@@ -952,9 +952,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         }
         
-        // Track todo completion for monthly count
+        // Track todo completion for monthly count with deduplication
         if (checked) {
-            trackTodoCompletion();
+            trackTodoCompletion(sharedId);
         }
         
         // Update monthly streak displays
@@ -994,9 +994,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.log(`Task unchecked on ${currentTab} tab:`, taskText, 'ID:', taskId);
         }
         
-        // Track todo completion for monthly count
+        // Track todo completion for monthly count with deduplication
         if (checkbox.checked) {
-            trackTodoCompletion();
+            const todoId = checkbox.closest('.todo-item')?.dataset.sharedId || checkbox.id;
+            trackTodoCompletion(todoId);
         }
         
         // Update monthly streak displays
@@ -1781,16 +1782,40 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     
     // Function to track todo completions
-    function trackTodoCompletion() {
+    function trackTodoCompletion(todoId = null) {
         try {
             const now = new Date();
             const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
+            const todayKey = now.toISOString().split('T')[0];
             
+            // Prevent double counting with deduplication tracking
+            const completedToday = JSON.parse(localStorage.getItem('todosCompletedToday') || '[]');
+            const dailyKey = `${todayKey}_${todoId || 'manual'}`;
+            
+            // Check if this completion was already counted today
+            if (completedToday.includes(dailyKey)) {
+                console.log(`⚠️ Todo completion already counted today: ${dailyKey}`);
+                return false;
+            }
+            
+            // Add to daily deduplication tracking
+            completedToday.push(dailyKey);
+            localStorage.setItem('todosCompletedToday', JSON.stringify(completedToday));
+            
+            // Clean old daily data (keep only last 7 days)
+            const cleanedDaily = completedToday.filter(key => {
+                const keyDate = key.split('_')[0];
+                const daysDiff = (new Date() - new Date(keyDate)) / (1000 * 60 * 60 * 24);
+                return daysDiff <= 7;
+            });
+            localStorage.setItem('todosCompletedToday', JSON.stringify(cleanedDaily));
+            
+            // Increment monthly counter
             const monthlyData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
             monthlyData[monthKey] = (monthlyData[monthKey] || 0) + 1;
             
             localStorage.setItem('monthlyTodoCompletions', JSON.stringify(monthlyData));
-            console.log(`🔍 DEBUG: Todo completion tracked for ${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}, total: ${monthlyData[monthKey]}`);
+            console.log(`✅ Todo completion tracked for ${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}, total: ${monthlyData[monthKey]}`);
             
             return monthlyData[monthKey];
         } catch (error) {
@@ -1999,8 +2024,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.clearRoutineData = function() {
         localStorage.removeItem('routineCompletionData');
         localStorage.removeItem('monthlyRoutineCompletions');
+        // DO NOT CLEAR monthlyTodoCompletions - todos are separate!
+        console.log('🗑️ Routine data cleared (todos preserved)');
+        updateMonthlyStreakDisplays();
+    };
+    
+    window.clearTodoData = function() {
         localStorage.removeItem('monthlyTodoCompletions');
-        console.log('🗑️ All routine data cleared');
+        console.log('🗑️ Todo completion data cleared');
         updateMonthlyStreakDisplays();
     };
     
@@ -5249,6 +5280,45 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('- ✅ 2-second archiving delay with cancellation support');
     console.log(`- 📊 Central state tracks ${todoState.todos.size} todos`);
     
+    // Auto-fix todo counter on startup
+    console.log('🔧 Auto-fixing todo counter on startup...');
+    try {
+        const now = new Date();
+        const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
+        const currentCount = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}')[monthKey] || 0;
+        
+        // Only auto-fix if count seems wrong (0 or undefined when todos exist)
+        const todosCache = JSON.parse(localStorage.getItem('todos_cache') || '[]');
+        const hasCompletedTodos = todosCache.some(todo => todo.completed);
+        
+        if ((currentCount === 0 || currentCount === undefined) && hasCompletedTodos) {
+            console.log(`🔧 Auto-fixing todo counter (was ${currentCount}, but completed todos exist)`);
+            
+            // Run simplified fix
+            const completedThisMonth = todosCache.filter(todo => {
+                if (!todo.completed) return false;
+                let todoDate = null;
+                if (todo.updated_at) todoDate = new Date(todo.updated_at);
+                else if (todo.created_at) todoDate = new Date(todo.created_at);
+                else if (todo.date) todoDate = new Date(todo.date);
+                
+                return todoDate && 
+                       todoDate.getMonth() === now.getMonth() && 
+                       todoDate.getFullYear() === now.getFullYear();
+            });
+            
+            const monthlyTodoData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
+            monthlyTodoData[monthKey] = completedThisMonth.length;
+            localStorage.setItem('monthlyTodoCompletions', JSON.stringify(monthlyTodoData));
+            
+            console.log(`✅ Auto-fix complete: Todo counter set to ${completedThisMonth.length}`);
+        } else {
+            console.log(`✅ Todo counter looks correct: ${currentCount}`);
+        }
+    } catch (error) {
+        console.log('⚠️ Auto-fix failed:', error.message);
+    }
+    
     // Make sure debug functions are globally available
     console.log('🔍 Debug functions available: debugRoutineCounter, debugTodoCounter, fixTodoCounter, createTestData');
 });
@@ -5325,27 +5395,55 @@ if (typeof window !== 'undefined') {
         localStorage.setItem('routineCompletionData', JSON.stringify(localData));
         console.log('✅ Routine data fixed');
         
-        // Fix todo counter  
+        // Fix todo counter with robust data reconstruction
         const now = new Date();
         const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
-        const todosCache = JSON.parse(localStorage.getItem('todos_cache') || '[]');
         
-        const completedThisMonth = todosCache.filter(todo => {
+        // Get all possible todo data sources
+        const todosCache = JSON.parse(localStorage.getItem('todos_cache') || '[]');
+        let cloudTodos = [];
+        try {
+            if (window.cloudStorage && window.cloudStorage.getLocalTodos) {
+                cloudTodos = window.cloudStorage.getLocalTodos() || [];
+            }
+        } catch (error) {
+            console.log('Cloud todos not available:', error.message);
+        }
+        
+        // Merge and deduplicate todos from all sources
+        const allTodos = [...todosCache];
+        cloudTodos.forEach(cloudTodo => {
+            if (!allTodos.find(todo => todo.id === cloudTodo.id || todo.sharedId === cloudTodo.sharedId)) {
+                allTodos.push(cloudTodo);
+            }
+        });
+        
+        // Count completed todos this month from all sources
+        const completedThisMonth = allTodos.filter(todo => {
             if (!todo.completed) return false;
+            
             let todoDate = null;
+            // Try multiple date fields
             if (todo.updated_at) todoDate = new Date(todo.updated_at);
             else if (todo.created_at) todoDate = new Date(todo.created_at);
             else if (todo.date) todoDate = new Date(todo.date);
+            else if (todo.completedAt) todoDate = new Date(todo.completedAt);
             
-            return todoDate && 
-                   todoDate.getMonth() === now.getMonth() && 
+            if (!todoDate || isNaN(todoDate.getTime())) return false;
+            
+            return todoDate.getMonth() === now.getMonth() && 
                    todoDate.getFullYear() === now.getFullYear();
         });
         
+        // Update monthly tracking with rebuilt count
         const monthlyTodoData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
         monthlyTodoData[monthKey] = completedThisMonth.length;
         localStorage.setItem('monthlyTodoCompletions', JSON.stringify(monthlyTodoData));
-        console.log(`✅ Todo counter fixed: ${completedThisMonth.length} todos`);
+        
+        // Clear daily deduplication for fresh start
+        localStorage.setItem('todosCompletedToday', JSON.stringify([]));
+        
+        console.log(`✅ Todo counter fixed: ${completedThisMonth.length} todos from ${allTodos.length} total todos`);
         
         // Force refresh the displays
         const event = new CustomEvent('forceUpdateCounters');
