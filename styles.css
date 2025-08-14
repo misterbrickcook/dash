@@ -736,9 +736,11 @@ input:focus, textarea:focus, select:focus {
 }
 
 .todo-card-header {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.75rem;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .todo-category-badge {
@@ -750,15 +752,13 @@ input:focus, textarea:focus, select:focus {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: #666666;
-    text-align: right;
+    display: inline-block;
 }
 
 .todo-card-content {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
-    margin-right: 4rem; /* Space for category badge */
-    margin-top: 1.5rem; /* Push content down to avoid overlap */
     margin-bottom: 0.5rem;
 }
 
