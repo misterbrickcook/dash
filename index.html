@@ -1183,6 +1183,31 @@
         </div>
     </div>
 
+    <!-- === EDIT GOAL VALUE MODAL === -->
+    <div id="edit-goal-value-modal" class="add-todo-modal hide">
+        <div class="add-todo-container">
+            <div class="add-todo-header">
+                <h2 id="edit-goal-modal-title">Fortschritt aktualisieren</h2>
+            </div>
+            
+            <div id="edit-goal-current-status" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; color: #666;">
+                <!-- Current goal status will be inserted here -->
+            </div>
+            
+            <form id="edit-goal-value-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="new-goal-value">Neuer aktueller Wert</label>
+                    <input type="number" id="new-goal-value" step="0.01" required autocomplete="off" style="font-size: 1.1rem; padding: 0.75rem;">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancel-edit-goal-value-btn" class="btn secondary">Abbrechen</button>
+                    <button type="submit" class="btn">Wert aktualisieren</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- === AUTH SCREEN === -->
     <div id="auth-screen" class="auth-screen hide">
         <div class="auth-container">
@@ -3175,7 +3200,7 @@
                     <div class="termin-title">${goal.name}</div>
                     <div class="termin-description">${goal.description}</div>
                     ${progressSection}
-                    <div class="termin-edit-icon" onclick="GoalManager.editGoalValue('${goal.id}')">✎</div>
+                    <div class="termin-edit-icon" onclick="GoalManager.showEditGoalValueModal('${goal.id}')">✎</div>
                     <div class="termin-delete-icon" onclick="GoalManager.deleteGoal('${goal.id}')">🗑</div>
                 `;
                 
@@ -3218,7 +3243,7 @@
                 }
             },
             
-            async editGoalValue(goalId) {
+            showEditGoalValueModal(goalId) {
                 const goal = this.goals.find(g => g.id == goalId);
                 if (!goal) {
                     alert('Ziel nicht gefunden!');
@@ -3228,25 +3253,56 @@
                 const currentValue = goal.currentValue || goal.startValue || 0;
                 const unit = goal.unit ? ` ${goal.unit}` : '';
                 
-                const newValue = prompt(
-                    `Aktueller Wert für "${goal.name}":\n\n` +
-                    `Start: ${goal.startValue}${unit}\n` +
-                    `Ziel: ${goal.targetValue}${unit}\n` +
-                    `Aktuell: ${currentValue}${unit}\n\n` +
-                    `Neuer aktueller Wert:`,
-                    currentValue
-                );
+                // Set modal title and current status
+                document.getElementById('edit-goal-modal-title').textContent = `Fortschritt für "${goal.name}"`;
+                document.getElementById('edit-goal-current-status').innerHTML = `
+                    <strong>Aktueller Status:</strong><br>
+                    Start: <strong>${goal.startValue}${unit}</strong> → 
+                    Ziel: <strong>${goal.targetValue}${unit}</strong><br>
+                    Aktuell: <strong>${currentValue}${unit}</strong> 
+                    (${goal.progress || 0}% erreicht)
+                `;
                 
-                if (newValue === null) return; // Cancelled
+                // Pre-fill current value
+                document.getElementById('new-goal-value').value = currentValue;
                 
-                const parsedValue = parseFloat(newValue);
-                if (isNaN(parsedValue)) {
+                // Store goal ID for form submission
+                document.getElementById('edit-goal-value-form').dataset.goalId = goalId;
+                
+                // Show modal
+                document.getElementById('edit-goal-value-modal').classList.remove('hide');
+                
+                // Focus input
+                setTimeout(() => {
+                    document.getElementById('new-goal-value').focus();
+                    document.getElementById('new-goal-value').select();
+                }, 100);
+            },
+            
+            hideEditGoalValueModal() {
+                document.getElementById('edit-goal-value-modal').classList.add('hide');
+                document.getElementById('edit-goal-value-form').reset();
+                delete document.getElementById('edit-goal-value-form').dataset.goalId;
+            },
+            
+            async editGoalValue(goalId) {
+                // This method is now called by the modal form submission
+                const goal = this.goals.find(g => g.id == goalId);
+                if (!goal) {
+                    alert('Ziel nicht gefunden!');
+                    return;
+                }
+                
+                const newValue = parseFloat(document.getElementById('new-goal-value').value);
+                if (isNaN(newValue)) {
                     alert('Bitte eine gültige Zahl eingeben!');
                     return;
                 }
                 
+                const unit = goal.unit ? ` ${goal.unit}` : '';
+                
                 // Update values
-                goal.currentValue = parsedValue;
+                goal.currentValue = newValue;
                 goal.progress = this.calculateProgress(goal.startValue, goal.targetValue, goal.currentValue);
                 goal.completed = goal.progress >= 100;
                 
@@ -3256,7 +3312,7 @@
                 if (supabase?.isAuthenticated() && dbId) {
                     try {
                         await supabase.update('goals', { 
-                            currentValue: goal.currentValue,
+                            current_value: goal.currentValue, // Use DB field name
                             progress: goal.progress,
                             completed: goal.completed
                         }, dbId);
@@ -3268,7 +3324,8 @@
                     }
                 }
                 
-                // Refresh view
+                // Hide modal and refresh view
+                this.hideEditGoalValueModal();
                 this.refreshCurrentView();
                 
                 console.log('✅ Goal value updated:', goal.name, `${goal.currentValue}${unit}`, `${goal.progress}%`);
@@ -4353,6 +4410,20 @@
             // Initialize todo counter display
             initializeTodoCounter();
             
+            // === EDIT GOAL VALUE MODAL EVENT LISTENERS ===
+            document.getElementById('cancel-edit-goal-value-btn').addEventListener('click', () => {
+                GoalManager.hideEditGoalValueModal();
+            });
+
+            document.getElementById('edit-goal-value-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const goalId = e.target.dataset.goalId;
+                if (goalId) {
+                    await GoalManager.editGoalValue(goalId);
+                }
+            });
+
             // === SIMPLE LOGOUT (URL-based) ===
             console.log('✅ Logout is now URL-based, no JavaScript needed');
             
