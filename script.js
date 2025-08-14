@@ -328,7 +328,8 @@ const Auth = {
     },
     
     showDashboard() {
-        console.log('📊 Showing dashboard, loading user data and initializing...');
+        console.log('📊 SHOWDASHBOARD CALLED - Showing dashboard, loading user data and initializing...');
+        console.log('🔍 Current auth status:', supabase ? supabase.isAuthenticated() : 'no supabase');
         document.querySelector('.layout').style.display = 'flex';
         
         // Load user data from database and initialize after a short delay
@@ -419,6 +420,22 @@ const Auth = {
             } else {
                 console.warn('⚠️ initializeTodoCounter function not available');
             }
+            
+            // FORCE RELOAD TERMINE as final fallback
+            setTimeout(async () => {
+                console.log('🚨 FINAL FALLBACK: Force reloading termine after everything else...');
+                if (window.TerminManager && window.TerminManager.loadTermine) {
+                    try {
+                        await window.TerminManager.loadTermine();
+                        await window.TerminManager.displayTermine();
+                        console.log('🚨 FALLBACK SUCCESS: Termine force-reloaded');
+                    } catch (error) {
+                        console.error('🚨 FALLBACK FAILED:', error);
+                    }
+                } else {
+                    console.error('🚨 FALLBACK FAILED: TerminManager not available');
+                }
+            }, 3000);
         }, 1500);
     },
     
