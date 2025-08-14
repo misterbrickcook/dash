@@ -729,19 +729,30 @@
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
         }
         
-        .termin-days-until {
+        /* Base styling for days badges - dezent und rechteckig wie Kategorien */
+        .termin-days-until, .ziel-days-until {
             position: absolute !important;
             top: 0.5rem !important;
+            background: #f0f0f0 !important;
+            color: #666666 !important;
+            padding: 0.2rem 0.5rem !important;
+            border: 1px solid #e0e0e0 !important;
+            font-size: 0.65rem !important;
+            font-weight: 500 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.1em !important;
+            white-space: nowrap !important;
+        }
+        
+        /* Termine: Rechtsbündig */
+        .termin-days-until {
+            right: 0.5rem !important;
+        }
+        
+        /* Ziele: Mittig */
+        .ziel-days-until {
             left: 50% !important;
             transform: translateX(-50%) !important;
-            background: linear-gradient(135deg, var(--badge-color-1), var(--badge-color-2)) !important;
-            color: white !important;
-            padding: 0.375rem 0.75rem !important;
-            border-radius: 20px !important;
-            font-size: 0.75rem !important;
-            font-weight: 600 !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-            border: 2px solid rgba(255, 255, 255, 0.2) !important;
         }
         
         .termin-date {
@@ -3192,7 +3203,7 @@
                 console.log('🔍 progressSection length:', progressSection.length);
 
                 goalCard.innerHTML = `
-                    ${daysUntilText ? `<div class="termin-days-until">${daysUntilText}</div>` : ''}
+                    ${daysUntilText ? `<div class="ziel-days-until">${daysUntilText}</div>` : ''}
                     <div class="ziel-kategorie">${goal.category}</div>
                     ${formattedDeadline ? `<div class="termin-date">🎯 ${formattedDeadline}</div>` : ''}
                     <div class="termin-title">${goal.name}</div>
