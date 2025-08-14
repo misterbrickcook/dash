@@ -1407,22 +1407,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         console.log(`Routine progress updated: ${completed}/${total} (${percentage}%)`);
         
-        // Direct monthly streak update - no setTimeout
-        console.log('🔍 DEBUG: Direct monthly streak check');
+        // Only update progress bar, don't directly save completion
+        console.log('🔍 DEBUG: Progress updated, completion handling will be done by checkAndSaveRoutineCompletion');
         if (percentage === 100) {
-            console.log('🔍 DEBUG: 100% reached, updating monthly streaks');
-            const today = new Date().toISOString().split('T')[0];
-            const routineType = isEveningVisible ? 'evening' : 'morning';
-            
-            // Save completion
-            const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
-            if (!localData[today]) localData[today] = {};
-            localData[today][routineType] = true;
-            localStorage.setItem('routineCompletionData', JSON.stringify(localData));
-            console.log(`🔍 DEBUG: Saved ${routineType} completion to localStorage`);
-            
-            // Update display immediately
-            updateMonthlyStreakDisplays();
+            console.log('🔍 DEBUG: 100% reached - routine complete!');
         }
     }
     
@@ -2003,9 +1991,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         localData[yesterday].morning = true;
         localData[yesterday].evening = true;
         
-        // Today: both routines completed (if all checkboxes are checked)
+        // Today: check current routine completion status
         const morningComplete = isRoutineComplete('morning');
         const eveningComplete = isRoutineComplete('evening');
+        
+        console.log('🔍 Current routine status check:');
+        console.log(`  Morning complete: ${morningComplete} (needs all 4 items checked)`);
+        console.log(`  Evening complete: ${eveningComplete} (needs all 5 items checked)`);
         
         if (!localData[today]) localData[today] = {};
         localData[today].morning = morningComplete;
@@ -2018,7 +2010,27 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.log(`  Today (${today}): morning=${morningComplete}, evening=${eveningComplete}`);
         
         updateMonthlyStreakDisplays();
-        return { yesterday, today, localData };
+        return { yesterday, today, localData, morningComplete, eveningComplete };
+    };
+    
+    window.checkRoutineStatus = function() {
+        const morningComplete = isRoutineComplete('morning');
+        const eveningComplete = isRoutineComplete('evening');
+        
+        const morningRoutine = document.getElementById('morning-routine');
+        const eveningRoutine = document.getElementById('evening-routine');
+        
+        const morningChecked = morningRoutine ? morningRoutine.querySelectorAll('input[type="checkbox"]:checked').length : 0;
+        const morningTotal = morningRoutine ? morningRoutine.querySelectorAll('input[type="checkbox"]').length : 0;
+        
+        const eveningChecked = eveningRoutine ? eveningRoutine.querySelectorAll('input[type="checkbox"]:checked').length : 0;
+        const eveningTotal = eveningRoutine ? eveningRoutine.querySelectorAll('input[type="checkbox"]').length : 0;
+        
+        console.log('🔍 === ROUTINE STATUS CHECK ===');
+        console.log(`Morning: ${morningChecked}/${morningTotal} checked, complete: ${morningComplete}`);
+        console.log(`Evening: ${eveningChecked}/${eveningTotal} checked, complete: ${eveningComplete}`);
+        
+        return { morningComplete, eveningComplete, morningChecked, morningTotal, eveningChecked, eveningTotal };
     };
     
     window.clearRoutineData = function() {
