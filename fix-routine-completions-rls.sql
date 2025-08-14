@@ -25,23 +25,23 @@ DROP POLICY IF EXISTS "Users can delete their own routine completions" ON routin
 -- Policy for SELECT: Users can view their own routine completions
 CREATE POLICY "Users can view their own routine completions" 
 ON routine_completions FOR SELECT 
-USING (auth.uid() = user_id);
+USING (auth.uid()::UUID = user_id);
 
 -- Policy for INSERT: Users can insert their own routine completions
 CREATE POLICY "Users can insert their own routine completions" 
 ON routine_completions FOR INSERT 
-WITH CHECK (auth.uid() = user_id);
+WITH CHECK (auth.uid()::UUID = user_id);
 
 -- Policy for UPDATE: Users can update their own routine completions
 CREATE POLICY "Users can update their own routine completions" 
 ON routine_completions FOR UPDATE 
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
+USING (auth.uid()::UUID = user_id)
+WITH CHECK (auth.uid()::UUID = user_id);
 
 -- Policy for DELETE: Users can delete their own routine completions
 CREATE POLICY "Users can delete their own routine completions" 
 ON routine_completions FOR DELETE 
-USING (auth.uid() = user_id);
+USING (auth.uid()::UUID = user_id);
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_routine_completions_user_date 
