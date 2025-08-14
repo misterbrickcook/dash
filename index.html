@@ -3147,42 +3147,48 @@
             },
             
             async deleteGoal(goalId) {
-                if (!confirm('Dieses Ziel wirklich löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden!')) {
+                if (!confirm('Dieses Ziel ins Archiv verschieben?\n\n(Es wird als abgeschlossen markiert und ins Archiv verschoben)')) {
                     return;
                 }
                 
-                const goalIndex = this.goals.findIndex(g => g.id == goalId);
-                if (goalIndex === -1) {
-                    console.error('❌ Goal not found for deletion:', goalId);
+                const goal = this.goals.find(g => g.id == goalId);
+                if (!goal) {
+                    console.error('❌ Goal not found for archiving:', goalId);
                     alert('Ziel nicht gefunden!');
                     return;
                 }
                 
-                const goal = this.goals[goalIndex];
-                console.log('🗑️ Deleting goal:', goal.name);
+                console.log('📦 Archiving goal:', goal.name);
                 
-                // Delete from database if authenticated and has real DB ID
+                // Mark as completed (move to archive)
+                const oldCompleted = goal.completed;
+                goal.completed = true;
+                goal.progress = 100; // Set to 100% when archived
+                
+                // Update in database if authenticated and has real DB ID
                 const dbId = goal.database_id || (goal.id && !isNaN(goal.id) && goal.id.toString().length < 10 ? goal.id : null);
                 
                 if (supabase?.isAuthenticated() && dbId) {
                     try {
-                        console.log('💾 Deleting goal from database with ID:', dbId);
-                        await supabase.delete('goals', dbId);
-                        console.log('✅ Goal deleted from database');
+                        console.log('💾 Updating goal in database with ID:', dbId);
+                        await supabase.update('goals', { 
+                            completed: true,
+                            progress: 100
+                        }, dbId);
+                        console.log('✅ Goal archived in database');
                     } catch (error) {
-                        console.error('❌ Error deleting goal from database:', error);
-                        alert('Fehler beim Löschen aus der Datenbank: ' + error.message);
+                        console.error('❌ Error archiving goal in database:', error);
+                        alert('Fehler beim Archivieren: ' + error.message);
+                        // Revert on error
+                        goal.completed = oldCompleted;
                         return;
                     }
                 }
                 
-                // Remove from local array
-                this.goals.splice(goalIndex, 1);
-                
                 // Refresh current view
                 this.refreshCurrentView();
                 
-                console.log('✅ Goal deleted successfully:', goal.name);
+                console.log('✅ Goal archived successfully:', goal.name);
             },
             
             async clearGoalArchive() {
