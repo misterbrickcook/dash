@@ -2394,40 +2394,151 @@
         
         async function loadRoutineCompletions() {
             try {
-                console.log('🔄 Loading routine completions (Mobile-First approach)...');
+                console.log('🔄 Loading routine completions (Cloud-First with Migration)...');
                 
+                // STEP 1: If not authenticated, use local data only
                 if (!supabase?.isAuthenticated()) {
-                    console.log('⚠️ Not authenticated, skipping routine completions load');
+                    console.log('⚠️ Not authenticated, using local data only');
+                    try {
+                        const localData = localStorage.getItem('routine_completions_cache');
+                        if (localData) {
+                            globalRoutineCompletions = JSON.parse(localData);
+                            updateMonthlyStreakDisplaysFromMemory();
+                        }
+                    } catch (e) {
+                        console.warn('⚠️ Could not read local data:', e);
+                        globalRoutineCompletions = [];
+                    }
                     return;
                 }
                 
-                // Query routine completions from Supabase
-                const routineCompletions = await supabase.query('routine_completions?select=*');
-                console.log(`✅ Loaded ${routineCompletions?.length || 0} routine completions from database`);
+                // STEP 2: Load cloud data
+                const cloudCompletions = await supabase.query('routine_completions?select=*');
+                console.log(`☁️ Loaded ${cloudCompletions?.length || 0} routine completions from cloud`);
                 
-                if (routineCompletions && routineCompletions.length > 0) {
-                    // ALWAYS store in global variable first (works on all browsers)
-                    globalRoutineCompletions = routineCompletions;
-                    console.log('💾 Stored routine completions in memory');
+                // STEP 3: Check if we need to migrate local data to cloud
+                if ((!cloudCompletions || cloudCompletions.length === 0)) {
+                    console.log('🔍 Cloud is empty, checking for local data to migrate...');
+                    await migrateLocalDataToCloud();
                     
-                    // Try localStorage as secondary cache (may fail on Chrome Mobile)
-                    try {
-                        localStorage.setItem('routine_completions_cache', JSON.stringify(routineCompletions));
-                        console.log('💾 Also cached in localStorage (if supported)');
-                    } catch (storageError) {
-                        console.warn('⚠️ localStorage failed (Chrome Mobile issue), using memory only:', storageError);
-                    }
+                    // Reload after migration
+                    const newCloudCompletions = await supabase.query('routine_completions?select=*');
+                    console.log(`🔄 After migration: ${newCloudCompletions?.length || 0} completions in cloud`);
+                    globalRoutineCompletions = newCloudCompletions || [];
                 } else {
-                    globalRoutineCompletions = [];
-                    console.log('ℹ️ No routine completions found in database');
+                    // Use cloud data
+                    globalRoutineCompletions = cloudCompletions;
+                    console.log(`☁️ Using ${cloudCompletions.length} completions from cloud`);
                 }
                 
-                // Update counters immediately after loading
+                // STEP 4: Cache locally for offline access
+                try {
+                    localStorage.setItem('routine_completions_cache', JSON.stringify(globalRoutineCompletions));
+                    console.log('💾 Cached cloud data locally');
+                } catch (storageError) {
+                    console.warn('⚠️ localStorage save failed:', storageError);
+                }
+                
+                // STEP 5: Update displays
                 updateMonthlyStreakDisplaysFromMemory();
                 
             } catch (error) {
                 console.error('❌ Error loading routine completions:', error);
-                globalRoutineCompletions = [];
+                // Fallback to local data on error
+                try {
+                    const localData = localStorage.getItem('routine_completions_cache');
+                    if (localData) {
+                        globalRoutineCompletions = JSON.parse(localData);
+                        console.log('🔄 Fallback to local data due to error');
+                    } else {
+                        globalRoutineCompletions = [];
+                    }
+                } catch (e) {
+                    globalRoutineCompletions = [];
+                }
+            }
+        }
+        
+        // === MIGRATION FUNCTION ===
+        async function migrateLocalDataToCloud() {
+            try {
+                console.log('🚀 Starting migration of local routine data to cloud...');
+                
+                // Get all local routine data sources
+                const sources = [
+                    'routine_completions_cache',
+                    'routineCompletionData',
+                    'monthlyRoutineCompletions'
+                ];
+                
+                let allLocalCompletions = [];
+                
+                for (const source of sources) {
+                    try {
+                        const data = localStorage.getItem(source);
+                        if (data) {
+                            let parsed = JSON.parse(data);
+                            console.log(`📁 Found data in ${source}:`, parsed);
+                            
+                            if (source === 'routineCompletionData') {
+                                // Convert old format to new format
+                                Object.keys(parsed).forEach(date => {
+                                    const dayData = parsed[date];
+                                    if (dayData.morning !== undefined) {
+                                        allLocalCompletions.push({
+                                            template_id: 'morning_routine',
+                                            date: date,
+                                            completed: dayData.morning,
+                                            user_id: supabase.getCurrentUser()?.id
+                                        });
+                                    }
+                                    if (dayData.evening !== undefined) {
+                                        allLocalCompletions.push({
+                                            template_id: 'evening_routine', 
+                                            date: date,
+                                            completed: dayData.evening,
+                                            user_id: supabase.getCurrentUser()?.id
+                                        });
+                                    }
+                                });
+                            } else if (Array.isArray(parsed)) {
+                                // Add user_id to existing completions
+                                parsed.forEach(completion => {
+                                    completion.user_id = supabase.getCurrentUser()?.id;
+                                    allLocalCompletions.push(completion);
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.warn(`⚠️ Could not parse ${source}:`, e);
+                    }
+                }
+                
+                console.log(`📊 Found ${allLocalCompletions.length} local completions to migrate`);
+                
+                if (allLocalCompletions.length > 0) {
+                    // Upload to cloud in batches
+                    const batchSize = 50;
+                    let uploaded = 0;
+                    
+                    for (let i = 0; i < allLocalCompletions.length; i += batchSize) {
+                        const batch = allLocalCompletions.slice(i, i + batchSize);
+                        try {
+                            await supabase.insert('routine_completions', batch);
+                            uploaded += batch.length;
+                            console.log(`✅ Uploaded batch: ${uploaded}/${allLocalCompletions.length}`);
+                        } catch (batchError) {
+                            console.error('❌ Batch upload failed:', batchError);
+                        }
+                    }
+                    
+                    console.log(`🎉 Migration complete! Uploaded ${uploaded} routine completions to cloud`);
+                } else {
+                    console.log('📭 No local data found to migrate');
+                }
+                
+            } catch (error) {
+                console.error('❌ Migration failed:', error);
             }
         }
         
@@ -4958,10 +5069,13 @@
                 });
             }
             
-            // Load resources when Resources tab is selected
-            document.querySelector('[data-tab="ressourcen"]').addEventListener('click', () => {
-                ResourceManager.loadResources();
-            });
+            // Load resources when Resources tab is selected  
+            const ressourcenTab = document.querySelector('[data-tab="ressourcen"]');
+            if (ressourcenTab) {
+                ressourcenTab.addEventListener('click', () => {
+                    ResourceManager.loadResources();
+                });
+            }
             
             // Initialize resources with sample data if empty
             document.addEventListener('DOMContentLoaded', () => {
