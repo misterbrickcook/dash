@@ -3634,9 +3634,10 @@
                 
                 if (supabase?.isAuthenticated()) {
                     try {
-                        // Create database entry without 'date' field (only 'entry_date')
+                        // Create database entry without 'date' and 'created_at' fields (auto-generated)
                         const dbEntry = { ...entry };
                         delete dbEntry.date;
+                        delete dbEntry.created_at;
                         console.log('💾 Sending to database:', dbEntry);
                         const result = await supabase.insert('journal_entries', dbEntry);
                         if (result && result.length > 0) {
