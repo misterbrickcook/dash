@@ -3056,9 +3056,16 @@
                     goalDate.setHours(0, 0, 0, 0);
                     const daysDifference = Math.ceil((goalDate - today) / (1000 * 60 * 60 * 24));
                     
-                    // Format German date
-                    const [year, month, day] = goal.deadline.split('-');
-                    const germanDate = `${day}.${month}.${year}`;
+                    // Format German date - handle both YYYY-MM-DD and full ISO dates
+                    let germanDate = '';
+                    try {
+                        const dateOnly = goal.deadline.split('T')[0]; // Remove time part if exists
+                        const [year, month, day] = dateOnly.split('-');
+                        germanDate = `${day}.${month}.${year}`;
+                    } catch (error) {
+                        // Fallback: use the date object
+                        germanDate = goalDate.toLocaleDateString('de-DE');
+                    }
                     deadlineText = `Deadline: ${germanDate}`;
                     
                     if (daysDifference === 0) {
