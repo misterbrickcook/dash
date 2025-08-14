@@ -419,6 +419,18 @@ const Auth = {
                     if (window.loadRoutineCompletions) {
                         await window.loadRoutineCompletions();
                         console.log('✅ Routine completions loaded');
+                        
+                        // CRITICAL: Reload routine states after cloud data is loaded
+                        if (window.loadRoutineStates) {
+                            await window.loadRoutineStates();
+                            console.log('✅ Routine states reloaded after cloud sync');
+                        }
+                        
+                        // Update UI to reflect loaded states
+                        if (window.updateRoutineProgress) {
+                            window.updateRoutineProgress();
+                            console.log('✅ Routine progress updated');
+                        }
                     }
                     
                     console.log('🎉 All user data and managers restored from database!');
