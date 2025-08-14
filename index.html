@@ -76,18 +76,32 @@
             font-weight: 400 !important;
             background: transparent !important;
             border: none !important;
+            border-color: transparent !important;
+            outline: none !important;
             cursor: pointer !important;
             pointer-events: auto !important;
             position: relative !important;
             z-index: 1000 !important;
+            box-shadow: none !important;
+            text-transform: none !important;
+            letter-spacing: normal !important;
+            padding: 0.5rem 1rem !important;
         }
         
-        /* Mobile-safe hover states */
+        /* Mobile-safe hover states - override nav-tab hover */
         .logout-btn:hover, .settings-btn:hover,
         .logout-btn:active, .settings-btn:active,
         .logout-btn:focus, .settings-btn:focus {
             background: transparent !important;
             border: none !important;
+            border-color: transparent !important;
+        }
+        
+        /* Specific override for nav-tab hover border */
+        .nav-tab.logout-btn:hover, .nav-tab.settings-btn:hover {
+            border: none !important;
+            border-color: transparent !important;
+            background: transparent !important;
         }
         
         .logout-btn:hover span, .logout-btn:active span, .logout-btn:focus span {
