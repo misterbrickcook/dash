@@ -2416,61 +2416,63 @@
                 const cloudCompletions = await supabase.query('routine_completions?select=*');
                 console.log(`☁️ Loaded ${cloudCompletions?.length || 0} routine completions from cloud`);
                 
-                // STEP 3: Use local-first approach (temporarily disable migration)
-                console.log('📱 Using local-first approach (migration temporarily disabled)');
-                globalRoutineCompletions = [];
-                
-                // Load from all local sources
-                const localSources = ['routine_completions_cache', 'routineCompletionData'];
-                for (const source of localSources) {
-                    try {
-                        const localData = localStorage.getItem(source);
-                        if (localData) {
-                            const parsed = JSON.parse(localData);
-                            
-                            if (source === 'routineCompletionData') {
-                                // Convert old format
-                                Object.keys(parsed).forEach(date => {
-                                    const dayData = parsed[date];
-                                    if (dayData.morning !== undefined) {
-                                        globalRoutineCompletions.push({
-                                            template_id: 'morning_routine',
-                                            date: date,
-                                            completed: dayData.morning
+                // STEP 3: Cloud-first with improved migration
+                if (cloudCompletions && cloudCompletions.length > 0) {
+                    // Use cloud data if available
+                    globalRoutineCompletions = cloudCompletions;
+                    console.log(`☁️ Using ${cloudCompletions.length} completions from cloud`);
+                } else {
+                    // Cloud is empty - try migration with new improved approach
+                    console.log('🔍 Cloud is empty, attempting migration with new schema...');
+                    const migrationSuccess = await migrateLocalDataToCloudV2();
+                    
+                    if (migrationSuccess) {
+                        // Reload after successful migration
+                        const newCloudCompletions = await supabase.query('routine_completions?select=*');
+                        console.log(`🔄 After migration: ${newCloudCompletions?.length || 0} completions in cloud`);
+                        globalRoutineCompletions = newCloudCompletions || [];
+                    } else {
+                        // Migration failed - use local data as fallback
+                        console.log('⚠️ Migration failed, using local data as fallback');
+                        globalRoutineCompletions = [];
+                        
+                        // Load from all local sources
+                        const localSources = ['routine_completions_cache', 'routineCompletionData'];
+                        for (const source of localSources) {
+                            try {
+                                const localData = localStorage.getItem(source);
+                                if (localData) {
+                                    const parsed = JSON.parse(localData);
+                                    
+                                    if (source === 'routineCompletionData') {
+                                        // Convert old format
+                                        Object.keys(parsed).forEach(date => {
+                                            const dayData = parsed[date];
+                                            if (dayData.morning !== undefined) {
+                                                globalRoutineCompletions.push({
+                                                    template_id: 'morning_routine',
+                                                    date: date,
+                                                    completed: dayData.morning
+                                                });
+                                            }
+                                            if (dayData.evening !== undefined) {
+                                                globalRoutineCompletions.push({
+                                                    template_id: 'evening_routine',
+                                                    date: date,
+                                                    completed: dayData.evening
+                                                });
+                                            }
                                         });
+                                    } else if (Array.isArray(parsed)) {
+                                        globalRoutineCompletions.push(...parsed);
                                     }
-                                    if (dayData.evening !== undefined) {
-                                        globalRoutineCompletions.push({
-                                            template_id: 'evening_routine',
-                                            date: date,
-                                            completed: dayData.evening
-                                        });
-                                    }
-                                });
-                            } else if (Array.isArray(parsed)) {
-                                globalRoutineCompletions.push(...parsed);
+                                }
+                            } catch (e) {
+                                console.warn(`⚠️ Could not load fallback from ${source}:`, e);
                             }
                         }
-                    } catch (e) {
-                        console.warn(`⚠️ Could not load from ${source}:`, e);
+                        console.log(`📱 Using ${globalRoutineCompletions.length} local completions as fallback`);
                     }
-                }
-                
-                console.log(`📱 Using ${globalRoutineCompletions.length} local completions (local-first mode)`);
-                
-                // If we have cloud data AND it's more recent, merge it
-                if (cloudCompletions && cloudCompletions.length > 0) {
-                    console.log(`☁️ Found ${cloudCompletions.length} cloud completions, merging with local`);
-                    cloudCompletions.forEach(cloudCompletion => {
-                        const existsLocally = globalRoutineCompletions.some(local => 
-                            local.template_id === cloudCompletion.template_id && 
-                            local.date === cloudCompletion.date
-                        );
-                        if (!existsLocally) {
-                            globalRoutineCompletions.push(cloudCompletion);
-                        }
-                    });
-                    console.log(`🔀 After merge: ${globalRoutineCompletions.length} total completions`);
                 }
                 
                 // STEP 4: Cache locally for offline access
@@ -2501,7 +2503,112 @@
             }
         }
         
-        // === MIGRATION FUNCTION ===
+        // === IMPROVED MIGRATION FUNCTION V2 ===
+        async function migrateLocalDataToCloudV2() {
+            try {
+                console.log('🚀 Starting IMPROVED migration (V2) of local routine data to cloud...');
+                
+                // Get current user
+                const currentUser = supabase.getCurrentUser();
+                if (!currentUser || !currentUser.id) {
+                    console.error('❌ No authenticated user found for migration');
+                    return false;
+                }
+                
+                console.log(`👤 Migrating data for user: ${currentUser.email}`);
+                
+                // Collect all local data
+                const localCompletions = [];
+                
+                // Source 1: routineCompletionData (legacy format)
+                try {
+                    const legacyData = localStorage.getItem('routineCompletionData');
+                    if (legacyData) {
+                        const parsed = JSON.parse(legacyData);
+                        console.log(`📁 Found legacy data for ${Object.keys(parsed).length} dates`);
+                        
+                        Object.keys(parsed).forEach(date => {
+                            const dayData = parsed[date];
+                            if (dayData.morning !== undefined) {
+                                localCompletions.push({
+                                    template_id: 'morning_routine',
+                                    date: date,
+                                    completed: Boolean(dayData.morning),
+                                    user_id: currentUser.id
+                                });
+                            }
+                            if (dayData.evening !== undefined) {
+                                localCompletions.push({
+                                    template_id: 'evening_routine',
+                                    date: date,
+                                    completed: Boolean(dayData.evening),
+                                    user_id: currentUser.id
+                                });
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Could not parse legacy routine data:', e);
+                }
+                
+                console.log(`📊 Prepared ${localCompletions.length} completions for migration`);
+                
+                if (localCompletions.length === 0) {
+                    console.log('📭 No local data found to migrate');
+                    return true;
+                }
+                
+                // Remove duplicates based on user_id + template_id + date
+                const uniqueCompletions = [];
+                const seen = new Set();
+                
+                localCompletions.forEach(completion => {
+                    const key = `${completion.user_id}_${completion.template_id}_${completion.date}`;
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        uniqueCompletions.push(completion);
+                    }
+                });
+                
+                console.log(`🔍 After deduplication: ${uniqueCompletions.length} unique completions`);
+                
+                // Upload to cloud
+                let uploadedCount = 0;
+                
+                for (const completion of uniqueCompletions) {
+                    try {
+                        console.log(`⬆️ Uploading: ${completion.template_id} for ${completion.date} (${completion.completed})`);
+                        
+                        const result = await supabase.insert('routine_completions', [completion]);
+                        if (result && result.length > 0) {
+                            uploadedCount++;
+                            console.log(`✅ Uploaded successfully`);
+                        } else {
+                            console.warn(`⚠️ Upload returned no result`);
+                        }
+                    } catch (uploadError) {
+                        console.error(`❌ Failed to upload completion:`, uploadError);
+                        
+                        // Check if it's a duplicate key error (which is OK)
+                        if (uploadError.message && uploadError.message.includes('unique constraint')) {
+                            console.log(`ℹ️ Duplicate entry (already exists) - skipping`);
+                            uploadedCount++; // Count as success since data exists
+                        } else {
+                            console.error(`❌ Real upload error:`, uploadError.message);
+                        }
+                    }
+                }
+                
+                console.log(`🎉 Migration V2 complete! Successfully processed ${uploadedCount}/${uniqueCompletions.length} completions`);
+                return uploadedCount > 0;
+                
+            } catch (error) {
+                console.error('❌ Migration V2 failed:', error);
+                return false;
+            }
+        }
+        
+        // === OLD MIGRATION FUNCTION (DEPRECATED) ===
         async function migrateLocalDataToCloud() {
             try {
                 console.log('🚀 Starting migration of local routine data to cloud...');
