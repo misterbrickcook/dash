@@ -552,11 +552,10 @@ class CloudStorage {
             {id: 'morning_2', text: '💪 BBÜ und Sport', routine_type: 'morning', order_index: 2},
             {id: 'morning_3', text: '📅 Tag planen', routine_type: 'morning', order_index: 3},
             {id: 'morning_4', text: '✅ Todos checken', routine_type: 'morning', order_index: 4},
-            {id: 'evening_1', text: '📱 Alle Geräte weggelegt', routine_type: 'evening', order_index: 1},
-            {id: 'evening_2', text: '📖 15 Min lesen', routine_type: 'evening', order_index: 2},
-            {id: 'evening_3', text: '✅ Tag reflektieren & dankbar sein', routine_type: 'evening', order_index: 3},
-            {id: 'evening_4', text: '🧹 Kurz aufräumen', routine_type: 'evening', order_index: 4},
-            {id: 'evening_5', text: '😴 Vor 22:30 ins Bett', routine_type: 'evening', order_index: 5}
+            {id: 'evening_1', text: '📝 Tag reflektieren per Journal', routine_type: 'evening', order_index: 1},
+            {id: 'evening_2', text: '📚 Lesen und Lessons nachhalten', routine_type: 'evening', order_index: 2},
+            {id: 'evening_3', text: '📅 Nächsten Tag planen', routine_type: 'evening', order_index: 3},
+            {id: 'evening_4', text: '📊 Trades evaluieren und Lessons nachhalten', routine_type: 'evening', order_index: 4}
         ];
     }
     
