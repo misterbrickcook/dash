@@ -548,7 +548,7 @@ class CloudStorage {
         
         // Default templates if none cached  
         return [
-            {id: 'morning_1', text: '💧 Wasser und Kreatin in einem', routine_type: 'morning', order_index: 1},
+            {id: 'morning_1', text: '💧 Wasser und Kreatin', routine_type: 'morning', order_index: 1},
             {id: 'morning_2', text: '💪 BBÜ und Sport', routine_type: 'morning', order_index: 2},
             {id: 'morning_3', text: '📅 Tag planen', routine_type: 'morning', order_index: 3},
             {id: 'morning_4', text: '✅ Todos checken', routine_type: 'morning', order_index: 4},
