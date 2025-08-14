@@ -836,9 +836,72 @@
         
         .resource-description {
             color: #666666;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             flex: 1;
             line-height: 1.5;
+            font-size: 0.9rem;
+        }
+        
+        .resource-category-tag {
+            background: #f0f0f0;
+            color: #666666;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: auto;
+        }
+        
+        .resource-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* === EMOJI PALETTE === */
+        .emoji-palette {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            padding: 1rem;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        
+        .emoji-btn {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+        }
+        
+        .emoji-btn:hover {
+            background: #000000;
+            border-color: #000000;
+            transform: scale(1.1);
+        }
+        
+        .btn-link {
+            background: none;
+            border: none;
+            color: #666666;
+            cursor: pointer;
+            text-decoration: underline;
+            font-family: inherit;
+        }
+        
+        .btn-link:hover {
+            color: #000000;
         }
         
         .resource-footer {
@@ -1861,8 +1924,31 @@
                 
                 <div class="form-group">
                     <label for="resource-icon">Icon (optional)</label>
-                    <input type="text" id="resource-icon" placeholder="e.g. 📧, 💼, 📚, 🏠" maxlength="4">
-                    <small>Emoji that will be displayed with the resource</small>
+                    <input type="text" id="resource-icon" placeholder="Click emoji below or type manually" maxlength="4" readonly>
+                    <div class="emoji-palette">
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('📧')">📧</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('💼')">💼</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('📚')">📚</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🏠')">🏠</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('💬')">💬</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🏦')">🏦</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🔧')">🔧</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('📊')">📊</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('📝')">📝</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('👥')">👥</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🌐')">🌐</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('💰')">💰</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🎯')">🎯</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('⚡')">⚡</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🔐')">🔐</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🔗')">🔗</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🚀')">🚀</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🎨')">🎨</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🏃')">🏃</button>
+                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🤖')">🤖</button>
+                    </div>
+                    <small style="margin-top: 0.5rem; display: block;">Click an emoji above or make input editable to type manually</small>
+                    <button type="button" class="btn-link" onclick="ResourceManager.toggleEmojiInput()" style="font-size: 0.8rem; margin-top: 0.25rem;">Enable manual typing</button>
                 </div>
                 
                 <div class="form-actions">
@@ -5336,63 +5422,32 @@
                     if (filteredResources.length === 0) {
                         html = '<p style="text-align: center; color: #666; padding: 3rem;">Keine Resources vorhanden</p>';
                     } else {
-                        // Group by category for "alle" view, or show flat for specific categories
-                        if (category === 'alle') {
-                            const groupedResources = {};
-                            filteredResources.forEach(resource => {
-                                if (!groupedResources[resource.category]) {
-                                    groupedResources[resource.category] = [];
-                                }
-                                groupedResources[resource.category].push(resource);
-                            });
-                            
-                            // Render each category section
-                            Object.keys(groupedResources).sort().forEach(cat => {
-                                html += `
-                                    <div class="resource-category-section">
-                                        <h3 class="resource-category-title">${cat}</h3>
-                                        <div class="resource-buttons">
-                                `;
-                                
-                                groupedResources[cat].forEach(resource => {
-                                    const icon = resource.icon || '🔗';
-                                    html += `
-                                        <button class="resource-button" onclick="window.open('${resource.url}', '_blank')" 
-                                                title="${resource.description || resource.title}">
-                                            <span class="resource-icon">${icon}</span>
-                                            <span class="resource-name">${resource.title}</span>
-                                            <div class="resource-actions">
-                                                <button class="resource-edit-btn" onclick="event.stopPropagation(); ResourceManager.editResource('${resource.id}')" title="Edit">✏️</button>
-                                                <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">🗑️</button>
-                                            </div>
-                                        </button>
-                                    `;
-                                });
-                                
-                                html += `
-                                        </div>
-                                    </div>
-                                `;
-                            });
-                        } else {
-                            // Flat view for specific categories
-                            html += '<div class="resource-buttons">';
-                            filteredResources.forEach(resource => {
-                                const icon = resource.icon || '🔗';
-                                html += `
-                                    <button class="resource-button" onclick="window.open('${resource.url}', '_blank')" 
-                                            title="${resource.description || resource.title}">
+                        // Todo-style grid layout for all categories
+                        html += '<div class="resource-grid">';
+                        
+                        filteredResources.forEach(resource => {
+                            const icon = resource.icon || '🔗';
+                            const description = resource.description || '';
+                            html += `
+                                <div class="resource-card" onclick="window.open('${resource.url}', '_blank')" 
+                                     title="${description}">
+                                    <div class="resource-header">
                                         <span class="resource-icon">${icon}</span>
-                                        <span class="resource-name">${resource.title}</span>
                                         <div class="resource-actions">
                                             <button class="resource-edit-btn" onclick="event.stopPropagation(); ResourceManager.editResource('${resource.id}')" title="Edit">✏️</button>
                                             <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">🗑️</button>
                                         </div>
-                                    </button>
-                                `;
-                            });
-                            html += '</div>';
-                        }
+                                    </div>
+                                    <div class="resource-body">
+                                        <h3 class="resource-title">${resource.title}</h3>
+                                        ${description ? `<p class="resource-description">${description}</p>` : ''}
+                                        <span class="resource-category-tag">${resource.category}</span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        html += '</div>';
                     }
                     
                     container.innerHTML = html;
@@ -5474,6 +5529,29 @@
                     form.dataset.editId = resourceId;
                     
                     this.showAddResourceModal();
+                },
+                
+                selectEmoji(emoji) {
+                    const iconInput = document.getElementById('resource-icon');
+                    if (iconInput) {
+                        iconInput.value = emoji;
+                    }
+                },
+                
+                toggleEmojiInput() {
+                    const iconInput = document.getElementById('resource-icon');
+                    const toggleBtn = event.target;
+                    
+                    if (iconInput.readOnly) {
+                        iconInput.readOnly = false;
+                        iconInput.placeholder = 'Type emoji manually...';
+                        iconInput.focus();
+                        toggleBtn.textContent = 'Use emoji palette';
+                    } else {
+                        iconInput.readOnly = true;
+                        iconInput.placeholder = 'Click emoji below or type manually';
+                        toggleBtn.textContent = 'Enable manual typing';
+                    }
                 }
             };
             
