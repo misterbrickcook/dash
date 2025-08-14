@@ -525,6 +525,103 @@ class CloudStorage {
         localStorage.setItem(`notes_${category}`, content);
         localStorage.setItem(`notes_${category}_cache`, JSON.stringify({ category, content }));
     }
+
+    // === RESOURCES CLOUD STORAGE ===
+    
+    async getResources() {
+        try {
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
+                return this.getLocalResources();
+            }
+            
+            const data = await supabase.select('resources', '*');
+            if (data) {
+                localStorage.setItem('resources_cache', JSON.stringify(data));
+                return data;
+            }
+            return this.getLocalResources();
+        } catch (error) {
+            console.error('Error fetching resources:', error);
+            return this.getLocalResources();
+        }
+    }
+    
+    async saveResource(resource) {
+        try {
+            this.saveLocalResource(resource);
+            
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
+                this.queueSync('resources', 'save', resource);
+                return;
+            }
+            
+            // Add user_id to resource before saving
+            const user = supabase.getCurrentUser();
+            if (user) {
+                resource.user_id = user.id;
+            }
+            
+            if (resource.id) {
+                await supabase.update('resources', resource, resource.id);
+            } else {
+                const result = await supabase.insert('resources', [resource]);
+                if (result && result[0]) {
+                    resource.id = result[0].id;
+                    this.saveLocalResource(resource);
+                }
+            }
+            
+            console.log('✅ Resource synced to cloud:', resource.title);
+        } catch (error) {
+            console.error('Error saving resource:', error);
+            this.queueSync('resources', 'save', resource);
+        }
+    }
+    
+    async deleteResource(resourceId) {
+        try {
+            this.deleteLocalResource(resourceId);
+            
+            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
+                this.queueSync('resources', 'delete', { id: resourceId });
+                return;
+            }
+            
+            await supabase.delete('resources', resourceId);
+            console.log('✅ Resource deleted from cloud:', resourceId);
+        } catch (error) {
+            console.error('Error deleting resource:', error);
+            this.queueSync('resources', 'delete', { id: resourceId });
+        }
+    }
+    
+    getLocalResources() {
+        const cached = localStorage.getItem('resources_cache');
+        if (cached) {
+            return JSON.parse(cached);
+        }
+        return JSON.parse(localStorage.getItem('resources') || '[]');
+    }
+    
+    saveLocalResource(resource) {
+        const resources = this.getLocalResources();
+        const existingIndex = resources.findIndex(r => r.id === resource.id);
+        
+        if (existingIndex >= 0) {
+            resources[existingIndex] = resource;
+        } else {
+            resources.push(resource);
+        }
+        
+        localStorage.setItem('resources_cache', JSON.stringify(resources));
+        localStorage.setItem('resources', JSON.stringify(resources));
+    }
+    
+    deleteLocalResource(resourceId) {
+        const resources = this.getLocalResources().filter(r => r.id !== resourceId);
+        localStorage.setItem('resources_cache', JSON.stringify(resources));
+        localStorage.setItem('resources', JSON.stringify(resources));
+    }
     
     getLocalRoutineData() {
         const cached = localStorage.getItem('routines_cache');
