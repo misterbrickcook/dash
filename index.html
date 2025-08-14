@@ -1190,7 +1190,7 @@
             <section style="margin-bottom: 3rem;">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 1.5rem;">
                     <h2 style="font-size: 1.2rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">Anstehende Termine</h2>
-                    <button id="add-termin-btn" class="btn" style="font-size: 0.7rem; padding: 0.5rem 1rem;">+ Add Termin</button>
+                    <button id="add-termin-btn" class="btn" style="font-size: 0.7rem; padding: 0.5rem 1rem;">Add New</button>
                 </div>
                 <div class="grid-3" id="termine-container">
                     <!-- Termine will be loaded from TerminManager -->
@@ -3459,10 +3459,31 @@
                     displayDate += `, ${formattedTime}`;
                 }
                 
+                // Calculate days until appointment
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const appointmentDate = new Date(termin.date);
+                appointmentDate.setHours(0, 0, 0, 0);
+                const daysDifference = Math.ceil((appointmentDate - today) / (1000 * 60 * 60 * 24));
+                
+                let daysUntilText = '';
+                if (daysDifference === 0) {
+                    daysUntilText = 'Heute';
+                } else if (daysDifference === 1) {
+                    daysUntilText = 'Morgen';
+                } else if (daysDifference === -1) {
+                    daysUntilText = 'Gestern';
+                } else if (daysDifference > 1) {
+                    daysUntilText = `in ${daysDifference} Tagen`;
+                } else if (daysDifference < -1) {
+                    daysUntilText = `vor ${Math.abs(daysDifference)} Tagen`;
+                }
+                
                 terminCard.innerHTML = `
                     <div class="termin-edit-icon" onclick="TerminManager.editTermin('${termin.id}')" style="position: absolute; top: 1rem; right: 1rem; cursor: pointer; color: #666; font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s ease;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">✎</div>
                     <div class="termin-delete-icon" onclick="TerminManager.deleteTermin('${termin.id}')" style="position: absolute; top: 1rem; right: 2.5rem; cursor: pointer; color: #dc2626; font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s ease;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🗑</div>
-                    <div class="termin-date">${displayDate}</div>
+                    <div class="termin-days-until" style="position: absolute; top: 1rem; left: 1rem; background: ${daysDifference === 0 ? '#ef4444' : daysDifference === 1 ? '#f97316' : daysDifference > 1 ? '#3b82f6' : '#6b7280'}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 600;">${daysUntilText}</div>
+                    <div class="termin-date" style="margin-top: 1.5rem;">${displayDate}</div>
                     <div class="termin-title">${termin.title}</div>
                     <div class="termin-description">${termin.description}</div>
                 `;
