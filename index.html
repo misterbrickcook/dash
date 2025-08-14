@@ -2076,14 +2076,20 @@
                 
                 // Load all data after successful login
                 if (supabase?.isAuthenticated()) {
-                    await Promise.all([
+                    const loadPromises = [
                         TodoManager.loadTodos(),
                         GoalManager.loadGoals(),
                         JournalManager.loadEntries(),
                         TerminManager.loadTermine(),
-                        ResourceManager.loadResources(),
                         loadRoutineCompletions()
-                    ]);
+                    ];
+                    
+                    // Add ResourceManager if available (defined later in script)
+                    if (typeof ResourceManager !== 'undefined' && ResourceManager.loadResources) {
+                        loadPromises.push(ResourceManager.loadResources());
+                    }
+                    
+                    await Promise.all(loadPromises);
                 } else {
                     // Initialize displays for local storage mode
                     TodoManager.updateHomeTodos();
@@ -5021,14 +5027,23 @@
             
             // Load all data from database if authenticated
             if (supabase?.isAuthenticated()) {
-                await Promise.all([
+                const loadPromises = [
                     TodoManager.loadTodos(),
                     GoalManager.loadGoals(),
                     JournalManager.loadEntries(),
                     TerminManager.loadTermine(),
-                    ResourceManager.loadResources(),
                     loadRoutineCompletions()
-                ]);
+                ];
+                
+                // Add ResourceManager if available (should be defined by now)
+                if (typeof ResourceManager !== 'undefined' && ResourceManager.loadResources) {
+                    loadPromises.push(ResourceManager.loadResources());
+                    console.log('✅ ResourceManager added to loading sequence');
+                } else {
+                    console.warn('⚠️ ResourceManager not yet available during DOMContentLoaded');
+                }
+                
+                await Promise.all(loadPromises);
             } else {
                 // Initialize displays for local storage mode
                 TodoManager.updateHomeTodos();
