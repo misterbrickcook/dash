@@ -395,6 +395,11 @@ const Auth = {
                         console.log('✅ JournalManager loaded from database');
                     }
                     
+                    if (window.ResourceManager && window.ResourceManager.loadResources) {
+                        await window.ResourceManager.loadResources();
+                        console.log('✅ ResourceManager loaded from database');
+                    }
+                    
                     // Load cloud storage data
                     if (window.cloudStorage && window.cloudStorage.getTodos) {
                         await window.cloudStorage.getTodos();
