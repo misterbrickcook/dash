@@ -902,7 +902,7 @@
             right: 0.4rem;
             display: flex;
             gap: 0.2rem;
-            opacity: 0.7;
+            opacity: 1;
             transition: opacity 0.2s ease;
             z-index: 10;
         }
@@ -2321,7 +2321,8 @@
                     window.location.reload();
                 } catch (error) {
                     console.error('❌ Logout error:', error);
-                    localStorage.clear();
+                    // Only clear auth-related data, preserve user data
+                    localStorage.removeItem('supabase.auth.token');
                     sessionStorage.clear();
                     window.location.reload();
                 }
@@ -2401,12 +2402,16 @@
                 
                 // Load all data after successful login
                 if (supabase?.isAuthenticated()) {
+                    // First load routine completions
+                    await loadRoutineCompletions();
+                    
+                    // Then load everything else including routine states
                     await Promise.all([
                         TodoManager.loadTodos(),
                         GoalManager.loadGoals(),
                         JournalManager.loadEntries(),
                         TerminManager.loadTermine(),
-                        loadRoutineCompletions()
+                        loadRoutineStates()
                     ]);
                     
                     // Force routine UI update after data load with retries
@@ -5910,12 +5915,31 @@
                     
                     container.innerHTML = html;
                     
-                    // Initialize Lucide icons after rendering for this category
+                    // Enhanced Lucide initialization with icon verification
                     setTimeout(() => {
                         if (window.lucide) {
                             lucide.createIcons();
+                            console.log('🎨 Lucide icons initialized for resource category:', category);
+                            
+                            // Verify icons are actually rendered
+                            setTimeout(() => {
+                                const actionBtns = container.querySelectorAll('.resource-actions');
+                                console.log(`🔍 Found ${actionBtns.length} action button containers in ${category}`);
+                                
+                                actionBtns.forEach((actions, index) => {
+                                    const buttons = actions.querySelectorAll('button');
+                                    const icons = actions.querySelectorAll('svg');
+                                    console.log(`  Container ${index}: ${buttons.length} buttons, ${icons.length} SVG icons, opacity: ${getComputedStyle(actions).opacity}`);
+                                    
+                                    // Force re-render if icons missing
+                                    if (buttons.length > 0 && icons.length === 0) {
+                                        console.log('⚠️ Missing icons detected, forcing re-render...');
+                                        lucide.createIcons();
+                                    }
+                                });
+                            }, 50);
                         }
-                    }, 100);
+                    }, 150);
                 },
                 
                 showAddResourceModal() {
