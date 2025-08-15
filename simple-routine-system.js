@@ -73,39 +73,74 @@ class SimpleRoutineManager {
         try {
             console.log('🔄 Attempting to migrate from old system...');
             
-            // Read actual checkbox states from DOM instead of localStorage
-            // This is more accurate as it reflects the current visual state
+            // Check old localStorage data first
+            const oldLocalData = localStorage.getItem('routineCompletionData');
+            if (!oldLocalData) {
+                console.log('⚠️ No old system data found');
+                return null;
+            }
+            
+            const parsed = JSON.parse(oldLocalData);
+            const todayOldData = parsed[this.today];
+            
+            if (!todayOldData) {
+                console.log('⚠️ No old system data for today');
+                return null;
+            }
+            
+            console.log('🔄 Found old system data for today:', todayOldData);
+            
             const newData = this.getEmptyData();
             const todayData = newData[this.today];
             
-            let foundCheckedBoxes = false;
+            let foundData = false;
             
-            // Read morning checkboxes from DOM
-            Object.keys(todayData.morning).forEach(checkboxId => {
-                const checkbox = document.getElementById(checkboxId);
-                if (checkbox && checkbox.checked) {
-                    todayData.morning[checkboxId] = true;
-                    foundCheckedBoxes = true;
-                    console.log(`🔄 Migrated morning: ${checkboxId} = true`);
-                }
-            });
+            // Convert old format: if morning/evening was true, set all tasks to true
+            if (todayOldData.morning === true) {
+                Object.keys(todayData.morning).forEach(key => {
+                    todayData.morning[key] = true;
+                    console.log(`🔄 Migrated morning: ${key} = true`);
+                });
+                foundData = true;
+            }
             
-            // Read evening checkboxes from DOM
-            Object.keys(todayData.evening).forEach(checkboxId => {
-                const checkbox = document.getElementById(checkboxId);
-                if (checkbox && checkbox.checked) {
-                    todayData.evening[checkboxId] = true;
-                    foundCheckedBoxes = true;
-                    console.log(`🔄 Migrated evening: ${checkboxId} = true`);
-                }
-            });
+            if (todayOldData.evening === true) {
+                Object.keys(todayData.evening).forEach(key => {
+                    todayData.evening[key] = true;
+                    console.log(`🔄 Migrated evening: ${key} = true`);
+                });
+                foundData = true;
+            }
             
-            if (foundCheckedBoxes) {
+            // Also check for partial completion from individual task arrays
+            if (todayOldData.morning && Array.isArray(todayOldData.morning)) {
+                todayOldData.morning.forEach((completed, index) => {
+                    const keys = Object.keys(todayData.morning);
+                    if (keys[index] && completed) {
+                        todayData.morning[keys[index]] = true;
+                        console.log(`🔄 Migrated morning task ${index}: ${keys[index]} = true`);
+                        foundData = true;
+                    }
+                });
+            }
+            
+            if (todayOldData.evening && Array.isArray(todayOldData.evening)) {
+                todayOldData.evening.forEach((completed, index) => {
+                    const keys = Object.keys(todayData.evening);
+                    if (keys[index] && completed) {
+                        todayData.evening[keys[index]] = true;
+                        console.log(`🔄 Migrated evening task ${index}: ${keys[index]} = true`);
+                        foundData = true;
+                    }
+                });
+            }
+            
+            if (foundData) {
                 // Save migrated data
                 localStorage.setItem('simple_routine_data', JSON.stringify(newData));
                 await this.saveToCloud();
                 
-                console.log('✅ Successfully migrated checkbox states from DOM');
+                console.log('✅ Successfully migrated old system data');
                 return newData;
             }
             
@@ -396,9 +431,19 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         window.simpleRoutineManager = new SimpleRoutineManager();
         
-        // Restore checkboxes after initialization
-        setTimeout(() => {
+        // Restore checkboxes after initialization and check if migration is needed
+        setTimeout(async () => {
+            // First try to migrate if no data exists yet
+            if (Object.keys(window.simpleRoutineManager.routineData[window.simpleRoutineManager.today] || {}).length === 0) {
+                console.log('🔄 No data found, attempting migration...');
+                const migrated = await window.simpleRoutineManager.migrateFromOldSystem();
+                if (migrated) {
+                    window.simpleRoutineManager.routineData = migrated;
+                }
+            }
+            
             window.simpleRoutineManager.restoreCheckboxes();
+            window.simpleRoutineManager.updateUI();
         }, 500);
     }, 1000);
 });
