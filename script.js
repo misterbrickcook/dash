@@ -72,7 +72,7 @@ const Auth = {
                     await window.initializeTodoCounter();
                     console.log('✅ Todo counter updated for authenticated user');
                 }
-            }, 2000);
+            }, 3000); // Increased delay to ensure all data is loaded
         } else {
             this.showAuthScreen();
         }
@@ -237,6 +237,15 @@ const Auth = {
             this.hideAuthScreen();
             this.showDashboard();
             
+            // Additional todo counter update after login with delay
+            setTimeout(async () => {
+                console.log('🔄 Final todo counter update after login...');
+                if (window.initializeTodoCounter) {
+                    await window.initializeTodoCounter();
+                    console.log('✅ Final todo counter update complete');
+                }
+            }, 4000);
+            
         } catch (error) {
             console.error('❌ Login exception:', error);
             this.showAuthError('login', `Login failed: ${error.message}`);
@@ -394,7 +403,14 @@ const Auth = {
                         await window.TodoManager.loadTodos();
                         console.log('✅ TodoManager loaded from database');
                         
-                        // Force update todo counter after loading
+                        // Force update todo counter AFTER todos are loaded
+                        console.log('🔄 Updating todo counter after todos loaded...');
+                        if (window.initializeTodoCounter) {
+                            await window.initializeTodoCounter();
+                            console.log('✅ Todo counter updated from cloud data');
+                        }
+                        
+                        // Force update todo display after loading
                         if (window.TodoManager.displayTodosForCategory) {
                             console.log('🔄 Refreshing todo display after load...');
                             window.TodoManager.displayTodosForCategory('alle');
@@ -410,13 +426,6 @@ const Auth = {
                     console.log('🔄 Updating streak counters after login...');
                     updateMonthlyStreakDisplays();
                     console.log('✅ Streak counters updated');
-                    
-                    // Update todo counter from cloud data after login
-                    console.log('🔄 Updating todo counter from cloud...');
-                    if (window.initializeTodoCounter) {
-                        await window.initializeTodoCounter();
-                        console.log('✅ Todo counter updated from cloud');
-                    }
                     
                     if (window.JournalManager && window.JournalManager.loadEntries) {
                         await window.JournalManager.loadEntries();
