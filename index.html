@@ -2645,13 +2645,43 @@
         function initializeTodoCounterLocal() {
             try {
                 const now = new Date();
-                const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
+                const currentMonth = now.getMonth() + 1;
+                const currentYear = now.getFullYear();
+                const monthName = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                                 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()];
                 
-                const monthlyData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
-                const todoCount = monthlyData[monthKey] || 0;
+                // Try to count from cached todos first
+                let todoCount = 0;
+                try {
+                    const cachedTodos = localStorage.getItem('todos_cache');
+                    if (cachedTodos) {
+                        const todos = JSON.parse(cachedTodos);
+                        console.log(`📱 Found ${todos.length} todos in cache`);
+                        
+                        // Count completed todos from current month
+                        todoCount = todos.filter(todo => {
+                            if (!todo.completed) return false;
+                            
+                            const completedDate = new Date(todo.completed_at || todo.created_at);
+                            return completedDate.getMonth() + 1 === currentMonth && 
+                                   completedDate.getFullYear() === currentYear;
+                        }).length;
+                        
+                        console.log(`📱 Counted ${todoCount} completed todos from current month`);
+                    } else {
+                        console.log(`📱 No todos cache found`);
+                    }
+                } catch (e) {
+                    console.warn('📱 Error counting from todos cache:', e);
+                    
+                    // Fallback to old method
+                    const monthKey = `${currentYear}-${now.getMonth()}`;
+                    const monthlyData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
+                    todoCount = monthlyData[monthKey] || 0;
+                    console.log(`📱 Fallback to monthly counter: ${todoCount}`);
+                }
                 
-                console.log(`📱 Local fallback: Todo counter for ${['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-                         'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()]} ${now.getFullYear()}: ${todoCount}`);
+                console.log(`📱 Local fallback: Todo counter for ${monthName} ${currentYear}: ${todoCount}`);
                 
                 // Update the third streak tile (todos)
                 const streakTiles = document.querySelectorAll('.streak-tile');
@@ -2661,10 +2691,11 @@
                     const dateElement = todoTile.querySelector('.streak-date');
                     if (numberElement && dateElement) {
                         numberElement.textContent = todoCount;
-                        dateElement.textContent = `${['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-                                                    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()]} ${now.getFullYear()}`;
+                        dateElement.textContent = `${monthName} ${currentYear}`;
                         console.log(`📱 Local todo counter set to ${todoCount}`);
                     }
+                } else {
+                    console.error('📱 Todo tile not found');
                 }
             } catch (error) {
                 console.error('Error in local todo counter fallback:', error);
@@ -5385,8 +5416,13 @@
             // Initialize settings functionality
             initializeSettings();
             
-            // Don't initialize todo counter here - will be done after login in showDashboard()
-            // initializeTodoCounter();
+            // Initialize todo counter after short delay to allow auth to complete
+            setTimeout(() => {
+                if (window.initializeTodoCounter) {
+                    console.log('🔄 Initial todo counter setup...');
+                    window.initializeTodoCounter();
+                }
+            }, 1000);
             
             // === EDIT GOAL VALUE MODAL EVENT LISTENERS ===
             document.getElementById('cancel-edit-goal-value-btn').addEventListener('click', () => {
