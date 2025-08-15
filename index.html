@@ -5799,6 +5799,10 @@
                                 console.log('📋 Sample local resource IDs:', this.resources.slice(0, 3).map(r => `${r.id} (${typeof r.id})`));
                             }
                         }
+                        
+                        // Migrate old emoji icons to lucide icons (one-time migration)
+                        this.migrateEmojiIcons();
+                        
                         this.renderResources();
                         console.log('✅ ResourceManager.loadResources() completed');
                     } catch (error) {
@@ -6010,13 +6014,58 @@
                     
                     if (iconInput.readOnly) {
                         iconInput.readOnly = false;
-                        iconInput.placeholder = 'Type emoji manually...';
+                        iconInput.placeholder = 'Type lucide icon name manually...';
                         iconInput.focus();
-                        toggleBtn.textContent = 'Use emoji palette';
+                        toggleBtn.textContent = 'Use icon palette';
                     } else {
                         iconInput.readOnly = true;
-                        iconInput.placeholder = 'Click emoji below or type manually';
+                        iconInput.placeholder = 'Click icon below or type manually';
                         toggleBtn.textContent = 'Enable manual typing';
+                    }
+                },
+                
+                migrateEmojiIcons() {
+                    const emojiToLucideMap = {
+                        '📧': 'mail',
+                        '💼': 'briefcase',
+                        '📚': 'book',
+                        '🏠': 'home',
+                        '💬': 'message-circle',
+                        '🏦': 'building',
+                        '🔧': 'wrench',
+                        '📊': 'bar-chart-3',
+                        '📝': 'file-text',
+                        '👥': 'users',
+                        '🌐': 'globe',
+                        '💰': 'dollar-sign',
+                        '🎯': 'target',
+                        '⚡': 'zap',
+                        '🔐': 'lock',
+                        '🔗': 'link',
+                        '🚀': 'rocket',
+                        '🎨': 'palette',
+                        '🏃': 'activity',
+                        '🤖': 'bot',
+                        '🌱': 'sprout'
+                    };
+                    
+                    let migrationNeeded = false;
+                    
+                    this.resources.forEach(resource => {
+                        if (emojiToLucideMap[resource.icon]) {
+                            console.log(`🔄 Migrating icon for "${resource.title}": ${resource.icon} → ${emojiToLucideMap[resource.icon]}`);
+                            resource.icon = emojiToLucideMap[resource.icon];
+                            migrationNeeded = true;
+                        }
+                    });
+                    
+                    if (migrationNeeded) {
+                        console.log('✅ Icon migration completed, saving to storage');
+                        this.saveToLocalStorage();
+                        // Also save to cloud if authenticated
+                        if (cloudStorage && supabase?.isAuthenticated()) {
+                            this.resources.forEach(resource => cloudStorage.saveResource(resource));
+                        }
                     }
                 }
             };
