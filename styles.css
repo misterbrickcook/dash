@@ -580,49 +580,43 @@ input:focus, textarea:focus, select:focus {
 /* === MOTIVATION CARDS === */
 .motivation-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
     padding: 1rem;
 }
 
 .motivation-card {
     background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: all 0.3s ease;
+    border: 1px solid #ddd;
+    border-radius: 0px;
+    transition: all 0.2s ease;
     cursor: pointer;
-    height: 400px;
     display: flex;
     flex-direction: column;
+    min-height: 350px;
 }
 
 .motivation-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     border-color: #000;
+    transform: translateY(-1px);
 }
 
 .motivation-image-container {
-    height: 250px;
+    height: 200px;
     position: relative;
     overflow: hidden;
     background: #f8f8f8;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-bottom: 1px solid #ddd;
 }
 
 .motivation-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.motivation-card:hover .motivation-image {
-    transform: scale(1.05);
+    transition: opacity 0.3s ease;
 }
 
 .motivation-placeholder {
@@ -637,111 +631,112 @@ input:focus, textarea:focus, select:focus {
 }
 
 .motivation-icon {
-    font-size: 3rem;
+    font-size: 2.5rem;
     margin-bottom: 1rem;
-    opacity: 0.6;
+    opacity: 0.4;
 }
 
 .motivation-placeholder p {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #666;
 }
 
 .motivation-content {
-    padding: 1.5rem;
+    padding: 1.2rem;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
 }
 
 .motivation-title {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 500;
-    margin: 0 0 1rem 0;
+    margin: 0 0 0.8rem 0;
     color: #333;
     border: none;
     background: transparent;
     outline: none;
-    transition: color 0.2s ease;
+    min-height: 1.2rem;
 }
 
 .motivation-title:focus {
-    color: #000;
     background: #f9f9f9;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    padding: 0.3rem;
+    border-radius: 2px;
 }
 
 .motivation-description {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #666;
-    line-height: 1.5;
+    line-height: 1.4;
     margin: 0;
     flex-grow: 1;
     border: none;
     background: transparent;
     outline: none;
     resize: none;
-    transition: background 0.2s ease;
+    min-height: 2.4rem;
 }
 
 .motivation-description:focus {
     background: #f9f9f9;
-    padding: 0.5rem;
-    border-radius: 4px;
+    padding: 0.4rem;
+    border-radius: 2px;
     color: #333;
 }
 
-.motivation-description:empty::before {
-    content: attr(placeholder);
-    color: #aaa;
-    font-style: italic;
+.motivation-delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: #666;
 }
 
-/* Mobile responsiveness for motivation cards */
+.motivation-card:hover .motivation-delete-btn {
+    opacity: 1;
+}
+
+.motivation-delete-btn:hover {
+    background: #ff4444;
+    color: white;
+    border-color: #ff4444;
+}
+
+/* Mobile responsiveness */
 @media (max-width: 768px) {
     .motivation-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        padding: 0.5rem;
     }
     
     .motivation-card {
-        height: 350px;
-    }
-    
-    .motivation-image-container {
-        height: 200px;
-    }
-    
-    .motivation-content {
-        padding: 1rem;
-    }
-    
-    .motivation-title {
-        font-size: 1.1rem;
-    }
-    
-    .motivation-description {
-        font-size: 0.85rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .motivation-card {
-        height: 320px;
+        min-height: 320px;
     }
     
     .motivation-image-container {
         height: 180px;
     }
     
-    .motivation-icon {
-        font-size: 2.5rem;
+    .motivation-content {
+        padding: 1rem;
     }
     
-    .motivation-placeholder p {
-        font-size: 0.8rem;
+    .motivation-delete-btn {
+        opacity: 1;
     }
 }
 
