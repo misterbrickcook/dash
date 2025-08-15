@@ -648,15 +648,23 @@ class CloudStorage {
                 console.log('🔄 Attempting to save resource without user_id...');
             }
             
-            if (resource.id && resource.id.toString().indexOf('sample_') === -1 && resource.id.toString().indexOf('temp_') === -1) {
-                console.log('🔄 Updating existing resource in cloud...');
+            // Check if this is a real database ID (should be a number from BIGSERIAL)
+            const isRealDbId = resource.id && 
+                              typeof resource.id === 'number' && 
+                              Number.isInteger(resource.id) && 
+                              resource.id > 0;
+            
+            if (isRealDbId) {
+                console.log('🔄 Updating existing resource in cloud with real DB ID:', resource.id);
                 await supabase.update('resources', resource, resource.id);
                 console.log('✅ Resource updated in cloud');
             } else {
                 console.log('➕ Inserting new resource to cloud...');
-                // Remove temp/sample IDs - let database auto-generate BIGSERIAL ID
-                if (resource.id && (resource.id.toString().indexOf('sample_') === 0 || resource.id.toString().indexOf('temp_') === 0)) {
-                    console.log('🔄 Removing temp/sample ID:', resource.id);
+                console.log('🔍 Current resource ID type:', typeof resource.id, 'value:', resource.id);
+                
+                // Remove any ID that's not a proper database BIGSERIAL ID
+                if (resource.id) {
+                    console.log('🔄 Removing non-database ID:', resource.id, 'type:', typeof resource.id);
                     delete resource.id;
                 }
                 
