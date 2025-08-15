@@ -63,6 +63,12 @@ const Auth = {
             this.isAuthenticated = true;
             this.hideAuthScreen();
             this.showDashboard();
+            
+            // Additional counter update for already authenticated users
+            setTimeout(() => {
+                console.log('🔄 Additional streak counter update for authenticated user...');
+                updateMonthlyStreakDisplays();
+            }, 2000);
         } else {
             this.showAuthScreen();
         }
@@ -383,12 +389,23 @@ const Auth = {
                     if (window.TodoManager && window.TodoManager.loadTodos) {
                         await window.TodoManager.loadTodos();
                         console.log('✅ TodoManager loaded from database');
+                        
+                        // Force update todo counter after loading
+                        if (window.TodoManager.displayTodosForCategory) {
+                            console.log('🔄 Refreshing todo display after load...');
+                            window.TodoManager.displayTodosForCategory('alle');
+                        }
                     }
                     
                     if (window.GoalManager && window.GoalManager.loadGoals) {
                         await window.GoalManager.loadGoals();
                         console.log('✅ GoalManager loaded from database');
                     }
+                    
+                    // Update streak counters after all data is loaded
+                    console.log('🔄 Updating streak counters after login...');
+                    updateMonthlyStreakDisplays();
+                    console.log('✅ Streak counters updated');
                     
                     if (window.JournalManager && window.JournalManager.loadEntries) {
                         await window.JournalManager.loadEntries();
