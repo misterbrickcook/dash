@@ -615,8 +615,24 @@ class CloudStorage {
             this.saveLocalResource(resource);
             console.log('📱 Resource saved locally');
             
+            // Enhanced debug logging for authentication issues
+            console.log('🔍 DEBUG - Checking prerequisites:');
+            console.log('  - supabase exists:', !!supabase);
+            console.log('  - isOnline:', this.isOnline);
+            console.log('  - isSupabaseAuthenticated():', this.isSupabaseAuthenticated());
+            
+            if (supabase) {
+                try {
+                    const user = supabase.getCurrentUser();
+                    console.log('  - getCurrentUser():', !!user, user ? `(ID: ${user.id})` : '(null)');
+                } catch (userError) {
+                    console.log('  - getCurrentUser() error:', userError.message);
+                }
+            }
+            
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 console.log('⏳ Not authenticated/online, queuing for sync');
+                console.log('🔍 Reason: supabase=' + !!supabase + ', online=' + this.isOnline + ', auth=' + this.isSupabaseAuthenticated());
                 this.queueSync('resources', 'save', resource);
                 return;
             }
@@ -628,27 +644,39 @@ class CloudStorage {
                 console.log('👤 Added user_id to resource:', user.id);
             } else {
                 console.warn('⚠️ No current user found when saving resource');
+                // Try to save without user_id rather than failing completely
+                console.log('🔄 Attempting to save resource without user_id...');
             }
             
-            if (resource.id) {
+            if (resource.id && resource.id.toString().indexOf('sample_') === -1) {
                 console.log('🔄 Updating existing resource in cloud...');
                 await supabase.update('resources', resource, resource.id);
                 console.log('✅ Resource updated in cloud');
             } else {
                 console.log('➕ Inserting new resource to cloud...');
+                // Remove sample ID if present
+                if (resource.id && resource.id.toString().indexOf('sample_') === 0) {
+                    delete resource.id;
+                }
+                
                 const result = await supabase.insert('resources', [resource]);
-                if (result && result[0]) {
+                console.log('🔍 Insert result:', result);
+                
+                if (result && result.length > 0 && result[0]) {
                     resource.id = result[0].id;
                     this.saveLocalResource(resource); // Update local with new cloud ID
                     console.log('✅ New resource inserted with ID:', resource.id);
                 } else {
-                    console.warn('⚠️ Insert returned no result:', result);
+                    console.warn('⚠️ Insert returned unexpected result:', result);
+                    // Log the full response for debugging
+                    console.log('🔍 Full insert response:', JSON.stringify(result, null, 2));
                 }
             }
             
             console.log('✅ Resource synced to cloud:', resource.title);
         } catch (error) {
             console.error('❌ Error saving resource to cloud:', error);
+            console.error('❌ Error details:', error.message, error.stack);
             console.log('⏳ Queuing resource for later sync');
             this.queueSync('resources', 'save', resource);
         }
@@ -780,6 +808,10 @@ class CloudStorage {
     
     async processSyncQueue() {
         if (!supabase || !this.isOnline || this.syncQueue.length === 0) {
+            if (this.syncQueue.length > 0) {
+                console.log('🔍 Sync queue not processed:', this.syncQueue.length, 'items waiting');
+                console.log('🔍 Reasons: supabase=' + !!supabase + ', online=' + this.isOnline);
+            }
             return;
         }
         
@@ -790,15 +822,25 @@ class CloudStorage {
         
         for (const item of queue) {
             try {
+                console.log('🔄 Syncing:', item.table, item.action, item.data?.title || item.data?.id);
+                
                 switch (item.action) {
                     case 'save':
-                        if (item.data.id) {
+                        if (item.data.id && item.data.id.toString().indexOf('sample_') === -1) {
+                            console.log('🔄 Updating queued item:', item.data.id);
                             await supabase.update(item.table, item.data, item.data.id);
                         } else {
-                            await supabase.insert(item.table, [item.data]);
+                            console.log('➕ Inserting queued item');
+                            // Remove sample ID if present
+                            if (item.data.id && item.data.id.toString().indexOf('sample_') === 0) {
+                                delete item.data.id;
+                            }
+                            const result = await supabase.insert(item.table, [item.data]);
+                            console.log('🔍 Queued insert result:', result);
                         }
                         break;
                     case 'delete':
+                        console.log('🗑️ Deleting queued item:', item.data.id);
                         await supabase.delete(item.table, item.data.id);
                         break;
                     case 'notes':
@@ -819,8 +861,13 @@ class CloudStorage {
                 console.log('✅ Synced:', item.table, item.action);
             } catch (error) {
                 console.error('❌ Sync failed:', item, error);
+                console.error('❌ Sync error details:', error.message);
                 this.syncQueue.push(item); // Re-queue failed items
             }
+        }
+        
+        if (this.syncQueue.length > 0) {
+            console.log('⚠️ Sync queue still has', this.syncQueue.length, 'items after processing');
         }
     }
     
@@ -867,4 +914,63 @@ window.cloudStorage = new CloudStorage();
 // Auto-start periodic sync
 cloudStorage.startPeriodicSync();
 
+// Add global debug functions for resources
+window.debugResources = function() {
+    console.log('🔍 === RESOURCE DEBUG ===');
+    console.log('📦 Sync queue items:', cloudStorage.syncQueue.length);
+    if (cloudStorage.syncQueue.length > 0) {
+        console.log('📦 Queued items:', cloudStorage.syncQueue);
+    }
+    console.log('🔍 Auth status:', cloudStorage.isSupabaseAuthenticated());
+    console.log('🌐 Online status:', cloudStorage.isOnline);
+    console.log('🔌 Supabase available:', !!window.supabase);
+    if (window.supabase) {
+        try {
+            const user = window.supabase.getCurrentUser();
+            console.log('👤 Current user:', !!user, user ? `(ID: ${user.id})` : '(null)');
+        } catch (e) {
+            console.log('👤 User check error:', e.message);
+        }
+    }
+    
+    // Check local resources
+    const localResources = cloudStorage.getLocalResources();
+    console.log('📱 Local resources:', localResources.length);
+    
+    if (window.ResourceManager) {
+        console.log('🏠 ResourceManager resources:', window.ResourceManager.resources.length);
+    }
+};
+
+window.forceSyncResources = async function() {
+    console.log('🔧 Force syncing resources...');
+    try {
+        await cloudStorage.processSyncQueue();
+        console.log('✅ Force sync completed');
+    } catch (error) {
+        console.error('❌ Force sync failed:', error);
+    }
+};
+
+window.testResourceSave = async function() {
+    console.log('🧪 Testing resource save...');
+    const testResource = {
+        id: Date.now().toString(),
+        title: 'Test Resource',
+        category: 'Test',
+        url: 'https://example.com',
+        description: 'Debug test resource',
+        icon: '🧪',
+        created_at: new Date().toISOString()
+    };
+    
+    try {
+        await cloudStorage.saveResource(testResource);
+        console.log('✅ Test resource save completed');
+    } catch (error) {
+        console.error('❌ Test resource save failed:', error);
+    }
+};
+
 console.log('☁️ Cloud Storage System loaded');
+console.log('🔍 Debug functions available: debugResources(), forceSyncResources(), testResourceSave()');

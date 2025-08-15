@@ -5489,6 +5489,8 @@
                 },
                 
                 async addResource(resourceData) {
+                    console.log('🔄 ResourceManager.addResource() called for:', resourceData.title);
+                    
                     const resource = {
                         id: Date.now().toString(),
                         title: resourceData.title,
@@ -5499,20 +5501,29 @@
                         created_at: new Date().toISOString()
                     };
                     
+                    console.log('📝 Created resource object:', { id: resource.id, title: resource.title });
+                    
                     this.resources.push(resource);
+                    console.log('📱 Added to local ResourceManager array, total:', this.resources.length);
+                    
+                    // Update UI immediately for better UX
+                    this.renderResources();
                     
                     try {
                         if (cloudStorage) {
+                            console.log('☁️ Attempting to save resource to cloud...');
                             await cloudStorage.saveResource(resource);
+                            console.log('✅ Resource saved to cloud successfully');
                         } else {
+                            console.log('📱 No cloudStorage, saving to localStorage only');
                             localStorage.setItem('resources', JSON.stringify(this.resources));
                         }
-                        this.renderResources();
                         console.log('✅ Resource added:', resource.title);
                     } catch (error) {
-                        console.error('Error saving resource:', error);
-                        // Remove from local array if save failed
-                        this.resources = this.resources.filter(r => r.id !== resource.id);
+                        console.error('❌ Error saving resource:', error);
+                        console.error('❌ Resource save error details:', error.message, error.stack);
+                        // Don't remove from local array - leave it for sync queue to handle
+                        console.log('⚠️ Resource kept in local array for later sync');
                     }
                 },
                 
