@@ -865,7 +865,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     
     // Todo Filter System
-    let currentTodoFilter = 'heute';
+    let currentTodoFilter = 'alle';
     const todoFilters = document.querySelectorAll('.tabs .tab[data-filter]');
     const todoFilterContainers = document.querySelectorAll('.todo-filter');
     
@@ -5451,7 +5451,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     initializeDailyProgress(); // Initialize daily progress tracking
     initializeMonthlyTodoStreak(); // Initialize monthly todo streak
     updateHomeTodos(); // Set up initial 5 todos on home
-    showTodoFilter('heute'); // Start with 'heute' filter
+    showTodoFilter('alle'); // Start with 'heute' filter
     initializeExistingCheckboxes(); // Make existing checkboxes consistent
     initializeRoutineProgress(); // Initialize routine progress tracking
     initializeRoutineStreaks(); // Initialize routine streak counting

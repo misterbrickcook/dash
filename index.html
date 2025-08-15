@@ -1326,6 +1326,7 @@
                         <label for="todo-category">Kategorie</label>
                         <select id="todo-category" required autocomplete="off">
                             <option value="">Kategorie wählen</option>
+                            <option value="alle">Alle</option>
                             <option value="privat">Privat</option>
                             <option value="uni">Uni</option>
                             <option value="arbeit">Arbeit</option>
@@ -1692,18 +1693,18 @@
         <section id="tab-todos" class="tab-section">
             
             <div class="category-tabs">
-                <button class="category-tab active" data-category="heute">Heute</button>
+                <button class="category-tab" data-category="heute">Heute</button>
                 <button class="category-tab" data-category="privat">Privat</button>
                 <button class="category-tab" data-category="uni">Uni</button>
                 <button class="category-tab" data-category="arbeit">Arbeit</button>
-                <button class="category-tab" data-category="alle">Alle</button>
+                <button class="category-tab active" data-category="alle">Alle</button>
                 <button class="category-tab" data-category="archiv">Archiv</button>
                 <button id="add-todo-btn" class="btn" style="margin-left: 2rem;">+ Add Todo</button>
                 <button id="clear-archive-btn" class="btn secondary" style="margin-left: 1rem; display: none;">🗑️ Archiv leeren</button>
             </div>
 
             <!-- HEUTE KATEGORIE -->
-            <div class="category-content active" id="heute">
+            <div class="category-content" id="heute">
                 <!-- Todos for today will be loaded from database -->
             </div>
 
@@ -1723,7 +1724,7 @@
             </div>
 
             <!-- ALLE KATEGORIE -->
-            <div class="category-content" id="alle">
+            <div class="category-content active" id="alle">
                 <!-- All todos will be loaded from database -->
             </div>
 
