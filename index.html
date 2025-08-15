@@ -5771,8 +5771,14 @@
                 
                 init() {
                     console.log('💪 MotivationManager.init() called');
+                    if (this.initialized) {
+                        console.log('⚠️ MotivationManager already initialized, skipping...');
+                        return;
+                    }
+                    
                     this.loadData();
                     this.setupEventListeners();
+                    this.setupCardEventListeners(); // Set up global event delegation
                     this.renderCards();
                     this.initialized = true;
                     console.log('✅ MotivationManager initialization complete');
@@ -5808,8 +5814,8 @@
                 addCard() {
                     const newCard = {
                         id: this.nextId++,
-                        title: '',
-                        description: '',
+                        title: 'Neues Ziel',
+                        description: 'Beschreibe dein Ziel hier...',
                         image: null,
                         created: new Date().toISOString()
                     };
@@ -5817,6 +5823,15 @@
                     this.cards.push(newCard);
                     this.renderCards();
                     this.saveData();
+                    
+                    // Focus on the new card's title for immediate editing
+                    setTimeout(() => {
+                        const newCardElement = document.querySelector(`[data-id="${newCard.id}"] .motivation-title`);
+                        if (newCardElement) {
+                            newCardElement.focus();
+                            newCardElement.select();
+                        }
+                    }, 100);
                     
                     console.log('➕ Added new motivation card:', newCard.id);
                 },
@@ -5832,20 +5847,33 @@
                     const file = event.target.files[0];
                     if (!file || !this.currentCardId) return;
                     
-                    if (!file.type.startsWith('image/')) {
-                        alert('Please select an image file.');
+                    console.log(`📁 Selected file: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+                    
+                    // Validate file type
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
+                        alert('Bitte wähle ein Bild (JPG, PNG, GIF oder WebP)');
+                        event.target.value = '';
                         return;
                     }
                     
                     // Check file size (max 5MB)
                     if (file.size > 5 * 1024 * 1024) {
-                        alert('Image size should be less than 5MB.');
+                        alert('Bild zu groß! Maximum 5MB erlaubt.');
+                        event.target.value = '';
                         return;
                     }
                     
                     const reader = new FileReader();
                     reader.onload = (e) => {
+                        console.log(`📸 Image loaded successfully for card ${this.currentCardId}`);
                         this.updateCardImage(this.currentCardId, e.target.result);
+                        event.target.value = ''; // Reset for next use
+                    };
+                    reader.onerror = () => {
+                        console.error('❌ Error reading file');
+                        alert('Fehler beim Laden des Bildes');
+                        event.target.value = '';
                     };
                     reader.readAsDataURL(file);
                 },
@@ -5880,8 +5908,6 @@
                         container.appendChild(cardElement);
                     });
                     
-                    // Re-setup event listeners for new cards
-                    this.setupCardEventListeners();
                     console.log(`🎨 Rendered ${this.cards.length} motivation cards`);
                 },
                 
@@ -5911,45 +5937,55 @@
                 },
                 
                 setupCardEventListeners() {
-                    // Image click handlers
-                    document.querySelectorAll('.motivation-image-container').forEach(container => {
-                        const deleteBtn = container.querySelector('.motivation-delete-btn');
-                        
-                        container.addEventListener('click', (e) => {
-                            if (e.target === deleteBtn) return; // Don't trigger image upload when clicking delete
-                            
-                            const card = e.target.closest('.motivation-card');
+                    console.log('🎧 Setting up card event listeners...');
+                    
+                    // Image click handlers - use event delegation
+                    document.addEventListener('click', (e) => {
+                        const imageContainer = e.target.closest('.motivation-image-container');
+                        if (imageContainer && !e.target.closest('.motivation-delete-btn')) {
+                            const card = imageContainer.closest('.motivation-card');
                             if (card) {
                                 this.currentCardId = parseInt(card.getAttribute('data-id'));
+                                console.log(`📸 Opening file selector for card ${this.currentCardId}`);
                                 document.getElementById('motivation-file-input').click();
                             }
-                        });
+                        }
                     });
                     
-                    // Delete button handlers
-                    document.querySelectorAll('.motivation-delete-btn').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
+                    // Delete button handlers - use event delegation
+                    document.addEventListener('click', (e) => {
+                        if (e.target.closest('.motivation-delete-btn')) {
                             e.stopPropagation();
-                            const card = e.target.closest('.motivation-card');
-                            if (card && confirm('Delete this motivation card?')) {
-                                const cardId = parseInt(card.getAttribute('data-id'));
-                                this.deleteCard(cardId);
-                            }
-                        });
-                    });
-                    
-                    // Text change handlers
-                    document.querySelectorAll('.motivation-title, .motivation-description').forEach(element => {
-                        element.addEventListener('input', (e) => {
                             const card = e.target.closest('.motivation-card');
                             if (card) {
                                 const cardId = parseInt(card.getAttribute('data-id'));
-                                const title = card.querySelector('.motivation-title').textContent.trim();
-                                const description = card.querySelector('.motivation-description').textContent.trim();
-                                this.updateCardText(cardId, title, description);
+                                const cardTitle = card.querySelector('.motivation-title').textContent.trim() || 'Unnamed card';
+                                if (confirm(`Delete "${cardTitle}"?`)) {
+                                    console.log(`🗑️ Deleting card ${cardId}`);
+                                    this.deleteCard(cardId);
+                                }
                             }
-                        });
+                        }
                     });
+                    
+                    // Text change handlers - use event delegation with debouncing
+                    document.addEventListener('input', (e) => {
+                        if (e.target.matches('.motivation-title, .motivation-description')) {
+                            const card = e.target.closest('.motivation-card');
+                            if (card) {
+                                clearTimeout(this.textUpdateTimeout);
+                                this.textUpdateTimeout = setTimeout(() => {
+                                    const cardId = parseInt(card.getAttribute('data-id'));
+                                    const title = card.querySelector('.motivation-title').textContent.trim();
+                                    const description = card.querySelector('.motivation-description').textContent.trim();
+                                    this.updateCardText(cardId, title, description);
+                                    console.log(`✏️ Updated text for card ${cardId}`);
+                                }, 300);
+                            }
+                        }
+                    });
+                    
+                    console.log('✅ Card event listeners setup complete');
                 },
                 
                 loadData() {
@@ -5978,12 +6014,26 @@
                             cards: this.cards,
                             nextId: this.nextId
                         };
-                        localStorage.setItem('motivation_cards', JSON.stringify(data));
-                        console.log('💾 Motivation cards saved');
+                        const dataString = JSON.stringify(data);
+                        const sizeInMB = (new Blob([dataString]).size / (1024 * 1024)).toFixed(2);
+                        
+                        localStorage.setItem('motivation_cards', dataString);
+                        console.log(`💾 Motivation cards saved (${sizeInMB}MB, ${this.cards.length} cards)`);
+                        
+                        // Check storage usage
+                        let totalSize = 0;
+                        for (let key in localStorage) {
+                            if (localStorage.hasOwnProperty(key)) {
+                                totalSize += localStorage[key].length;
+                            }
+                        }
+                        const totalMB = (totalSize / (1024 * 1024)).toFixed(2);
+                        console.log(`📊 Total localStorage usage: ${totalMB}MB`);
+                        
                     } catch (error) {
                         console.error('❌ Error saving motivation data:', error);
                         if (error.name === 'QuotaExceededError') {
-                            alert('Storage quota exceeded. Please remove some images.');
+                            alert('Speicher voll! Bitte lösche einige Bilder um Platz zu schaffen.');
                         }
                     }
                 },
