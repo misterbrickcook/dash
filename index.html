@@ -1927,7 +1927,7 @@
                     <h3>Routines Reset</h3>
                     <div class="setting-item">
                         <label>Routine-Datenbank komplett zurücksetzen:</label>
-                        <button id="reset-routines-btn" class="btn btn-danger" style="background: #cc0000; border-color: #cc0000; color: white;">Routines komplett zurücksetzen</button>
+                        <button id="reset-routines-btn" class="btn btn-danger" style="background: #cc0000; border-color: #cc0000; color: white;" onclick="handleRoutineReset()">Routines komplett zurücksetzen</button>
                         <span class="setting-description">⚠️ Löscht ALLE Routine-Daten und Counter. Synchronisiert zwischen allen Geräten.</span>
                     </div>
                 </div>
@@ -6277,29 +6277,32 @@
             });
             
             // === ROUTINE RESET FUNCTIONALITY ===
-            document.addEventListener('DOMContentLoaded', function() {
-                const resetBtn = document.getElementById('reset-routines-btn');
-                if (resetBtn) {
-                    resetBtn.addEventListener('click', async function() {
-                        const confirmed = confirm(
-                            '⚠️ ACHTUNG: Routine-Datenbank komplett zurücksetzen?\n\n' +
-                            '• Löscht ALLE Routine-Daten (lokal und cloud)\n' +
-                            '• Setzt alle Counter auf 0\n' +
-                            '• Betrifft alle Geräte\n' +
-                            '• Kann nicht rückgängig gemacht werden\n\n' +
-                            'Fortfahren?'
-                        );
-                        
-                        if (confirmed) {
-                            const success = await resetRoutineDatabase();
-                            if (success) {
-                                alert('✅ Routine-Datenbank wurde komplett zurückgesetzt!\n\nBitte refreshe die Seite auf allen Geräten.');
-                                window.location.reload();
-                            } else {
-                                alert('❌ Fehler beim Zurücksetzen. Bitte Console prüfen.');
-                            }
+            // Use event delegation to catch button clicks even if tab is loaded later
+            document.addEventListener('click', async function(e) {
+                if (e.target && e.target.id === 'reset-routines-btn') {
+                    console.log('🖱️ Reset routines button clicked');
+                    
+                    const confirmed = confirm(
+                        '⚠️ ACHTUNG: Routine-Datenbank komplett zurücksetzen?\n\n' +
+                        '• Löscht ALLE Routine-Daten (lokal und cloud)\n' +
+                        '• Setzt alle Counter auf 0\n' +
+                        '• Betrifft alle Geräte\n' +
+                        '• Kann nicht rückgängig gemacht werden\n\n' +
+                        'Fortfahren?'
+                    );
+                    
+                    if (confirmed) {
+                        console.log('✅ User confirmed reset');
+                        const success = await resetRoutineDatabase();
+                        if (success) {
+                            alert('✅ Routine-Datenbank wurde komplett zurückgesetzt!\n\nBitte refreshe die Seite auf allen Geräten.');
+                            window.location.reload();
+                        } else {
+                            alert('❌ Fehler beim Zurücksetzen. Bitte Console prüfen.');
                         }
-                    });
+                    } else {
+                        console.log('❌ User cancelled reset');
+                    }
                 }
             });
             
@@ -6388,6 +6391,33 @@
                     return false;
                 }
             }
+            
+            // === GLOBAL ROUTINE RESET HANDLER ===
+            window.handleRoutineReset = async function() {
+                console.log('🖱️ handleRoutineReset called via onclick');
+                
+                const confirmed = confirm(
+                    '⚠️ ACHTUNG: Routine-Datenbank komplett zurücksetzen?\n\n' +
+                    '• Löscht ALLE Routine-Daten (lokal und cloud)\n' +
+                    '• Setzt alle Counter auf 0\n' +
+                    '• Betrifft alle Geräte\n' +
+                    '• Kann nicht rückgängig gemacht werden\n\n' +
+                    'Fortfahren?'
+                );
+                
+                if (confirmed) {
+                    console.log('✅ User confirmed reset');
+                    const success = await resetRoutineDatabase();
+                    if (success) {
+                        alert('✅ Routine-Datenbank wurde komplett zurückgesetzt!\n\nBitte refreshe die Seite auf allen Geräten.');
+                        window.location.reload();
+                    } else {
+                        alert('❌ Fehler beim Zurücksetzen. Bitte Console prüfen.');
+                    }
+                } else {
+                    console.log('❌ User cancelled reset');
+                }
+            };
             
             // Mobile debug removed for cleaner console output
         });
