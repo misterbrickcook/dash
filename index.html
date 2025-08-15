@@ -1573,6 +1573,7 @@
             <button class="nav-tab" data-tab="tab-ziele">Ziele</button>
             <button class="nav-tab" data-tab="tab-journal">Journal</button>
             <button class="nav-tab" data-tab="tab-ressourcen">Ressourcen</button>
+            <button class="nav-tab" data-tab="tab-motivation">Motivation</button>
             <button class="nav-tab" data-tab="tab-settings" style="display: none;">Settings</button>
             <div class="nav-actions">
                 <button id="settings-btn" class="nav-tab settings-btn">
@@ -1856,6 +1857,100 @@
                 <!-- Crypto resources will be loaded from database -->
             </div>
             
+        </section>
+
+        <!-- === MOTIVATION TAB === -->
+        <section id="tab-motivation" class="tab-section">
+            <h1 class="section-title">Motivation</h1>
+            
+            <div class="motivation-grid">
+                <div class="motivation-card" data-id="1">
+                    <div class="motivation-image-container">
+                        <img class="motivation-image" src="" alt="Motivation Image 1" style="display: none;">
+                        <div class="motivation-placeholder">
+                            <span class="motivation-icon">📸</span>
+                            <p>Klick um Bild hinzuzufügen</p>
+                        </div>
+                    </div>
+                    <div class="motivation-content">
+                        <h3 class="motivation-title" contenteditable="true">Ziel 1</h3>
+                        <p class="motivation-description" contenteditable="true">Beschreibung deines Ziels...</p>
+                    </div>
+                </div>
+                
+                <div class="motivation-card" data-id="2">
+                    <div class="motivation-image-container">
+                        <img class="motivation-image" src="" alt="Motivation Image 2" style="display: none;">
+                        <div class="motivation-placeholder">
+                            <span class="motivation-icon">📸</span>
+                            <p>Klick um Bild hinzuzufügen</p>
+                        </div>
+                    </div>
+                    <div class="motivation-content">
+                        <h3 class="motivation-title" contenteditable="true">Ziel 2</h3>
+                        <p class="motivation-description" contenteditable="true">Beschreibung deines Ziels...</p>
+                    </div>
+                </div>
+                
+                <div class="motivation-card" data-id="3">
+                    <div class="motivation-image-container">
+                        <img class="motivation-image" src="" alt="Motivation Image 3" style="display: none;">
+                        <div class="motivation-placeholder">
+                            <span class="motivation-icon">📸</span>
+                            <p>Klick um Bild hinzuzufügen</p>
+                        </div>
+                    </div>
+                    <div class="motivation-content">
+                        <h3 class="motivation-title" contenteditable="true">Ziel 3</h3>
+                        <p class="motivation-description" contenteditable="true">Beschreibung deines Ziels...</p>
+                    </div>
+                </div>
+                
+                <div class="motivation-card" data-id="4">
+                    <div class="motivation-image-container">
+                        <img class="motivation-image" src="" alt="Motivation Image 4" style="display: none;">
+                        <div class="motivation-placeholder">
+                            <span class="motivation-icon">📸</span>
+                            <p>Klick um Bild hinzuzufügen</p>
+                        </div>
+                    </div>
+                    <div class="motivation-content">
+                        <h3 class="motivation-title" contenteditable="true">Ziel 4</h3>
+                        <p class="motivation-description" contenteditable="true">Beschreibung deines Ziels...</p>
+                    </div>
+                </div>
+                
+                <div class="motivation-card" data-id="5">
+                    <div class="motivation-image-container">
+                        <img class="motivation-image" src="" alt="Motivation Image 5" style="display: none;">
+                        <div class="motivation-placeholder">
+                            <span class="motivation-icon">📸</span>
+                            <p>Klick um Bild hinzuzufügen</p>
+                        </div>
+                    </div>
+                    <div class="motivation-content">
+                        <h3 class="motivation-title" contenteditable="true">Ziel 5</h3>
+                        <p class="motivation-description" contenteditable="true">Beschreibung deines Ziels...</p>
+                    </div>
+                </div>
+                
+                <div class="motivation-card" data-id="6">
+                    <div class="motivation-image-container">
+                        <img class="motivation-image" src="" alt="Motivation Image 6" style="display: none;">
+                        <div class="motivation-placeholder">
+                            <span class="motivation-icon">📸</span>
+                            <p>Klick um Bild hinzuzufügen</p>
+                        </div>
+                    </div>
+                    <div class="motivation-content">
+                        <h3 class="motivation-title" contenteditable="true">Ziel 6</h3>
+                        <p class="motivation-description" contenteditable="true">Beschreibung deines Ziels...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hidden file input for image uploads -->
+            <input type="file" id="motivation-file-input" accept="image/*" style="display: none;">
         </section>
 
         <!-- === SETTINGS TAB === -->
@@ -5729,6 +5824,197 @@
                         ResourceManager.renderResources();
                     }
                 }, 500);
+            });
+            
+            // === MOTIVATION MANAGER ===
+            const MotivationManager = {
+                data: {},
+                currentCardId: null,
+                
+                init() {
+                    console.log('💪 MotivationManager.init() called');
+                    this.loadData();
+                    this.setupEventListeners();
+                    this.renderCards();
+                },
+                
+                setupEventListeners() {
+                    // Image placeholder click handlers
+                    document.querySelectorAll('.motivation-image-container').forEach(container => {
+                        container.addEventListener('click', (e) => {
+                            const card = e.target.closest('.motivation-card');
+                            if (card) {
+                                this.currentCardId = card.getAttribute('data-id');
+                                document.getElementById('motivation-file-input').click();
+                            }
+                        });
+                    });
+                    
+                    // File input change handler
+                    const fileInput = document.getElementById('motivation-file-input');
+                    if (fileInput) {
+                        fileInput.addEventListener('change', (e) => this.handleImageUpload(e));
+                    }
+                    
+                    // Auto-save text changes
+                    document.querySelectorAll('.motivation-title, .motivation-description').forEach(element => {
+                        element.addEventListener('input', (e) => {
+                            const card = e.target.closest('.motivation-card');
+                            if (card) {
+                                this.saveCardText(card);
+                            }
+                        });
+                        
+                        element.addEventListener('blur', (e) => {
+                            const card = e.target.closest('.motivation-card');
+                            if (card) {
+                                this.saveCardText(card);
+                            }
+                        });
+                    });
+                },
+                
+                handleImageUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file || !this.currentCardId) return;
+                    
+                    if (!file.type.startsWith('image/')) {
+                        alert('Please select an image file.');
+                        return;
+                    }
+                    
+                    // Check file size (max 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Image size should be less than 5MB.');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.saveCardImage(this.currentCardId, e.target.result);
+                        this.renderCardImage(this.currentCardId, e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                },
+                
+                saveCardImage(cardId, imageData) {
+                    if (!this.data[cardId]) {
+                        this.data[cardId] = {};
+                    }
+                    this.data[cardId].image = imageData;
+                    this.saveData();
+                    console.log(`📸 Image saved for card ${cardId}`);
+                },
+                
+                saveCardText(card) {
+                    const cardId = card.getAttribute('data-id');
+                    const title = card.querySelector('.motivation-title').textContent.trim();
+                    const description = card.querySelector('.motivation-description').textContent.trim();
+                    
+                    if (!this.data[cardId]) {
+                        this.data[cardId] = {};
+                    }
+                    
+                    this.data[cardId].title = title;
+                    this.data[cardId].description = description;
+                    
+                    this.autoSave();
+                    console.log(`💾 Text saved for card ${cardId}`);
+                },
+                
+                renderCardImage(cardId, imageData) {
+                    const card = document.querySelector(`[data-id="${cardId}"]`);
+                    if (!card) return;
+                    
+                    const img = card.querySelector('.motivation-image');
+                    const placeholder = card.querySelector('.motivation-placeholder');
+                    
+                    if (img && placeholder) {
+                        img.src = imageData;
+                        img.style.display = 'block';
+                        placeholder.style.display = 'none';
+                    }
+                },
+                
+                renderCards() {
+                    Object.keys(this.data).forEach(cardId => {
+                        const cardData = this.data[cardId];
+                        const card = document.querySelector(`[data-id="${cardId}"]`);
+                        
+                        if (card) {
+                            // Render image
+                            if (cardData.image) {
+                                this.renderCardImage(cardId, cardData.image);
+                            }
+                            
+                            // Render text
+                            if (cardData.title) {
+                                const titleElement = card.querySelector('.motivation-title');
+                                if (titleElement) {
+                                    titleElement.textContent = cardData.title;
+                                }
+                            }
+                            
+                            if (cardData.description) {
+                                const descElement = card.querySelector('.motivation-description');
+                                if (descElement) {
+                                    descElement.textContent = cardData.description;
+                                }
+                            }
+                        }
+                    });
+                    
+                    console.log('🎨 Motivation cards rendered');
+                },
+                
+                loadData() {
+                    try {
+                        const cached = localStorage.getItem('motivation_data');
+                        if (cached) {
+                            this.data = JSON.parse(cached);
+                            console.log('📋 Loaded motivation data for', Object.keys(this.data).length, 'cards');
+                        } else {
+                            this.data = {};
+                            console.log('📋 Using empty motivation data');
+                        }
+                    } catch (error) {
+                        console.error('❌ Error loading motivation data:', error);
+                        this.data = {};
+                    }
+                },
+                
+                saveData() {
+                    try {
+                        localStorage.setItem('motivation_data', JSON.stringify(this.data));
+                        console.log('💾 Motivation data saved');
+                    } catch (error) {
+                        console.error('❌ Error saving motivation data:', error);
+                        // Handle quota exceeded error
+                        if (error.name === 'QuotaExceededError') {
+                            alert('Storage quota exceeded. Please remove some images or data.');
+                        }
+                    }
+                },
+                
+                autoSave() {
+                    clearTimeout(this.saveTimeout);
+                    this.saveTimeout = setTimeout(() => {
+                        this.saveData();
+                        console.log('🔄 Motivation data auto-saved');
+                    }, 1000);
+                }
+            };
+            
+            // Make MotivationManager globally available
+            window.MotivationManager = MotivationManager;
+            
+            // Initialize Motivation Manager when DOM is ready
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(() => {
+                    if (window.MotivationManager) {
+                        MotivationManager.init();
+                    }
+                }, 150);
             });
             
             // === SIMPLE LOGOUT (URL-based) ===
