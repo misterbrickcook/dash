@@ -5760,16 +5760,29 @@
                 },
                 
                 setupEventListeners() {
+                    console.log('🎧 Setting up MotivationManager event listeners...');
+                    
                     // Add motivation button
                     const addBtn = document.getElementById('add-motivation-btn');
+                    console.log('🔍 Add button found:', !!addBtn);
                     if (addBtn) {
-                        addBtn.addEventListener('click', () => this.addCard());
+                        addBtn.addEventListener('click', () => {
+                            console.log('🖱️ Add motivation button clicked!');
+                            this.addCard();
+                        });
+                        console.log('✅ Add button event listener attached');
+                    } else {
+                        console.error('❌ Add motivation button not found in DOM');
                     }
                     
                     // File input change handler
                     const fileInput = document.getElementById('motivation-file-input');
+                    console.log('🔍 File input found:', !!fileInput);
                     if (fileInput) {
                         fileInput.addEventListener('change', (e) => this.handleImageUpload(e));
+                        console.log('✅ File input event listener attached');
+                    } else {
+                        console.error('❌ File input not found in DOM');
                     }
                 },
                 
@@ -5970,9 +5983,13 @@
             
             // Initialize Motivation Manager when DOM is ready
             document.addEventListener('DOMContentLoaded', function() {
+                console.log('🎯 DOM loaded, initializing MotivationManager...');
                 setTimeout(() => {
                     if (window.MotivationManager) {
+                        console.log('🚀 Starting MotivationManager.init()');
                         MotivationManager.init();
+                    } else {
+                        console.error('❌ MotivationManager not found on window');
                     }
                 }, 150);
             });

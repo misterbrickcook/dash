@@ -470,13 +470,19 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* === CARD HEADERS === */
-.card-header {
+.card-header, .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #e0e0e0;
+}
+
+.section-header {
+    justify-content: flex-end;
+    border-bottom: none;
+    margin-bottom: 2rem;
 }
 
 .card-title, .card-header h2 {
