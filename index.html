@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DASHBOARD v2.3</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22 font-family=%22-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif%22 font-weight=%22700%22 fill=%22%23000000%22>A</text></svg>">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
         /* === RESET & BASE === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1403,6 +1404,35 @@
             padding: 3rem;
         }
 
+        /* === LUCIDE ICON STYLES === */
+        .icon-palette {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .icon-btn:hover {
+            background: #f3f4f6;
+            border-color: #000000;
+        }
+        
+        .icon-btn:active {
+            background: #e5e7eb;
+        }
+
         @media (max-width: 768px) {
             .grid-2, .grid-3, .routine-grid, .streak-grid { grid-template-columns: 1fr; gap: 2rem; }
             .routine-grid { height: auto; }
@@ -1714,13 +1744,10 @@
             <button class="nav-tab" data-tab="tab-settings" style="display: none;">Settings</button>
             <div class="nav-actions">
                 <button id="settings-btn" class="nav-tab settings-btn">
-                    <span>⚙</span>
+                    <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
                 </button>
                 <button id="logout-btn" class="nav-tab logout-btn" style="display:flex;align-items:center;justify-content:center;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v10"></path>
-                        <circle cx="12" cy="12" r="10"></circle>
-                    </svg>
+                    <i data-lucide="log-out" style="width: 18px; height: 18px;"></i>
                 </button>
             </div>
         </div>
@@ -2042,7 +2069,9 @@
             <div class="wiki-controls">
                 <div class="search-container">
                     <input type="text" id="wiki-search" placeholder="Search wiki entries..." class="search-input">
-                    <button class="search-btn" onclick="CryptoWiki.search()">🔍</button>
+                    <button class="search-btn" onclick="CryptoWiki.search()">
+                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                    </button>
                 </div>
                 <div class="filter-container">
                     <select id="wiki-category-filter" onchange="CryptoWiki.filterByCategory()">
@@ -2099,31 +2128,31 @@
                 
                 <div class="form-group">
                     <label for="resource-icon">Icon (optional)</label>
-                    <input type="text" id="resource-icon" placeholder="Click emoji below or type manually" maxlength="4" readonly>
-                    <div class="emoji-palette">
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('📧')">📧</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('💼')">💼</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('📚')">📚</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🏠')">🏠</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('💬')">💬</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🏦')">🏦</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🔧')">🔧</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('📊')">📊</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('📝')">📝</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('👥')">👥</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🌐')">🌐</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('💰')">💰</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🎯')">🎯</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('⚡')">⚡</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🔐')">🔐</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🔗')">🔗</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🚀')">🚀</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🎨')">🎨</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🏃')">🏃</button>
-                        <button type="button" class="emoji-btn" onclick="ResourceManager.selectEmoji('🤖')">🤖</button>
+                    <input type="text" id="resource-icon" placeholder="Click icon below or type lucide icon name" readonly>
+                    <div class="icon-palette">
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('mail')"><i data-lucide="mail" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('briefcase')"><i data-lucide="briefcase" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('book')"><i data-lucide="book" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('home')"><i data-lucide="home" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('message-circle')"><i data-lucide="message-circle" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('building')"><i data-lucide="building" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('wrench')"><i data-lucide="wrench" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('bar-chart-3')"><i data-lucide="bar-chart-3" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('file-text')"><i data-lucide="file-text" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('users')"><i data-lucide="users" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('globe')"><i data-lucide="globe" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('dollar-sign')"><i data-lucide="dollar-sign" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('target')"><i data-lucide="target" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('zap')"><i data-lucide="zap" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('lock')"><i data-lucide="lock" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('link')"><i data-lucide="link" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('rocket')"><i data-lucide="rocket" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('palette')"><i data-lucide="palette" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('activity')"><i data-lucide="activity" style="width: 16px; height: 16px;"></i></button>
+                        <button type="button" class="icon-btn" onclick="ResourceManager.selectIcon('bot')"><i data-lucide="bot" style="width: 16px; height: 16px;"></i></button>
                     </div>
-                    <small style="margin-top: 0.5rem; display: block;">Click an emoji above or make input editable to type manually</small>
-                    <button type="button" class="btn-link" onclick="ResourceManager.toggleEmojiInput()" style="font-size: 0.8rem; margin-top: 0.25rem;">Enable manual typing</button>
+                    <small style="margin-top: 0.5rem; display: block;">Click an icon above or make input editable to type manually</small>
+                    <button type="button" class="btn-link" onclick="ResourceManager.toggleIconInput()" style="font-size: 0.8rem; margin-top: 0.25rem;">Enable manual typing</button>
                 </div>
                 
                 <div class="form-actions">
@@ -2137,7 +2166,9 @@
     <!-- Add Wiki Entry Modal -->
     <div id="add-wiki-modal" class="modal hide">
         <div class="modal-content">
-            <span class="close" onclick="CryptoWiki.hideAddModal()">&times;</span>
+            <span class="close" onclick="CryptoWiki.hideAddModal()">
+                <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+            </span>
             <h2>Add Wiki Entry</h2>
             <form id="add-wiki-form">
                 <div class="form-group">
@@ -5836,22 +5867,33 @@
                         html += '<div class="resource-grid">';
                         
                         filteredResources.forEach(resource => {
-                            const icon = resource.icon || '🔗';
+                            const icon = resource.icon || 'link';
                             const description = resource.description || '';
                             const truncatedTitle = resource.title.length > 25 ? resource.title.substring(0, 25) + '...' : resource.title;
                             const fullTitle = `${resource.title}${description ? ` - ${description}` : ''}`;
                             html += `
                                 <div class="resource-card" onclick="window.open('${resource.url}', '_blank')" 
                                      title="${fullTitle}">
-                                    <span class="resource-icon">${icon}</span>
+                                    <span class="resource-icon"><i data-lucide="${icon}" style="width: 16px; height: 16px;"></i></span>
                                     <span class="resource-title">${truncatedTitle}</span>
                                     <div class="resource-actions">
-                                        <button class="resource-edit-btn" onclick="event.stopPropagation(); ResourceManager.editResource('${resource.id}')" title="Edit">✏️</button>
-                                        <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">🗑️</button>
+                                        <button class="resource-edit-btn" onclick="event.stopPropagation(); ResourceManager.editResource('${resource.id}')" title="Edit">
+                                            <i data-lucide="edit-3" style="width: 12px; height: 12px;"></i>
+                                        </button>
+                                        <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">
+                                            <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                                        </button>
                                     </div>
                                 </div>
                             `;
                         });
+                        
+                        // Initialize Lucide icons after rendering
+                        setTimeout(() => {
+                            if (window.lucide) {
+                                lucide.createIcons();
+                            }
+                        }, 100);
                         
                         html += '</div>';
                     }
@@ -5880,7 +5922,7 @@
                         category: resourceData.category,
                         url: resourceData.url,
                         description: resourceData.description || '',
-                        icon: resourceData.icon || '🔗',
+                        icon: resourceData.icon || 'link',
                         created_at: new Date().toISOString()
                     };
                     
@@ -5955,14 +5997,14 @@
                     this.showAddResourceModal();
                 },
                 
-                selectEmoji(emoji) {
+                selectIcon(iconName) {
                     const iconInput = document.getElementById('resource-icon');
                     if (iconInput) {
-                        iconInput.value = emoji;
+                        iconInput.value = iconName;
                     }
                 },
                 
-                toggleEmojiInput() {
+                toggleIconInput() {
                     const iconInput = document.getElementById('resource-icon');
                     const toggleBtn = event.target;
                     
@@ -6073,18 +6115,18 @@
                     if (ResourceManager.resources.length === 0) {
                         console.log('🌱 Adding sample resources...');
                         const sampleResources = [
-                            { title: 'Mail', category: 'Privat', url: 'https://gmail.com', icon: '📧', description: 'Personal email access' },
-                            { title: 'MyFitnessPal', category: 'Privat', url: 'https://myfitnesspal.com', icon: '🏃', description: 'Fitness tracking app' },
-                            { title: 'Telegram', category: 'Privat', url: 'https://web.telegram.org', icon: '💬', description: 'Telegram web client' },
-                            { title: 'ChatGPT', category: 'Privat', url: 'https://chat.openai.com', icon: '🤖', description: 'AI assistant' },
-                            { title: 'Sparkasse', category: 'Privat', url: 'https://sparkasse.de', icon: '🏦', description: 'Online banking' },
-                            { title: 'Mail', category: 'Work', url: 'https://outlook.com', icon: '📧', description: 'Work email access' },
-                            { title: 'Gartenpflege Lose', category: 'Work', url: 'https://example.com', icon: '🌱', description: 'Garden maintenance system' },
-                            { title: 'Techem', category: 'Work', url: 'https://techem.de', icon: '🔧', description: 'Heating service portal' },
-                            { title: 'BGWeb', category: 'Work', url: 'https://example.com', icon: '🏠', description: 'Building management' },
-                            { title: 'CO2', category: 'Work', url: 'https://example.com', icon: '📊', description: 'CO2 monitoring' },
-                            { title: 'DAML Notes', category: 'Studium', url: 'https://example.com', icon: '📝', description: 'DAML study notes' },
-                            { title: 'Teams', category: 'Studium', url: 'https://teams.microsoft.com', icon: '👥', description: 'Microsoft Teams' }
+                            { title: 'Mail', category: 'Privat', url: 'https://gmail.com', icon: 'mail', description: 'Personal email access' },
+                            { title: 'MyFitnessPal', category: 'Privat', url: 'https://myfitnesspal.com', icon: 'activity', description: 'Fitness tracking app' },
+                            { title: 'Telegram', category: 'Privat', url: 'https://web.telegram.org', icon: 'message-circle', description: 'Telegram web client' },
+                            { title: 'ChatGPT', category: 'Privat', url: 'https://chat.openai.com', icon: 'bot', description: 'AI assistant' },
+                            { title: 'Sparkasse', category: 'Privat', url: 'https://sparkasse.de', icon: 'building', description: 'Online banking' },
+                            { title: 'Mail', category: 'Work', url: 'https://outlook.com', icon: 'mail', description: 'Work email access' },
+                            { title: 'Gartenpflege Lose', category: 'Work', url: 'https://example.com', icon: 'sprout', description: 'Garden maintenance system' },
+                            { title: 'Techem', category: 'Work', url: 'https://techem.de', icon: 'wrench', description: 'Heating service portal' },
+                            { title: 'BGWeb', category: 'Work', url: 'https://example.com', icon: 'home', description: 'Building management' },
+                            { title: 'CO2', category: 'Work', url: 'https://example.com', icon: 'bar-chart-3', description: 'CO2 monitoring' },
+                            { title: 'DAML Notes', category: 'Studium', url: 'https://example.com', icon: 'file-text', description: 'DAML study notes' },
+                            { title: 'Teams', category: 'Studium', url: 'https://teams.microsoft.com', icon: 'users', description: 'Microsoft Teams' }
                         ];
                         
                         sampleResources.forEach((resourceData, index) => {
@@ -6457,6 +6499,13 @@
                     .join('');
                 
                 container.innerHTML = html;
+                
+                // Initialize Lucide icons after rendering
+                setTimeout(() => {
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                }, 100);
             },
             
             renderEntry(entry) {
@@ -6487,7 +6536,9 @@
                             <div class="wiki-entry-right">
                                 <span>${dateHtml}</span>
                                 <div class="wiki-entry-actions">
-                                    <button onclick="CryptoWiki.deleteEntry('${entry.id}')" title="Delete">🗑️</button>
+                                    <button onclick="CryptoWiki.deleteEntry('${entry.id}')" title="Delete">
+                                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -6626,6 +6677,11 @@
         // Initialize CryptoWiki when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             CryptoWiki.init();
+            
+            // Initialize Lucide icons globally
+            if (window.lucide) {
+                lucide.createIcons();
+            }
         });
     </script>
 </body>
