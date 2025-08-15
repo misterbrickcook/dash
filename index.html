@@ -2105,6 +2105,17 @@
                         console.log('🔄 Loading ResourceManager after login...');
                         await window.ResourceManager.loadResources();
                         console.log('✅ ResourceManager loaded after login');
+                        
+                        // CRITICAL: Force todo counter update after ResourceManager loads
+                        console.log('🚨 CRITICAL: Forcing todo counter update after ResourceManager...');
+                        if (window.initializeTodoCounter) {
+                            // Reset running flag and force update
+                            window.initializeTodoCounter.running = false;
+                            await window.initializeTodoCounter();
+                            console.log('✅ CRITICAL: Todo counter updated after ResourceManager');
+                        } else {
+                            console.error('❌ initializeTodoCounter not available after ResourceManager');
+                        }
                     }
                 } else {
                     // Initialize displays for local storage mode
