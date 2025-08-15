@@ -902,7 +902,7 @@
             right: 0.4rem;
             display: flex;
             gap: 0.2rem;
-            opacity: 0;
+            opacity: 0.7;
             transition: opacity 0.2s ease;
             z-index: 10;
         }
@@ -914,15 +914,14 @@
         .resource-edit-btn,
         .resource-delete-btn {
             background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(0, 0, 0, 0.15);
-            color: #666666;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: #333333;
             cursor: pointer;
             padding: 0.25rem;
             transition: all 0.2s ease;
             border-radius: 4px;
             width: 20px;
             height: 20px;
-            opacity: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -940,6 +939,11 @@
             background: rgba(59, 130, 246, 0.1);
             border-color: rgba(59, 130, 246, 0.3);
             color: #3b82f6;
+        }
+        
+        .resource-edit-btn:hover i,
+        .resource-delete-btn:hover i {
+            stroke: currentColor;
         }
         
         /* === RESOURCE CATEGORIES (bsp1.jpg style) === */
