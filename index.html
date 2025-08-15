@@ -2020,6 +2020,7 @@
     <!-- Scripts -->
     <script src="supabase-config.js"></script>
     <script src="cloud-storage.js"></script>
+    <script src="simple-routine-system.js"></script>
     <script>
         // Debug: Check if basic JavaScript works
         console.log('🔧 JavaScript loading started...');
@@ -6311,7 +6312,7 @@
                 console.log('🔄 Starting complete routine database reset...');
                 
                 try {
-                    // 1. Clear all localStorage routine data
+                    // 1. Clear all localStorage routine data (old and new)
                     const keysToRemove = [
                         'routineCompletionData',
                         'routine_completions_cache', 
@@ -6320,7 +6321,8 @@
                         'lastRoutineResetDate',
                         'routineResetTime',
                         'morningRoutineStreak',
-                        'eveningRoutineStreak'
+                        'eveningRoutineStreak',
+                        'simple_routine_data' // New system
                     ];
                     
                     keysToRemove.forEach(key => {
@@ -6330,15 +6332,19 @@
                         }
                     });
                     
-                    // 2. Clear Supabase routine_completions table if authenticated
+                    // 2. Clear Supabase tables if authenticated
                     if (window.supabase && window.supabase.isAuthenticated()) {
                         const user = window.supabase.getCurrentUser();
                         console.log('🔄 Clearing cloud routine data for user:', user.email);
                         
                         try {
-                            // Delete all routine completions for current user
-                            const result = await window.supabase.delete('routine_completions', `user_id=eq.${user.id}`);
-                            console.log('✅ Cleared cloud routine completions');
+                            // Delete old system data
+                            await window.supabase.delete('routine_completions', `user_id=eq.${user.id}`);
+                            console.log('✅ Cleared old routine_completions table');
+                            
+                            // Delete new system data
+                            await window.supabase.delete('simple_routines', `user_id=eq.${user.id}`);
+                            console.log('✅ Cleared new simple_routines table');
                         } catch (error) {
                             console.warn('⚠️ Could not clear cloud data:', error);
                         }
@@ -6373,11 +6379,10 @@
                         console.log('✅ Reset routine counters to 0');
                     }
                     
-                    // 5. Initialize clean routine system
-                    if (window.cloudStorage) {
-                        // Ensure routine methods are available
-                        window.cloudStorage.setupRoutineMethods();
-                        console.log('✅ Reinitialized routine methods');
+                    // 5. Reset new simple routine manager if available
+                    if (window.simpleRoutineManager) {
+                        await window.simpleRoutineManager.reset();
+                        console.log('✅ Reset SimpleRoutineManager');
                     }
                     
                     console.log('🎉 Routine database reset complete!');

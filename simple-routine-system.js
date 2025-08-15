@@ -1,0 +1,302 @@
+// Simple Routine System - Reliable Cloud Sync
+// This replaces the complex routine system with a simple, working one
+
+class SimpleRoutineManager {
+    constructor() {
+        this.routineData = {};
+        this.today = new Date().toISOString().split('T')[0];
+        this.init();
+    }
+
+    async init() {
+        console.log('🔄 Initializing SimpleRoutineManager...');
+        await this.loadTodaysData();
+        this.setupEventListeners();
+        this.updateUI();
+        console.log('✅ SimpleRoutineManager initialized');
+    }
+
+    async loadTodaysData() {
+        try {
+            // Try cloud first if authenticated
+            if (window.supabase && window.supabase.isAuthenticated()) {
+                const cloudData = await this.loadFromCloud();
+                if (cloudData) {
+                    this.routineData = cloudData;
+                    console.log('☁️ Loaded routine data from cloud:', cloudData);
+                    return;
+                }
+            }
+
+            // Fallback to localStorage
+            const localData = localStorage.getItem('simple_routine_data');
+            if (localData) {
+                this.routineData = JSON.parse(localData);
+                console.log('💾 Loaded routine data from localStorage:', this.routineData);
+            } else {
+                this.routineData = this.getEmptyData();
+                console.log('🆕 Created new routine data');
+            }
+        } catch (error) {
+            console.error('❌ Error loading routine data:', error);
+            this.routineData = this.getEmptyData();
+        }
+    }
+
+    async loadFromCloud() {
+        try {
+            const user = window.supabase.getCurrentUser();
+            const result = await window.supabase.select('simple_routines', `user_id=eq.${user.id}&date=eq.${this.today}`);
+            
+            if (result && result.length > 0) {
+                return JSON.parse(result[0].routine_data);
+            }
+            return null;
+        } catch (error) {
+            console.error('❌ Error loading from cloud:', error);
+            return null;
+        }
+    }
+
+    async saveToCloud() {
+        try {
+            if (!window.supabase || !window.supabase.isAuthenticated()) {
+                return false;
+            }
+
+            const user = window.supabase.getCurrentUser();
+            const existing = await window.supabase.select('simple_routines', `user_id=eq.${user.id}&date=eq.${this.today}`);
+
+            const dataToSave = {
+                user_id: user.id,
+                date: this.today,
+                routine_data: JSON.stringify(this.routineData),
+                updated_at: new Date().toISOString()
+            };
+
+            if (existing && existing.length > 0) {
+                await window.supabase.update('simple_routines', dataToSave, existing[0].id);
+            } else {
+                await window.supabase.insert('simple_routines', [dataToSave]);
+            }
+
+            console.log('☁️ Saved routine data to cloud');
+            return true;
+        } catch (error) {
+            console.error('❌ Error saving to cloud:', error);
+            return false;
+        }
+    }
+
+    getEmptyData() {
+        return {
+            [this.today]: {
+                morning: {
+                    'wasser-kreatin': false,
+                    'bbue-sport': false,
+                    'tag-planen': false,
+                    'todos-checken': false
+                },
+                evening: {
+                    'journal-reflexion': false,
+                    'lesen-lessons': false,
+                    'trades-evaluieren': false,
+                    'naechsten-tag-planen': false
+                }
+            }
+        };
+    }
+
+    setupEventListeners() {
+        // Morning routine checkboxes
+        const morningCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"]');
+        morningCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => this.handleCheckboxChange(checkbox, 'morning'));
+        });
+
+        // Evening routine checkboxes  
+        const eveningCheckboxes = document.querySelectorAll('#evening-routine input[type="checkbox"]');
+        eveningCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => this.handleCheckboxChange(checkbox, 'evening'));
+        });
+
+        console.log('✅ Event listeners set up for routine checkboxes');
+    }
+
+    async handleCheckboxChange(checkbox, routineType) {
+        const checkboxId = checkbox.id;
+        const isChecked = checkbox.checked;
+
+        console.log(`📝 Checkbox changed: ${checkboxId} = ${isChecked} (${routineType})`);
+
+        // Ensure today exists in data
+        if (!this.routineData[this.today]) {
+            this.routineData[this.today] = this.getEmptyData()[this.today];
+        }
+
+        // Update data
+        this.routineData[this.today][routineType][checkboxId] = isChecked;
+
+        // Update visual styling
+        const label = checkbox.nextElementSibling;
+        if (label) {
+            if (isChecked) {
+                label.style.textDecoration = 'line-through';
+                label.style.color = '#999';
+            } else {
+                label.style.textDecoration = 'none';
+                label.style.color = 'inherit';
+            }
+        }
+
+        // Save locally immediately
+        localStorage.setItem('simple_routine_data', JSON.stringify(this.routineData));
+
+        // Save to cloud
+        await this.saveToCloud();
+
+        // Update UI
+        this.updateUI();
+
+        console.log('✅ Routine data updated and saved');
+    }
+
+    updateUI() {
+        // Update progress bars
+        this.updateProgressBars();
+        // Update counters
+        this.updateCounters();
+    }
+
+    updateProgressBars() {
+        const todayData = this.routineData[this.today];
+        if (!todayData) return;
+
+        // Morning progress
+        const morningChecked = Object.values(todayData.morning).filter(Boolean).length;
+        const morningTotal = Object.keys(todayData.morning).length;
+        const morningProgress = (morningChecked / morningTotal) * 100;
+
+        const morningProgressFill = document.querySelector('#morning-routine .progress-fill');
+        if (morningProgressFill) {
+            morningProgressFill.style.width = `${morningProgress}%`;
+        }
+
+        // Evening progress
+        const eveningChecked = Object.values(todayData.evening).filter(Boolean).length;
+        const eveningTotal = Object.keys(todayData.evening).length;
+        const eveningProgress = (eveningChecked / eveningTotal) * 100;
+
+        const eveningProgressFill = document.querySelector('#evening-routine .progress-fill');
+        if (eveningProgressFill) {
+            eveningProgressFill.style.width = `${eveningProgress}%`;
+        }
+    }
+
+    updateCounters() {
+        // Count completed days in current month
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+
+        let morningCount = 0;
+        let eveningCount = 0;
+
+        Object.keys(this.routineData).forEach(dateKey => {
+            const date = new Date(dateKey);
+            if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+                const dayData = this.routineData[dateKey];
+                
+                // Check if all morning tasks completed
+                const morningCompleted = Object.values(dayData.morning).every(Boolean);
+                if (morningCompleted) morningCount++;
+
+                // Check if all evening tasks completed
+                const eveningCompleted = Object.values(dayData.evening).every(Boolean);
+                if (eveningCompleted) eveningCount++;
+            }
+        });
+
+        // Update counter tiles
+        const streakTiles = document.querySelectorAll('.streak-tile');
+        if (streakTiles.length >= 2) {
+            const morningTile = streakTiles[0];
+            const eveningTile = streakTiles[1];
+
+            const morningNumber = morningTile?.querySelector('.streak-number');
+            const eveningNumber = eveningTile?.querySelector('.streak-number');
+
+            if (morningNumber) morningNumber.textContent = morningCount.toString();
+            if (eveningNumber) eveningNumber.textContent = eveningCount.toString();
+
+            console.log(`📊 Updated counters: Morning=${morningCount}, Evening=${eveningCount}`);
+        }
+    }
+
+    restoreCheckboxes() {
+        const todayData = this.routineData[this.today];
+        if (!todayData) return;
+
+        // Restore morning checkboxes
+        Object.keys(todayData.morning).forEach(checkboxId => {
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox) {
+                checkbox.checked = todayData.morning[checkboxId];
+                
+                const label = checkbox.nextElementSibling;
+                if (label && checkbox.checked) {
+                    label.style.textDecoration = 'line-through';
+                    label.style.color = '#999';
+                }
+            }
+        });
+
+        // Restore evening checkboxes
+        Object.keys(todayData.evening).forEach(checkboxId => {
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox) {
+                checkbox.checked = todayData.evening[checkboxId];
+                
+                const label = checkbox.nextElementSibling;
+                if (label && checkbox.checked) {
+                    label.style.textDecoration = 'line-through';
+                    label.style.color = '#999';
+                }
+            }
+        });
+
+        console.log('✅ Checkboxes restored from data');
+    }
+
+    async reset() {
+        this.routineData = this.getEmptyData();
+        localStorage.setItem('simple_routine_data', JSON.stringify(this.routineData));
+        await this.saveToCloud();
+        
+        // Reset UI
+        const allCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"], #evening-routine input[type="checkbox"]');
+        allCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+            const label = checkbox.nextElementSibling;
+            if (label) {
+                label.style.textDecoration = 'none';
+                label.style.color = 'inherit';
+            }
+        });
+
+        this.updateUI();
+        console.log('🔄 Routine system reset');
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for other systems to load
+    setTimeout(() => {
+        window.simpleRoutineManager = new SimpleRoutineManager();
+        
+        // Restore checkboxes after initialization
+        setTimeout(() => {
+            window.simpleRoutineManager.restoreCheckboxes();
+        }, 500);
+    }, 1000);
+});
