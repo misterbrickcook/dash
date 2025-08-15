@@ -399,6 +399,10 @@ const Auth = {
                     }
                     
                     // Load other managers
+                    console.log('🔍 Checking TodoManager availability...');
+                    console.log('window.TodoManager exists:', !!window.TodoManager);
+                    console.log('window.TodoManager.loadTodos exists:', !!(window.TodoManager && window.TodoManager.loadTodos));
+                    
                     if (window.TodoManager && window.TodoManager.loadTodos) {
                         await window.TodoManager.loadTodos();
                         console.log('✅ TodoManager loaded from database');
@@ -414,6 +418,14 @@ const Auth = {
                         if (window.TodoManager.displayTodosForCategory) {
                             console.log('🔄 Refreshing todo display after load...');
                             window.TodoManager.displayTodosForCategory('alle');
+                        }
+                    } else {
+                        console.warn('⚠️ TodoManager or loadTodos method not available');
+                        // Force todo counter update anyway
+                        console.log('🔄 Forcing todo counter update without TodoManager...');
+                        if (window.initializeTodoCounter) {
+                            await window.initializeTodoCounter();
+                            console.log('✅ Todo counter updated (fallback)');
                         }
                     }
                     
