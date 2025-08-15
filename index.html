@@ -2296,6 +2296,62 @@
                 document.getElementById('auth-screen').classList.remove('hide');
             },
             
+            async forceRoutineUpdate() {
+                // Retry mechanism for routine updates
+                for (let attempt = 0; attempt < 5; attempt++) {
+                    console.log(`🔄 Routine update attempt ${attempt + 1}/5`);
+                    
+                    try {
+                        // Wait a bit for scripts to load
+                        await new Promise(resolve => setTimeout(resolve, attempt * 500));
+                        
+                        // Try to update routine UI
+                        if (window.updateRoutineUI) {
+                            console.log('✅ Found updateRoutineUI, calling...');
+                            await window.updateRoutineUI();
+                        } else {
+                            console.log('❌ updateRoutineUI not found');
+                        }
+                        
+                        // Try to update counters
+                        if (window.updateRoutineCounters) {
+                            console.log('✅ Found updateRoutineCounters, calling...');
+                            window.updateRoutineCounters();
+                        } else {
+                            console.log('❌ updateRoutineCounters not found');
+                        }
+                        
+                        // Try to initialize todo counter
+                        if (window.initializeTodoCounter) {
+                            console.log('✅ Found initializeTodoCounter, calling...');
+                            window.initializeTodoCounter.running = false;
+                            await window.initializeTodoCounter();
+                        } else {
+                            console.log('❌ initializeTodoCounter not found');
+                        }
+                        
+                        // Force render routine sections
+                        const routineSections = document.querySelectorAll('.routine-item, .habit-item');
+                        if (routineSections.length > 0) {
+                            console.log(`✅ Found ${routineSections.length} routine elements, forcing render`);
+                            // Trigger a re-render by dispatching events
+                            routineSections.forEach(section => {
+                                const event = new Event('routineUpdate', { bubbles: true });
+                                section.dispatchEvent(event);
+                            });
+                            break; // Success, exit retry loop
+                        } else {
+                            console.log('❌ No routine elements found, retrying...');
+                        }
+                        
+                    } catch (error) {
+                        console.error(`❌ Routine update attempt ${attempt + 1} failed:`, error);
+                    }
+                }
+                
+                console.log('✅ Routine update process completed');
+            },
+            
             async showDashboard() {
                 document.getElementById('auth-screen').classList.add('hide');
                 
@@ -2309,14 +2365,9 @@
                         loadRoutineCompletions()
                     ]);
                     
-                    // Force routine UI update after data load
+                    // Force routine UI update after data load with retries
                     console.log('🔄 Forcing routine UI update after login...');
-                    if (window.updateRoutineUI) {
-                        await window.updateRoutineUI();
-                    }
-                    if (window.updateRoutineCounters) {
-                        window.updateRoutineCounters();
-                    }
+                    await this.forceRoutineUpdate();
                     
                     // Load CryptoWiki data
                     console.log('🔄 Loading CryptoWiki after login...');
@@ -2333,14 +2384,26 @@
                         
                         // CRITICAL: Force todo counter update after ResourceManager loads
                         console.log('🚨 CRITICAL: Forcing todo counter update after ResourceManager...');
-                        if (window.initializeTodoCounter) {
-                            // Reset running flag and force update
-                            window.initializeTodoCounter.running = false;
-                            await window.initializeTodoCounter();
-                            console.log('✅ CRITICAL: Todo counter updated after ResourceManager');
-                        } else {
-                            console.error('❌ initializeTodoCounter not available after ResourceManager');
+                        
+                        // Additional retry for critical post-ResourceManager updates
+                        for (let attempt = 0; attempt < 3; attempt++) {
+                            await new Promise(resolve => setTimeout(resolve, attempt * 200));
+                            if (window.initializeTodoCounter) {
+                                window.initializeTodoCounter.running = false;
+                                await window.initializeTodoCounter();
+                                console.log('✅ CRITICAL: Todo counter updated after ResourceManager');
+                                break;
+                            } else {
+                                console.log(`❌ CRITICAL: initializeTodoCounter not found, attempt ${attempt + 1}/3`);
+                            }
                         }
+                        
+                        // Final UI refresh
+                        console.log('🔄 Final UI refresh after all data loaded');
+                        setTimeout(() => {
+                            if (window.updateRoutineUI) window.updateRoutineUI();
+                            if (window.updateRoutineCounters) window.updateRoutineCounters();
+                        }, 1000);
                     }
                 } else {
                     // Initialize displays for local storage mode
