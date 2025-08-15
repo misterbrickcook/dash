@@ -46,6 +46,14 @@ class SimpleRoutineManager {
                 }
             }
 
+            // Check if we can migrate from old system
+            const migratedData = await this.migrateFromOldSystem();
+            if (migratedData) {
+                this.routineData = migratedData;
+                console.log('🔄 Migrated data from old system:', migratedData);
+                return;
+            }
+
             // Fallback to localStorage
             const localData = localStorage.getItem('simple_routine_data');
             if (localData) {
@@ -61,10 +69,58 @@ class SimpleRoutineManager {
         }
     }
 
+    async migrateFromOldSystem() {
+        try {
+            console.log('🔄 Attempting to migrate from old system...');
+            
+            // Read actual checkbox states from DOM instead of localStorage
+            // This is more accurate as it reflects the current visual state
+            const newData = this.getEmptyData();
+            const todayData = newData[this.today];
+            
+            let foundCheckedBoxes = false;
+            
+            // Read morning checkboxes from DOM
+            Object.keys(todayData.morning).forEach(checkboxId => {
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox && checkbox.checked) {
+                    todayData.morning[checkboxId] = true;
+                    foundCheckedBoxes = true;
+                    console.log(`🔄 Migrated morning: ${checkboxId} = true`);
+                }
+            });
+            
+            // Read evening checkboxes from DOM
+            Object.keys(todayData.evening).forEach(checkboxId => {
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox && checkbox.checked) {
+                    todayData.evening[checkboxId] = true;
+                    foundCheckedBoxes = true;
+                    console.log(`🔄 Migrated evening: ${checkboxId} = true`);
+                }
+            });
+            
+            if (foundCheckedBoxes) {
+                // Save migrated data
+                localStorage.setItem('simple_routine_data', JSON.stringify(newData));
+                await this.saveToCloud();
+                
+                console.log('✅ Successfully migrated checkbox states from DOM');
+                return newData;
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('❌ Error migrating from old system:', error);
+            return null;
+        }
+    }
+
     async loadFromCloud() {
         try {
             const user = window.supabase.getCurrentUser();
-            const result = await window.supabase.select('simple_routines', `user_id=eq.${user.id}&date=eq.${this.today}`);
+            // Fix the query syntax - the select parameter was wrong
+            const result = await window.supabase.query(`simple_routines?user_id=eq.${user.id}&date=eq.${this.today}&select=*`);
             
             if (result && result.length > 0) {
                 return JSON.parse(result[0].routine_data);
