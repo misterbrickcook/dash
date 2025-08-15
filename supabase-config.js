@@ -287,8 +287,13 @@ class SupabaseClient {
         return this.query(`${table}?id=eq.${id}`, 'PATCH', data);
     }
 
-    async delete(table, id) {
-        return this.query(`${table}?id=eq.${id}`, 'DELETE');
+    async delete(table, condition) {
+        // Handle both ID and condition formats
+        if (condition.includes('=eq.')) {
+            return this.query(`${table}?${condition}`, 'DELETE');
+        } else {
+            return this.query(`${table}?id=eq.${condition}`, 'DELETE');
+        }
     }
 }
 
