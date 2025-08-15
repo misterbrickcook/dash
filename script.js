@@ -65,9 +65,13 @@ const Auth = {
             this.showDashboard();
             
             // Additional counter update for already authenticated users
-            setTimeout(() => {
-                console.log('🔄 Additional streak counter update for authenticated user...');
+            setTimeout(async () => {
+                console.log('🔄 Additional counter update for authenticated user...');
                 updateMonthlyStreakDisplays();
+                if (window.initializeTodoCounter) {
+                    await window.initializeTodoCounter();
+                    console.log('✅ Todo counter updated for authenticated user');
+                }
             }, 2000);
         } else {
             this.showAuthScreen();
@@ -406,6 +410,13 @@ const Auth = {
                     console.log('🔄 Updating streak counters after login...');
                     updateMonthlyStreakDisplays();
                     console.log('✅ Streak counters updated');
+                    
+                    // Update todo counter from cloud data after login
+                    console.log('🔄 Updating todo counter from cloud...');
+                    if (window.initializeTodoCounter) {
+                        await window.initializeTodoCounter();
+                        console.log('✅ Todo counter updated from cloud');
+                    }
                     
                     if (window.JournalManager && window.JournalManager.loadEntries) {
                         await window.JournalManager.loadEntries();
