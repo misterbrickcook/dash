@@ -174,7 +174,8 @@ class SimpleRoutineManager {
             }
 
             const user = window.supabase.getCurrentUser();
-            const existing = await window.supabase.select('simple_routines', `user_id=eq.${user.id}&date=eq.${this.today}`);
+            // Fix the query syntax - use the query method instead of select
+            const existing = await window.supabase.query(`simple_routines?user_id=eq.${user.id}&date=eq.${this.today}&select=*`);
 
             const dataToSave = {
                 user_id: user.id,
