@@ -2598,6 +2598,13 @@
         // === CLOUD-BASED TODO COUNTER ===
         async function initializeTodoCounter() {
             try {
+                // Prevent multiple concurrent calls
+                if (initializeTodoCounter.running) {
+                    console.log('⚠️ Todo counter initialization already in progress, skipping...');
+                    return;
+                }
+                initializeTodoCounter.running = true;
+                
                 console.log('☁️ Initializing todo counter from cloud data...');
                 
                 if (!supabase?.isAuthenticated()) {
@@ -2631,6 +2638,17 @@
                         numberElement.textContent = todoCount;
                         dateElement.textContent = `${monthName} ${currentYear}`;
                         console.log(`☁️ Todo counter set to ${todoCount} from cloud data`);
+                        
+                        // Additional verification
+                        setTimeout(() => {
+                            const verifyElement = document.querySelectorAll('.streak-tile')[2]?.querySelector('.streak-number');
+                            if (verifyElement && verifyElement.textContent !== todoCount.toString()) {
+                                console.warn(`⚠️ Todo counter was overwritten! Setting back to ${todoCount}`);
+                                verifyElement.textContent = todoCount;
+                            } else {
+                                console.log(`✅ Todo counter verified: ${verifyElement?.textContent}`);
+                            }
+                        }, 1000);
                     }
                 } else {
                     console.error('Todo tile not found');
@@ -2638,6 +2656,8 @@
             } catch (error) {
                 console.error('❌ Error loading cloud todo counter, falling back to local:', error);
                 initializeTodoCounterLocal();
+            } finally {
+                initializeTodoCounter.running = false;
             }
         }
         
