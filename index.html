@@ -2076,20 +2076,20 @@
                 
                 // Load all data after successful login
                 if (supabase?.isAuthenticated()) {
-                    const loadPromises = [
+                    await Promise.all([
                         TodoManager.loadTodos(),
                         GoalManager.loadGoals(),
                         JournalManager.loadEntries(),
                         TerminManager.loadTermine(),
                         loadRoutineCompletions()
-                    ];
+                    ]);
                     
-                    // Add ResourceManager if available (defined later in script)
-                    if (typeof ResourceManager !== 'undefined' && ResourceManager.loadResources) {
-                        loadPromises.push(ResourceManager.loadResources());
+                    // Load ResourceManager separately after all other managers
+                    if (window.ResourceManager && window.ResourceManager.loadResources) {
+                        console.log('🔄 Loading ResourceManager after login...');
+                        await window.ResourceManager.loadResources();
+                        console.log('✅ ResourceManager loaded after login');
                     }
-                    
-                    await Promise.all(loadPromises);
                 } else {
                     // Initialize displays for local storage mode
                     TodoManager.updateHomeTodos();
@@ -5027,23 +5027,24 @@
             
             // Load all data from database if authenticated
             if (supabase?.isAuthenticated()) {
-                const loadPromises = [
+                await Promise.all([
                     TodoManager.loadTodos(),
                     GoalManager.loadGoals(),
                     JournalManager.loadEntries(),
                     TerminManager.loadTermine(),
                     loadRoutineCompletions()
-                ];
+                ]);
                 
-                // Add ResourceManager if available (should be defined by now)
-                if (typeof ResourceManager !== 'undefined' && ResourceManager.loadResources) {
-                    loadPromises.push(ResourceManager.loadResources());
-                    console.log('✅ ResourceManager added to loading sequence');
-                } else {
-                    console.warn('⚠️ ResourceManager not yet available during DOMContentLoaded');
-                }
-                
-                await Promise.all(loadPromises);
+                // Load ResourceManager separately after it's defined
+                setTimeout(async () => {
+                    if (window.ResourceManager && window.ResourceManager.loadResources) {
+                        console.log('🔄 Loading ResourceManager after initialization...');
+                        await window.ResourceManager.loadResources();
+                        console.log('✅ ResourceManager loaded successfully');
+                    } else {
+                        console.warn('⚠️ ResourceManager still not available');
+                    }
+                }, 100);
             } else {
                 // Initialize displays for local storage mode
                 TodoManager.updateHomeTodos();
