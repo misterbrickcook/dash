@@ -728,12 +728,6 @@ input:focus, textarea:focus, select:focus {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-.modal.show {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .modal-content {
     background: #ffffff;
     border: 2px solid #000000;

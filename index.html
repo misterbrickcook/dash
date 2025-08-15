@@ -1871,7 +1871,7 @@
         </section>
 
         <!-- === ADD MOTIVATION MODAL === -->
-        <div id="add-motivation-modal" class="modal">
+        <div id="add-motivation-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Neue Motivation erstellen</h2>
@@ -5968,22 +5968,26 @@
                 },
                 
                 showAddModal() {
+                    console.log('🖱️ showAddModal called');
                     const modal = document.getElementById('add-motivation-modal');
                     if (modal) {
-                        modal.classList.add('show');
+                        modal.style.display = 'flex';
+                        modal.style.alignItems = 'center';
+                        modal.style.justifyContent = 'center';
                         this.resetModalForm();
-                        console.log('📝 Opening add motivation modal');
+                        console.log('✅ Modal should now be visible');
                     } else {
                         console.error('❌ Modal element not found!');
                     }
                 },
                 
                 hideAddModal() {
+                    console.log('🖱️ hideAddModal called');
                     const modal = document.getElementById('add-motivation-modal');
                     if (modal) {
-                        modal.classList.remove('show');
+                        modal.style.display = 'none';
                         this.resetModalForm();
-                        console.log('❌ Closing add motivation modal');
+                        console.log('✅ Modal should now be hidden');
                     } else {
                         console.error('❌ Modal element not found!');
                     }
@@ -6219,6 +6223,49 @@
             
             // === SIMPLE LOGOUT (URL-based) ===
             console.log('✅ Logout is now URL-based, no JavaScript needed');
+            
+            // === EMERGENCY MODAL CLOSE ===
+            // Add global event listeners to force-close any visible modals
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('🚨 Emergency modal close system activated');
+                
+                // Force hide modal on page load
+                const modal = document.getElementById('add-motivation-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    console.log('🔒 Modal force-hidden on page load');
+                }
+                
+                // Global ESC key listener
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        const modal = document.getElementById('add-motivation-modal');
+                        if (modal && modal.style.display !== 'none') {
+                            modal.style.display = 'none';
+                            console.log('🔑 Modal closed via ESC key');
+                        }
+                    }
+                });
+                
+                // Global click listener for modal close buttons
+                document.addEventListener('click', function(e) {
+                    // Close button or cancel button
+                    if (e.target.id === 'close-motivation-modal' || 
+                        e.target.id === 'cancel-motivation-btn') {
+                        const modal = document.getElementById('add-motivation-modal');
+                        if (modal) {
+                            modal.style.display = 'none';
+                            console.log('🖱️ Modal closed via button click');
+                        }
+                    }
+                    
+                    // Background click
+                    if (e.target.id === 'add-motivation-modal') {
+                        e.target.style.display = 'none';
+                        console.log('🖱️ Modal closed via background click');
+                    }
+                });
+            });
             
             // Mobile debug removed for cleaner console output
         });
