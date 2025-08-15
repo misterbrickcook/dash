@@ -395,16 +395,7 @@ const Auth = {
                         console.log('✅ JournalManager loaded from database');
                     }
                     
-                    if (window.ResourceManager && window.ResourceManager.loadResources) {
-                        console.log('🔍 Calling ResourceManager.loadResources() from showDashboard...');
-                        await window.ResourceManager.loadResources();
-                        console.log('✅ ResourceManager loaded from database');
-                    } else {
-                        console.warn('⚠️ ResourceManager not available in showDashboard()');
-                        console.log('window.ResourceManager:', window.ResourceManager);
-                    }
-                    
-                    // Load cloud storage data
+                    // Load cloud storage data first (this loads data into cache)
                     if (window.cloudStorage && window.cloudStorage.getTodos) {
                         await window.cloudStorage.getTodos();
                         console.log('✅ CloudStorage todos loaded');
@@ -418,6 +409,50 @@ const Auth = {
                     if (window.cloudStorage && window.cloudStorage.getLinks) {
                         await window.cloudStorage.getLinks();
                         console.log('✅ CloudStorage links loaded');
+                    }
+                    
+                    if (window.cloudStorage && window.cloudStorage.getResources) {
+                        await window.cloudStorage.getResources();
+                        console.log('✅ CloudStorage resources loaded');
+                    }
+                    
+                    // Load ResourceManager (this loads data AND renders UI)
+                    if (window.ResourceManager && window.ResourceManager.loadResources) {
+                        console.log('🔍 Calling ResourceManager.loadResources() from showDashboard...');
+                        await window.ResourceManager.loadResources();
+                        console.log('✅ ResourceManager loaded from database');
+                    } else {
+                        console.warn('⚠️ ResourceManager not available in showDashboard()');
+                        console.log('window.ResourceManager:', window.ResourceManager);
+                        
+                        // If ResourceManager is not available yet, set up a retry mechanism
+                        console.log('🔄 Setting up ResourceManager retry...');
+                        let retryCount = 0;
+                        const maxRetries = 10;
+                        const retryInterval = setInterval(async () => {
+                            retryCount++;
+                            if (window.ResourceManager && window.ResourceManager.loadResources) {
+                                console.log(`✅ ResourceManager found on retry ${retryCount}, loading resources...`);
+                                clearInterval(retryInterval);
+                                try {
+                                    await window.ResourceManager.loadResources();
+                                    console.log('✅ ResourceManager loaded from database (retry)');
+                                } catch (error) {
+                                    console.error('❌ Error loading ResourceManager on retry:', error);
+                                }
+                            } else if (retryCount >= maxRetries) {
+                                console.error('❌ ResourceManager still not available after max retries');
+                                clearInterval(retryInterval);
+                            } else {
+                                console.log(`⏳ ResourceManager retry ${retryCount}/${maxRetries}...`);
+                            }
+                        }, 200); // Check every 200ms
+                    }
+                    
+                    // CRITICAL: Fetch routine completions from cloud first
+                    if (window.cloudStorage && window.cloudStorage.getRoutineCompletions) {
+                        await window.cloudStorage.getRoutineCompletions();
+                        console.log('✅ CloudStorage routine completions loaded');
                     }
                     
                     if (window.loadRoutineCompletions) {
@@ -4428,69 +4463,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         }, 100);
     }
 
-    // Monthly Todo Streak System
-    let monthlyTodoData = {
-        month: null,
-        year: null,
-        completedCount: 0
-    };
-
-    function updateMonthlyTodoStreak() {
-        const now = new Date();
-        const currentMonth = now.getMonth(); // 0-11
-        const currentYear = now.getFullYear();
-        const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
-                           'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-        
-        const countElement = document.getElementById('monthlyTodosCount');
-        const dateElement = document.getElementById('monthlyTodosDate');
-        
-        if (!countElement || !dateElement) return;
-        
-        // Reset count if it's a new month
-        if (monthlyTodoData.month !== currentMonth || monthlyTodoData.year !== currentYear) {
-            monthlyTodoData = {
-                month: currentMonth,
-                year: currentYear,
-                completedCount: 0
-            };
-            console.log(`Monthly todo streak reset for ${MONTH_NAMES[currentMonth]} ${currentYear}`);
-        }
-        
-        // Count archived todos from current month
-        const archiveContainer = document.querySelector('[data-filter="archiv"] .checkbox-group');
-        if (archiveContainer) {
-            const archivedTodos = archiveContainer.querySelectorAll('.checkbox-item[data-archived-at], .todo-card[data-archived-at]');
-            let monthlyCount = 0;
-            
-            archivedTodos.forEach(todo => {
-                const archivedAt = todo.getAttribute('data-archived-at');
-                if (archivedAt) {
-                    const archiveDate = new Date(archivedAt);
-                    if (archiveDate.getMonth() === currentMonth && 
-                        archiveDate.getFullYear() === currentYear) {
-                        monthlyCount++;
-                    }
-                }
-            });
-            
-            monthlyTodoData.completedCount = monthlyCount;
-        }
-        
-        // Update display
-        countElement.textContent = monthlyTodoData.completedCount;
-        dateElement.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
-        
-        console.log(`Monthly todos completed: ${monthlyTodoData.completedCount} in ${MONTH_NAMES[currentMonth]} ${currentYear}`);
-        
-        return monthlyTodoData.completedCount;
-    }
-
+    // Use the proper monthly tracking system instead of conflicting implementation
     function initializeMonthlyTodoStreak() {
-        // Update monthly streak on startup
+        // Use the existing proper monthly streak system
         setTimeout(() => {
-            updateMonthlyTodoStreak();
-            console.log('Monthly todo streak system initialized');
+            updateMonthlyStreakDisplays();
+            console.log('Monthly todo streak system initialized (using proper tracking)');
         }, 200);
     }
 
@@ -4612,7 +4590,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         setTimeout(() => {
             updateHomeTodos();
             updateDailyProgress();
-            updateMonthlyTodoStreak();
+            updateMonthlyStreakDisplays();
         }, 300);
     };
 

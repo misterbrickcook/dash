@@ -310,12 +310,47 @@ class CloudStorage {
             const data = await supabase.query(`routine_completions?select=*${dateFilter}`);
             if (data) {
                 localStorage.setItem('routine_completions_cache', JSON.stringify(data));
+                
+                // Convert cloud data to legacy format for UI compatibility
+                this.updateLegacyRoutineFormat(data);
+                
                 return data;
             }
             return this.getLocalRoutineCompletions(date);
         } catch (error) {
             console.error('Error fetching routine completions:', error);
             return this.getLocalRoutineCompletions(date);
+        }
+    }
+    
+    // Convert cloud routine data to legacy localStorage format for UI
+    updateLegacyRoutineFormat(cloudData) {
+        try {
+            const legacyData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
+            
+            cloudData.forEach(completion => {
+                const date = completion.date;
+                if (!legacyData[date]) {
+                    legacyData[date] = {};
+                }
+                
+                // Map template_id to routine type
+                let routineType = null;
+                if (completion.template_id.includes('morning')) {
+                    routineType = 'morning';
+                } else if (completion.template_id.includes('evening')) {
+                    routineType = 'evening';
+                }
+                
+                if (routineType) {
+                    legacyData[date][routineType] = completion.completed;
+                }
+            });
+            
+            localStorage.setItem('routineCompletionData', JSON.stringify(legacyData));
+            console.log('✅ Updated legacy routine format from cloud data');
+        } catch (error) {
+            console.error('Error updating legacy routine format:', error);
         }
     }
     
@@ -530,34 +565,58 @@ class CloudStorage {
     
     async getResources() {
         try {
+            console.log('📋 getResources() called');
+            console.log('🔍 Authentication status:', this.isSupabaseAuthenticated());
+            console.log('🌐 Online status:', this.isOnline);
+            console.log('🔌 Supabase available:', !!supabase);
+            
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 console.log('☁️ Not authenticated or offline, using local resources');
-                return this.getLocalResources();
+                const localResources = this.getLocalResources();
+                console.log(`📱 Local resources count: ${localResources.length}`);
+                return localResources;
             }
             
             console.log('☁️ Fetching resources from Supabase...');
             const data = await supabase.select('resources', '*');
             console.log('☁️ Supabase query result:', data);
+            console.log(`☁️ Cloud query returned ${data ? data.length : 0} resources`);
             
-            if (data) {
+            if (data && data.length > 0) {
                 localStorage.setItem('resources_cache', JSON.stringify(data));
-                console.log(`☁️ Successfully loaded ${data.length} resources from cloud`);
+                console.log(`☁️ Successfully loaded ${data.length} resources from cloud and cached locally`);
+                console.log('📋 Sample resource titles:', data.slice(0, 3).map(r => r.title));
                 return data;
+            } else if (data && data.length === 0) {
+                console.log('☁️ Cloud query successful but returned 0 resources');
+                localStorage.setItem('resources_cache', JSON.stringify([]));
+                return [];
             }
+            
             console.log('☁️ No cloud data, falling back to local');
-            return this.getLocalResources();
+            const localResources = this.getLocalResources();
+            console.log(`📱 Fallback local resources count: ${localResources.length}`);
+            return localResources;
         } catch (error) {
             console.error('❌ Error fetching resources from cloud:', error);
             console.log('📱 Falling back to local resources');
-            return this.getLocalResources();
+            const localResources = this.getLocalResources();
+            console.log(`📱 Error fallback local resources count: ${localResources.length}`);
+            return localResources;
         }
     }
     
     async saveResource(resource) {
         try {
+            console.log('💾 saveResource() called for:', resource.title);
+            console.log('🔍 Resource data:', { id: resource.id, title: resource.title, category: resource.category });
+            
+            // Always save locally first for immediate UI feedback
             this.saveLocalResource(resource);
+            console.log('📱 Resource saved locally');
             
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
+                console.log('⏳ Not authenticated/online, queuing for sync');
                 this.queueSync('resources', 'save', resource);
                 return;
             }
@@ -566,21 +625,31 @@ class CloudStorage {
             const user = supabase.getCurrentUser();
             if (user) {
                 resource.user_id = user.id;
+                console.log('👤 Added user_id to resource:', user.id);
+            } else {
+                console.warn('⚠️ No current user found when saving resource');
             }
             
             if (resource.id) {
+                console.log('🔄 Updating existing resource in cloud...');
                 await supabase.update('resources', resource, resource.id);
+                console.log('✅ Resource updated in cloud');
             } else {
+                console.log('➕ Inserting new resource to cloud...');
                 const result = await supabase.insert('resources', [resource]);
                 if (result && result[0]) {
                     resource.id = result[0].id;
-                    this.saveLocalResource(resource);
+                    this.saveLocalResource(resource); // Update local with new cloud ID
+                    console.log('✅ New resource inserted with ID:', resource.id);
+                } else {
+                    console.warn('⚠️ Insert returned no result:', result);
                 }
             }
             
             console.log('✅ Resource synced to cloud:', resource.title);
         } catch (error) {
-            console.error('Error saving resource:', error);
+            console.error('❌ Error saving resource to cloud:', error);
+            console.log('⏳ Queuing resource for later sync');
             this.queueSync('resources', 'save', resource);
         }
     }
