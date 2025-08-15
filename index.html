@@ -6061,7 +6061,8 @@
                     
                     if (migrationNeeded) {
                         console.log('✅ Icon migration completed, saving to storage');
-                        this.saveToLocalStorage();
+                        // Save to localStorage
+                        localStorage.setItem('resources', JSON.stringify(this.resources));
                         // Also save to cloud if authenticated
                         if (cloudStorage && supabase?.isAuthenticated()) {
                             this.resources.forEach(resource => cloudStorage.saveResource(resource));
