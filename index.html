@@ -2137,6 +2137,22 @@
                 TodoManager.updateHomeTodos();
             }
             
+            // If switching to motivation tab, ensure MotivationManager is initialized
+            if (tabId === 'tab-motivation') {
+                console.log('🎯 Switching to motivation tab, checking MotivationManager...');
+                setTimeout(() => {
+                    if (window.MotivationManager && !window.MotivationManager.initialized) {
+                        console.log('🚀 Initializing MotivationManager for first time');
+                        window.MotivationManager.init();
+                        window.MotivationManager.initialized = true;
+                    } else if (!window.MotivationManager) {
+                        console.error('❌ MotivationManager not found when switching to motivation tab');
+                    } else {
+                        console.log('✅ MotivationManager already initialized');
+                    }
+                }, 100);
+            }
+            
             // If switching to ziele tab, load the active category
             if (tabId === 'tab-ziele') {
                 const activeTab = document.querySelector('.ziel-tab.active');
@@ -5751,12 +5767,15 @@
                 cards: [],
                 currentCardId: null,
                 nextId: 1,
+                initialized: false,
                 
                 init() {
                     console.log('💪 MotivationManager.init() called');
                     this.loadData();
                     this.setupEventListeners();
                     this.renderCards();
+                    this.initialized = true;
+                    console.log('✅ MotivationManager initialization complete');
                 },
                 
                 setupEventListeners() {
@@ -5981,18 +6000,24 @@
             // Make MotivationManager globally available
             window.MotivationManager = MotivationManager;
             
-            // Initialize Motivation Manager when DOM is ready
-            document.addEventListener('DOMContentLoaded', function() {
-                console.log('🎯 DOM loaded, initializing MotivationManager...');
-                setTimeout(() => {
-                    if (window.MotivationManager) {
-                        console.log('🚀 Starting MotivationManager.init()');
-                        MotivationManager.init();
-                    } else {
-                        console.error('❌ MotivationManager not found on window');
-                    }
-                }, 150);
-            });
+            // MotivationManager will be initialized when switching to motivation tab
+            
+            // Fallback: Direct event listener for add button
+            setTimeout(() => {
+                const fallbackBtn = document.getElementById('add-motivation-btn');
+                if (fallbackBtn && !fallbackBtn.hasAttribute('data-listener-added')) {
+                    console.log('🔧 Adding fallback event listener to add button');
+                    fallbackBtn.setAttribute('data-listener-added', 'true');
+                    fallbackBtn.addEventListener('click', function() {
+                        console.log('🖱️ Fallback: Add motivation button clicked!');
+                        if (window.MotivationManager && window.MotivationManager.addCard) {
+                            window.MotivationManager.addCard();
+                        } else {
+                            console.error('❌ MotivationManager or addCard method not available');
+                        }
+                    });
+                }
+            }, 500);
             
             // === SIMPLE LOGOUT (URL-based) ===
             console.log('✅ Logout is now URL-based, no JavaScript needed');
