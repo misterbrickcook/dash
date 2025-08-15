@@ -2309,6 +2309,22 @@
                         loadRoutineCompletions()
                     ]);
                     
+                    // Force routine UI update after data load
+                    console.log('🔄 Forcing routine UI update after login...');
+                    if (window.updateRoutineUI) {
+                        await window.updateRoutineUI();
+                    }
+                    if (window.updateRoutineCounters) {
+                        window.updateRoutineCounters();
+                    }
+                    
+                    // Load CryptoWiki data
+                    console.log('🔄 Loading CryptoWiki after login...');
+                    if (window.CryptoWiki) {
+                        await window.CryptoWiki.loadEntries();
+                        window.CryptoWiki.render();
+                    }
+                    
                     // Load ResourceManager separately after all other managers
                     if (window.ResourceManager && window.ResourceManager.loadResources) {
                         console.log('🔄 Loading ResourceManager after login...');
@@ -6541,6 +6557,9 @@
             }
         };
 
+        // Make CryptoWiki globally available
+        window.CryptoWiki = CryptoWiki;
+        
         // Initialize CryptoWiki when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             CryptoWiki.init();
