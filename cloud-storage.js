@@ -357,7 +357,7 @@ class CloudStorage {
     async saveRoutineCompletion(templateId, date, completed) {
         try {
             const completion = {
-                id: `${templateId}_${date}`,
+                // Remove id - let database auto-generate BIGSERIAL id
                 template_id: templateId,
                 date: date,
                 completed: completed,
@@ -648,14 +648,15 @@ class CloudStorage {
                 console.log('🔄 Attempting to save resource without user_id...');
             }
             
-            if (resource.id && resource.id.toString().indexOf('sample_') === -1) {
+            if (resource.id && resource.id.toString().indexOf('sample_') === -1 && resource.id.toString().indexOf('temp_') === -1) {
                 console.log('🔄 Updating existing resource in cloud...');
                 await supabase.update('resources', resource, resource.id);
                 console.log('✅ Resource updated in cloud');
             } else {
                 console.log('➕ Inserting new resource to cloud...');
-                // Remove sample ID if present
-                if (resource.id && resource.id.toString().indexOf('sample_') === 0) {
+                // Remove temp/sample IDs - let database auto-generate BIGSERIAL ID
+                if (resource.id && (resource.id.toString().indexOf('sample_') === 0 || resource.id.toString().indexOf('temp_') === 0)) {
+                    console.log('🔄 Removing temp/sample ID:', resource.id);
                     delete resource.id;
                 }
                 
@@ -663,13 +664,14 @@ class CloudStorage {
                 console.log('🔍 Insert result:', result);
                 
                 if (result && result.length > 0 && result[0]) {
-                    resource.id = result[0].id;
-                    this.saveLocalResource(resource); // Update local with new cloud ID
-                    console.log('✅ New resource inserted with ID:', resource.id);
+                    const newId = result[0].id;
+                    console.log('✅ New resource inserted with database ID:', newId);
+                    resource.id = newId; // Update the passed resource object
+                    this.saveLocalResource(resource); // Save with proper database ID
                 } else {
                     console.warn('⚠️ Insert returned unexpected result:', result);
-                    // Log the full response for debugging
                     console.log('🔍 Full insert response:', JSON.stringify(result, null, 2));
+                    throw new Error('Failed to insert resource - unexpected response format');
                 }
             }
             
@@ -826,17 +828,26 @@ class CloudStorage {
                 
                 switch (item.action) {
                     case 'save':
-                        if (item.data.id && item.data.id.toString().indexOf('sample_') === -1) {
+                        if (item.data.id && item.data.id.toString().indexOf('sample_') === -1 && item.data.id.toString().indexOf('temp_') === -1) {
                             console.log('🔄 Updating queued item:', item.data.id);
                             await supabase.update(item.table, item.data, item.data.id);
                         } else {
                             console.log('➕ Inserting queued item');
-                            // Remove sample ID if present
-                            if (item.data.id && item.data.id.toString().indexOf('sample_') === 0) {
+                            // Remove temp/sample IDs - let database auto-generate
+                            if (item.data.id && (item.data.id.toString().indexOf('sample_') === 0 || item.data.id.toString().indexOf('temp_') === 0)) {
+                                console.log('🔄 Removing temp/sample ID from queued item:', item.data.id);
                                 delete item.data.id;
                             }
                             const result = await supabase.insert(item.table, [item.data]);
                             console.log('🔍 Queued insert result:', result);
+                            
+                            // Update local storage with proper database ID if resources table
+                            if (item.table === 'resources' && result && result.length > 0 && result[0]) {
+                                const newId = result[0].id;
+                                item.data.id = newId;
+                                this.saveLocalResource(item.data);
+                                console.log('✅ Updated local resource with database ID:', newId);
+                            }
                         }
                         break;
                     case 'delete':
@@ -953,13 +964,13 @@ window.forceSyncResources = async function() {
 };
 
 window.testResourceSave = async function() {
-    console.log('🧪 Testing resource save...');
+    console.log('🧪 Testing resource save (without manual ID)...');
     const testResource = {
-        id: Date.now().toString(),
-        title: 'Test Resource',
-        category: 'Test',
+        // No manual ID - let database auto-generate
+        title: 'Test Resource ' + Date.now(),
+        category: 'Privat',
         url: 'https://example.com',
-        description: 'Debug test resource',
+        description: 'Debug test resource - no manual ID',
         icon: '🧪',
         created_at: new Date().toISOString()
     };
@@ -967,10 +978,37 @@ window.testResourceSave = async function() {
     try {
         await cloudStorage.saveResource(testResource);
         console.log('✅ Test resource save completed');
+        console.log('🔍 Final resource object:', testResource);
+        
+        // Reload ResourceManager to see updated list
+        if (window.ResourceManager && window.ResourceManager.loadResources) {
+            console.log('🔄 Reloading ResourceManager...');
+            await window.ResourceManager.loadResources();
+        }
     } catch (error) {
         console.error('❌ Test resource save failed:', error);
     }
 };
 
+window.checkResourceState = function() {
+    console.log('🔍 === RESOURCE STATE CHECK ===');
+    console.log('📦 CloudStorage sync queue:', cloudStorage.syncQueue.length, 'items');
+    console.log('📱 ResourceManager resources:', window.ResourceManager?.resources?.length || 0);
+    console.log('💾 localStorage resources:', JSON.parse(localStorage.getItem('resources') || '[]').length);
+    console.log('💾 localStorage resources_cache:', JSON.parse(localStorage.getItem('resources_cache') || '[]').length);
+    
+    if (window.ResourceManager && window.ResourceManager.resources.length > 0) {
+        console.log('📋 Sample ResourceManager resource IDs:', 
+            window.ResourceManager.resources.slice(0, 3).map(r => `${r.id} (${typeof r.id})`));
+    }
+    
+    const cached = JSON.parse(localStorage.getItem('resources_cache') || '[]');
+    if (cached.length > 0) {
+        console.log('📋 Sample cached resource IDs:', 
+            cached.slice(0, 3).map(r => `${r.id} (${typeof r.id})`));
+    }
+    console.log('================================');
+};
+
 console.log('☁️ Cloud Storage System loaded');
-console.log('🔍 Debug functions available: debugResources(), forceSyncResources(), testResourceSave()');
+console.log('🔍 Debug functions available: debugResources(), forceSyncResources(), testResourceSave(), checkResourceState()');

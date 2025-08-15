@@ -5376,19 +5376,28 @@
                 
                 async loadResources() {
                     try {
-                        console.log('🔄 Loading resources...');
+                        console.log('🔄 ResourceManager.loadResources() called');
+                        console.log('🔍 Auth status:', supabase?.isAuthenticated());
+                        console.log('🔍 CloudStorage available:', !!cloudStorage);
                         
                         if (cloudStorage && supabase?.isAuthenticated()) {
                             console.log('☁️ Attempting to load resources from cloud...');
                             this.resources = await cloudStorage.getResources() || [];
                             console.log(`☁️ Loaded ${this.resources.length} resources from cloud`);
+                            if (this.resources.length > 0) {
+                                console.log('📋 Sample resource IDs:', this.resources.slice(0, 3).map(r => `${r.id} (${typeof r.id})`));
+                            }
                         } else {
                             console.log('📱 Loading resources from localStorage...');
                             const cached = localStorage.getItem('resources');
                             this.resources = cached ? JSON.parse(cached) : [];
                             console.log(`📱 Loaded ${this.resources.length} resources from localStorage`);
+                            if (this.resources.length > 0) {
+                                console.log('📋 Sample local resource IDs:', this.resources.slice(0, 3).map(r => `${r.id} (${typeof r.id})`));
+                            }
                         }
                         this.renderResources();
+                        console.log('✅ ResourceManager.loadResources() completed');
                     } catch (error) {
                         console.error('❌ Error loading resources:', error);
                         console.log('📱 Falling back to localStorage...');
@@ -5399,6 +5408,7 @@
                 },
                 
                 renderResources() {
+                    console.log('🎨 ResourceManager.renderResources() called with', this.resources.length, 'resources');
                     // Refresh current view
                     this.refreshCurrentView();
                 },
@@ -5408,6 +5418,7 @@
                     const activeTab = document.querySelector('.resource-tab.active');
                     const activeCategory = activeTab ? activeTab.getAttribute('data-resource-category') : 'alle';
                     
+                    console.log('🔄 Refreshing view for category:', activeCategory);
                     this.displayResourcesForCategory(activeCategory);
                 },
                 
@@ -5492,7 +5503,7 @@
                     console.log('🔄 ResourceManager.addResource() called for:', resourceData.title);
                     
                     const resource = {
-                        id: Date.now().toString(),
+                        // Remove manual ID - let database auto-generate BIGSERIAL id
                         title: resourceData.title,
                         category: resourceData.category,
                         url: resourceData.url,
@@ -5501,29 +5512,36 @@
                         created_at: new Date().toISOString()
                     };
                     
-                    console.log('📝 Created resource object:', { id: resource.id, title: resource.title });
-                    
-                    this.resources.push(resource);
-                    console.log('📱 Added to local ResourceManager array, total:', this.resources.length);
-                    
-                    // Update UI immediately for better UX
-                    this.renderResources();
+                    console.log('📝 Created resource object:', { title: resource.title, category: resource.category });
                     
                     try {
-                        if (cloudStorage) {
+                        if (cloudStorage && supabase?.isAuthenticated()) {
                             console.log('☁️ Attempting to save resource to cloud...');
                             await cloudStorage.saveResource(resource);
                             console.log('✅ Resource saved to cloud successfully');
+                            
+                            // Reload resources from cloud to get updated data with proper IDs
+                            console.log('🔄 Reloading resources to get updated list...');
+                            await this.loadResources();
+                            
                         } else {
-                            console.log('📱 No cloudStorage, saving to localStorage only');
+                            console.log('📱 No cloudStorage/auth, generating temp ID and saving locally');
+                            // Generate temporary ID for offline use
+                            resource.id = 'temp_' + Date.now().toString();
+                            this.resources.push(resource);
                             localStorage.setItem('resources', JSON.stringify(this.resources));
+                            this.renderResources();
                         }
                         console.log('✅ Resource added:', resource.title);
                     } catch (error) {
                         console.error('❌ Error saving resource:', error);
                         console.error('❌ Resource save error details:', error.message, error.stack);
-                        // Don't remove from local array - leave it for sync queue to handle
-                        console.log('⚠️ Resource kept in local array for later sync');
+                        
+                        // Fallback: add with temp ID and let sync queue handle it
+                        console.log('⚠️ Adding resource with temp ID for sync queue');
+                        resource.id = 'temp_' + Date.now().toString();
+                        this.resources.push(resource);
+                        this.renderResources();
                     }
                 },
                 
