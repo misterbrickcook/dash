@@ -10,10 +10,28 @@ class SimpleRoutineManager {
 
     async init() {
         console.log('🔄 Initializing SimpleRoutineManager...');
+        
+        // First clear any existing visual styles
+        this.clearVisualStyles();
+        
         await this.loadTodaysData();
         this.setupEventListeners();
         this.updateUI();
         console.log('✅ SimpleRoutineManager initialized');
+    }
+
+    clearVisualStyles() {
+        // Reset all checkboxes and labels to clean state
+        const allCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"], #evening-routine input[type="checkbox"]');
+        allCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+            const label = checkbox.nextElementSibling;
+            if (label) {
+                label.style.textDecoration = 'none';
+                label.style.color = 'inherit';
+            }
+        });
+        console.log('🧹 Cleared existing visual styles');
     }
 
     async loadTodaysData() {
@@ -234,19 +252,32 @@ class SimpleRoutineManager {
 
     restoreCheckboxes() {
         const todayData = this.routineData[this.today];
-        if (!todayData) return;
+        if (!todayData) {
+            console.log('⚠️ No data for today:', this.today);
+            return;
+        }
+
+        console.log('🔄 Restoring checkboxes from data:', todayData);
 
         // Restore morning checkboxes
         Object.keys(todayData.morning).forEach(checkboxId => {
             const checkbox = document.getElementById(checkboxId);
             if (checkbox) {
-                checkbox.checked = todayData.morning[checkboxId];
+                const isChecked = todayData.morning[checkboxId];
+                checkbox.checked = isChecked;
                 
                 const label = checkbox.nextElementSibling;
-                if (label && checkbox.checked) {
-                    label.style.textDecoration = 'line-through';
-                    label.style.color = '#999';
+                if (label) {
+                    if (isChecked) {
+                        label.style.textDecoration = 'line-through';
+                        label.style.color = '#999';
+                    } else {
+                        label.style.textDecoration = 'none';
+                        label.style.color = 'inherit';
+                    }
                 }
+                
+                console.log(`📋 Morning: ${checkboxId} = ${isChecked}`);
             }
         });
 
@@ -254,13 +285,21 @@ class SimpleRoutineManager {
         Object.keys(todayData.evening).forEach(checkboxId => {
             const checkbox = document.getElementById(checkboxId);
             if (checkbox) {
-                checkbox.checked = todayData.evening[checkboxId];
+                const isChecked = todayData.evening[checkboxId];
+                checkbox.checked = isChecked;
                 
                 const label = checkbox.nextElementSibling;
-                if (label && checkbox.checked) {
-                    label.style.textDecoration = 'line-through';
-                    label.style.color = '#999';
+                if (label) {
+                    if (isChecked) {
+                        label.style.textDecoration = 'line-through';
+                        label.style.color = '#999';
+                    } else {
+                        label.style.textDecoration = 'none';
+                        label.style.color = 'inherit';
+                    }
                 }
+                
+                console.log(`📋 Evening: ${checkboxId} = ${isChecked}`);
             }
         });
 
@@ -290,6 +329,13 @@ class SimpleRoutineManager {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    // Disable old routine system functions
+    if (window.initializeRoutineProgress) {
+        window.initializeRoutineProgress = function() {
+            console.log('🚫 Old routine system disabled - using SimpleRoutineManager instead');
+        };
+    }
+    
     // Wait a bit for other systems to load
     setTimeout(() => {
         window.simpleRoutineManager = new SimpleRoutineManager();

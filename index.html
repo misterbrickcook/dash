@@ -1928,6 +1928,7 @@
                     <div class="setting-item">
                         <label>Routine-Datenbank komplett zurücksetzen:</label>
                         <button id="reset-routines-btn" class="btn btn-danger" style="background: #cc0000; border-color: #cc0000; color: white;" onclick="handleRoutineReset()">Routines komplett zurücksetzen</button>
+                        <button onclick="debugRoutineSystem()" class="btn btn-secondary" style="margin-left: 1rem;">🔍 Debug Routines</button>
                         <span class="setting-description">⚠️ Löscht ALLE Routine-Daten und Counter. Synchronisiert zwischen allen Geräten.</span>
                     </div>
                 </div>
@@ -6396,6 +6397,55 @@
                     return false;
                 }
             }
+            
+            // === DEBUG ROUTINE SYSTEM ===
+            window.debugRoutineSystem = function() {
+                console.log('🔍 ROUTINE SYSTEM DEBUG');
+                console.log('======================');
+                
+                // Check localStorage
+                const simpleData = localStorage.getItem('simple_routine_data');
+                console.log('📱 simple_routine_data:', simpleData ? JSON.parse(simpleData) : 'NOT FOUND');
+                
+                const oldData = localStorage.getItem('routineCompletionData');
+                console.log('📱 routineCompletionData (old):', oldData ? JSON.parse(oldData) : 'NOT FOUND');
+                
+                // Check SimpleRoutineManager
+                if (window.simpleRoutineManager) {
+                    console.log('✅ SimpleRoutineManager exists');
+                    console.log('📊 Current data:', window.simpleRoutineManager.routineData);
+                    console.log('📅 Today:', window.simpleRoutineManager.today);
+                } else {
+                    console.log('❌ SimpleRoutineManager NOT FOUND');
+                }
+                
+                // Check checkboxes
+                const morningCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"]');
+                const eveningCheckboxes = document.querySelectorAll('#evening-routine input[type="checkbox"]');
+                
+                console.log('🌅 Morning checkboxes:');
+                morningCheckboxes.forEach(cb => {
+                    const label = cb.nextElementSibling;
+                    console.log(`- ${cb.id}: checked=${cb.checked}, strikethrough=${label?.style?.textDecoration || 'none'}`);
+                });
+                
+                console.log('🌙 Evening checkboxes:');
+                eveningCheckboxes.forEach(cb => {
+                    const label = cb.nextElementSibling;
+                    console.log(`- ${cb.id}: checked=${cb.checked}, strikethrough=${label?.style?.textDecoration || 'none'}`);
+                });
+                
+                // Check counters
+                const streakTiles = document.querySelectorAll('.streak-tile');
+                console.log('📊 Counter tiles:');
+                streakTiles.forEach((tile, index) => {
+                    const number = tile.querySelector('.streak-number');
+                    const label = tile.querySelector('.streak-label');
+                    console.log(`- Tile ${index}: ${label?.textContent} = ${number?.textContent}`);
+                });
+                
+                alert('Debug info logged to console - press F12 to see details');
+            };
             
             // === GLOBAL ROUTINE RESET HANDLER ===
             window.handleRoutineReset = async function() {
