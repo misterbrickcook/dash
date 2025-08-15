@@ -5919,9 +5919,19 @@
                     const fileInput = document.getElementById('motivation-image-input');
                     
                     // Close modal events
-                    [closeBtn, cancelBtn].forEach(btn => {
-                        if (btn) btn.addEventListener('click', () => this.hideAddModal());
-                    });
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            console.log('🖱️ Close button clicked');
+                            this.hideAddModal();
+                        });
+                    }
+                    
+                    if (cancelBtn) {
+                        cancelBtn.addEventListener('click', () => {
+                            console.log('🖱️ Cancel button clicked');
+                            this.hideAddModal();
+                        });
+                    }
                     
                     // Close on background click
                     modal?.addEventListener('click', (e) => {
@@ -5959,16 +5969,24 @@
                 
                 showAddModal() {
                     const modal = document.getElementById('add-motivation-modal');
-                    modal.style.display = 'flex';
-                    this.resetModalForm();
-                    console.log('📝 Opening add motivation modal');
+                    if (modal) {
+                        modal.classList.add('show');
+                        this.resetModalForm();
+                        console.log('📝 Opening add motivation modal');
+                    } else {
+                        console.error('❌ Modal element not found!');
+                    }
                 },
                 
                 hideAddModal() {
                     const modal = document.getElementById('add-motivation-modal');
-                    modal.style.display = 'none';
-                    this.resetModalForm();
-                    console.log('❌ Closing add motivation modal');
+                    if (modal) {
+                        modal.classList.remove('show');
+                        this.resetModalForm();
+                        console.log('❌ Closing add motivation modal');
+                    } else {
+                        console.error('❌ Modal element not found!');
+                    }
                 },
                 
                 resetModalForm() {
