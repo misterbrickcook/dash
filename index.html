@@ -5829,7 +5829,14 @@
                         const newCardElement = document.querySelector(`[data-id="${newCard.id}"] .motivation-title`);
                         if (newCardElement) {
                             newCardElement.focus();
-                            newCardElement.select();
+                            // Select all text in contenteditable element
+                            if (window.getSelection && document.createRange) {
+                                const selection = window.getSelection();
+                                const range = document.createRange();
+                                range.selectNodeContents(newCardElement);
+                                selection.removeAllRanges();
+                                selection.addRange(range);
+                            }
                         }
                     }, 100);
                     
@@ -6015,20 +6022,29 @@
                             nextId: this.nextId
                         };
                         const dataString = JSON.stringify(data);
-                        const sizeInMB = (new Blob([dataString]).size / (1024 * 1024)).toFixed(2);
+                        const sizeInKB = (dataString.length / 1024).toFixed(2);
+                        const sizeInMB = (dataString.length / (1024 * 1024)).toFixed(2);
                         
                         localStorage.setItem('motivation_cards', dataString);
-                        console.log(`💾 Motivation cards saved (${sizeInMB}MB, ${this.cards.length} cards)`);
+                        console.log(`💾 Motivation cards saved (${sizeInKB}KB / ${sizeInMB}MB, ${this.cards.length} cards)`);
                         
-                        // Check storage usage
+                        // Check total storage usage
                         let totalSize = 0;
+                        let itemCount = 0;
                         for (let key in localStorage) {
                             if (localStorage.hasOwnProperty(key)) {
                                 totalSize += localStorage[key].length;
+                                itemCount++;
                             }
                         }
+                        const totalKB = (totalSize / 1024).toFixed(2);
                         const totalMB = (totalSize / (1024 * 1024)).toFixed(2);
-                        console.log(`📊 Total localStorage usage: ${totalMB}MB`);
+                        console.log(`📊 Total localStorage: ${itemCount} items, ${totalKB}KB / ${totalMB}MB`);
+                        
+                        // Warn if approaching 5MB localStorage limit
+                        if (totalSize > 4 * 1024 * 1024) {
+                            console.warn('⚠️ Approaching localStorage limit (5MB)');
+                        }
                         
                     } catch (error) {
                         console.error('❌ Error saving motivation data:', error);
