@@ -237,14 +237,19 @@ const Auth = {
             this.hideAuthScreen();
             this.showDashboard();
             
-            // Additional todo counter update after login with delay
+            // Force immediate todo counter update after login
             setTimeout(async () => {
-                console.log('🔄 Final todo counter update after login...');
+                console.log('🔄 URGENT: Forcing todo counter update after login...');
+                console.log('🔍 Checking if showDashboard was called...');
                 if (window.initializeTodoCounter) {
+                    // Reset the running flag to allow re-execution
+                    window.initializeTodoCounter.running = false;
                     await window.initializeTodoCounter();
-                    console.log('✅ Final todo counter update complete');
+                    console.log('✅ URGENT: Todo counter forcibly updated after login');
+                } else {
+                    console.error('❌ initializeTodoCounter not available after login');
                 }
-            }, 4000);
+            }, 2000);
             
         } catch (error) {
             console.error('❌ Login exception:', error);
@@ -349,6 +354,7 @@ const Auth = {
     showDashboard() {
         console.log('📊 SHOWDASHBOARD CALLED - Showing dashboard, loading user data and initializing...');
         console.log('🔍 Current auth status:', supabase ? supabase.isAuthenticated() : 'no supabase');
+        console.log('🚨 CRITICAL: showDashboard() WAS EXECUTED'); // This should appear in logs
         document.querySelector('.layout').style.display = 'flex';
         
         // Load user data from database and initialize after a short delay
