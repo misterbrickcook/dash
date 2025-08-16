@@ -2950,7 +2950,8 @@
                 const startOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
                 const endOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-31`;
                 
-                const completedTodos = await supabase.query(`todos?completed=eq.true&created_at=gte.${startOfMonth}&created_at=lt.${endOfMonth}&select=*`);
+                const user = supabase.getCurrentUser();
+                const completedTodos = await supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&created_at=gte.${startOfMonth}&created_at=lt.${endOfMonth}&select=*`);
                 const todoCount = completedTodos ? completedTodos.length : 0;
                 
                 console.log(`☁️ Found ${todoCount} completed todos in ${monthName} ${currentYear} from cloud`);
@@ -3700,7 +3701,8 @@
             async loadTodos() {
                 if (!supabase?.isAuthenticated()) return;
                 try {
-                    const data = await supabase.select('todos', '*');
+                    const user = supabase.getCurrentUser();
+                    const data = await supabase.query(`todos?user_id=eq.${user.id}&select=*`);
                     if (data && Array.isArray(data)) {
                         // Transform database data to match UI expectations
                         this.todos = data.map(todo => {
@@ -4185,7 +4187,8 @@
             async loadGoals() {
                 if (!supabase?.isAuthenticated()) return;
                 try {
-                    const data = await supabase.select('goals', '*');
+                    const user = supabase.getCurrentUser();
+                    const data = await supabase.query(`goals?user_id=eq.${user.id}&select=*`);
                     console.log('💾 Raw goals from database:', data);
                     if (data && Array.isArray(data)) {
                         // Transform database data to match UI expectations
@@ -5116,7 +5119,8 @@
                 
                 try {
                     console.log('📡 Fetching termine from database...');
-                    const data = await supabase.select('termine', '*');
+                    const user = supabase.getCurrentUser();
+                    const data = await supabase.query(`termine?user_id=eq.${user.id}&select=*`);
                     console.log('📥 Raw termine data received:', data);
                     
                     if (data && Array.isArray(data)) {
