@@ -3711,7 +3711,12 @@
             },
             
             async loadTodos() {
-                if (!supabase?.isAuthenticated()) return;
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ TodoManager: Not authenticated - pure cloud mode requires authentication');
+                    this.todos = [];
+                    return;
+                }
+                
                 try {
                     const user = supabase.getCurrentUser();
                     const data = await supabase.query(`todos?user_id=eq.${user.id}&select=*`);
@@ -3735,11 +3740,16 @@
                                 priority: priorityString // Convert integer to string
                             };
                         });
+                        console.log(`☁️ TodoManager: Loaded ${this.todos.length} todos from cloud`);
                         this.refreshCurrentView();
                         this.updateHomeTodos();
+                    } else {
+                        console.log('☁️ TodoManager: No todos found in cloud');
+                        this.todos = [];
                     }
                 } catch (error) {
-                    console.error('Error loading todos:', error);
+                    console.error('❌ TodoManager: Error loading from cloud:', error);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
             },
             
@@ -3788,45 +3798,33 @@
                     user_id: supabase?.user?.id || 'anonymous'
                 };
                 
-                if (supabase?.isAuthenticated()) {
-                    try {
-                        const result = await supabase.insert('todos', todo);
-                        console.log('💾 Supabase insert result:', result);
-                        if (result && Array.isArray(result) && result.length > 0) {
-                            // Transform the database result to match UI expectations
-                            const dbTodo = result[0];
-                            console.log('Database returned todo with ID:', dbTodo.id, dbTodo);
-                            const uiTodo = {
-                                ...dbTodo,
-                                title: dbTodo.text,
-                                deadline: dbTodo.date, // Use date field only
-                                priority: this.priorityIntToString(dbTodo.priority || 1)
-                            };
-                            this.todos.push(uiTodo);
-                        } else {
-                            // If insert doesn't return data, add with generated id
-                            todo.id = Date.now().toString();
-                            todo.title = todo.text;
-                            todo.deadline = todo.date;
-                            todo.priority = this.priorityIntToString(todo.priority);
-                            this.todos.push(todo);
-                        }
-                    } catch (error) {
-                        console.error('Error saving todo:', error);
-                        // Fall back to local storage
-                        todo.id = Date.now().toString();
-                        todo.title = todo.text;
-                        todo.deadline = todo.due_date || todo.date;
-                        todo.priority = this.priorityIntToString(todo.priority);
-                        this.todos.push(todo);
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ TodoManager: Not authenticated - cannot add todo in pure cloud mode');
+                    alert('Fehler: Nicht authentifiziert. Todo kann nicht gespeichert werden.');
+                    return;
+                }
+                
+                try {
+                    const result = await supabase.insert('todos', todo);
+                    console.log('💾 Supabase insert result:', result);
+                    if (result && Array.isArray(result) && result.length > 0) {
+                        // Transform the database result to match UI expectations
+                        const dbTodo = result[0];
+                        console.log('☁️ TodoManager: Todo saved to cloud with ID:', dbTodo.id);
+                        const uiTodo = {
+                            ...dbTodo,
+                            title: dbTodo.text,
+                            deadline: dbTodo.date, // Use date field only
+                            priority: this.priorityIntToString(dbTodo.priority || 1)
+                        };
+                        this.todos.push(uiTodo);
+                    } else {
+                        throw new Error('Insert did not return data');
                     }
-                } else {
-                    // Local storage fallback
-                    todo.id = Date.now().toString();
-                    todo.title = todo.text;
-                    todo.deadline = todo.due_date || todo.date;
-                    todo.priority = this.priorityIntToString(todo.priority);
-                    this.todos.push(todo);
+                } catch (error) {
+                    console.error('❌ TodoManager: Error saving to cloud:', error);
+                    alert('Fehler beim Speichern des Todos: ' + error.message);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
                 
                 console.log('Todo added:', todo);
@@ -4133,50 +4131,46 @@
             },
             
             async clearArchive() {
-                console.log('🔍 DEBUG: clearArchive() called');
+                console.log('☁️ TodoManager: clearArchive() called (pure cloud mode)');
                 if (!confirm('Wirklich alle erledigten Todos dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden!')) {
-                    console.log('🔍 DEBUG: Archive clear cancelled by user');
+                    console.log('🔍 Archive clear cancelled by user');
+                    return;
+                }
+                
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ TodoManager: Not authenticated - cannot clear archive in pure cloud mode');
+                    alert('Fehler: Nicht authentifiziert. Archive kann nicht geleert werden.');
                     return;
                 }
                 
                 const completedTodos = this.todos.filter(todo => todo.completed);
-                console.log('🗑️ Deleting', completedTodos.length, 'completed todos from archive');
+                console.log('☁️ TodoManager: Deleting', completedTodos.length, 'completed todos from cloud');
                 
-                if (supabase?.isAuthenticated()) {
-                    try {
-                        // Delete from database
-                        for (const todo of completedTodos) {
-                            console.log(`🗑️ Deleting todo from database: ID ${todo.id} (type: ${typeof todo.id}), Title: "${todo.title}"`);
-                            if (!todo.id) {
-                                console.warn(`⚠️ Skipping todo without ID: "${todo.title}"`);
-                                continue;
-                            }
-                            const result = await supabase.delete('todos', String(todo.id));
-                            console.log(`🗑️ Delete result for ${todo.id}:`, result);
-                        }
-                        console.log('✅ All completed todos deleted from database');
-                    } catch (error) {
-                        console.error('❌ Error deleting todos from database:', error);
-                        alert('Fehler beim Löschen aus der Datenbank: ' + error.message);
-                        return;
-                    }
-                }
-                
-                // Remove from local array
-                this.todos = this.todos.filter(todo => !todo.completed);
-                
-                // Update localStorage cache
                 try {
-                    localStorage.setItem('todos_cache', JSON.stringify(this.todos));
-                    console.log('🔄 Updated local todos cache');
+                    // Delete from cloud database
+                    for (const todo of completedTodos) {
+                        console.log(`☁️ Deleting todo from cloud: ID ${todo.id}, Title: "${todo.title}"`);
+                        if (!todo.id) {
+                            console.warn(`⚠️ Skipping todo without ID: "${todo.title}"`);
+                            continue;
+                        }
+                        const result = await supabase.delete('todos', String(todo.id));
+                        console.log(`✅ Delete result for ${todo.id}:`, result);
+                    }
+                    console.log('☁️ TodoManager: All completed todos deleted from cloud');
+                    
+                    // Remove from local array
+                    this.todos = this.todos.filter(todo => !todo.completed);
+                    
+                    // Refresh current view
+                    this.refreshCurrentView();
+                    
+                    alert(`✅ ${completedTodos.length} erledigte Todos wurden gelöscht!`);
                 } catch (error) {
-                    console.error('Error updating local todos cache:', error);
+                    console.error('❌ TodoManager: Error deleting from cloud:', error);
+                    alert('Fehler beim Löschen aus der Cloud: ' + error.message);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
-                
-                // Refresh current view
-                this.refreshCurrentView();
-                
-                alert(`✅ ${completedTodos.length} erledigte Todos wurden gelöscht!`);
             },
             
             updateHomeTodos() {
@@ -4240,11 +4234,16 @@
             goals: [], // In-memory storage for demo
             
             async loadGoals() {
-                if (!supabase?.isAuthenticated()) return;
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ GoalManager: Not authenticated - pure cloud mode requires authentication');
+                    this.goals = [];
+                    return;
+                }
+                
                 try {
                     const user = supabase.getCurrentUser();
                     const data = await supabase.query(`goals?user_id=eq.${user.id}&select=*`);
-                    console.log('💾 Raw goals from database:', data);
+                    console.log('☁️ GoalManager: Raw goals from cloud:', data);
                     if (data && Array.isArray(data)) {
                         // Transform database data to match UI expectations
                         this.goals = data.map(goal => {
@@ -4263,11 +4262,15 @@
                                 unit: goal.unit
                             };
                         });
-                        console.log('🔄 Transformed goals:', this.goals);
+                        console.log(`☁️ GoalManager: Loaded ${this.goals.length} goals from cloud`);
                         this.refreshCurrentView();
+                    } else {
+                        console.log('☁️ GoalManager: No goals found in cloud');
+                        this.goals = [];
                     }
                 } catch (error) {
-                    console.error('Error loading goals:', error);
+                    console.error('❌ GoalManager: Error loading from cloud:', error);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
             },
             
@@ -4360,58 +4363,57 @@
                     progress: goal.progress
                 });
                 
-                if (supabase?.isAuthenticated()) {
-                    try {
-                        // Map UI fields to database schema - all progress fields now supported
-                        const dbGoal = {
-                            title: goal.name,
-                            description: goal.description,
-                            category: goal.category,
-                            target_date: goal.deadline,
-                            progress: goal.progress,
-                            timeframe: goal.timeframe,
-                            completed: goal.completed,
-                            start_value: goal.startValue,
-                            target_value: goal.targetValue, 
-                            current_value: goal.currentValue,
-                            unit: goal.unit,
-                            user_id: supabase?.user?.id
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ GoalManager: Not authenticated - cannot add goal in pure cloud mode');
+                    alert('Fehler: Nicht authentifiziert. Ziel kann nicht gespeichert werden.');
+                    return;
+                }
+                
+                try {
+                    // Map UI fields to database schema - all progress fields now supported
+                    const dbGoal = {
+                        title: goal.name,
+                        description: goal.description,
+                        category: goal.category,
+                        target_date: goal.deadline,
+                        progress: goal.progress,
+                        timeframe: goal.timeframe,
+                        completed: goal.completed,
+                        start_value: goal.startValue,
+                        target_value: goal.targetValue, 
+                        current_value: goal.currentValue,
+                        unit: goal.unit,
+                        user_id: supabase?.user?.id
+                    };
+                    
+                    console.log('☁️ GoalManager: Saving goal to cloud:', dbGoal);
+                    const result = await supabase.insert('goals', dbGoal);
+                    console.log('☁️ GoalManager: Cloud result:', result);
+                    
+                    if (result && Array.isArray(result) && result.length > 0) {
+                        // Use database result and transform back to UI format
+                        const savedGoal = {
+                            ...result[0],
+                            name: result[0].title,
+                            deadline: result[0].target_date,
+                            timeframe: result[0].timeframe,
+                            progress: result[0].progress,
+                            completed: result[0].completed,
+                            startValue: result[0].start_value,
+                            targetValue: result[0].target_value,
+                            currentValue: result[0].current_value,
+                            unit: result[0].unit,
+                            database_id: result[0].id // Store real DB ID for updates
                         };
-                        
-                        console.log('💾 Attempting to save goal to database:', dbGoal);
-                        const result = await supabase.insert('goals', dbGoal);
-                        console.log('💾 Database result:', result);
-                        console.log('💾 Database result type:', typeof result, 'Array?', Array.isArray(result));
-                        
-                        if (result && Array.isArray(result) && result.length > 0) {
-                            // Use database result and transform back to UI format
-                            const savedGoal = {
-                                ...result[0],
-                                name: result[0].title,
-                                deadline: result[0].target_date,
-                                timeframe: result[0].timeframe,
-                                progress: result[0].progress,
-                                completed: result[0].completed,
-                                startValue: result[0].start_value,
-                                targetValue: result[0].target_value,
-                                currentValue: result[0].current_value,
-                                unit: result[0].unit,
-                                database_id: result[0].id // Store real DB ID for updates
-                            };
-                            this.goals.push(savedGoal);
-                            console.log('✅ Goal saved to cloud with database_id:', result[0].id);
-                        } else {
-                            // Fallback to local storage
-                            this.goals.push(goal);
-                        }
-                    } catch (error) {
-                        console.error('❌ Error saving goal to database:', error);
-                        console.log('💾 Falling back to local storage');
-                        this.goals.push(goal);
+                        this.goals.push(savedGoal);
+                        console.log('☁️ GoalManager: Goal saved to cloud with ID:', result[0].id);
+                    } else {
+                        throw new Error('Insert did not return data');
                     }
-                } else {
-                    // Not authenticated, use local storage
-                    this.goals.push(goal);
+                } catch (error) {
+                    console.error('❌ GoalManager: Error saving to cloud:', error);
+                    alert('Fehler beim Speichern des Ziels: ' + error.message);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
                 
                 console.log('Goal added:', goal);

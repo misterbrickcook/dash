@@ -76,15 +76,9 @@ class SimpleRoutineManager {
                 return;
             }
 
-            // Fallback to localStorage
-            const localData = localStorage.getItem('simple_routine_data');
-            if (localData) {
-                this.routineData = JSON.parse(localData);
-                console.log('💾 Loaded routine data from localStorage:', this.routineData);
-            } else {
-                this.routineData = this.getEmptyData();
-                console.log('🆕 Created new routine data');
-            }
+            // Pure cloud mode - no localStorage fallback
+            console.error('❌ SimpleRoutineManager: Not authenticated - pure cloud mode requires authentication');
+            this.routineData = this.getEmptyData();
         } catch (error) {
             console.error('❌ Error loading routine data:', error);
             this.routineData = this.getEmptyData();
@@ -158,8 +152,7 @@ class SimpleRoutineManager {
             }
             
             if (foundData) {
-                // Save migrated data
-                localStorage.setItem('simple_routine_data', JSON.stringify(newData));
+                // Save migrated data to cloud only
                 await this.saveToCloud();
                 
                 console.log('✅ Successfully migrated old system data');
@@ -279,8 +272,7 @@ class SimpleRoutineManager {
             }
         }
 
-        // Save locally immediately
-        localStorage.setItem('simple_routine_data', JSON.stringify(this.routineData));
+        // Pure cloud mode - no localStorage saving
 
         // Save to cloud
         await this.saveToCloud();
@@ -445,7 +437,7 @@ class SimpleRoutineManager {
 
     async reset() {
         this.routineData = this.getEmptyData();
-        localStorage.setItem('simple_routine_data', JSON.stringify(this.routineData));
+        // Pure cloud mode - no localStorage
         await this.saveToCloud();
         
         // Reset UI using cached elements
