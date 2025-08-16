@@ -2348,10 +2348,7 @@
                 console.log('🔄 Refreshing routine UI...');
                 
                 try {
-                    // Initialize todo counter if available
-                    if (window.initializeTodoCounter && !window.initializeTodoCounter.running) {
-                        await window.initializeTodoCounter();
-                    }
+                    // Note: Counter updates now handled by SimpleCounters
                     
                     // Dispatch update event for routine elements
                     const routineSections = document.querySelectorAll('.routine-item, .habit-item');
@@ -2641,98 +2638,14 @@
                             console.log(`☁️ Saving routine completion to cloud: ${routineType} = ${completionStatus}`);
                             await cloudStorage.saveRoutineCompletion(`${routineType}_routine`, today, completionStatus);
                             
-                            // Refresh cloud-based routine counter after saving
-                            setTimeout(() => {
-                                updateMonthlyStreakDisplaysFromMemory();
-                            }, 100);
+                            // Note: Counter updates now handled by SimpleCounters
                         } catch (error) {
                             console.warn('⚠️ Could not save routine completion to cloud:', error);
                         }
                     })();
                 }
                 
-                // Update streak display directly
-                console.log('🔍 DEBUG: Updating streak display');
-                
-                // Calculate monthly count from both legacy localStorage and new cloud cache
-                const currentDate = new Date();
-                const currentYear = currentDate.getFullYear();
-                const currentMonth = currentDate.getMonth() + 1; // getMonth() is 0-indexed
-                const currentMonthPrefix = `${currentYear}-${currentMonth.toString().padStart(2, '0')}`;
-                
-                console.log(`🔍 DEBUG: Current month prefix: ${currentMonthPrefix}`);
-                
-                // Pure cloud mode - get monthly count from cloud data only
-                let monthlyCount = 0;
-                console.log(`☁️ DEBUG: Pure cloud mode - calculating ${routineType} count from cloud`);
-                
-                // Check cloud completions from global cache
-                let cloudCompletions = [];
-                try {
-                    // Use global routine completions instead of localStorage
-                    if (window.globalRoutineCompletions && Array.isArray(window.globalRoutineCompletions)) {
-                        cloudCompletions = window.globalRoutineCompletions;
-                        console.log(`☁️ DEBUG: Found global cloud completions with ${cloudCompletions.length} entries`);
-                        
-                        // Filter for current month and routine type
-                        const currentMonthCloudCompletions = cloudCompletions.filter(completion => {
-                            if (!completion.date || !completion.template_id) return false;
-                            const completionMonth = completion.date.substring(0, 7); // "2025-08-13" -> "2025-08"
-                            const expectedPrefix = currentMonthPrefix.substring(0, 7); // "2025-08-13" -> "2025-08" 
-                            return completionMonth === expectedPrefix && 
-                                   completion.template_id.includes(routineType) && 
-                                   completion.completed === true;
-                        });
-                        
-                        console.log(`🔍 DEBUG: Current month cloud completions for ${routineType}:`, currentMonthCloudCompletions.length);
-                        
-                        // Count days with completed routines (group by date)
-                        const completionDates = new Set(currentMonthCloudCompletions.map(c => c.date));
-                        const cloudMonthlyCount = completionDates.size;
-                        console.log(`🔍 DEBUG: Cloud format count for ${routineType}: ${cloudMonthlyCount}`);
-                        
-                        // Use the higher count (in case data exists in both formats)
-                        monthlyCount = Math.max(monthlyCount, cloudMonthlyCount);
-                    } else {
-                        console.log(`🔍 DEBUG: No cloud completions cache found, trying direct Supabase query...`);
-                        
-                        // Try direct Supabase query if authenticated and cache is empty
-                        if (supabase?.isAuthenticated()) {
-                            try {
-                                // Query routine completions directly from Supabase
-                                const currentMonthStart = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
-                                const nextMonth = currentMonth === 12 ? 1 : currentMonth + 1;
-                                const nextYear = currentMonth === 12 ? currentYear + 1 : currentYear;
-                                const nextMonthStart = `${nextYear}-${nextMonth.toString().padStart(2, '0')}-01`;
-                                
-                                console.log(`🔍 DEBUG: Querying Supabase for routine completions from ${currentMonthStart} to ${nextMonthStart}`);
-                                
-                                // Direct Supabase query not needed here - data should be loaded via loadRoutineCompletions()
-                                console.log(`🔍 DEBUG: Cache is empty - data should be loaded by loadRoutineCompletions() on login`);
-                            } catch (error) {
-                                console.warn(`⚠️ Error querying Supabase directly:`, error);
-                            }
-                        } else {
-                            console.log(`🔍 DEBUG: Not authenticated for direct Supabase query`);
-                        }
-                    }
-                } catch (error) {
-                    console.warn(`⚠️ Error checking cloud completions:`, error);
-                }
-                console.log(`🔍 DEBUG: monthlyCount for ${routineType}:`, monthlyCount);
-                const streakTiles = document.querySelectorAll('.streak-tile');
-                console.log(`🔍 DEBUG: Found ${streakTiles.length} streak tiles`);
-                const tileIndex = routineType === 'morning' ? 0 : 1;
-                const targetTile = streakTiles[tileIndex];
-                console.log(`🔍 DEBUG: targetTile at index ${tileIndex}:`, targetTile);
-                if (targetTile) {
-                    const numberElement = targetTile.querySelector('.streak-number');
-                    console.log(`🔍 DEBUG: numberElement:`, numberElement);
-                    if (numberElement) {
-                        numberElement.textContent = monthlyCount;
-                        console.log(`🔍 DEBUG: Set ${routineType} counter to ${monthlyCount}`);
-                    }
-                }
+                // Note: Counter updates now handled by SimpleCounters
             });
         }
 
@@ -2901,11 +2814,9 @@
                 }
             });
             
-            // Update progress and streak displays
+            // Update progress displays
             updateRoutineProgress();
-            if (window.updateMonthlyStreakDisplays) {
-                updateMonthlyStreakDisplays();
-            }
+            // Note: Counter updates now handled by SimpleCounters
             
             alert('Routinen für heute wurden zurückgesetzt!');
             console.log('Routines reset for today');
@@ -2920,10 +2831,7 @@
             monthlyData[monthKey] = 0;
             localStorage.setItem('monthlyTodoCompletions', JSON.stringify(monthlyData));
             
-            // Update streak displays
-            if (window.updateMonthlyStreakDisplays) {
-                updateMonthlyStreakDisplays();
-            }
+            // Note: Counter updates now handled by SimpleCounters
             
             const monthName = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
                              'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()];
@@ -2931,133 +2839,8 @@
             console.log(`Monthly todos reset for ${monthKey}`);
         }
         
-        // === CLOUD-BASED TODO COUNTER ===
-        async function initializeTodoCounter() {
-            try {
-                // Prevent multiple concurrent calls
-                if (initializeTodoCounter.running) {
-                    console.log('⚠️ Todo counter initialization already in progress, skipping...');
-                    return;
-                }
-                initializeTodoCounter.running = true;
-                
-                console.log('☁️ Initializing todo counter from cloud data...');
-                
-                if (!supabase?.isAuthenticated()) {
-                    console.log('⚠️ Not authenticated, using local fallback for todo counter');
-                    initializeTodoCounterLocal();
-                    return;
-                }
-                
-                const now = new Date();
-                const currentMonth = now.getMonth() + 1; // 1-12
-                const currentYear = now.getFullYear();
-                const monthName = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-                                 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()];
-                
-                // Query completed todos for current month from cloud
-                const startOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
-                const endOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-31`;
-                
-                const user = supabase.getCurrentUser();
-                const completedTodos = await supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&created_at=gte.${startOfMonth}&created_at=lt.${endOfMonth}&select=*`);
-                const todoCount = completedTodos ? completedTodos.length : 0;
-                
-                console.log(`☁️ Found ${todoCount} completed todos in ${monthName} ${currentYear} from cloud`);
-                
-                // Update the third streak tile (todos)
-                const streakTiles = document.querySelectorAll('.streak-tile');
-                const todoTile = streakTiles[2]; // Third tile is todos
-                if (todoTile) {
-                    const numberElement = todoTile.querySelector('.streak-number');
-                    const dateElement = todoTile.querySelector('.streak-date');
-                    if (numberElement && dateElement) {
-                        numberElement.textContent = todoCount;
-                        dateElement.textContent = `${monthName} ${currentYear}`;
-                        console.log(`☁️ Todo counter set to ${todoCount} from cloud data`);
-                        
-                        // Additional verification
-                        setTimeout(() => {
-                            const verifyElement = document.querySelectorAll('.streak-tile')[2]?.querySelector('.streak-number');
-                            if (verifyElement && verifyElement.textContent !== todoCount.toString()) {
-                                console.warn(`⚠️ Todo counter was overwritten! Setting back to ${todoCount}`);
-                                verifyElement.textContent = todoCount;
-                            } else {
-                                console.log(`✅ Todo counter verified: ${verifyElement?.textContent}`);
-                            }
-                        }, 1000);
-                    }
-                } else {
-                    console.error('Todo tile not found');
-                }
-            } catch (error) {
-                console.error('❌ Error loading cloud todo counter, falling back to local:', error);
-                initializeTodoCounterLocal();
-            } finally {
-                initializeTodoCounter.running = false;
-            }
-        }
-        
-        // === LOCAL FALLBACK FOR TODO COUNTER ===
-        function initializeTodoCounterLocal() {
-            try {
-                const now = new Date();
-                const currentMonth = now.getMonth() + 1;
-                const currentYear = now.getFullYear();
-                const monthName = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-                                 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()];
-                
-                // Try to count from cached todos first
-                let todoCount = 0;
-                try {
-                    const cachedTodos = localStorage.getItem('todos_cache');
-                    if (cachedTodos) {
-                        const todos = JSON.parse(cachedTodos);
-                        console.log(`📱 Found ${todos.length} todos in cache`);
-                        
-                        // Count completed todos from current month
-                        todoCount = todos.filter(todo => {
-                            if (!todo.completed) return false;
-                            
-                            const completedDate = new Date(todo.completed_at || todo.created_at);
-                            return completedDate.getMonth() + 1 === currentMonth && 
-                                   completedDate.getFullYear() === currentYear;
-                        }).length;
-                        
-                        console.log(`📱 Counted ${todoCount} completed todos from current month`);
-                    } else {
-                        console.log(`📱 No todos cache found`);
-                    }
-                } catch (e) {
-                    console.warn('📱 Error counting from todos cache:', e);
-                    
-                    // Fallback to old method
-                    const monthKey = `${currentYear}-${now.getMonth()}`;
-                    const monthlyData = JSON.parse(localStorage.getItem('monthlyTodoCompletions') || '{}');
-                    todoCount = monthlyData[monthKey] || 0;
-                    console.log(`📱 Fallback to monthly counter: ${todoCount}`);
-                }
-                
-                console.log(`📱 Local fallback: Todo counter for ${monthName} ${currentYear}: ${todoCount}`);
-                
-                // Update the third streak tile (todos)
-                const streakTiles = document.querySelectorAll('.streak-tile');
-                const todoTile = streakTiles[2]; // Third tile is todos
-                if (todoTile) {
-                    const numberElement = todoTile.querySelector('.streak-number');
-                    const dateElement = todoTile.querySelector('.streak-date');
-                    if (numberElement && dateElement) {
-                        numberElement.textContent = todoCount;
-                        dateElement.textContent = `${monthName} ${currentYear}`;
-                        console.log(`📱 Local todo counter set to ${todoCount}`);
-                    }
-                } else {
-                    console.error('📱 Todo tile not found');
-                }
-            } catch (error) {
-                console.error('Error in local todo counter fallback:', error);
-            }
-        }
+        // === TODO COUNTER SYSTEMS REMOVED ===
+        // Note: Counter updates now handled by SimpleCounters
         
         // === MOBILE-FIRST ROUTINE COMPLETIONS ===
         let globalRoutineCompletions = []; // Always keep in memory for mobile
@@ -3073,7 +2856,7 @@
                         const localData = localStorage.getItem('routine_completions_cache');
                         if (localData) {
                             globalRoutineCompletions = JSON.parse(localData);
-                            updateMonthlyStreakDisplaysFromMemory();
+                            // Note: Counter updates now handled by SimpleCounters
                         }
                     } catch (e) {
                         console.warn('⚠️ Could not read local data:', e);
@@ -3148,8 +2931,7 @@
                 // STEP 4: Pure cloud mode - no local caching needed
                 console.log('☁️ Pure cloud mode - skipping local cache storage');
                 
-                // STEP 5: Update displays
-                updateMonthlyStreakDisplaysFromMemory();
+                // STEP 5: Counter updates now handled by SimpleCounters
                 
             } catch (error) {
                 console.error('❌ Error loading routine completions:', error);
@@ -3421,164 +3203,14 @@
             return [];
         }
         
-        // === CLOUD-BASED ROUTINE STREAK UPDATER ===
-        async function updateMonthlyStreakDisplaysFromMemory() {
-            try {
-                console.log('☁️ Updating routine streak displays from cloud data...');
-                
-                if (!supabase?.isAuthenticated()) {
-                    console.log('⚠️ Not authenticated, using local routine data');
-                    updateRoutineStreakLocal();
-                    return;
-                }
-                
-                const currentDate = new Date();
-                const currentYear = currentDate.getFullYear();
-                const currentMonth = currentDate.getMonth() + 1; // 1-12
-                const monthName = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-                                 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][currentDate.getMonth()];
-                
-                // Query routine completions for current month from cloud
-                const startOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
-                const endOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-31`;
-                
-                const routineCompletions = await supabase.query(`routine_completions?date=gte.${startOfMonth}&date=lte.${endOfMonth}&completed=eq.true&select=*`);
-                
-                console.log(`☁️ Found ${routineCompletions?.length || 0} completed routines in ${monthName} ${currentYear} from cloud`);
-                
-                // Count morning and evening completions
-                let morningCount = 0;
-                let eveningCount = 0;
-                
-                if (routineCompletions) {
-                    const morningDates = new Set();
-                    const eveningDates = new Set();
-                    
-                    routineCompletions.forEach(completion => {
-                        if (completion.template_id.includes('morning')) {
-                            morningDates.add(completion.date);
-                        } else if (completion.template_id.includes('evening')) {
-                            eveningDates.add(completion.date);
-                        }
-                    });
-                    
-                    morningCount = morningDates.size;
-                    eveningCount = eveningDates.size;
-                }
-                
-                console.log(`☁️ Cloud routine counts: Morning=${morningCount}, Evening=${eveningCount}`);
-                
-                // Update streak tiles
-                const streakTiles = document.querySelectorAll('.streak-tile');
-                if (streakTiles.length >= 2) {
-                    // Morning (tile 0)
-                    const morningTile = streakTiles[0];
-                    const morningNumber = morningTile?.querySelector('.streak-number');
-                    const morningDate = morningTile?.querySelector('.streak-date');
-                    if (morningNumber && morningDate) {
-                        morningNumber.textContent = morningCount;
-                        morningDate.textContent = `${monthName} ${currentYear}`;
-                        console.log(`☁️ Updated morning counter to ${morningCount} from cloud`);
-                    }
-                    
-                    // Evening (tile 1)  
-                    const eveningTile = streakTiles[1];
-                    const eveningNumber = eveningTile?.querySelector('.streak-number');
-                    const eveningDate = eveningTile?.querySelector('.streak-date');
-                    if (eveningNumber && eveningDate) {
-                        eveningNumber.textContent = eveningCount;
-                        eveningDate.textContent = `${monthName} ${currentYear}`;
-                        console.log(`☁️ Updated evening counter to ${eveningCount} from cloud`);
-                    }
-                } else {
-                    console.warn('⚠️ Streak tiles not found');
-                }
-                
-            } catch (error) {
-                console.error('❌ Error updating cloud routine streaks, falling back to local:', error);
-                updateRoutineStreakLocal();
-            }
-        }
+        // === CLOUD-BASED ROUTINE STREAK UPDATER REMOVED ===
+        // Note: Counter updates now handled by SimpleCounters
         
-        // === LOCAL FALLBACK FOR ROUTINE STREAKS ===
-        function updateRoutineStreakLocal() {
-            try {
-                console.log('📱 Updating routine streaks from local data...');
-                const routineCompletions = getRoutineCompletions();
-                const currentDate = new Date();
-                const currentMonthPrefix = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
-                
-                console.log(`📱 Checking ${routineCompletions.length} local routine completions for ${currentMonthPrefix}`);
-                
-                // Count morning routine completions this month
-                const morningCompletions = routineCompletions.filter(c => 
-                    c.date && c.date.startsWith(currentMonthPrefix) && 
-                    c.template_id && c.template_id.includes('morning') && 
-                    c.completed === true
-                );
-                const morningDates = new Set(morningCompletions.map(c => c.date));
-                const morningCount = morningDates.size;
-                
-                // Count evening routine completions this month  
-                const eveningCompletions = routineCompletions.filter(c =>
-                    c.date && c.date.startsWith(currentMonthPrefix) && 
-                    c.template_id && c.template_id.includes('evening') && 
-                    c.completed === true
-                );
-                const eveningDates = new Set(eveningCompletions.map(c => c.date));
-                const eveningCount = eveningDates.size;
-                
-                console.log(`📱 Local routine counts: Morning=${morningCount}, Evening=${eveningCount}`);
-                
-                // Update streak tiles
-                const streakTiles = document.querySelectorAll('.streak-tile');
-                if (streakTiles.length >= 2) {
-                    // Morning (tile 0)
-                    const morningTile = streakTiles[0];
-                    const morningNumber = morningTile?.querySelector('.streak-number');
-                    if (morningNumber) {
-                        morningNumber.textContent = morningCount;
-                        console.log(`📱 Updated morning counter to ${morningCount} from local`);
-                    }
-                    
-                    // Evening (tile 1)  
-                    const eveningTile = streakTiles[1];
-                    const eveningNumber = eveningTile?.querySelector('.streak-number');
-                    if (eveningNumber) {
-                        eveningNumber.textContent = eveningCount;
-                        console.log(`📱 Updated evening counter to ${eveningCount} from local`);
-                    }
-                } else {
-                    console.warn('⚠️ Streak tiles not found');
-                }
-                
-            } catch (error) {
-                console.error('❌ Error updating local routine streaks:', error);
-            }
-        }
+        // === LOCAL FALLBACK FOR ROUTINE STREAKS REMOVED ===
+        // Note: Counter updates now handled by SimpleCounters
         
-        // === MONTHLY STREAK DISPLAY FUNCTION (FIXED) ===
-        function updateMonthlyStreakDisplays() {
-            console.log('🔄 Updating monthly streak displays...');
-            // Simple implementation for now
-            const now = new Date();
-            const monthName = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-                             'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][now.getMonth()];
-            
-            // Update streak tiles with current month
-            const streakTiles = document.querySelectorAll('.streak-tile');
-            streakTiles.forEach((tile, index) => {
-                const dateElement = tile.querySelector('.streak-date');
-                if (dateElement) {
-                    dateElement.textContent = `${monthName} ${now.getFullYear()}`;
-                }
-            });
-        }
-        
-        function updateMonthlyStreakDisplaysFromMemory() {
-            // Fallback to basic function for now
-            updateMonthlyStreakDisplays();
-        }
+        // === MONTHLY STREAK DISPLAY FUNCTIONS REMOVED ===
+        // Note: Counter updates now handled by SimpleCounters
         
         function getRoutineCompletions() {
             // Return empty array for now
@@ -3586,10 +3218,7 @@
         }
         
         // === MAKE FUNCTIONS GLOBALLY AVAILABLE ===
-        window.updateMonthlyStreakDisplays = updateMonthlyStreakDisplays;
-        window.updateMonthlyStreakDisplaysFromMemory = updateMonthlyStreakDisplaysFromMemory;
         window.getRoutineCompletions = getRoutineCompletions;
-        window.initializeTodoCounter = initializeTodoCounter;
         window.loadRoutineCompletions = loadRoutineCompletions;
         window.loadRoutineStates = loadRoutineStates;
         window.updateRoutineProgress = updateRoutineProgress;
