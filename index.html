@@ -2496,11 +2496,12 @@
             if (hash && hashTabMapping[hash]) {
                 console.log(`🔗 Hash changed to #${hash}, switching to ${hashTabMapping[hash]}`);
                 switchTab(hashTabMapping[hash], false); // Don't update hash again
-            } else if (!hash) {
-                // Default to home if no hash
-                console.log('🔗 No hash found, defaulting to home');
+            } else if (!hash && supabase?.isAuthenticated()) {
+                // Only default to home if authenticated (not on login screen)
+                console.log('🔗 No hash found, defaulting to home (authenticated user)');
                 switchTab('tab-home', false);
             }
+            // If not authenticated and no hash, do nothing (stay on login screen)
         }
 
         // Initialize tab from URL hash on page load
@@ -2508,7 +2509,11 @@
             const hash = window.location.hash.slice(1);
             if (hash && hashTabMapping[hash]) {
                 switchTab(hashTabMapping[hash], false);
+            } else if (!hash && supabase?.isAuthenticated()) {
+                // Only default to home if authenticated
+                switchTab('tab-home', false);
             }
+            // If not authenticated and no hash, do nothing (stay on login screen)
         }
 
         // === ROUTINE PROGRESS ===
@@ -6445,15 +6450,17 @@
             // Add hash change event listener
             window.addEventListener('hashchange', handleHashChange);
             
-            // Initialize URL hash for current active tab
+            // Initialize URL hash for current active tab (only if authenticated)
             setTimeout(() => {
-                const activeTab = document.querySelector('.nav-tab.active');
-                if (activeTab && !window.location.hash) {
-                    const tabId = activeTab.getAttribute('data-tab');
-                    if (tabId && tabHashMapping[tabId]) {
-                        const hash = tabHashMapping[tabId];
-                        window.history.replaceState(null, null, `#${hash}`);
-                        console.log(`🔗 Initial tab loaded: ${tabId}, URL set to #${hash}`);
+                if (supabase?.isAuthenticated()) {
+                    const activeTab = document.querySelector('.nav-tab.active');
+                    if (activeTab && !window.location.hash) {
+                        const tabId = activeTab.getAttribute('data-tab');
+                        if (tabId && tabHashMapping[tabId]) {
+                            const hash = tabHashMapping[tabId];
+                            window.history.replaceState(null, null, `#${hash}`);
+                            console.log(`🔗 Initial tab loaded: ${tabId}, URL set to #${hash}`);
+                        }
                     }
                 }
             }, 100);
