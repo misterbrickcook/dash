@@ -2507,15 +2507,15 @@
         }
 
         // === ROUTINE PROGRESS ===
-        // Load saved checkbox states from database and localStorage
+        // Load saved checkbox states from cloud only (pure cloud mode)
         async function loadRoutineStates() {
             const today = new Date().toISOString().split('T')[0];
             let savedStates = {};
             
-            // First load from localStorage (fallback)
-            savedStates = JSON.parse(localStorage.getItem(`routineStates_${today}`) || '{}');
+            // Pure cloud mode - no localStorage fallback needed
+            console.log('☁️ Pure cloud mode - loading routine states from cloud only');
             
-            // If authenticated, load from database and merge/override localStorage states
+            // If authenticated, load from database
             if (supabase?.isAuthenticated()) {
                 try {
                     const routineCompletions = getRoutineCompletions();
@@ -2534,8 +2534,8 @@
                             }
                         });
                         
-                        // Update localStorage with merged states
-                        localStorage.setItem(`routineStates_${today}`, JSON.stringify(savedStates));
+                        // Pure cloud mode - no localStorage updates needed
+                        console.log('☁️ Routine states loaded from cloud');
                     }
                 } catch (error) {
                     console.error('Error loading routine states from database:', error);
@@ -2613,29 +2613,27 @@
                 // Optional: Log progress for debugging
                 console.log(`Routine progress: ${percentage}% (${checkedBoxes.length}/${checkboxes.length})`);
                 
-                // Update monthly streaks based on completion status
+                // Update monthly streaks based on completion status (pure cloud mode)
                 const today = new Date().toISOString().split('T')[0];
                 const routineType = section.querySelector('h2').textContent.includes('Morgen') ? 'morning' : 'evening';
-                const localData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
-                if (!localData[today]) localData[today] = {};
                 
+                let completionStatus;
                 if (percentage === 100) {
                     console.log('🔍 DEBUG: 100% reached, marking as complete');
-                    localData[today][routineType] = true;
+                    completionStatus = true;
                 } else {
                     console.log('🔍 DEBUG: Less than 100%, marking as incomplete');
-                    localData[today][routineType] = false;
+                    completionStatus = false;
                 }
                 
-                localStorage.setItem('routineCompletionData', JSON.stringify(localData));
-                console.log(`🔍 DEBUG: Saved ${routineType} completion: ${localData[today][routineType]}`);
+                console.log(`☁️ Pure cloud mode: ${routineType} completion: ${completionStatus}`);
                 
-                // Also save to cloud if authenticated (async without blocking)
+                // Save to cloud if authenticated (async without blocking)
                 if (supabase?.isAuthenticated()) {
                     (async () => {
                         try {
-                            console.log(`☁️ Saving routine completion to cloud: ${routineType} = ${localData[today][routineType]}`);
-                            await cloudStorage.saveRoutineCompletion(`${routineType}_routine`, today, localData[today][routineType]);
+                            console.log(`☁️ Saving routine completion to cloud: ${routineType} = ${completionStatus}`);
+                            await cloudStorage.saveRoutineCompletion(`${routineType}_routine`, today, completionStatus);
                             
                             // Refresh cloud-based routine counter after saving
                             setTimeout(() => {
@@ -2649,7 +2647,6 @@
                 
                 // Update streak display directly
                 console.log('🔍 DEBUG: Updating streak display');
-                console.log('🔍 DEBUG: localData:', localData);
                 
                 // Calculate monthly count from both legacy localStorage and new cloud cache
                 const currentDate = new Date();
@@ -3147,13 +3144,8 @@
                     }
                 }
                 
-                // STEP 4: Cache locally for offline access
-                try {
-                    localStorage.setItem('routine_completions_cache', JSON.stringify(globalRoutineCompletions));
-                    console.log('💾 Cached cloud data locally');
-                } catch (storageError) {
-                    console.warn('⚠️ localStorage save failed:', storageError);
-                }
+                // STEP 4: Pure cloud mode - no local caching needed
+                console.log('☁️ Pure cloud mode - skipping local cache storage');
                 
                 // STEP 5: Update displays
                 updateMonthlyStreakDisplaysFromMemory();
