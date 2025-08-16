@@ -2314,7 +2314,10 @@
                     // Only clear auth-related data, preserve routine/todo data
                     localStorage.removeItem('supabase.auth.token');
                     sessionStorage.clear();
-                    console.log('✅ Logout successful, reloading...');
+                    console.log('✅ Logout successful, redirecting to login...');
+                    
+                    // Clear URL hash and redirect to clean login page
+                    window.history.replaceState(null, null, window.location.pathname);
                     window.location.reload();
                 } catch (error) {
                     console.error('❌ Logout error:', error);
@@ -2397,15 +2400,9 @@
                     
                     console.log('✅ Dashboard data loaded');
                     
-                    // After login, check current URL hash and activate the correct tab
-                    const currentHash = window.location.hash.slice(1);
-                    if (currentHash && hashTabMapping[currentHash]) {
-                        console.log(`🔗 After login, activating tab for hash: #${currentHash}`);
-                        switchTab(hashTabMapping[currentHash], false);
-                    } else {
-                        // Default to home if no hash
-                        switchTab('tab-home', false);
-                    }
+                    // After login, always go to home tab for clean UX
+                    console.log('🏠 After login, redirecting to home tab');
+                    switchTab('tab-home', true); // Update URL to #home
                 } else {
                     // Initialize displays for local storage mode
                     TodoManager.updateHomeTodos();
