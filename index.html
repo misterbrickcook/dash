@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self';">
     <title>DASHBOARD v2.3</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22 font-family=%22-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif%22 font-weight=%22700%22 fill=%22%23000000%22>A</text></svg>">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -1510,13 +1511,13 @@
             <form id="add-todo-form" autocomplete="off">
                 <div class="form-group">
                     <label for="todo-title">Aufgabe</label>
-                    <input type="text" id="todo-title" placeholder="Was möchtest du erledigen?" required autocomplete="off">
+                    <input type="text" id="todo-title" name="todo-title" placeholder="Was möchtest du erledigen?" required autocomplete="off">
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="todo-category">Kategorie</label>
-                        <select id="todo-category" required autocomplete="off">
+                        <select id="todo-category" name="todo-category" required autocomplete="off">
                             <option value="">Kategorie wählen</option>
                             <option value="privat">Privat</option>
                             <option value="uni">Uni</option>
@@ -1525,7 +1526,7 @@
                     </div>
                     <div class="form-group">
                         <label for="todo-priority">Priorität</label>
-                        <select id="todo-priority" required autocomplete="off">
+                        <select id="todo-priority" name="todo-priority" required autocomplete="off">
                             <option value="mittel" selected>Normal</option>
                             <option value="wichtig">Wichtig</option>
                             <option value="dringend">Dringend</option>
@@ -1536,11 +1537,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="todo-deadline">Deadline</label>
-                        <input type="date" id="todo-deadline" required autocomplete="off">
+                        <input type="date" id="todo-deadline" name="todo-deadline" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="todo-time">Uhrzeit</label>
-                        <input type="time" id="todo-time" value="21:00" required autocomplete="off">
+                        <input type="time" id="todo-time" name="todo-time" value="21:00" required autocomplete="off">
                     </div>
                 </div>
                 
@@ -1562,7 +1563,7 @@
             <form id="add-goal-form" autocomplete="off">
                 <div class="form-group">
                     <label for="goal-name">Ziel-Name</label>
-                    <input type="text" id="goal-name" placeholder="Was möchtest du erreichen?" required autocomplete="off">
+                    <input type="text" id="goal-name" name="goal-name" placeholder="Was möchtest du erreichen?" required autocomplete="off">
                 </div>
                 
                 <div class="form-group">
@@ -1725,7 +1726,7 @@
             <form id="edit-goal-value-form" autocomplete="off">
                 <div class="form-group">
                     <label for="new-goal-value">Neuer aktueller Wert</label>
-                    <input type="number" id="new-goal-value" step="0.01" required autocomplete="off" style="font-size: 1.1rem; padding: 0.75rem;">
+                    <input type="number" id="new-goal-value" name="new-goal-value" step="0.01" required autocomplete="off" style="font-size: 1.1rem; padding: 0.75rem;">
                 </div>
                 
                 <div class="form-actions">
@@ -1745,11 +1746,11 @@
             
             <div class="form-group">
                 <label for="login-email">Email</label>
-                <input type="email" id="login-email" placeholder="your@email.com" required>
+                <input type="email" id="login-email" name="email" placeholder="your@email.com" required autocomplete="email">
             </div>
             <div class="form-group">
                 <label for="login-password">Password</label>
-                <input type="password" id="login-password" placeholder="Your password" required>
+                <input type="password" id="login-password" name="password" placeholder="Your password" required autocomplete="current-password">
             </div>
             <button id="login-btn" class="auth-btn">Login</button>
             <div id="login-error" class="auth-error"></div>
