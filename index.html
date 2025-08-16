@@ -1884,8 +1884,7 @@
             
             <div class="category-tabs">
                 <button class="category-tab active" data-category="alle">Alle</button>
-                <button class="category-tab" data-category="heute">Heute</button>
-                <button class="category-tab" data-category="überfällig">Überfällig <span id="overdue-count" class="badge" style="display: none;"></span></button>
+                <button class="category-tab" data-category="heute">Heute <span id="overdue-count" class="badge" style="display: none;"></span></button>
                 <button class="category-tab" data-category="privat">Privat</button>
                 <button class="category-tab" data-category="uni">Uni</button>
                 <button class="category-tab" data-category="arbeit">Arbeit</button>
@@ -1896,12 +1895,7 @@
 
             <!-- HEUTE KATEGORIE -->
             <div class="category-content" id="heute">
-                <!-- Todos for today will be loaded from database -->
-            </div>
-
-            <!-- ÜBERFÄLLIG KATEGORIE -->
-            <div class="category-content" id="überfällig">
-                <!-- Overdue todos will be loaded from database -->
+                <!-- Todos for today and overdue will be loaded from database -->
             </div>
 
             <!-- PRIVAT KATEGORIE -->
@@ -3915,19 +3909,9 @@
                                        String(today.getMonth() + 1).padStart(2, '0') + '-' + 
                                        String(today.getDate()).padStart(2, '0');
                         
+                        // Include both today's todos AND overdue todos
                         filteredTodos = this.todos.filter(todo => 
-                            todo.date === todayStr && !todo.completed
-                        );
-                        break;
-                    case 'überfällig':
-                        // Get today without timezone conversion
-                        const todayForOverdue = new Date();
-                        const todayStrForOverdue = todayForOverdue.getFullYear() + '-' + 
-                                                 String(todayForOverdue.getMonth() + 1).padStart(2, '0') + '-' + 
-                                                 String(todayForOverdue.getDate()).padStart(2, '0');
-                        
-                        filteredTodos = this.todos.filter(todo => 
-                            todo.date && todo.date < todayStrForOverdue && !todo.completed
+                            todo.date && todo.date <= todayStr && !todo.completed
                         );
                         break;
                     case 'alle':
@@ -4216,15 +4200,25 @@
                 const homeContainer = document.getElementById('home-todos');
                 if (!homeContainer) return;
                 
-                // Show today's uncompleted todos on home
+                // Show today's and overdue uncompleted todos on home
                 const today = new Date();
                 const todayStr = today.getFullYear() + '-' + 
                                String(today.getMonth() + 1).padStart(2, '0') + '-' + 
                                String(today.getDate()).padStart(2, '0');
                 
                 const todayTodos = this.todos.filter(todo => 
-                    todo.date === todayStr && !todo.completed
+                    todo.date && todo.date <= todayStr && !todo.completed
                 ).sort((a, b) => {
+                    // First sort by date (overdue first)
+                    const dateA = a.date || '9999-12-31';
+                    const dateB = b.date || '9999-12-31';
+                    const dateComparison = dateA.localeCompare(dateB);
+                    
+                    if (dateComparison !== 0) {
+                        return dateComparison;
+                    }
+                    
+                    // Then by time
                     const timeA = a.time || '23:59';
                     const timeB = b.time || '23:59';
                     return timeA.localeCompare(timeB);
