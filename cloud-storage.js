@@ -564,98 +564,48 @@ class CloudStorage {
     // === RESOURCES CLOUD STORAGE ===
     
     async getResources() {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            console.error('❌ CloudStorage: Not authenticated - pure cloud mode requires authentication');
+            return [];
+        }
+        
         try {
-            console.log('📋 getResources() called');
-            console.log('🔍 Authentication status:', this.isSupabaseAuthenticated());
-            console.log('🌐 Online status:', this.isOnline);
-            console.log('🔌 Supabase available:', !!supabase);
-            
-            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                console.log('☁️ Not authenticated or offline, using local resources');
-                const localResources = this.getLocalResources();
-                console.log(`📱 Local resources count: ${localResources.length}`);
-                return localResources;
+            console.log('☁️ CloudStorage: Fetching resources from cloud...');
+            const user = supabase.getCurrentUser();
+            if (!user) {
+                throw new Error('No current user found');
             }
             
-            console.log('☁️ Fetching resources from Supabase...');
-            // Filter by user_id to only get current user's resources
-            const user = supabase.getCurrentUser();
-            const userFilter = user ? `user_id=eq.${user.id}` : '';
-            console.log('👤 Filtering resources for user:', user?.id);
+            const data = await supabase.query(`resources?user_id=eq.${user.id}&select=*`);
             
-            const data = await supabase.query(`resources?${userFilter}&select=*`);
-            console.log('☁️ Supabase query result:', data);
-            console.log(`☁️ Cloud query returned ${data ? data.length : 0} resources`);
-            
-            if (data && data.length > 0) {
-                // Clear any old resources data to prevent duplicates
-                localStorage.removeItem('resources');
-                localStorage.setItem('resources_cache', JSON.stringify(data));
-                console.log(`☁️ Successfully loaded ${data.length} resources from cloud and cached locally`);
-                console.log('📋 Sample resource titles:', data.slice(0, 3).map(r => r.title));
+            if (data && Array.isArray(data)) {
+                console.log(`☁️ CloudStorage: Loaded ${data.length} resources from cloud`);
                 return data;
-            } else if (data && data.length === 0) {
-                console.log('☁️ Cloud query successful but returned 0 resources');
-                // Trust the cloud - if it says 0, clear local cache
-                localStorage.removeItem('resources');
-                localStorage.setItem('resources_cache', JSON.stringify([]));
-                console.log('📱 Cloud returned 0 resources, cleared local cache');
+            } else {
+                console.log('☁️ CloudStorage: No resources found in cloud');
                 return [];
             }
-            
-            console.log('☁️ No cloud data, falling back to local');
-            const localResources = this.getLocalResources();
-            console.log(`📱 Fallback local resources count: ${localResources.length}`);
-            return localResources;
         } catch (error) {
-            console.error('❌ Error fetching resources from cloud:', error);
-            console.log('📱 Falling back to local resources');
-            const localResources = this.getLocalResources();
-            console.log(`📱 Error fallback local resources count: ${localResources.length}`);
-            return localResources;
+            console.error('❌ CloudStorage: Error fetching resources:', error);
+            throw error; // Don't hide errors in pure cloud mode
         }
     }
     
     async saveResource(resource) {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            console.error('❌ CloudStorage: Not authenticated - cannot save resource in pure cloud mode');
+            throw new Error('Not authenticated - pure cloud mode requires authentication');
+        }
+        
         try {
-            console.log('💾 saveResource() called for:', resource.title);
-            console.log('🔍 Resource data:', { id: resource.id, title: resource.title, category: resource.category });
-            
-            // Always save locally first for immediate UI feedback
-            this.saveLocalResource(resource);
-            console.log('📱 Resource saved locally');
-            
-            // Enhanced debug logging for authentication issues
-            console.log('🔍 DEBUG - Checking prerequisites:');
-            console.log('  - supabase exists:', !!supabase);
-            console.log('  - isOnline:', this.isOnline);
-            console.log('  - isSupabaseAuthenticated():', this.isSupabaseAuthenticated());
-            
-            if (supabase) {
-                try {
-                    const user = supabase.getCurrentUser();
-                    console.log('  - getCurrentUser():', !!user, user ? `(ID: ${user.id})` : '(null)');
-                } catch (userError) {
-                    console.log('  - getCurrentUser() error:', userError.message);
-                }
-            }
-            
-            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                console.log('⏳ Not authenticated/online, queuing for sync');
-                console.log('🔍 Reason: supabase=' + !!supabase + ', online=' + this.isOnline + ', auth=' + this.isSupabaseAuthenticated());
-                this.queueSync('resources', 'save', resource);
-                return;
-            }
+            console.log('☁️ CloudStorage: Saving resource to cloud:', resource.title);
             
             // Add user_id to resource before saving
             const user = supabase.getCurrentUser();
             if (user) {
                 resource.user_id = user.id;
-                console.log('👤 Added user_id to resource:', user.id);
             } else {
-                console.warn('⚠️ No current user found when saving resource');
-                // Try to save without user_id rather than failing completely
-                console.log('🔄 Attempting to save resource without user_id...');
+                throw new Error('No current user found');
             }
             
             // Check if this is a real database ID (should be a number from BIGSERIAL)
@@ -665,111 +615,66 @@ class CloudStorage {
                               resource.id > 0;
             
             if (isRealDbId) {
-                console.log('🔄 Updating existing resource in cloud with real DB ID:', resource.id);
+                console.log('☁️ CloudStorage: Updating existing resource in cloud with ID:', resource.id);
                 await supabase.update('resources', resource, resource.id);
-                console.log('✅ Resource updated in cloud');
+                console.log('☁️ CloudStorage: Resource updated in cloud');
             } else {
-                console.log('➕ Inserting new resource to cloud...');
-                console.log('🔍 Current resource ID type:', typeof resource.id, 'value:', resource.id);
+                console.log('☁️ CloudStorage: Inserting new resource to cloud...');
                 
                 // Remove any ID that's not a proper database BIGSERIAL ID
                 if (resource.id) {
-                    console.log('🔄 Removing non-database ID:', resource.id, 'type:', typeof resource.id);
+                    console.log('☁️ CloudStorage: Removing non-database ID:', resource.id);
                     delete resource.id;
                 }
                 
                 const result = await supabase.insert('resources', [resource]);
-                console.log('🔍 Insert result:', result);
                 
                 if (result && result.length > 0 && result[0]) {
                     const newId = result[0].id;
-                    console.log('✅ New resource inserted with database ID:', newId);
+                    console.log('☁️ CloudStorage: New resource inserted with database ID:', newId);
                     resource.id = newId; // Update the passed resource object
-                    this.saveLocalResource(resource); // Save with proper database ID
                 } else {
-                    console.warn('⚠️ Insert returned unexpected result:', result);
-                    console.log('🔍 Full insert response:', JSON.stringify(result, null, 2));
                     throw new Error('Failed to insert resource - unexpected response format');
                 }
             }
             
-            console.log('✅ Resource synced to cloud:', resource.title);
+            console.log('☁️ CloudStorage: Resource synced to cloud:', resource.title);
         } catch (error) {
-            console.error('❌ Error saving resource to cloud:', error);
-            console.error('❌ Error details:', error.message, error.stack);
-            console.log('⏳ Queuing resource for later sync');
-            this.queueSync('resources', 'save', resource);
+            console.error('❌ CloudStorage: Error saving resource to cloud:', error);
+            throw error; // Don't hide errors in pure cloud mode
         }
     }
     
     async deleteResource(resourceId) {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            console.error('❌ CloudStorage: Not authenticated - cannot delete resource in pure cloud mode');
+            throw new Error('Not authenticated - pure cloud mode requires authentication');
+        }
+        
         try {
-            this.deleteLocalResource(resourceId);
-            
-            if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                this.queueSync('resources', 'delete', { id: resourceId });
-                return;
-            }
-            
+            console.log('☁️ CloudStorage: Deleting resource from cloud:', resourceId);
             await supabase.delete('resources', resourceId);
-            console.log('✅ Resource deleted from cloud:', resourceId);
+            console.log('☁️ CloudStorage: Resource deleted from cloud:', resourceId);
         } catch (error) {
-            console.error('Error deleting resource:', error);
-            this.queueSync('resources', 'delete', { id: resourceId });
+            console.error('❌ CloudStorage: Error deleting resource:', error);
+            throw error; // Don't hide errors in pure cloud mode
         }
     }
     
     getLocalResources() {
-        // Prioritize resources_cache (cloud synced data) over old resources key
-        const cached = localStorage.getItem('resources_cache');
-        if (cached) {
-            try {
-                const parsedCache = JSON.parse(cached);
-                console.log(`📱 getLocalResources: Found ${parsedCache.length} resources in cache`);
-                return parsedCache;
-            } catch (error) {
-                console.error('Error parsing resources_cache:', error);
-                localStorage.removeItem('resources_cache');
-            }
-        }
-        
-        // Fallback to old resources key only if no cache exists
-        const oldResources = localStorage.getItem('resources');
-        if (oldResources) {
-            try {
-                const parsedOld = JSON.parse(oldResources);
-                console.log(`📱 getLocalResources: Found ${parsedOld.length} resources in old storage`);
-                return parsedOld;
-            } catch (error) {
-                console.error('Error parsing old resources:', error);
-                localStorage.removeItem('resources');
-            }
-        }
-        
-        console.log('📱 getLocalResources: No local resources found');
+        // Pure cloud mode - no localStorage fallbacks
+        console.warn('⚠️ CloudStorage: getLocalResources() called in pure cloud mode - should not be used');
         return [];
     }
     
     saveLocalResource(resource) {
-        const resources = this.getLocalResources();
-        const existingIndex = resources.findIndex(r => r.id === resource.id);
-        
-        if (existingIndex >= 0) {
-            resources[existingIndex] = resource;
-        } else {
-            resources.push(resource);
-        }
-        
-        // Only use resources_cache for cloud-synced data
-        localStorage.setItem('resources_cache', JSON.stringify(resources));
-        console.log(`💾 saveLocalResource: Saved ${resources.length} resources to cache`);
+        // Pure cloud mode - no localStorage saving
+        console.warn('⚠️ CloudStorage: saveLocalResource() called in pure cloud mode - should not be used');
     }
     
     deleteLocalResource(resourceId) {
-        const resources = this.getLocalResources().filter(r => r.id !== resourceId);
-        // Only use resources_cache for cloud-synced data
-        localStorage.setItem('resources_cache', JSON.stringify(resources));
-        console.log(`🗑️ deleteLocalResource: Removed resource ${resourceId}, ${resources.length} remaining`);
+        // Pure cloud mode - no localStorage operations
+        console.warn('⚠️ CloudStorage: deleteLocalResource() called in pure cloud mode - should not be used');
     }
     
     getLocalRoutineData() {

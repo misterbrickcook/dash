@@ -4942,7 +4942,12 @@
             entries: [], // In-memory storage for demo
             
             async loadEntries() {
-                if (!supabase?.isAuthenticated()) return;
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ JournalManager: Not authenticated - pure cloud mode requires authentication');
+                    this.entries = [];
+                    return;
+                }
+                
                 try {
                     const data = await supabase.select('journal_entries', '*');
                     if (data && Array.isArray(data)) {
@@ -4973,10 +4978,15 @@
                                 tags: tags
                             };
                         });
+                        console.log(`☁️ JournalManager: Loaded ${this.entries.length} entries from cloud`);
                         this.refreshCurrentView();
+                    } else {
+                        console.log('☁️ JournalManager: No entries found in cloud');
+                        this.entries = [];
                     }
                 } catch (error) {
-                    console.error('Error loading journal entries:', error);
+                    console.error('❌ JournalManager: Error loading from cloud:', error);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
             },
             
@@ -5000,6 +5010,12 @@
             },
             
             async addEntry(entryData) {
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ JournalManager: Not authenticated - cannot add entry in pure cloud mode');
+                    alert('Fehler: Nicht authentifiziert. Journal-Eintrag kann nicht gespeichert werden.');
+                    return;
+                }
+                
                 const entry = {
                     title: entryData.title,
                     content: entryData.content,
@@ -5010,31 +5026,26 @@
                     created_at: new Date().toISOString()
                 };
                 
-                if (supabase?.isAuthenticated()) {
-                    try {
-                        // Create database entry without 'date' and 'created_at' fields (auto-generated)
-                        const dbEntry = { ...entry };
-                        delete dbEntry.date;
-                        delete dbEntry.created_at;
-                        console.log('💾 Sending to database:', dbEntry);
-                        const result = await supabase.insert('journal_entries', dbEntry);
-                        if (result && result.length > 0) {
-                            this.entries.push(result[0]);
-                        } else {
-                            entry.id = Date.now().toString();
-                            this.entries.push(entry);
-                        }
-                    } catch (error) {
-                        console.error('Error saving journal entry:', error);
-                        entry.id = Date.now().toString();
-                        this.entries.push(entry);
+                try {
+                    // Create database entry without 'date' and 'created_at' fields (auto-generated)
+                    const dbEntry = { ...entry };
+                    delete dbEntry.date;
+                    delete dbEntry.created_at;
+                    console.log('☁️ JournalManager: Saving entry to cloud:', dbEntry);
+                    const result = await supabase.insert('journal_entries', dbEntry);
+                    if (result && result.length > 0) {
+                        this.entries.push(result[0]);
+                        console.log('☁️ JournalManager: Entry saved to cloud with ID:', result[0].id);
+                    } else {
+                        throw new Error('Insert did not return data');
                     }
-                } else {
-                    entry.id = Date.now().toString();
-                    this.entries.push(entry);
+                } catch (error) {
+                    console.error('❌ JournalManager: Error saving to cloud:', error);
+                    alert('Fehler beim Speichern des Journal-Eintrags: ' + error.message);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
                 
-                console.log('Journal entry added:', entry);
+                console.log('☁️ JournalManager: Entry added:', entry);
                 
                 // Refresh current view
                 this.refreshCurrentView();
@@ -5160,45 +5171,30 @@
             termine: [], // In-memory storage for demo
             
             async loadTermine(forceReload = false) {
-                console.log('🔄 TerminManager.loadTermine() called, forceReload:', forceReload);
-                console.log('🔍 Auth check:', supabase ? 'supabase exists' : 'no supabase', supabase?.isAuthenticated() ? 'authenticated' : 'not authenticated');
-                
-                // Enhanced authentication check with retry
                 if (!supabase?.isAuthenticated()) {
-                    console.log('❌ Not authenticated, checking again in 500ms...');
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    
-                    if (!supabase?.isAuthenticated()) {
-                        console.log('❌ Still not authenticated after retry, aborting loadTermine');
-                        return;
-                    }
+                    console.error('❌ TerminManager: Not authenticated - pure cloud mode requires authentication');
+                    this.termine = [];
+                    this.displayTermine();
+                    return;
                 }
                 
                 try {
-                    console.log('📡 Fetching termine from database...');
+                    console.log('☁️ TerminManager: Loading termine from cloud...');
                     const user = supabase.getCurrentUser();
                     const data = await supabase.query(`termine?user_id=eq.${user.id}&select=*`);
-                    console.log('📥 Raw termine data received:', data);
                     
                     if (data && Array.isArray(data)) {
                         this.termine = data;
-                        console.log('✅ Termine loaded to memory:', this.termine.length, 'items');
+                        console.log(`☁️ TerminManager: Loaded ${this.termine.length} termine from cloud`);
                         this.displayTermine();
                     } else {
-                        console.warn('⚠️ Invalid termine data format:', data);
+                        console.log('☁️ TerminManager: No termine found in cloud');
                         this.termine = [];
                         this.displayTermine();
                     }
                 } catch (error) {
-                    console.error('❌ Error loading termine:', error);
-                    
-                    // If error but we had termine before, keep them
-                    if (this.termine.length > 0 && !forceReload) {
-                        console.log('ℹ️ Keeping existing termine after error');
-                    } else {
-                        this.termine = [];
-                        this.displayTermine();
-                    }
+                    console.error('❌ TerminManager: Error loading from cloud:', error);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
             },
             
@@ -5228,44 +5224,51 @@
             },
             
             async addTermin(terminData) {
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ TerminManager: Not authenticated - cannot add termin in pure cloud mode');
+                    alert('Fehler: Nicht authentifiziert. Termin kann nicht gespeichert werden.');
+                    return;
+                }
+                
                 const termin = {
                     title: terminData.title,
                     description: terminData.description,
                     date: terminData.date,
                     time: terminData.time,
-                    user_id: supabase?.user?.id,
+                    user_id: supabase.getCurrentUser().id,
                     created_at: new Date().toISOString()
                 };
                 
-                if (supabase?.isAuthenticated()) {
-                    try {
-                        const result = await supabase.insert('termine', termin);
-                        if (result && result.length > 0) {
-                            this.termine.push(result[0]);
-                        } else {
-                            termin.id = Date.now().toString();
-                            this.termine.push(termin);
-                        }
-                    } catch (error) {
-                        console.error('Error saving termin:', error);
-                        termin.id = Date.now().toString();
-                        this.termine.push(termin);
+                try {
+                    console.log('☁️ TerminManager: Saving termin to cloud:', termin.title);
+                    const result = await supabase.insert('termine', termin);
+                    if (result && result.length > 0) {
+                        this.termine.push(result[0]);
+                        console.log('☁️ TerminManager: Termin saved to cloud with ID:', result[0].id);
+                    } else {
+                        throw new Error('Insert did not return data');
                     }
-                } else {
-                    termin.id = Date.now().toString();
-                    this.termine.push(termin);
+                } catch (error) {
+                    console.error('❌ TerminManager: Error saving to cloud:', error);
+                    alert('Fehler beim Speichern des Termins: ' + error.message);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
                 
-                console.log('Termin added:', termin);
-                
-                // Refresh display
+                console.log('☁️ TerminManager: Termin added:', termin);
                 this.displayTermine();
             },
             
             async updateTermin(terminId, terminData) {
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ TerminManager: Not authenticated - cannot update termin in pure cloud mode');
+                    alert('Fehler: Nicht authentifiziert. Termin kann nicht aktualisiert werden.');
+                    return;
+                }
+                
                 const terminIndex = this.termine.findIndex(t => t.id == terminId);
                 if (terminIndex === -1) {
-                    console.error('Termin not found for update:', terminId);
+                    console.error('❌ TerminManager: Termin not found for update:', terminId);
+                    alert('Termin nicht gefunden!');
                     return;
                 }
                 
@@ -5278,21 +5281,18 @@
                     updated_at: new Date().toISOString()
                 };
                 
-                if (supabase?.isAuthenticated()) {
-                    try {
-                        await supabase.update('termine', updatedTermin, terminId);
-                        this.termine[terminIndex] = updatedTermin;
-                    } catch (error) {
-                        console.error('Error updating termin:', error);
-                        this.termine[terminIndex] = updatedTermin;
-                    }
-                } else {
+                try {
+                    console.log('☁️ TerminManager: Updating termin in cloud:', terminId);
+                    await supabase.update('termine', updatedTermin, terminId);
                     this.termine[terminIndex] = updatedTermin;
+                    console.log('☁️ TerminManager: Termin updated in cloud');
+                } catch (error) {
+                    console.error('❌ TerminManager: Error updating in cloud:', error);
+                    alert('Fehler beim Aktualisieren des Termins: ' + error.message);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
                 
-                console.log('Termin updated:', updatedTermin);
-                
-                // Refresh display
+                console.log('☁️ TerminManager: Termin updated:', updatedTermin);
                 this.displayTermine();
             },
             
@@ -5450,34 +5450,31 @@
                     return;
                 }
                 
-                console.log('🗑️ Deleting termin:', terminId);
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ TerminManager: Not authenticated - cannot delete termin in pure cloud mode');
+                    alert('Fehler: Nicht authentifiziert. Termin kann nicht gelöscht werden.');
+                    return;
+                }
                 
-                if (supabase?.isAuthenticated()) {
-                    try {
-                        await supabase.delete('termine', terminId);
-                        console.log('✅ Termin deleted from database');
-                    } catch (error) {
-                        console.error('❌ Error deleting termin from database:', error);
-                        alert('Fehler beim Löschen: ' + error.message);
-                        return;
-                    }
+                try {
+                    console.log('☁️ TerminManager: Deleting termin from cloud:', terminId);
+                    await supabase.delete('termine', terminId);
+                    console.log('☁️ TerminManager: Termin deleted from cloud');
+                } catch (error) {
+                    console.error('❌ TerminManager: Error deleting from cloud:', error);
+                    alert('Fehler beim Löschen: ' + error.message);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
                 
                 // Remove from local array
                 this.termine = this.termine.filter(t => t.id != terminId);
                 
-                // Update localStorage cache
-                try {
-                    localStorage.setItem('termine_cache', JSON.stringify(this.termine));
-                    console.log('🔄 Updated local termine cache');
-                } catch (error) {
-                    console.error('Error updating local termine cache:', error);
-                }
+                // Pure cloud mode - no localStorage caching
                 
                 // Refresh view
                 this.displayTermine();
                 
-                console.log('✅ Termin deleted successfully');
+                console.log('☁️ TerminManager: Termin deleted successfully');
             }
         };
 
@@ -5832,39 +5829,26 @@
                 resources: [],
                 
                 async loadResources() {
+                    if (!supabase?.isAuthenticated()) {
+                        console.error('❌ ResourceManager: Not authenticated - pure cloud mode requires authentication');
+                        this.resources = [];
+                        this.renderResources();
+                        return;
+                    }
+                    
                     try {
-                        console.log('🔄 ResourceManager.loadResources() called');
-                        console.log('🔍 Auth status:', supabase?.isAuthenticated());
-                        console.log('🔍 CloudStorage available:', !!cloudStorage);
-                        
-                        if (cloudStorage && supabase?.isAuthenticated()) {
-                            console.log('☁️ Attempting to load resources from cloud...');
-                            this.resources = await cloudStorage.getResources() || [];
-                            console.log(`☁️ Loaded ${this.resources.length} resources from cloud`);
-                            if (this.resources.length > 0) {
-                                console.log('📋 Sample resource IDs:', this.resources.slice(0, 3).map(r => `${r.id} (${typeof r.id})`));
-                            }
-                        } else {
-                            console.log('📱 Loading resources from localStorage...');
-                            const cached = localStorage.getItem('resources');
-                            this.resources = cached ? JSON.parse(cached) : [];
-                            console.log(`📱 Loaded ${this.resources.length} resources from localStorage`);
-                            if (this.resources.length > 0) {
-                                console.log('📋 Sample local resource IDs:', this.resources.slice(0, 3).map(r => `${r.id} (${typeof r.id})`));
-                            }
-                        }
+                        console.log('☁️ ResourceManager: Loading resources from cloud...');
+                        this.resources = await cloudStorage.getResources() || [];
+                        console.log(`☁️ ResourceManager: Loaded ${this.resources.length} resources from cloud`);
                         
                         // Migrate old emoji icons to lucide icons (one-time migration)
                         this.migrateEmojiIcons();
                         
                         this.renderResources();
-                        console.log('✅ ResourceManager.loadResources() completed');
+                        console.log('☁️ ResourceManager: Load completed');
                     } catch (error) {
-                        console.error('❌ Error loading resources:', error);
-                        console.log('📱 Falling back to localStorage...');
-                        const cached = localStorage.getItem('resources');
-                        this.resources = cached ? JSON.parse(cached) : [];
-                        console.log(`📱 Fallback loaded ${this.resources.length} resources`);
+                        console.error('❌ ResourceManager: Error loading from cloud:', error);
+                        throw error; // Don't hide errors in pure cloud mode
                     }
                 },
                 
@@ -5990,48 +5974,36 @@
                 },
                 
                 async addResource(resourceData) {
-                    console.log('🔄 ResourceManager.addResource() called for:', resourceData.title);
+                    if (!supabase?.isAuthenticated()) {
+                        console.error('❌ ResourceManager: Not authenticated - cannot add resource in pure cloud mode');
+                        alert('Fehler: Nicht authentifiziert. Resource kann nicht gespeichert werden.');
+                        return;
+                    }
                     
                     const resource = {
-                        // Remove manual ID - let database auto-generate BIGSERIAL id
                         title: resourceData.title,
                         category: resourceData.category,
                         url: resourceData.url,
                         description: resourceData.description || '',
                         icon: resourceData.icon || 'link',
+                        user_id: supabase.getCurrentUser().id,
                         created_at: new Date().toISOString()
                     };
                     
-                    console.log('📝 Created resource object:', { title: resource.title, category: resource.category });
-                    
                     try {
-                        if (cloudStorage && supabase?.isAuthenticated()) {
-                            console.log('☁️ Attempting to save resource to cloud...');
-                            await cloudStorage.saveResource(resource);
-                            console.log('✅ Resource saved to cloud successfully');
-                            
-                            // Reload resources from cloud to get updated data with proper IDs
-                            console.log('🔄 Reloading resources to get updated list...');
-                            await this.loadResources();
-                            
-                        } else {
-                            console.log('📱 No cloudStorage/auth, generating temp ID and saving locally');
-                            // Generate temporary ID for offline use
-                            resource.id = 'temp_' + Date.now().toString();
-                            this.resources.push(resource);
-                            localStorage.setItem('resources', JSON.stringify(this.resources));
-                            this.renderResources();
-                        }
-                        console.log('✅ Resource added:', resource.title);
-                    } catch (error) {
-                        console.error('❌ Error saving resource:', error);
-                        console.error('❌ Resource save error details:', error.message, error.stack);
+                        console.log('☁️ ResourceManager: Saving resource to cloud:', resource.title);
+                        await cloudStorage.saveResource(resource);
+                        console.log('☁️ ResourceManager: Resource saved to cloud successfully');
                         
-                        // Fallback: add with temp ID and let sync queue handle it
-                        console.log('⚠️ Adding resource with temp ID for sync queue');
-                        resource.id = 'temp_' + Date.now().toString();
-                        this.resources.push(resource);
-                        this.renderResources();
+                        // Reload resources from cloud to get updated data with proper IDs
+                        console.log('🔄 Reloading resources to get updated list...');
+                        await this.loadResources();
+                        
+                        console.log('☁️ ResourceManager: Resource added:', resource.title);
+                    } catch (error) {
+                        console.error('❌ ResourceManager: Error saving resource:', error);
+                        alert('Fehler beim Speichern der Resource: ' + error.message);
+                        throw error; // Don't hide errors in pure cloud mode
                     }
                 },
                 
@@ -6040,31 +6012,27 @@
                         return;
                     }
                     
+                    if (!supabase?.isAuthenticated()) {
+                        console.error('❌ ResourceManager: Not authenticated - cannot delete resource in pure cloud mode');
+                        alert('Fehler: Nicht authentifiziert. Resource kann nicht gelöscht werden.');
+                        return;
+                    }
+                    
                     try {
-                        // Delete from cloud first
-                        if (cloudStorage && supabase?.isAuthenticated()) {
-                            console.log('☁️ Deleting resource from cloud:', resourceId);
-                            await cloudStorage.deleteResource(resourceId);
-                            console.log('✅ Resource deleted from cloud successfully');
-                            
-                            // Force clean reload by clearing local cache first
-                            console.log('🔄 Clearing local cache and reloading from cloud...');
-                            localStorage.removeItem('resources_cache');
-                            localStorage.removeItem('resources');
-                            
-                            // Reload resources from cloud to get updated list
-                            await this.loadResources();
-                        } else {
-                            // Update local array and localStorage when not using cloud
-                            this.resources = this.resources.filter(r => r.id != resourceId);
-                            localStorage.setItem('resources', JSON.stringify(this.resources));
-                            this.renderResources();
-                        }
+                        console.log('☁️ ResourceManager: Deleting resource from cloud:', resourceId);
+                        await cloudStorage.deleteResource(resourceId);
+                        console.log('☁️ ResourceManager: Resource deleted from cloud successfully');
                         
-                        console.log('✅ Resource deleted and UI updated');
+                        // Pure cloud mode - no localStorage
+                        
+                        // Reload resources from cloud to get updated list
+                        await this.loadResources();
+                        
+                        console.log('☁️ ResourceManager: Resource deleted and UI updated');
                     } catch (error) {
-                        console.error('❌ Error deleting resource:', error);
+                        console.error('❌ ResourceManager: Error deleting resource:', error);
                         alert('Fehler beim Löschen der Resource: ' + error.message);
+                        throw error; // Don't hide errors in pure cloud mode
                     }
                 },
                 
@@ -6134,6 +6102,10 @@
                         '🌱': 'sprout'
                     };
                     
+                    if (!supabase?.isAuthenticated()) {
+                        return; // Skip migration if not authenticated
+                    }
+                    
                     let migrationNeeded = false;
                     
                     this.resources.forEach(resource => {
@@ -6145,13 +6117,9 @@
                     });
                     
                     if (migrationNeeded) {
-                        console.log('✅ Icon migration completed, saving to storage');
-                        // Save to localStorage
-                        localStorage.setItem('resources', JSON.stringify(this.resources));
-                        // Also save to cloud if authenticated
-                        if (cloudStorage && supabase?.isAuthenticated()) {
-                            this.resources.forEach(resource => cloudStorage.saveResource(resource));
-                        }
+                        console.log('☁️ Icon migration completed, saving to cloud');
+                        // Pure cloud mode - only save to cloud
+                        this.resources.forEach(resource => cloudStorage.saveResource(resource));
                     }
                 },
                 
@@ -6235,17 +6203,22 @@
                         // Update existing resource
                         const resource = ResourceManager.resources.find(r => r.id === editId);
                         if (resource) {
+                            if (!supabase?.isAuthenticated()) {
+                                console.error('❌ ResourceManager: Not authenticated - cannot update resource in pure cloud mode');
+                                alert('Fehler: Nicht authentifiziert. Resource kann nicht aktualisiert werden.');
+                                return;
+                            }
+                            
                             Object.assign(resource, resourceData);
                             try {
-                                if (cloudStorage) {
-                                    await cloudStorage.saveResource(resource);
-                                } else {
-                                    localStorage.setItem('resources', JSON.stringify(ResourceManager.resources));
-                                }
+                                console.log('☁️ ResourceManager: Updating resource in cloud:', resource.title);
+                                await cloudStorage.saveResource(resource);
                                 ResourceManager.renderResources();
-                                console.log('✅ Resource updated:', resource.title);
+                                console.log('☁️ ResourceManager: Resource updated:', resource.title);
                             } catch (error) {
-                                console.error('Error updating resource:', error);
+                                console.error('❌ ResourceManager: Error updating resource:', error);
+                                alert('Fehler beim Aktualisieren der Resource: ' + error.message);
+                                throw error; // Don't hide errors in pure cloud mode
                             }
                         }
                         // Clear edit mode
@@ -6593,6 +6566,12 @@
             },
             
             async addEntry() {
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ Wiki: Not authenticated - cannot add entry in pure cloud mode');
+                    alert('Fehler: Nicht authentifiziert. Wiki-Eintrag kann nicht gespeichert werden.');
+                    return;
+                }
+                
                 const title = document.getElementById('wiki-title').value;
                 const content = document.getElementById('wiki-content').value;
                 const tagsText = document.getElementById('wiki-tags').value;
@@ -6607,51 +6586,65 @@
                 const category = tags[0] || 'general'; // First tag becomes primary category
                 
                 const entry = {
-                    id: Date.now().toString(),
                     title,
                     category,
                     content,
                     tags,
                     source,
+                    user_id: supabase.getCurrentUser().id,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
                 
-                // Add to local array first
-                this.entries.push(entry);
-                
-                // Save to localStorage
-                localStorage.setItem('wiki_entries', JSON.stringify(this.entries));
-                
-                // Save to cloud if authenticated
-                if (supabase && supabase.isAuthenticated()) {
-                    await this.saveEntryToCloud(entry);
+                try {
+                    console.log('☁️ Wiki: Saving entry to cloud:', title);
+                    const result = await supabase.insert('crypto_wiki_entries', entry);
+                    if (result && result.length > 0) {
+                        this.entries.push(result[0]);
+                        console.log('☁️ Wiki: Entry saved to cloud with ID:', result[0].id);
+                    } else {
+                        throw new Error('Insert did not return data');
+                    }
+                } catch (error) {
+                    console.error('❌ Wiki: Error saving to cloud:', error);
+                    alert('Fehler beim Speichern des Wiki-Eintrags: ' + error.message);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
                 
                 this.hideAddModal();
                 this.render();
                 
-                console.log('✅ Wiki: Entry added:', title);
+                console.log('☁️ Wiki: Entry added:', title);
             },
             
             async deleteEntry(id) {
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ Wiki: Not authenticated - cannot delete entry in pure cloud mode');
+                    alert('Fehler: Nicht authentifiziert. Wiki-Eintrag kann nicht gelöscht werden.');
+                    return;
+                }
+                
                 const entry = this.entries.find(e => e.id === id);
                 if (!entry) return;
                 
                 if (confirm(`Delete wiki entry "${entry.title}"?`)) {
+                    try {
+                        console.log('☁️ Wiki: Deleting entry from cloud:', id);
+                        await supabase.delete('crypto_wiki_entries', `id=eq.${id}`);
+                        console.log('☁️ Wiki: Entry deleted from cloud');
+                    } catch (error) {
+                        console.error('❌ Wiki: Error deleting from cloud:', error);
+                        alert('Fehler beim Löschen des Wiki-Eintrags: ' + error.message);
+                        throw error; // Don't hide errors in pure cloud mode
+                    }
+                    
                     // Remove from local array
                     this.entries = this.entries.filter(e => e.id !== id);
                     
-                    // Save to localStorage
-                    localStorage.setItem('wiki_entries', JSON.stringify(this.entries));
-                    
-                    // Delete from cloud if authenticated
-                    if (supabase && supabase.isAuthenticated()) {
-                        await this.deleteEntryFromCloud(id);
-                    }
+                    // Pure cloud mode - no localStorage
                     
                     this.render();
-                    console.log('🗑️ Wiki: Entry deleted:', entry.title);
+                    console.log('☁️ Wiki: Entry deleted:', entry.title);
                 }
             },
             
@@ -6751,63 +6744,59 @@
             },
             
             async loadEntries() {
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ Wiki: Not authenticated - pure cloud mode requires authentication');
+                    this.entries = [];
+                    this.render();
+                    return;
+                }
+                
                 try {
-                    // Load from cloud if authenticated
-                    if (supabase && supabase.isAuthenticated()) {
-                        await this.loadFromCloud();
-                    } else {
-                        // Fallback to localStorage when not authenticated
-                        const stored = localStorage.getItem('wiki_entries');
-                        if (stored) {
-                            this.entries = JSON.parse(stored);
-                            console.log(`✅ Wiki: Loaded ${this.entries.length} entries from localStorage`);
-                        } else {
-                            this.entries = [];
-                            console.log('✅ Wiki: No entries found');
-                        }
-                    }
+                    await this.loadFromCloud();
                 } catch (error) {
                     console.error('❌ Wiki: Error loading entries:', error);
-                    this.entries = [];
+                    throw error; // Don't hide errors in pure cloud mode
                 }
             },
 
             
             async saveEntries() {
+                // Pure cloud mode - no localStorage saving
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ Wiki: Not authenticated - cannot save in pure cloud mode');
+                    return;
+                }
+                
                 try {
-                    localStorage.setItem('wiki_entries', JSON.stringify(this.entries));
-                    console.log('✅ Wiki: Saved to localStorage');
-                    
-                    // Save to cloud if authenticated
-                    if (supabase && supabase.isAuthenticated()) {
-                        await this.saveToCloud();
-                    }
+                    await this.saveToCloud();
                 } catch (error) {
                     console.error('❌ Wiki: Error saving entries:', error);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
             },
             
             async loadFromCloud() {
                 try {
-                    console.log('🔄 Wiki: Loading from Supabase...');
+                    console.log('☁️ Wiki: Loading from cloud...');
                     const user = supabase.getCurrentUser();
                     if (!user) {
-                        console.log('❌ Wiki: No user found');
-                        return;
+                        throw new Error('No user found');
                     }
 
                     const data = await supabase.query(`crypto_wiki_entries?user_id=eq.${user.id}&order=updated_at.desc&select=*`);
-                    const error = !data;
-
-                    if (error) {
-                        console.error('❌ Wiki: Supabase error:', error);
-                        return;
+                    
+                    if (data && Array.isArray(data)) {
+                        this.entries = data;
+                        console.log(`☁️ Wiki: Loaded ${this.entries.length} entries from cloud`);
+                        this.render();
+                    } else {
+                        console.log('☁️ Wiki: No entries found in cloud');
+                        this.entries = [];
+                        this.render();
                     }
-
-                    this.entries = data || [];
-                    console.log(`✅ Wiki: Loaded ${this.entries.length} entries from Supabase`);
                 } catch (error) {
                     console.error('❌ Wiki: Error loading from cloud:', error);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
             },
             
@@ -6830,7 +6819,9 @@
             async saveEntryToCloud(entry) {
                 try {
                     const user = supabase.getCurrentUser();
-                    if (!user) return;
+                    if (!user) {
+                        throw new Error('No user found');
+                    }
 
                     const entryWithUserId = {
                         ...entry,
@@ -6838,39 +6829,33 @@
                     };
 
                     const data = await supabase.insert('crypto_wiki_entries', entryWithUserId);
-                    const error = !data;
-
-                    if (error) {
-                        console.error('❌ Wiki: Error saving entry to cloud:', error);
-                        return false;
+                    
+                    if (!data || !Array.isArray(data) || data.length === 0) {
+                        throw new Error('Insert did not return data');
                     }
 
-                    console.log('✅ Wiki: Entry saved to cloud:', entry.title);
+                    console.log('☁️ Wiki: Entry saved to cloud:', entry.title);
                     return true;
                 } catch (error) {
                     console.error('❌ Wiki: Error in saveEntryToCloud:', error);
-                    return false;
+                    throw error; // Don't hide errors in pure cloud mode
                 }
             },
 
             async deleteEntryFromCloud(entryId) {
                 try {
                     const user = supabase.getCurrentUser();
-                    if (!user) return;
-
-                    const result = await supabase.delete('crypto_wiki_entries', `id=eq.${entryId}`);
-                    const error = !result;
-
-                    if (error) {
-                        console.error('❌ Wiki: Error deleting entry from cloud:', error);
-                        return false;
+                    if (!user) {
+                        throw new Error('No user found');
                     }
 
-                    console.log('✅ Wiki: Entry deleted from cloud');
+                    const result = await supabase.delete('crypto_wiki_entries', `id=eq.${entryId}`);
+                    
+                    console.log('☁️ Wiki: Entry deleted from cloud');
                     return true;
                 } catch (error) {
                     console.error('❌ Wiki: Error in deleteEntryFromCloud:', error);
-                    return false;
+                    throw error; // Don't hide errors in pure cloud mode
                 }
             }
         };
