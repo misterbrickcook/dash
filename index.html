@@ -2374,12 +2374,12 @@
                     
                     // Load all data in parallel for better performance
                     await Promise.all([
-                        loadRoutineCompletions(),
+                        // loadRoutineCompletions(), // DISABLED - SimpleRoutineManager handles routines
                         TodoManager.loadTodos(),
                         GoalManager.loadGoals(),
                         JournalManager.loadEntries(),
                         TerminManager.loadTermine(),
-                        loadRoutineStates(),
+                        // loadRoutineStates(), // DISABLED - conflicts with SimpleRoutineManager
                         // Load Wiki data if available
                         window.Wiki ? window.Wiki.loadEntries() : Promise.resolve(),
                         // Load ResourceManager data if it exists (after login)
@@ -2595,6 +2595,8 @@
         }
 
         function updateRoutineProgress() {
+            // DISABLED - conflicts with SimpleRoutineManager
+            return;
             const routineTab = document.getElementById('tab-home');
             if (!routineTab) return;
             
@@ -3298,9 +3300,9 @@
                         }
                     }
                     
-                    // Save checkbox state (now async)
-                    await saveCheckboxState(this.id, this.checked);
-                    updateRoutineProgress();
+                    // DISABLED - SimpleRoutineManager handles this
+                    // await saveCheckboxState(this.id, this.checked);
+                    // updateRoutineProgress();
                 }
             });
         });
