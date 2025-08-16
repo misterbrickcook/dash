@@ -4650,6 +4650,12 @@
                 // Show modal
                 document.getElementById('edit-goal-value-modal').classList.remove('hide');
                 
+                // Ensure event listeners are set up when modal opens
+                console.log('🎯 Modal opened, reinitializing event listeners...');
+                if (window.initGoalEditModalEventListeners) {
+                    window.initGoalEditModalEventListeners();
+                }
+                
                 // Focus input
                 setTimeout(() => {
                     document.getElementById('new-goal-value').focus();
@@ -5859,14 +5865,18 @@
             // Todo counter is now initialized in showDashboard() after authentication
             
             // === EDIT GOAL VALUE MODAL EVENT LISTENERS ===
-            // Initialize goal edit modal event listeners
-            function initGoalEditModalEventListeners() {
+            // Make event listener initialization globally available
+            window.initGoalEditModalEventListeners = function() {
                 console.log('🎯 Initializing goal edit modal event listeners...');
                 
                 const cancelEditGoalBtn = document.getElementById('cancel-edit-goal-value-btn');
                 if (cancelEditGoalBtn) {
                     console.log('✅ Found cancel-edit-goal-value-btn, adding event listener');
-                    cancelEditGoalBtn.addEventListener('click', () => {
+                    // Remove existing listeners first
+                    const newCancelBtn = cancelEditGoalBtn.cloneNode(true);
+                    cancelEditGoalBtn.parentNode.replaceChild(newCancelBtn, cancelEditGoalBtn);
+                    
+                    newCancelBtn.addEventListener('click', () => {
                         console.log('🎯 Cancel button clicked');
                         GoalManager.hideEditGoalValueModal();
                     });
@@ -5877,7 +5887,11 @@
                 const editGoalForm = document.getElementById('edit-goal-value-form');
                 if (editGoalForm) {
                     console.log('✅ Found edit-goal-value-form, adding event listener');
-                    editGoalForm.addEventListener('submit', async (e) => {
+                    // Remove existing listeners first
+                    const newForm = editGoalForm.cloneNode(true);
+                    editGoalForm.parentNode.replaceChild(newForm, editGoalForm);
+                    
+                    newForm.addEventListener('submit', async (e) => {
                         console.log('🎯 Form submit event triggered');
                         e.preventDefault();
                         
@@ -5892,11 +5906,19 @@
                 } else {
                     console.error('❌ edit-goal-value-form not found');
                 }
-            }
+            };
             
-            // Call it immediately and also after a short delay to ensure DOM is ready
-            initGoalEditModalEventListeners();
-            setTimeout(initGoalEditModalEventListeners, 1000);
+            // Call it immediately and periodically to ensure it works
+            console.log('🎯 Setting up goal edit modal event listeners...');
+            window.initGoalEditModalEventListeners();
+            setTimeout(() => {
+                console.log('🎯 Retry goal edit modal event listeners after 1s...');
+                window.initGoalEditModalEventListeners();
+            }, 1000);
+            setTimeout(() => {
+                console.log('🎯 Retry goal edit modal event listeners after 3s...');
+                window.initGoalEditModalEventListeners();
+            }, 3000);
             
             // === RESOURCE MANAGER ===
             const ResourceManager = {
