@@ -6613,35 +6613,8 @@
                 
                 const tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag);
                 
-                // Map tags to allowed categories for database constraint
-                // Try common categories that might be allowed
-                const allowedCategories = ['bitcoin', 'ethereum', 'altcoin', 'trading', 'defi', 'nft'];
-                let category = 'bitcoin'; // Default to bitcoin (most likely to be allowed)
-                
-                // Try to match first tag to allowed categories
-                if (tags.length > 0) {
-                    const firstTag = tags[0].toLowerCase();
-                    // Check if first tag matches any allowed category
-                    if (allowedCategories.includes(firstTag)) {
-                        category = firstTag;
-                    } else {
-                        // Try to find matching category from tag keywords
-                        if (firstTag.includes('bitcoin') || firstTag.includes('btc')) {
-                            category = 'bitcoin';
-                        } else if (firstTag.includes('ethereum') || firstTag.includes('eth')) {
-                            category = 'ethereum';
-                        } else if (firstTag.includes('trade') || firstTag.includes('trading')) {
-                            category = 'trading';
-                        } else if (firstTag.includes('defi') || firstTag.includes('yield') || firstTag.includes('staking')) {
-                            category = 'defi';
-                        } else if (firstTag.includes('nft') || firstTag.includes('art') || firstTag.includes('collectible')) {
-                            category = 'nft';
-                        } else if (firstTag.includes('alt') || firstTag.includes('coin') || firstTag.includes('token')) {
-                            category = 'altcoin';
-                        }
-                        // Otherwise keep 'bitcoin' as default
-                    }
-                }
+                // Category is not needed - we filter by tags only
+                // Set to null or don't include it in the entry
                 
                 // Generate a unique ID for the wiki entry
                 const entryId = Date.now(); // Use timestamp as ID
@@ -6649,7 +6622,6 @@
                 const entry = {
                     id: entryId, // Manually set ID since table doesn't auto-generate
                     title,
-                    category,
                     content,
                     tags,
                     source,
