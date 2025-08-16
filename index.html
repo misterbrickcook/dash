@@ -7007,16 +7007,8 @@
             window.initGoalEditModalEventListeners();
         }
         
-        // Also try with delays
-        setTimeout(() => {
-            console.log('🎯 GLOBAL: Retry after 2s...');
-            window.initGoalEditModalEventListeners();
-        }, 2000);
-        
-        setTimeout(() => {
-            console.log('🎯 GLOBAL: Retry after 5s...');
-            window.initGoalEditModalEventListeners();
-        }, 5000);
+        // Event listeners are initialized when DOM is ready and when modal opens
+        // No need for redundant retries
     </script>
 </body>
 </html>

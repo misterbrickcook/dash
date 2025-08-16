@@ -4,6 +4,7 @@
 class CloudCounters {
     constructor() {
         this.isInitialized = false;
+        this.isInitializing = false;
         this.counters = {
             todos: 0,
             morning_routines: 0,
@@ -12,26 +13,41 @@ class CloudCounters {
     }
 
     async init() {
+        // Prevent multiple simultaneous initializations
+        if (this.isInitialized) {
+            console.log('⏭️ CloudCounters: Already initialized, skipping');
+            return true;
+        }
+        
+        if (this.isInitializing) {
+            console.log('⏳ CloudCounters: Already initializing, waiting...');
+            while (this.isInitializing) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            return this.isInitialized;
+        }
+
         if (!supabase?.isAuthenticated()) {
             console.error('❌ CloudCounters: Not authenticated, cannot initialize');
             return false;
         }
 
+        this.isInitializing = true;
         console.log('☁️ CloudCounters: Initializing pure cloud counter system...');
         
         try {
-            await Promise.all([
-                this.loadTodoCounter(),
-                this.loadRoutineCounters()
-            ]);
+            // Single batched query for better performance
+            await this.loadAllCounters();
             
             this.updateDisplay();
             this.isInitialized = true;
+            this.isInitializing = false;
             
             console.log('✅ CloudCounters: Initialization complete');
             return true;
         } catch (error) {
             console.error('❌ CloudCounters: Initialization failed:', error);
+            this.isInitializing = false;
             return false;
         }
     }
@@ -102,6 +118,65 @@ class CloudCounters {
         this.counters.evening_routines = eveningCount;
         
         console.log(`☁️ CloudCounters: Loaded routine counters - Morning: ${morningCount}, Evening: ${eveningCount}`);
+    }
+
+    async loadAllCounters() {
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+        
+        const startOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
+        const endOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-31`;
+        
+        const user = supabase.getCurrentUser();
+        
+        // Batch all queries for better performance
+        const [completedTodos, routineData] = await Promise.all([
+            supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&created_at=gte.${startOfMonth}&created_at=lt.${endOfMonth}&select=*`),
+            supabase.query(`simple_routines?user_id=eq.${user.id}&select=*`)
+        ]);
+        
+        // Process todos counter
+        this.counters.todos = completedTodos ? completedTodos.length : 0;
+        
+        // Process routine counters
+        let morningCount = 0;
+        let eveningCount = 0;
+        
+        if (routineData && routineData.length > 0) {
+            routineData.forEach(entry => {
+                const entryDate = new Date(entry.date);
+                
+                // Only count entries from current month
+                if (entryDate.getMonth() + 1 === currentMonth && entryDate.getFullYear() === currentYear) {
+                    try {
+                        const data = JSON.parse(entry.routine_data);
+                        const dateKey = entry.date;
+                        
+                        if (data[dateKey]) {
+                            // Check if all morning tasks completed
+                            const morningTasks = data[dateKey].morning;
+                            if (morningTasks && Object.values(morningTasks).every(Boolean)) {
+                                morningCount++;
+                            }
+                            
+                            // Check if all evening tasks completed
+                            const eveningTasks = data[dateKey].evening;
+                            if (eveningTasks && Object.values(eveningTasks).every(Boolean)) {
+                                eveningCount++;
+                            }
+                        }
+                    } catch (error) {
+                        console.warn('CloudCounters: Error parsing routine data for', entry.date, error);
+                    }
+                }
+            });
+        }
+        
+        this.counters.morning_routines = morningCount;
+        this.counters.evening_routines = eveningCount;
+        
+        console.log(`☁️ CloudCounters: Batched load complete - Todos: ${this.counters.todos}, Morning: ${morningCount}, Evening: ${eveningCount}`);
     }
 
     updateDisplay() {
