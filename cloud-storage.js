@@ -364,12 +364,12 @@ class CloudStorage {
                 user_id: supabase.getCurrentUser()?.id
             };
             
-            // Save locally first
-            this.saveLocalRoutineCompletion(completion);
+            // Pure cloud mode - no local saving needed
+            console.log('☁️ CloudStorage: Pure cloud save mode for routine completion');
             
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                this.queueSync('routine_completions', 'save', completion);
-                return;
+                console.error('❌ CloudStorage: Cannot save routine completion - not authenticated or offline');
+                throw new Error('Pure cloud mode requires authentication and online connection');
             }
             
             // Save to cloud
@@ -384,7 +384,8 @@ class CloudStorage {
             console.log('✅ Routine completion synced:', templateId, completed);
         } catch (error) {
             console.error('Error saving routine completion:', error);
-            this.queueSync('routine_completions', 'save', completion);
+            // Pure cloud mode - don't queue for sync, just throw error
+            throw error;
         }
     }
     
@@ -711,33 +712,15 @@ class CloudStorage {
     }
     
     getLocalRoutineCompletions(date = null) {
-        const cached = localStorage.getItem('routine_completions_cache');
-        if (cached) {
-            const completions = JSON.parse(cached);
-            return date ? completions.filter(c => c.date === date) : completions;
-        }
+        // Pure cloud mode - no localStorage cache, return empty array
+        console.log('☁️ Pure cloud mode: No local routine completions cache');
         return [];
     }
     
     saveLocalRoutineCompletion(completion) {
-        const completions = this.getLocalRoutineCompletions();
-        console.log(`💾 Saving routine completion:`, completion);
-        console.log(`📊 Current completions count: ${completions.length}`);
-        
-        const existingIndex = completions.findIndex(c => 
-            c.template_id === completion.template_id && c.date === completion.date
-        );
-        
-        if (existingIndex >= 0) {
-            console.log(`✏️ Updating existing completion at index ${existingIndex}`);
-            completions[existingIndex] = completion;
-        } else {
-            console.log(`➕ Adding new completion to cache`);
-            completions.push(completion);
-        }
-        
-        localStorage.setItem('routine_completions_cache', JSON.stringify(completions));
-        console.log(`✅ Saved to localStorage, new total: ${completions.length}`);
+        // Pure cloud mode - no local saving, just log the attempt
+        console.log(`☁️ Pure cloud mode: Skipping local save for routine completion:`, completion);
+        console.log(`☁️ Data will be saved directly to cloud database only`);
     }
     
     saveLocalRoutineData(key, value) {

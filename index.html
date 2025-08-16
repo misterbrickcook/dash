@@ -2656,20 +2656,17 @@
                 
                 console.log(`🔍 DEBUG: Current month prefix: ${currentMonthPrefix}`);
                 
-                // First try legacy format (mobile compatibility)
-                const currentMonthDates = Object.keys(localData).filter(date => date.startsWith(currentMonthPrefix));
-                let monthlyCount = currentMonthDates.filter(date => localData[date][routineType] === true).length;
-                console.log(`🔍 DEBUG: Legacy format count for ${routineType}: ${monthlyCount}`);
+                // Pure cloud mode - get monthly count from cloud data only
+                let monthlyCount = 0;
+                console.log(`☁️ DEBUG: Pure cloud mode - calculating ${routineType} count from cloud`);
                 
-                // Also check cloud completions - first try cache, then direct Supabase query
+                // Check cloud completions from global cache
                 let cloudCompletions = [];
                 try {
-                    const cloudCompletionsCache = localStorage.getItem('routine_completions_cache');
-                    console.log(`🔍 DEBUG: Cloud completions cache raw:`, cloudCompletionsCache);
-                    
-                    if (cloudCompletionsCache) {
-                        cloudCompletions = JSON.parse(cloudCompletionsCache);
-                        console.log(`🔍 DEBUG: Found cloud completions cache with ${cloudCompletions.length} entries`);
+                    // Use global routine completions instead of localStorage
+                    if (window.globalRoutineCompletions && Array.isArray(window.globalRoutineCompletions)) {
+                        cloudCompletions = window.globalRoutineCompletions;
+                        console.log(`☁️ DEBUG: Found global cloud completions with ${cloudCompletions.length} entries`);
                         
                         // Filter for current month and routine type
                         const currentMonthCloudCompletions = cloudCompletions.filter(completion => {
