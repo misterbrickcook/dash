@@ -5873,15 +5873,14 @@
                             const truncatedTitle = resource.title.length > 25 ? resource.title.substring(0, 25) + '...' : resource.title;
                             const fullTitle = `${resource.title}${description ? ` - ${description}` : ''}`;
                             html += `
-                                <div class="resource-card" onclick="window.open('${resource.url}', '_blank')" 
+                                <div class="resource-card" 
+                                     onclick="window.open('${resource.url}', '_blank')" 
+                                     oncontextmenu="event.preventDefault(); ResourceManager.showDeleteButton(this, '${resource.id}'); return false;"
                                      title="${fullTitle}">
                                     <span class="resource-icon"><i data-lucide="${icon}" style="width: 16px; height: 16px;"></i></span>
                                     <span class="resource-title">${truncatedTitle}</span>
-                                    <div class="resource-actions">
-                                        <button class="resource-edit-btn" onclick="event.stopPropagation(); ResourceManager.editResource('${resource.id}')" title="Edit">
-                                            <i data-lucide="edit-3" style="width: 12px; height: 12px;"></i>
-                                        </button>
-                                        <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">
+                                    <div class="resource-actions" style="opacity: 0;">
+                                        <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Rechtsklick zum Löschen">
                                             <i data-lucide="x" style="width: 12px; height: 12px;"></i>
                                         </button>
                                     </div>
@@ -6084,6 +6083,31 @@
                             this.resources.forEach(resource => cloudStorage.saveResource(resource));
                         }
                     }
+                },
+                
+                showDeleteButton(cardElement, resourceId) {
+                    // Hide all other delete buttons first
+                    document.querySelectorAll('.resource-actions').forEach(actions => {
+                        actions.style.opacity = '0';
+                    });
+                    
+                    // Show delete button for this card
+                    const actions = cardElement.querySelector('.resource-actions');
+                    if (actions) {
+                        actions.style.opacity = '1';
+                        console.log('🗑️ Delete button shown for resource:', resourceId);
+                        
+                        // Hide button after 3 seconds
+                        setTimeout(() => {
+                            actions.style.opacity = '0';
+                        }, 3000);
+                    }
+                },
+                
+                hideAllDeleteButtons() {
+                    document.querySelectorAll('.resource-actions').forEach(actions => {
+                        actions.style.opacity = '0';
+                    });
                 }
             };
             
@@ -6093,6 +6117,13 @@
             // Initialize ResourceManager now that it's properly defined
             console.log('🔄 Initializing ResourceManager after definition...');
             ResourceManager.loadResources();
+            
+            // Hide delete buttons when clicking elsewhere
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.resource-card') && !e.target.closest('.resource-actions')) {
+                    ResourceManager.hideAllDeleteButtons();
+                }
+            });
             
             // === JOURNAL DELETE BUTTONS ===
             document.addEventListener('click', (e) => {
