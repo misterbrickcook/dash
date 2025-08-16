@@ -6614,9 +6614,9 @@
                 const tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag);
                 
                 // Map tags to allowed categories for database constraint
-                // Based on crypto_wiki_entries table constraints
-                const allowedCategories = ['crypto', 'trading', 'defi', 'nft', 'blockchain'];
-                let category = 'crypto'; // Default to crypto since it's a crypto wiki
+                // Try common categories that might be allowed
+                const allowedCategories = ['bitcoin', 'ethereum', 'altcoin', 'trading', 'defi', 'nft'];
+                let category = 'bitcoin'; // Default to bitcoin (most likely to be allowed)
                 
                 // Try to match first tag to allowed categories
                 if (tags.length > 0) {
@@ -6626,18 +6626,20 @@
                         category = firstTag;
                     } else {
                         // Try to find matching category from tag keywords
-                        if (firstTag.includes('crypto') || firstTag.includes('coin') || firstTag.includes('token')) {
-                            category = 'crypto';
+                        if (firstTag.includes('bitcoin') || firstTag.includes('btc')) {
+                            category = 'bitcoin';
+                        } else if (firstTag.includes('ethereum') || firstTag.includes('eth')) {
+                            category = 'ethereum';
                         } else if (firstTag.includes('trade') || firstTag.includes('trading')) {
                             category = 'trading';
                         } else if (firstTag.includes('defi') || firstTag.includes('yield') || firstTag.includes('staking')) {
                             category = 'defi';
                         } else if (firstTag.includes('nft') || firstTag.includes('art') || firstTag.includes('collectible')) {
                             category = 'nft';
-                        } else if (firstTag.includes('blockchain') || firstTag.includes('web3')) {
-                            category = 'blockchain';
+                        } else if (firstTag.includes('alt') || firstTag.includes('coin') || firstTag.includes('token')) {
+                            category = 'altcoin';
                         }
-                        // Otherwise keep 'crypto' as default
+                        // Otherwise keep 'bitcoin' as default
                     }
                 }
                 
