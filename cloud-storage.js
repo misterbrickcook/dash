@@ -588,22 +588,19 @@ class CloudStorage {
             console.log(`☁️ Cloud query returned ${data ? data.length : 0} resources`);
             
             if (data && data.length > 0) {
+                // Clear any old resources data to prevent duplicates
+                localStorage.removeItem('resources');
                 localStorage.setItem('resources_cache', JSON.stringify(data));
                 console.log(`☁️ Successfully loaded ${data.length} resources from cloud and cached locally`);
                 console.log('📋 Sample resource titles:', data.slice(0, 3).map(r => r.title));
                 return data;
             } else if (data && data.length === 0) {
                 console.log('☁️ Cloud query successful but returned 0 resources');
-                // Check if we have local resources before clearing cache
-                const existingLocal = this.getLocalResources();
-                if (existingLocal.length > 0) {
-                    console.log(`⚠️ Cloud returned 0 but we have ${existingLocal.length} local resources - keeping local`);
-                    return existingLocal;
-                } else {
-                    console.log('📱 No local resources either, returning empty array');
-                    localStorage.setItem('resources_cache', JSON.stringify([]));
-                    return [];
-                }
+                // Trust the cloud - if it says 0, clear local cache
+                localStorage.removeItem('resources');
+                localStorage.setItem('resources_cache', JSON.stringify([]));
+                console.log('📱 Cloud returned 0 resources, cleared local cache');
+                return [];
             }
             
             console.log('☁️ No cloud data, falling back to local');
@@ -723,11 +720,34 @@ class CloudStorage {
     }
     
     getLocalResources() {
+        // Prioritize resources_cache (cloud synced data) over old resources key
         const cached = localStorage.getItem('resources_cache');
         if (cached) {
-            return JSON.parse(cached);
+            try {
+                const parsedCache = JSON.parse(cached);
+                console.log(`📱 getLocalResources: Found ${parsedCache.length} resources in cache`);
+                return parsedCache;
+            } catch (error) {
+                console.error('Error parsing resources_cache:', error);
+                localStorage.removeItem('resources_cache');
+            }
         }
-        return JSON.parse(localStorage.getItem('resources') || '[]');
+        
+        // Fallback to old resources key only if no cache exists
+        const oldResources = localStorage.getItem('resources');
+        if (oldResources) {
+            try {
+                const parsedOld = JSON.parse(oldResources);
+                console.log(`📱 getLocalResources: Found ${parsedOld.length} resources in old storage`);
+                return parsedOld;
+            } catch (error) {
+                console.error('Error parsing old resources:', error);
+                localStorage.removeItem('resources');
+            }
+        }
+        
+        console.log('📱 getLocalResources: No local resources found');
+        return [];
     }
     
     saveLocalResource(resource) {
@@ -740,14 +760,16 @@ class CloudStorage {
             resources.push(resource);
         }
         
+        // Only use resources_cache for cloud-synced data
         localStorage.setItem('resources_cache', JSON.stringify(resources));
-        localStorage.setItem('resources', JSON.stringify(resources));
+        console.log(`💾 saveLocalResource: Saved ${resources.length} resources to cache`);
     }
     
     deleteLocalResource(resourceId) {
         const resources = this.getLocalResources().filter(r => r.id !== resourceId);
+        // Only use resources_cache for cloud-synced data
         localStorage.setItem('resources_cache', JSON.stringify(resources));
-        localStorage.setItem('resources', JSON.stringify(resources));
+        console.log(`🗑️ deleteLocalResource: Removed resource ${resourceId}, ${resources.length} remaining`);
     }
     
     getLocalRoutineData() {
