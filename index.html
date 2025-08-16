@@ -1330,6 +1330,23 @@
             display: flex;
             gap: 1rem;
             align-items: center;
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .filter-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            background: #ffffff;
+        }
+        
+        .filter-input:focus {
+            outline: none;
+            border-color: #000000;
+            box-shadow: 0 0 0 1px #000000;
         }
         
         .filter-container select {
@@ -2089,7 +2106,7 @@
                     </button>
                 </div>
                 <div class="filter-container">
-                    <input type="text" id="wiki-tag-filter" placeholder="Filter by tags..." class="search-input" oninput="Wiki.filterByTags()">
+                    <input type="text" id="wiki-tag-filter" placeholder="Filter by tags..." class="filter-input" oninput="Wiki.filterByTags()">
                     <button class="btn" onclick="Wiki.showAddModal()">+ Add Entry</button>
                 </div>
             </div>
