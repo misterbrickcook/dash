@@ -2832,8 +2832,9 @@
 
         // === SETTINGS FUNCTIONALITY ===
         function initializeSettings() {
-            // Load saved routine reset time
-            const savedResetTime = localStorage.getItem('routineResetTime') || '06:00';
+            // Pure cloud mode - use default reset time (settings could be moved to cloud later)
+            console.log('☁️ Pure cloud mode: Using default routine reset time');
+            const savedResetTime = '06:00'; // Default time, no localStorage needed
             const timeInput = document.getElementById('routine-reset-time');
             if (timeInput) {
                 timeInput.value = savedResetTime;
@@ -2844,9 +2845,9 @@
             if (saveBtn) {
                 saveBtn.addEventListener('click', () => {
                     const resetTime = timeInput.value;
-                    localStorage.setItem('routineResetTime', resetTime);
-                    alert(`Routine Reset Zeit auf ${resetTime} gesetzt!`);
-                    console.log(`Routine reset time saved: ${resetTime}`);
+                    console.log('☁️ Pure cloud mode: Settings change noted but not persisted');
+                    alert(`Routine Reset Zeit auf ${resetTime} temporär gesetzt! (Pure Cloud Mode - nicht dauerhaft gespeichert)`);
+                    console.log(`Routine reset time noted: ${resetTime} (not persisted in pure cloud mode)`);
                 });
             }
             
@@ -2877,15 +2878,12 @@
         function resetRoutinesToday() {
             const today = new Date().toISOString().split('T')[0];
             
-            // Clear routine states for today
-            localStorage.removeItem(`routineStates_${today}`);
+            // Pure cloud mode - no localStorage operations needed
+            console.log('☁️ Pure cloud mode: Routine reset will only affect UI, not persistent storage');
+            console.log(`☁️ Resetting routines for ${today} (UI only)`);
             
-            // Clear routine completion data for today
-            const completionData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
-            if (completionData[today]) {
-                delete completionData[today];
-                localStorage.setItem('routineCompletionData', JSON.stringify(completionData));
-            }
+            // Note: In pure cloud mode, this only resets the UI
+            // The actual cloud data would need to be reset via cloud operations
             
             // Uncheck all routine checkboxes
             document.querySelectorAll('.routine-section input[type="checkbox"]').forEach(checkbox => {
