@@ -1765,7 +1765,7 @@
             <button class="nav-tab" data-tab="tab-ziele">Ziele</button>
             <button class="nav-tab" data-tab="tab-journal">Journal</button>
             <button class="nav-tab" data-tab="tab-ressourcen">Ressourcen</button>
-            <button class="nav-tab" data-tab="tab-cryptowiki">Crypto Wiki</button>
+            <button class="nav-tab" data-tab="tab-wiki">Wiki</button>
             <button class="nav-tab" data-tab="tab-settings" style="display: none;">Settings</button>
             <div class="nav-actions">
                 <button id="settings-btn" class="nav-tab settings-btn">
@@ -2088,26 +2088,19 @@
             </div>
         </section>
 
-        <!-- === CRYPTO WIKI TAB === -->
-        <section id="tab-cryptowiki" class="tab-section">
+        <!-- === WIKI TAB === -->
+        <section id="tab-wiki" class="tab-section">
             <!-- Search and Filter Bar -->
             <div class="wiki-controls">
                 <div class="search-container">
                     <input type="text" id="wiki-search" placeholder="Search wiki entries..." class="search-input">
-                    <button class="search-btn" onclick="CryptoWiki.search()">
+                    <button class="search-btn" onclick="Wiki.search()">
                         <i data-lucide="search" style="width: 16px; height: 16px;"></i>
                     </button>
                 </div>
                 <div class="filter-container">
-                    <select id="wiki-category-filter" onchange="CryptoWiki.filterByCategory()">
-                        <option value="">All Categories</option>
-                        <option value="grundlagen">Grundlagen</option>
-                        <option value="technische-analyse">Technische Analyse</option>
-                        <option value="video-learnings">Video Learnings</option>
-                        <option value="trading-rules">Trading Rules</option>
-                        <option value="market-events">Market Events</option>
-                    </select>
-                    <button class="btn" onclick="CryptoWiki.showAddModal()">+ Add Entry</button>
+                    <input type="text" id="wiki-tag-filter" placeholder="Filter by tags..." class="search-input" oninput="Wiki.filterByTags()">
+                    <button class="btn" onclick="Wiki.showAddModal()">+ Add Entry</button>
                 </div>
             </div>
 
@@ -2191,7 +2184,7 @@
     <!-- Add Wiki Entry Modal -->
     <div id="add-wiki-modal" class="modal hide">
         <div class="modal-content">
-            <span class="close" onclick="CryptoWiki.hideAddModal()">
+            <span class="close" onclick="Wiki.hideAddModal()">
                 <i data-lucide="x" style="width: 20px; height: 20px;"></i>
             </span>
             <h2>Add Wiki Entry</h2>
@@ -2202,15 +2195,9 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="wiki-category">Category *</label>
-                    <select id="wiki-category" required autocomplete="off">
-                        <option value="">Choose category...</option>
-                        <option value="grundlagen">Grundlagen</option>
-                        <option value="technische-analyse">Technische Analyse</option>
-                        <option value="video-learnings">Video Learnings</option>
-                        <option value="trading-rules">Trading Rules</option>
-                        <option value="market-events">Market Events</option>
-                    </select>
+                    <label for="wiki-tags">Tags *</label>
+                    <input type="text" id="wiki-tags" required placeholder="e.g. crypto, trading, analysis, finance" autocomplete="off">
+                    <small>Separate tags with commas. First tag will be primary category.</small>
                 </div>
                 
                 <div class="form-group">
@@ -2218,11 +2205,6 @@
                     <textarea id="wiki-content" rows="15" required autocomplete="off" placeholder="Enter detailed explanation, rules, or learnings..." style="resize: vertical; min-height: 300px; width: 100%;"></textarea>
                 </div>
                 
-                <div class="form-group">
-                    <label for="wiki-tags">Tags</label>
-                    <input type="text" id="wiki-tags" placeholder="e.g. gaps, cme, futures, strategy" autocomplete="off">
-                    <small>Separate tags with commas</small>
-                </div>
                 
                 <div class="form-group">
                     <label for="wiki-source">Source (optional)</label>
@@ -2230,7 +2212,7 @@
                 </div>
                 
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="CryptoWiki.hideAddModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="Wiki.hideAddModal()">Cancel</button>
                     <button type="submit" class="btn">Add Entry</button>
                 </div>
             </form>
@@ -2393,15 +2375,15 @@
                         JournalManager.loadEntries(),
                         TerminManager.loadTermine(),
                         loadRoutineStates(),
-                        // Load CryptoWiki data if available
-                        window.CryptoWiki ? window.CryptoWiki.loadEntries() : Promise.resolve(),
+                        // Load Wiki data if available
+                        window.Wiki ? window.Wiki.loadEntries() : Promise.resolve(),
                         // Load ResourceManager data if it exists (after login)
                         window.ResourceManager ? window.ResourceManager.loadResources() : Promise.resolve()
                     ]);
                     
-                    // Render CryptoWiki after data is loaded
-                    if (window.CryptoWiki) {
-                        window.CryptoWiki.render();
+                    // Render Wiki after data is loaded
+                    if (window.Wiki) {
+                        window.Wiki.render();
                     }
                     
                     // Initialize todo counter once after all data is loaded
@@ -2431,7 +2413,7 @@
             'tab-ziele': 'goals', 
             'tab-journal': 'journal',
             'tab-ressourcen': 'resources',
-            'tab-cryptowiki': 'crypto',
+            'tab-wiki': 'wiki',
             'tab-settings': 'settings'
         };
 
@@ -5517,9 +5499,9 @@
             // Initialize authentication (this will handle data loading via showDashboard)
             await Auth.init();
             
-            // Initialize CryptoWiki
-            if (window.CryptoWiki) {
-                CryptoWiki.init();
+            // Initialize Wiki
+            if (window.Wiki) {
+                Wiki.init();
             }
             
             // Initialize Lucide icons globally
@@ -6523,13 +6505,13 @@
             // Mobile debug removed for cleaner console output
         });
 
-        // === CRYPTO WIKI MANAGER ===
-        const CryptoWiki = {
+        // === WIKI MANAGER ===
+        const Wiki = {
             entries: [],
             filteredEntries: [],
             
             init() {
-                console.log('🔧 CryptoWiki: Initializing...');
+                console.log('🔧 Wiki: Initializing...');
                 this.loadEntries();
                 this.setupEventListeners();
                 this.render();
@@ -6572,17 +6554,17 @@
             
             async addEntry() {
                 const title = document.getElementById('wiki-title').value;
-                const category = document.getElementById('wiki-category').value;
                 const content = document.getElementById('wiki-content').value;
                 const tagsText = document.getElementById('wiki-tags').value;
                 const source = document.getElementById('wiki-source').value;
                 
-                if (!title || !category || !content) {
+                if (!title || !tagsText || !content) {
                     alert('Please fill in all required fields');
                     return;
                 }
                 
                 const tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag);
+                const category = tags[0] || 'general'; // First tag becomes primary category
                 
                 const entry = {
                     id: Date.now().toString(),
@@ -6599,7 +6581,7 @@
                 this.entries.push(entry);
                 
                 // Save to localStorage
-                localStorage.setItem('crypto_wiki_entries', JSON.stringify(this.entries));
+                localStorage.setItem('wiki_entries', JSON.stringify(this.entries));
                 
                 // Save to cloud if authenticated
                 if (supabase && supabase.isAuthenticated()) {
@@ -6609,7 +6591,7 @@
                 this.hideAddModal();
                 this.render();
                 
-                console.log('✅ CryptoWiki: Entry added:', title);
+                console.log('✅ Wiki: Entry added:', title);
             },
             
             async deleteEntry(id) {
@@ -6621,7 +6603,7 @@
                     this.entries = this.entries.filter(e => e.id !== id);
                     
                     // Save to localStorage
-                    localStorage.setItem('crypto_wiki_entries', JSON.stringify(this.entries));
+                    localStorage.setItem('wiki_entries', JSON.stringify(this.entries));
                     
                     // Delete from cloud if authenticated
                     if (supabase && supabase.isAuthenticated()) {
@@ -6629,13 +6611,12 @@
                     }
                     
                     this.render();
-                    console.log('🗑️ CryptoWiki: Entry deleted:', entry.title);
+                    console.log('🗑️ Wiki: Entry deleted:', entry.title);
                 }
             },
             
             search() {
                 const query = document.getElementById('wiki-search').value.toLowerCase();
-                const category = document.getElementById('wiki-category-filter').value;
                 
                 this.filteredEntries = this.entries.filter(entry => {
                     const matchesSearch = !query || 
@@ -6644,16 +6625,22 @@
                         entry.tags.some(tag => tag.toLowerCase().includes(query)) ||
                         (entry.source && entry.source.toLowerCase().includes(query));
                     
-                    const matchesCategory = !category || entry.category === category;
-                    
-                    return matchesSearch && matchesCategory;
+                    return matchesSearch;
                 });
                 
                 this.render();
             },
             
-            filterByCategory() {
-                this.search();
+            filterByTags() {
+                const tagFilter = document.getElementById('wiki-tag-filter').value.toLowerCase();
+                
+                this.filteredEntries = this.entries.filter(entry => {
+                    if (!tagFilter) return true;
+                    
+                    return entry.tags.some(tag => tag.toLowerCase().includes(tagFilter));
+                });
+                
+                this.render();
             },
             
             render() {
@@ -6662,11 +6649,11 @@
                 
                 const entriesToShow = this.filteredEntries.length > 0 || 
                     document.getElementById('wiki-search').value || 
-                    document.getElementById('wiki-category-filter').value 
+                    document.getElementById('wiki-tag-filter').value 
                     ? this.filteredEntries : this.entries;
                 
                 if (entriesToShow.length === 0) {
-                    container.innerHTML = '<div class="empty-wiki">No wiki entries found. Add your first crypto trading knowledge!</div>';
+                    container.innerHTML = '<div class="empty-wiki">No wiki entries found. Add your first knowledge entry!</div>';
                     return;
                 }
                 
@@ -6713,7 +6700,7 @@
                             <div class="wiki-entry-right">
                                 <span>${dateHtml}</span>
                                 <div class="wiki-entry-actions">
-                                    <button onclick="CryptoWiki.deleteEntry('${entry.id}')" title="Delete">
+                                    <button onclick="Wiki.deleteEntry('${entry.id}')" title="Delete">
                                         <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                     </button>
                                 </div>
@@ -6730,17 +6717,17 @@
                         await this.loadFromCloud();
                     } else {
                         // Fallback to localStorage when not authenticated
-                        const stored = localStorage.getItem('crypto_wiki_entries');
+                        const stored = localStorage.getItem('wiki_entries');
                         if (stored) {
                             this.entries = JSON.parse(stored);
-                            console.log(`✅ CryptoWiki: Loaded ${this.entries.length} entries from localStorage`);
+                            console.log(`✅ Wiki: Loaded ${this.entries.length} entries from localStorage`);
                         } else {
                             this.entries = [];
-                            console.log('✅ CryptoWiki: No entries found');
+                            console.log('✅ Wiki: No entries found');
                         }
                     }
                 } catch (error) {
-                    console.error('❌ CryptoWiki: Error loading entries:', error);
+                    console.error('❌ Wiki: Error loading entries:', error);
                     this.entries = [];
                 }
             },
@@ -6748,55 +6735,55 @@
             
             async saveEntries() {
                 try {
-                    localStorage.setItem('crypto_wiki_entries', JSON.stringify(this.entries));
-                    console.log('✅ CryptoWiki: Saved to localStorage');
+                    localStorage.setItem('wiki_entries', JSON.stringify(this.entries));
+                    console.log('✅ Wiki: Saved to localStorage');
                     
                     // Save to cloud if authenticated
                     if (supabase && supabase.isAuthenticated()) {
                         await this.saveToCloud();
                     }
                 } catch (error) {
-                    console.error('❌ CryptoWiki: Error saving entries:', error);
+                    console.error('❌ Wiki: Error saving entries:', error);
                 }
             },
             
             async loadFromCloud() {
                 try {
-                    console.log('🔄 CryptoWiki: Loading from Supabase...');
+                    console.log('🔄 Wiki: Loading from Supabase...');
                     const user = supabase.getCurrentUser();
                     if (!user) {
-                        console.log('❌ CryptoWiki: No user found');
+                        console.log('❌ Wiki: No user found');
                         return;
                     }
 
-                    const data = await supabase.query(`crypto_wiki_entries?user_id=eq.${user.id}&order=updated_at.desc&select=*`);
+                    const data = await supabase.query(`wiki_entries?user_id=eq.${user.id}&order=updated_at.desc&select=*`);
                     const error = !data;
 
                     if (error) {
-                        console.error('❌ CryptoWiki: Supabase error:', error);
+                        console.error('❌ Wiki: Supabase error:', error);
                         return;
                     }
 
                     this.entries = data || [];
-                    console.log(`✅ CryptoWiki: Loaded ${this.entries.length} entries from Supabase`);
+                    console.log(`✅ Wiki: Loaded ${this.entries.length} entries from Supabase`);
                 } catch (error) {
-                    console.error('❌ CryptoWiki: Error loading from cloud:', error);
+                    console.error('❌ Wiki: Error loading from cloud:', error);
                 }
             },
             
             async saveToCloud() {
                 try {
-                    console.log('🔄 CryptoWiki: Saving to Supabase...');
+                    console.log('🔄 Wiki: Saving to Supabase...');
                     const user = supabase.getCurrentUser();
                     if (!user) {
-                        console.log('❌ CryptoWiki: No user found');
+                        console.log('❌ Wiki: No user found');
                         return;
                     }
 
                     // We'll save entries individually when they're created/updated
-                    console.log('✅ CryptoWiki: Cloud sync ready');
+                    console.log('✅ Wiki: Cloud sync ready');
                 } catch (error) {
-                    console.error('❌ CryptoWiki: Error saving to cloud:', error);
+                    console.error('❌ Wiki: Error saving to cloud:', error);
                 }
             },
 
@@ -6810,18 +6797,18 @@
                         user_id: user.id
                     };
 
-                    const data = await supabase.insert('crypto_wiki_entries', entryWithUserId);
+                    const data = await supabase.insert('wiki_entries', entryWithUserId);
                     const error = !data;
 
                     if (error) {
-                        console.error('❌ CryptoWiki: Error saving entry to cloud:', error);
+                        console.error('❌ Wiki: Error saving entry to cloud:', error);
                         return false;
                     }
 
-                    console.log('✅ CryptoWiki: Entry saved to cloud:', entry.title);
+                    console.log('✅ Wiki: Entry saved to cloud:', entry.title);
                     return true;
                 } catch (error) {
-                    console.error('❌ CryptoWiki: Error in saveEntryToCloud:', error);
+                    console.error('❌ Wiki: Error in saveEntryToCloud:', error);
                     return false;
                 }
             },
@@ -6831,27 +6818,27 @@
                     const user = supabase.getCurrentUser();
                     if (!user) return;
 
-                    const result = await supabase.delete('crypto_wiki_entries', `id=eq.${entryId}`);
+                    const result = await supabase.delete('wiki_entries', `id=eq.${entryId}`);
                     const error = !result;
 
                     if (error) {
-                        console.error('❌ CryptoWiki: Error deleting entry from cloud:', error);
+                        console.error('❌ Wiki: Error deleting entry from cloud:', error);
                         return false;
                     }
 
-                    console.log('✅ CryptoWiki: Entry deleted from cloud');
+                    console.log('✅ Wiki: Entry deleted from cloud');
                     return true;
                 } catch (error) {
-                    console.error('❌ CryptoWiki: Error in deleteEntryFromCloud:', error);
+                    console.error('❌ Wiki: Error in deleteEntryFromCloud:', error);
                     return false;
                 }
             }
         };
 
-        // Make CryptoWiki globally available
-        window.CryptoWiki = CryptoWiki;
+        // Make Wiki globally available
+        window.Wiki = Wiki;
         
-        // CryptoWiki and Lucide icons initialization moved to main DOMContentLoaded listener
+        // Wiki and Lucide icons initialization moved to main DOMContentLoaded listener
     </script>
 </body>
 </html>
