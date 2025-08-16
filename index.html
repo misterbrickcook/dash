@@ -2380,8 +2380,8 @@
                         loadRoutineStates(),
                         // Load CryptoWiki data if available
                         window.CryptoWiki ? window.CryptoWiki.loadEntries() : Promise.resolve(),
-                        // Skip ResourceManager early load - it will be loaded after definition
-                        Promise.resolve().then(() => console.log('🔄 ResourceManager will be loaded after definition'))
+                        // Load ResourceManager data if it exists (after login)
+                        window.ResourceManager ? window.ResourceManager.loadResources() : Promise.resolve()
                     ]);
                     
                     // Render CryptoWiki after data is loaded
@@ -2396,6 +2396,16 @@
                     }
                     
                     console.log('✅ Dashboard data loaded');
+                    
+                    // After login, check current URL hash and activate the correct tab
+                    const currentHash = window.location.hash.slice(1);
+                    if (currentHash && hashTabMapping[currentHash]) {
+                        console.log(`🔗 After login, activating tab for hash: #${currentHash}`);
+                        switchTab(hashTabMapping[currentHash], false);
+                    } else {
+                        // Default to home if no hash
+                        switchTab('tab-home', false);
+                    }
                 } else {
                     // Initialize displays for local storage mode
                     TodoManager.updateHomeTodos();
@@ -2471,6 +2481,15 @@
                 const activeTab = document.querySelector('.journal-tab.active');
                 const activeCategory = activeTab ? activeTab.getAttribute('data-journal-category') : 'alle';
                 JournalManager.displayEntriesForCategory(activeCategory);
+            }
+            
+            // If switching to resources tab, load the active category
+            if (tabId === 'tab-ressourcen') {
+                if (window.ResourceManager) {
+                    const activeTab = document.querySelector('.resource-tab.active');
+                    const activeCategory = activeTab ? activeTab.getAttribute('data-resource-category') : 'alle';
+                    ResourceManager.displayResourcesForCategory(activeCategory);
+                }
             }
         }
 
