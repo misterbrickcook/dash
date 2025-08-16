@@ -2229,7 +2229,7 @@
     <!-- Scripts -->
     <script src="supabase-config.js"></script>
     <script src="cloud-storage.js"></script>
-    <script src="cloud-counters.js"></script>
+    <script src="simple-counters.js"></script>
     <script src="simple-routine-system.js"></script>
     <script>
         // Debug: Check if basic JavaScript works
@@ -2387,8 +2387,8 @@
                         window.Wiki ? window.Wiki.loadEntries() : Promise.resolve(),
                         // Load ResourceManager data if it exists (after login)
                         window.ResourceManager ? window.ResourceManager.loadResources() : Promise.resolve(),
-                        // Initialize pure cloud counters
-                        window.CloudCounters ? window.CloudCounters.init() : Promise.resolve()
+                        // Initialize simple counters
+                        window.SimpleCounters ? window.SimpleCounters.init() : Promise.resolve()
                     ]);
                     
                     // Render Wiki after data is loaded
@@ -4097,11 +4097,11 @@
                             
                             console.log('✅ Database update successful');
                             
-                            // Refresh cloud counter after successful database update
+                            // Refresh simple counter after successful database update
                             if (todo.completed !== wasCompleted) {
-                                console.log('☁️ Refreshing todo counter via CloudCounters...');
-                                if (window.CloudCounters) {
-                                    window.CloudCounters.onTodoCompleted();
+                                console.log('☁️ Refreshing todo counter via SimpleCounters...');
+                                if (window.SimpleCounters) {
+                                    window.SimpleCounters.onTodoChanged();
                                 }
                             }
                             

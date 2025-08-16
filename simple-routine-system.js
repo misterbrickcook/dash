@@ -280,11 +280,9 @@ class SimpleRoutineManager {
         // Update UI
         this.updateUI();
 
-        // Refresh cloud counters after routine completion
-        if (window.CloudCounters) {
-                window.CloudCounters.onRoutineCompleted();
-        } else {
-            console.warn('⚠️ SimpleRoutineManager: CloudCounters not available for refresh');
+        // Refresh simple counters after routine completion
+        if (window.SimpleCounters) {
+            window.SimpleCounters.onRoutineChanged();
         }
 
         console.log('✅ Routine data updated and saved');
