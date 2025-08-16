@@ -1366,16 +1366,6 @@
             margin: 0;
         }
         
-        .wiki-entry-category {
-            background: #000000;
-            color: #ffffff;
-            padding: 0.25rem 0.75rem;
-            border-radius: 0;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-        
         .wiki-entry-content {
             color: #333333;
             line-height: 1.6;
@@ -2197,7 +2187,7 @@
                 <div class="form-group">
                     <label for="wiki-tags">Tags *</label>
                     <input type="text" id="wiki-tags" required placeholder="e.g. crypto, trading, analysis, finance" autocomplete="off">
-                    <small>Separate tags with commas. First tag will be primary category.</small>
+                    <small>Separate tags with commas for better filtering.</small>
                 </div>
                 
                 <div class="form-group">
@@ -6613,16 +6603,12 @@
                 
                 const tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag);
                 
-                // Category is not needed - we filter by tags only
-                // Set to null or don't include it in the entry
-                
                 // Generate a unique ID for the wiki entry
                 const entryId = Date.now(); // Use timestamp as ID
                 
                 const entry = {
                     id: entryId, // Manually set ID since table doesn't auto-generate
                     title,
-                    category: 'grundlagen', // Valid category value that passes database constraint
                     content,
                     tags,
                     source,
@@ -6754,14 +6740,6 @@
             },
             
             renderEntry(entry) {
-                const categoryLabels = {
-                    'grundlagen': 'Grundlagen',
-                    'technische-analyse': 'Technische Analyse',
-                    'video-learnings': 'Video Learnings',
-                    'trading-rules': 'Trading Rules',
-                    'market-events': 'Market Events'
-                };
-                
                 const tagsHtml = entry.tags.map(tag => `<span class="wiki-tag">${tag}</span>`).join('');
                 const sourceHtml = entry.source ? `<span class="wiki-entry-source">Source: ${entry.source}</span>` : '';
                 const dateHtml = new Date(entry.created_at).toLocaleDateString('de-DE');
@@ -6770,7 +6748,6 @@
                     <div class="wiki-entry">
                         <div class="wiki-entry-header">
                             <h3 class="wiki-entry-title">${entry.title}</h3>
-                            <span class="wiki-entry-category">${categoryLabels[entry.category]}</span>
                         </div>
                         <div class="wiki-entry-content">${entry.content}</div>
                         <div class="wiki-entry-meta">
