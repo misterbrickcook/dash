@@ -402,6 +402,18 @@
             border-color: #000000;
             color: #ffffff;
         }
+        
+        .badge {
+            background: #dc2626;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
+            min-width: 16px;
+            text-align: center;
+        }
         .category-content { display: none; }
         .category-content.active { display: block; }
         
@@ -1873,6 +1885,7 @@
             <div class="category-tabs">
                 <button class="category-tab active" data-category="alle">Alle</button>
                 <button class="category-tab" data-category="heute">Heute</button>
+                <button class="category-tab" data-category="überfällig">Überfällig <span id="overdue-count" class="badge" style="display: none;"></span></button>
                 <button class="category-tab" data-category="privat">Privat</button>
                 <button class="category-tab" data-category="uni">Uni</button>
                 <button class="category-tab" data-category="arbeit">Arbeit</button>
@@ -1884,6 +1897,11 @@
             <!-- HEUTE KATEGORIE -->
             <div class="category-content" id="heute">
                 <!-- Todos for today will be loaded from database -->
+            </div>
+
+            <!-- ÜBERFÄLLIG KATEGORIE -->
+            <div class="category-content" id="überfällig">
+                <!-- Overdue todos will be loaded from database -->
             </div>
 
             <!-- PRIVAT KATEGORIE -->
@@ -3856,6 +3874,31 @@
                 
                 // Also update home todos
                 this.updateHomeTodos();
+                
+                // Update overdue badge
+                this.updateOverdueBadge();
+            },
+            
+            updateOverdueBadge() {
+                // Count overdue todos
+                const today = new Date();
+                const todayStr = today.getFullYear() + '-' + 
+                               String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(today.getDate()).padStart(2, '0');
+                
+                const overdueCount = this.todos.filter(todo => 
+                    todo.date && todo.date < todayStr && !todo.completed
+                ).length;
+                
+                const badge = document.getElementById('overdue-count');
+                if (badge) {
+                    if (overdueCount > 0) {
+                        badge.textContent = overdueCount;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
             },
             
             displayTodosForCategory(category) {
@@ -3874,6 +3917,17 @@
                         
                         filteredTodos = this.todos.filter(todo => 
                             todo.date === todayStr && !todo.completed
+                        );
+                        break;
+                    case 'überfällig':
+                        // Get today without timezone conversion
+                        const todayForOverdue = new Date();
+                        const todayStrForOverdue = todayForOverdue.getFullYear() + '-' + 
+                                                 String(todayForOverdue.getMonth() + 1).padStart(2, '0') + '-' + 
+                                                 String(todayForOverdue.getDate()).padStart(2, '0');
+                        
+                        filteredTodos = this.todos.filter(todo => 
+                            todo.date && todo.date < todayStrForOverdue && !todo.completed
                         );
                         break;
                     case 'alle':
@@ -4198,6 +4252,9 @@
                     `;
                     homeContainer.appendChild(todoItem);
                 });
+                
+                // Also update overdue badge when updating home
+                this.updateOverdueBadge();
             }
         };
 
