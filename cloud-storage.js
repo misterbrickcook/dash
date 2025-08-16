@@ -578,7 +578,12 @@ class CloudStorage {
             }
             
             console.log('☁️ Fetching resources from Supabase...');
-            const data = await supabase.select('resources', '*');
+            // Filter by user_id to only get current user's resources
+            const user = supabase.getCurrentUser();
+            const userFilter = user ? `user_id=eq.${user.id}` : '';
+            console.log('👤 Filtering resources for user:', user?.id);
+            
+            const data = await supabase.query(`resources?${userFilter}&select=*`);
             console.log('☁️ Supabase query result:', data);
             console.log(`☁️ Cloud query returned ${data ? data.length : 0} resources`);
             
@@ -589,8 +594,16 @@ class CloudStorage {
                 return data;
             } else if (data && data.length === 0) {
                 console.log('☁️ Cloud query successful but returned 0 resources');
-                localStorage.setItem('resources_cache', JSON.stringify([]));
-                return [];
+                // Check if we have local resources before clearing cache
+                const existingLocal = this.getLocalResources();
+                if (existingLocal.length > 0) {
+                    console.log(`⚠️ Cloud returned 0 but we have ${existingLocal.length} local resources - keeping local`);
+                    return existingLocal;
+                } else {
+                    console.log('📱 No local resources either, returning empty array');
+                    localStorage.setItem('resources_cache', JSON.stringify([]));
+                    return [];
+                }
             }
             
             console.log('☁️ No cloud data, falling back to local');
