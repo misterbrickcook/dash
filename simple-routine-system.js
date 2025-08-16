@@ -463,6 +463,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             window.simpleRoutineManager.restoreCheckboxes();
             window.simpleRoutineManager.updateUI();
+            
+            // Additional force update after a delay to ensure proper counter display
+            setTimeout(() => {
+                console.log('🔄 Final routine counter update...');
+                window.simpleRoutineManager.updateUI();
+            }, 1000);
         }, 500);
     }, 1000);
 });

@@ -6502,6 +6502,26 @@
                 }
             }, 100);
             
+            // Force refresh counters after initialization to fix any race conditions
+            setTimeout(() => {
+                console.log('🔄 Force refreshing counters after initialization...');
+                
+                // Refresh todo counter
+                if (window.initializeTodoCounter && !window.initializeTodoCounter.running) {
+                    window.initializeTodoCounter();
+                }
+                
+                // Refresh routine counters
+                if (window.simpleRoutineManager) {
+                    window.simpleRoutineManager.updateUI();
+                }
+                
+                // Update monthly streak displays if available
+                if (window.updateMonthlyStreakDisplaysFromMemory) {
+                    window.updateMonthlyStreakDisplaysFromMemory();
+                }
+            }, 2000);
+            
             // Mobile debug removed for cleaner console output
         });
 
