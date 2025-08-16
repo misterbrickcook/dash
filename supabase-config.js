@@ -289,7 +289,7 @@ class SupabaseClient {
 
     async delete(table, condition) {
         // Handle both ID and condition formats
-        if (condition.includes('=eq.')) {
+        if (typeof condition === 'string' && condition.includes('=eq.')) {
             return this.query(`${table}?${condition}`, 'DELETE');
         } else {
             return this.query(`${table}?id=eq.${condition}`, 'DELETE');
