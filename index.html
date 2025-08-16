@@ -5451,44 +5451,7 @@
                 lucide.createIcons();
             }
             
-            // Initialize ResourceManager and add sample data if needed
-            if (window.ResourceManager) {
-                console.log('🔄 Proper ResourceManager initialization starting...');
-                ResourceManager.loadResources();
-                
-                // Add sample resources if none exist
-                setTimeout(() => {
-                    if (ResourceManager.resources.length === 0) {
-                        console.log('🌱 Adding sample resources...');
-                        const sampleResources = [
-                            { title: 'Mail', category: 'Privat', url: 'https://gmail.com', icon: 'mail', description: 'Personal email access' },
-                            { title: 'MyFitnessPal', category: 'Privat', url: 'https://myfitnesspal.com', icon: 'activity', description: 'Fitness tracking app' },
-                            { title: 'Telegram', category: 'Privat', url: 'https://web.telegram.org', icon: 'message-circle', description: 'Telegram web client' },
-                            { title: 'ChatGPT', category: 'Privat', url: 'https://chat.openai.com', icon: 'bot', description: 'AI assistant' },
-                            { title: 'Sparkasse', category: 'Privat', url: 'https://sparkasse.de', icon: 'building', description: 'Online banking' },
-                            { title: 'Mail', category: 'Work', url: 'https://outlook.com', icon: 'mail', description: 'Work email access' },
-                            { title: 'Gartenpflege Lose', category: 'Work', url: 'https://example.com', icon: 'sprout', description: 'Garden maintenance system' },
-                            { title: 'Techem', category: 'Work', url: 'https://techem.de', icon: 'wrench', description: 'Heating service portal' },
-                            { title: 'BGWeb', category: 'Work', url: 'https://example.com', icon: 'home', description: 'Building management' },
-                            { title: 'CO2', category: 'Work', url: 'https://example.com', icon: 'bar-chart-3', description: 'CO2 monitoring' },
-                            { title: 'DAML Notes', category: 'Studium', url: 'https://example.com', icon: 'file-text', description: 'DAML study notes' },
-                            { title: 'Teams', category: 'Studium', url: 'https://teams.microsoft.com', icon: 'users', description: 'Microsoft Teams' }
-                        ];
-                        
-                        sampleResources.forEach((resourceData, index) => {
-                            const resource = {
-                                id: `sample_${Date.now()}_${index}`,
-                                ...resourceData,
-                                created_at: new Date().toISOString()
-                            };
-                            ResourceManager.resources.push(resource);
-                        });
-                        
-                        localStorage.setItem('resources', JSON.stringify(ResourceManager.resources));
-                        ResourceManager.renderResources();
-                    }
-                }, 500);
-            }
+            // ResourceManager will be initialized after its definition (moved down)
             
             // Logout button is already handled by Auth.setupEventListeners()
             
@@ -6126,6 +6089,10 @@
             
             // Make ResourceManager global
             window.ResourceManager = ResourceManager;
+            
+            // Initialize ResourceManager now that it's properly defined
+            console.log('🔄 Initializing ResourceManager after definition...');
+            ResourceManager.loadResources();
             
             // === JOURNAL DELETE BUTTONS ===
             document.addEventListener('click', (e) => {
