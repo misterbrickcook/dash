@@ -5983,18 +5983,31 @@
                         return;
                     }
                     
-                    this.resources = this.resources.filter(r => r.id !== resourceId);
-                    
                     try {
-                        if (cloudStorage) {
+                        // Delete from cloud first
+                        if (cloudStorage && supabase?.isAuthenticated()) {
+                            console.log('☁️ Deleting resource from cloud:', resourceId);
                             await cloudStorage.deleteResource(resourceId);
+                            console.log('✅ Resource deleted from cloud successfully');
+                            
+                            // Force clean reload by clearing local cache first
+                            console.log('🔄 Clearing local cache and reloading from cloud...');
+                            localStorage.removeItem('resources_cache');
+                            localStorage.removeItem('resources');
+                            
+                            // Reload resources from cloud to get updated list
+                            await this.loadResources();
                         } else {
+                            // Update local array and localStorage when not using cloud
+                            this.resources = this.resources.filter(r => r.id != resourceId);
                             localStorage.setItem('resources', JSON.stringify(this.resources));
+                            this.renderResources();
                         }
-                        this.renderResources();
-                        console.log('✅ Resource deleted');
+                        
+                        console.log('✅ Resource deleted and UI updated');
                     } catch (error) {
-                        console.error('Error deleting resource:', error);
+                        console.error('❌ Error deleting resource:', error);
+                        alert('Fehler beim Löschen der Resource: ' + error.message);
                     }
                 },
                 
