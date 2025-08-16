@@ -5859,35 +5859,44 @@
             // Todo counter is now initialized in showDashboard() after authentication
             
             // === EDIT GOAL VALUE MODAL EVENT LISTENERS ===
-            const cancelEditGoalBtn = document.getElementById('cancel-edit-goal-value-btn');
-            if (cancelEditGoalBtn) {
-                console.log('✅ Found cancel-edit-goal-value-btn, adding event listener');
-                cancelEditGoalBtn.addEventListener('click', () => {
-                    console.log('🎯 Cancel button clicked');
-                    GoalManager.hideEditGoalValueModal();
-                });
-            } else {
-                console.error('❌ cancel-edit-goal-value-btn not found');
-            }
+            // Initialize goal edit modal event listeners
+            function initGoalEditModalEventListeners() {
+                console.log('🎯 Initializing goal edit modal event listeners...');
+                
+                const cancelEditGoalBtn = document.getElementById('cancel-edit-goal-value-btn');
+                if (cancelEditGoalBtn) {
+                    console.log('✅ Found cancel-edit-goal-value-btn, adding event listener');
+                    cancelEditGoalBtn.addEventListener('click', () => {
+                        console.log('🎯 Cancel button clicked');
+                        GoalManager.hideEditGoalValueModal();
+                    });
+                } else {
+                    console.error('❌ cancel-edit-goal-value-btn not found');
+                }
 
-            const editGoalForm = document.getElementById('edit-goal-value-form');
-            if (editGoalForm) {
-                console.log('✅ Found edit-goal-value-form, adding event listener');
-                editGoalForm.addEventListener('submit', async (e) => {
-                    console.log('🎯 Form submit event triggered');
-                    e.preventDefault();
-                    
-                    const goalId = e.target.dataset.goalId;
-                    console.log('🎯 Form submit goalId:', goalId);
-                    if (goalId) {
-                        await GoalManager.editGoalValue(goalId);
-                    } else {
-                        console.error('❌ No goalId found in form dataset');
-                    }
-                });
-            } else {
-                console.error('❌ edit-goal-value-form not found');
+                const editGoalForm = document.getElementById('edit-goal-value-form');
+                if (editGoalForm) {
+                    console.log('✅ Found edit-goal-value-form, adding event listener');
+                    editGoalForm.addEventListener('submit', async (e) => {
+                        console.log('🎯 Form submit event triggered');
+                        e.preventDefault();
+                        
+                        const goalId = e.target.dataset.goalId;
+                        console.log('🎯 Form submit goalId:', goalId);
+                        if (goalId) {
+                            await GoalManager.editGoalValue(goalId);
+                        } else {
+                            console.error('❌ No goalId found in form dataset');
+                        }
+                    });
+                } else {
+                    console.error('❌ edit-goal-value-form not found');
+                }
             }
+            
+            // Call it immediately and also after a short delay to ensure DOM is ready
+            initGoalEditModalEventListeners();
+            setTimeout(initGoalEditModalEventListeners, 1000);
             
             // === RESOURCE MANAGER ===
             const ResourceManager = {
