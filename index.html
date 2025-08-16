@@ -4228,6 +4228,9 @@
             }
         };
 
+        // Make TodoManager globally available
+        window.TodoManager = TodoManager;
+
         // === GOAL MANAGEMENT ===
         const GoalManager = {
             goals: [], // In-memory storage for demo
@@ -4976,6 +4979,9 @@
             }
         };
 
+        // Make GoalManager globally available
+        window.GoalManager = GoalManager;
+
         // === JOURNAL MANAGEMENT ===
         const JournalManager = {
             entries: [], // In-memory storage for demo
@@ -5204,6 +5210,9 @@
                 }
             }
         };
+
+        // Make JournalManager globally available
+        window.JournalManager = JournalManager;
 
         // === TERMIN MANAGEMENT ===
         const TerminManager = {
