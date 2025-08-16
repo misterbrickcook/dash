@@ -6506,19 +6506,39 @@
             setTimeout(() => {
                 console.log('🔄 Force refreshing counters after initialization...');
                 
-                // Refresh todo counter
-                if (window.initializeTodoCounter && !window.initializeTodoCounter.running) {
-                    window.initializeTodoCounter();
+                // Check if todo counter is already set correctly
+                const todoTile = document.querySelectorAll('.streak-tile')[2];
+                const currentTodoCount = todoTile?.querySelector('.streak-number')?.textContent;
+                
+                if (!currentTodoCount || currentTodoCount === '0') {
+                    console.log('🔄 Todo counter needs refresh...');
+                    // Only refresh todo counter if it's not already set
+                    if (window.initializeTodoCounter && !window.initializeTodoCounter.running) {
+                        window.initializeTodoCounter();
+                    }
+                } else {
+                    console.log(`✅ Todo counter already set correctly: ${currentTodoCount}`);
                 }
                 
-                // Refresh routine counters
+                // Refresh routine counters (but not overwrite if already set)
                 if (window.simpleRoutineManager) {
-                    window.simpleRoutineManager.updateUI();
+                    // Only update progress bars, not counters
+                    window.simpleRoutineManager.updateProgressBarsOnly();
                 }
                 
-                // Update monthly streak displays if available
-                if (window.updateMonthlyStreakDisplaysFromMemory) {
-                    window.updateMonthlyStreakDisplaysFromMemory();
+                // Update monthly streak displays if available (but check if already set)
+                const morningTile = document.querySelectorAll('.streak-tile')[0];
+                const eveningTile = document.querySelectorAll('.streak-tile')[1];
+                const morningCount = morningTile?.querySelector('.streak-number')?.textContent;
+                const eveningCount = eveningTile?.querySelector('.streak-number')?.textContent;
+                
+                if ((!morningCount || morningCount === '0') || (!eveningCount || eveningCount === '0')) {
+                    console.log('🔄 Routine counters need refresh...');
+                    if (window.updateMonthlyStreakDisplaysFromMemory) {
+                        window.updateMonthlyStreakDisplaysFromMemory();
+                    }
+                } else {
+                    console.log(`✅ Routine counters already set: Morning=${morningCount}, Evening=${eveningCount}`);
                 }
             }, 2000);
             

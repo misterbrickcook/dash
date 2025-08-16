@@ -294,8 +294,13 @@ class SimpleRoutineManager {
     updateUI() {
         // Update progress bars
         this.updateProgressBars();
-        // Update counters
+        // Update counters (only as fallback)
         this.updateCounters();
+    }
+    
+    updateProgressBarsOnly() {
+        // Only update progress bars, not counters
+        this.updateProgressBars();
     }
 
     updateProgressBars() {
@@ -324,29 +329,11 @@ class SimpleRoutineManager {
     }
 
     updateCounters() {
-        // Count completed days in current month
-        const currentMonth = new Date().getMonth();
-        const currentYear = new Date().getFullYear();
-
-        let morningCount = 0;
-        let eveningCount = 0;
-
-        Object.keys(this.routineData).forEach(dateKey => {
-            const date = new Date(dateKey);
-            if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
-                const dayData = this.routineData[dateKey];
-                
-                // Check if all morning tasks completed
-                const morningCompleted = Object.values(dayData.morning).every(Boolean);
-                if (morningCompleted) morningCount++;
-
-                // Check if all evening tasks completed
-                const eveningCompleted = Object.values(dayData.evening).every(Boolean);
-                if (eveningCompleted) eveningCount++;
-            }
-        });
-
-        // Update counter tiles using cached elements
+        // DISABLED: Let the main counter system handle this to avoid conflicts
+        // The main system has access to cloud data and historical records
+        console.log('⚠️ SimpleRoutineManager: Counter update disabled to prevent conflicts with main counter system');
+        
+        // Only update if the main counter system hasn't set values yet
         if (this.domCache.streakTiles.length >= 2) {
             const morningTile = this.domCache.streakTiles[0];
             const eveningTile = this.domCache.streakTiles[1];
@@ -354,10 +341,44 @@ class SimpleRoutineManager {
             const morningNumber = morningTile?.querySelector('.streak-number');
             const eveningNumber = eveningTile?.querySelector('.streak-number');
 
-            if (morningNumber) morningNumber.textContent = morningCount.toString();
-            if (eveningNumber) eveningNumber.textContent = eveningCount.toString();
-
-            console.log(`📊 Updated counters: Morning=${morningCount}, Evening=${eveningCount}`);
+            // Only set if they are currently "0" or empty (not set by main system)
+            if (morningNumber && (morningNumber.textContent === '0' || morningNumber.textContent === '')) {
+                console.log('📊 SimpleRoutineManager: Setting morning counter as fallback');
+                // Count completed days in current month as fallback
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+                let morningCount = 0;
+                
+                Object.keys(this.routineData).forEach(dateKey => {
+                    const date = new Date(dateKey);
+                    if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+                        const dayData = this.routineData[dateKey];
+                        const morningCompleted = Object.values(dayData.morning).every(Boolean);
+                        if (morningCompleted) morningCount++;
+                    }
+                });
+                
+                morningNumber.textContent = morningCount.toString();
+            }
+            
+            if (eveningNumber && (eveningNumber.textContent === '0' || eveningNumber.textContent === '')) {
+                console.log('📊 SimpleRoutineManager: Setting evening counter as fallback');
+                // Count completed days in current month as fallback
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+                let eveningCount = 0;
+                
+                Object.keys(this.routineData).forEach(dateKey => {
+                    const date = new Date(dateKey);
+                    if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+                        const dayData = this.routineData[dateKey];
+                        const eveningCompleted = Object.values(dayData.evening).every(Boolean);
+                        if (eveningCompleted) eveningCount++;
+                    }
+                });
+                
+                eveningNumber.textContent = eveningCount.toString();
+            }
         }
     }
 
