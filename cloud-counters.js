@@ -218,7 +218,7 @@ class CloudCounters {
         if (!supabase?.isAuthenticated()) return;
         
         console.log('🔄 CloudCounters: Refreshing todo counter...');
-        await this.loadTodoCounter();
+        await this.loadAllCounters(); // Use optimized method that loads everything
         this.updateDisplay();
     }
 
@@ -226,7 +226,7 @@ class CloudCounters {
         if (!supabase?.isAuthenticated()) return;
         
         console.log('🔄 CloudCounters: Refreshing routine counters...');
-        await this.loadRoutineCounters();
+        await this.loadAllCounters(); // Use optimized method that loads everything
         this.updateDisplay();
     }
 
@@ -242,15 +242,16 @@ class CloudCounters {
         // Small delay to ensure database is updated
         setTimeout(() => {
             this.refreshTodoCounter();
-        }, 500);
+        }, 200);
     }
 
     // Method to call when routines are completed
     async onRoutineCompleted() {
         // Small delay to ensure database is updated
+        console.log('🔄 CloudCounters: onRoutineCompleted triggered, refreshing in 200ms...');
         setTimeout(() => {
             this.refreshRoutineCounters();
-        }, 500);
+        }, 200);
     }
 }
 
