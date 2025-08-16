@@ -6614,8 +6614,9 @@
                 const tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag);
                 
                 // Map tags to allowed categories for database constraint
-                const allowedCategories = ['crypto', 'trading', 'defi', 'nft', 'blockchain', 'general'];
-                let category = 'general'; // Default category
+                // Based on crypto_wiki_entries table constraints
+                const allowedCategories = ['crypto', 'trading', 'defi', 'nft', 'blockchain'];
+                let category = 'crypto'; // Default to crypto since it's a crypto wiki
                 
                 // Try to match first tag to allowed categories
                 if (tags.length > 0) {
@@ -6636,7 +6637,7 @@
                         } else if (firstTag.includes('blockchain') || firstTag.includes('web3')) {
                             category = 'blockchain';
                         }
-                        // Otherwise keep 'general' as default
+                        // Otherwise keep 'crypto' as default
                     }
                 }
                 
