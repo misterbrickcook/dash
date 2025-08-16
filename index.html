@@ -4661,45 +4661,85 @@
             },
             
             async editGoalValue(goalId) {
+                console.log('🎯 editGoalValue called with goalId:', goalId);
+                
                 // This method is now called by the modal form submission
                 const goal = this.goals.find(g => g.id == goalId);
                 if (!goal) {
+                    console.error('❌ Goal not found for ID:', goalId);
                     alert('Ziel nicht gefunden!');
                     return;
                 }
                 
-                const newValue = parseFloat(document.getElementById('new-goal-value').value);
+                console.log('🎯 Found goal:', goal.name, 'Current value:', goal.currentValue);
+                
+                const newValueInput = document.getElementById('new-goal-value').value;
+                console.log('🎯 Input value:', newValueInput);
+                
+                const newValue = parseFloat(newValueInput);
                 if (isNaN(newValue)) {
+                    console.error('❌ Invalid number:', newValueInput);
                     alert('Bitte eine gültige Zahl eingeben!');
+                    return;
+                }
+                
+                console.log('🎯 Parsed new value:', newValue);
+                
+                // Pure cloud mode - require authentication
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ GoalManager: Not authenticated - cannot update goal value in pure cloud mode');
+                    alert('Fehler: Nicht authentifiziert. Ziel-Wert kann nicht aktualisiert werden.');
                     return;
                 }
                 
                 const unit = goal.unit ? ` ${goal.unit}` : '';
                 
                 // Update values
+                const oldCurrentValue = goal.currentValue;
+                const oldProgress = goal.progress;
+                
                 goal.currentValue = newValue;
                 goal.progress = this.calculateProgress(goal.startValue, goal.targetValue, goal.currentValue);
                 goal.completed = goal.progress >= 100;
                 
-                // Update in database if authenticated
-                const dbId = goal.database_id || (goal.id && !isNaN(goal.id) && goal.id.toString().length < 10 ? goal.id : null);
+                console.log('🎯 Updated values:', {
+                    oldCurrentValue,
+                    newCurrentValue: goal.currentValue,
+                    oldProgress,
+                    newProgress: goal.progress,
+                    startValue: goal.startValue,
+                    targetValue: goal.targetValue
+                });
                 
-                if (supabase?.isAuthenticated() && dbId) {
+                // Update in database - use database ID
+                const dbId = goal.database_id || (goal.id && !isNaN(goal.id) && goal.id.toString().length < 10 ? goal.id : null);
+                console.log('🎯 Database ID for update:', dbId);
+                
+                if (dbId) {
                     try {
-                        await supabase.update('goals', { 
+                        console.log('💾 Updating goal in database...');
+                        const updateData = { 
                             current_value: goal.currentValue, // Use DB field name
                             progress: goal.progress,
                             completed: goal.completed
-                        }, dbId);
+                        };
+                        console.log('💾 Update data:', updateData);
+                        
+                        await supabase.update('goals', updateData, dbId);
                         console.log('✅ Goal value updated in database');
                     } catch (error) {
                         console.error('❌ Error updating goal value:', error);
                         alert('Fehler beim Speichern: ' + error.message);
                         return;
                     }
+                } else {
+                    console.error('❌ No valid database ID found for goal:', goal);
+                    alert('Fehler: Kann Ziel nicht in der Datenbank aktualisieren (keine gültige ID).');
+                    return;
                 }
                 
                 // Hide modal and refresh view
+                console.log('🎯 Hiding modal and refreshing view...');
                 this.hideEditGoalValueModal();
                 this.refreshCurrentView();
                 
