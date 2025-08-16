@@ -6617,6 +6617,7 @@
                 const category = tags[0] || 'general'; // First tag becomes primary category
                 
                 const entry = {
+                    // Don't set id - let database auto-generate BIGSERIAL id
                     title,
                     category,
                     content,
@@ -6627,9 +6628,21 @@
                     updated_at: new Date().toISOString()
                 };
                 
+                // Remove any undefined fields that might cause issues
+                Object.keys(entry).forEach(key => {
+                    if (entry[key] === undefined || entry[key] === null) {
+                        delete entry[key];
+                    }
+                });
+                
                 try {
                     console.log('☁️ Wiki: Saving entry to cloud:', title);
-                    const result = await supabase.insert('crypto_wiki_entries', entry);
+                    console.log('☁️ Wiki: Entry data:', entry);
+                    
+                    // Use array format for insert
+                    const result = await supabase.insert('crypto_wiki_entries', [entry]);
+                    console.log('☁️ Wiki: Insert result:', result);
+                    
                     if (result && result.length > 0) {
                         this.entries.push(result[0]);
                         console.log('☁️ Wiki: Entry saved to cloud with ID:', result[0].id);
@@ -6638,6 +6651,7 @@
                     }
                 } catch (error) {
                     console.error('❌ Wiki: Error saving to cloud:', error);
+                    console.error('❌ Wiki: Error details:', error.message);
                     alert('Fehler beim Speichern des Wiki-Eintrags: ' + error.message);
                     throw error; // Don't hide errors in pure cloud mode
                 }
