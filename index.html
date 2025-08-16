@@ -2405,15 +2405,47 @@
         };
 
         // === TAB SYSTEM ===
-        function switchTab(tabId) {
+        // Mapping between tab IDs and URL hashes
+        const tabHashMapping = {
+            'tab-home': 'home',
+            'tab-todos': 'todos',
+            'tab-ziele': 'goals', 
+            'tab-journal': 'journal',
+            'tab-ressourcen': 'resources',
+            'tab-cryptowiki': 'crypto',
+            'tab-settings': 'settings'
+        };
+
+        // Reverse mapping for hash to tab ID
+        const hashTabMapping = Object.fromEntries(
+            Object.entries(tabHashMapping).map(([key, value]) => [value, key])
+        );
+
+        function switchTab(tabId, updateHash = true) {
             document.querySelectorAll('.tab-section').forEach(section => {
                 section.classList.remove('active');
             });
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            document.getElementById(tabId).classList.add('active');
-            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            
+            const targetSection = document.getElementById(tabId);
+            const targetTab = document.querySelector(`[data-tab="${tabId}"]`);
+            
+            if (targetSection && targetTab) {
+                targetSection.classList.add('active');
+                targetTab.classList.add('active');
+                
+                // Update URL hash
+                if (updateHash && tabHashMapping[tabId]) {
+                    const hash = tabHashMapping[tabId];
+                    window.history.replaceState(null, null, `#${hash}`);
+                    console.log(`🔗 Tab switched to ${tabId}, URL updated to #${hash}`);
+                } else if (updateHash) {
+                    // Fallback: if no hash mapping, clear hash
+                    window.history.replaceState(null, null, window.location.pathname);
+                }
+            }
             
             // If switching to todos tab, load the active category
             if (tabId === 'tab-todos') {
@@ -2427,7 +2459,6 @@
                 TodoManager.updateHomeTodos();
             }
             
-            
             // If switching to ziele tab, load the active category
             if (tabId === 'tab-ziele') {
                 const activeTab = document.querySelector('.ziel-tab.active');
@@ -2440,6 +2471,27 @@
                 const activeTab = document.querySelector('.journal-tab.active');
                 const activeCategory = activeTab ? activeTab.getAttribute('data-journal-category') : 'alle';
                 JournalManager.displayEntriesForCategory(activeCategory);
+            }
+        }
+
+        // Handle hash changes for direct URL navigation
+        function handleHashChange() {
+            const hash = window.location.hash.slice(1); // Remove the '#'
+            if (hash && hashTabMapping[hash]) {
+                console.log(`🔗 Hash changed to #${hash}, switching to ${hashTabMapping[hash]}`);
+                switchTab(hashTabMapping[hash], false); // Don't update hash again
+            } else if (!hash) {
+                // Default to home if no hash
+                console.log('🔗 No hash found, defaulting to home');
+                switchTab('tab-home', false);
+            }
+        }
+
+        // Initialize tab from URL hash on page load
+        function initializeFromHash() {
+            const hash = window.location.hash.slice(1);
+            if (hash && hashTabMapping[hash]) {
+                switchTab(hashTabMapping[hash], false);
             }
         }
 
@@ -6352,6 +6404,25 @@
                     console.log('❌ User cancelled reset');
                 }
             };
+            
+            // Initialize hash-based navigation
+            initializeFromHash();
+            
+            // Add hash change event listener
+            window.addEventListener('hashchange', handleHashChange);
+            
+            // Initialize URL hash for current active tab
+            setTimeout(() => {
+                const activeTab = document.querySelector('.nav-tab.active');
+                if (activeTab && !window.location.hash) {
+                    const tabId = activeTab.getAttribute('data-tab');
+                    if (tabId && tabHashMapping[tabId]) {
+                        const hash = tabHashMapping[tabId];
+                        window.history.replaceState(null, null, `#${hash}`);
+                        console.log(`🔗 Initial tab loaded: ${tabId}, URL set to #${hash}`);
+                    }
+                }
+            }, 100);
             
             // Mobile debug removed for cleaner console output
         });
