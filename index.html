@@ -5865,60 +5865,7 @@
             // Todo counter is now initialized in showDashboard() after authentication
             
             // === EDIT GOAL VALUE MODAL EVENT LISTENERS ===
-            // Make event listener initialization globally available
-            window.initGoalEditModalEventListeners = function() {
-                console.log('🎯 Initializing goal edit modal event listeners...');
-                
-                const cancelEditGoalBtn = document.getElementById('cancel-edit-goal-value-btn');
-                if (cancelEditGoalBtn) {
-                    console.log('✅ Found cancel-edit-goal-value-btn, adding event listener');
-                    // Remove existing listeners first
-                    const newCancelBtn = cancelEditGoalBtn.cloneNode(true);
-                    cancelEditGoalBtn.parentNode.replaceChild(newCancelBtn, cancelEditGoalBtn);
-                    
-                    newCancelBtn.addEventListener('click', () => {
-                        console.log('🎯 Cancel button clicked');
-                        GoalManager.hideEditGoalValueModal();
-                    });
-                } else {
-                    console.error('❌ cancel-edit-goal-value-btn not found');
-                }
-
-                const editGoalForm = document.getElementById('edit-goal-value-form');
-                if (editGoalForm) {
-                    console.log('✅ Found edit-goal-value-form, adding event listener');
-                    // Remove existing listeners first
-                    const newForm = editGoalForm.cloneNode(true);
-                    editGoalForm.parentNode.replaceChild(newForm, editGoalForm);
-                    
-                    newForm.addEventListener('submit', async (e) => {
-                        console.log('🎯 Form submit event triggered');
-                        e.preventDefault();
-                        
-                        const goalId = e.target.dataset.goalId;
-                        console.log('🎯 Form submit goalId:', goalId);
-                        if (goalId) {
-                            await GoalManager.editGoalValue(goalId);
-                        } else {
-                            console.error('❌ No goalId found in form dataset');
-                        }
-                    });
-                } else {
-                    console.error('❌ edit-goal-value-form not found');
-                }
-            };
-            
-            // Call it immediately and periodically to ensure it works
-            console.log('🎯 Setting up goal edit modal event listeners...');
-            window.initGoalEditModalEventListeners();
-            setTimeout(() => {
-                console.log('🎯 Retry goal edit modal event listeners after 1s...');
-                window.initGoalEditModalEventListeners();
-            }, 1000);
-            setTimeout(() => {
-                console.log('🎯 Retry goal edit modal event listeners after 3s...');
-                window.initGoalEditModalEventListeners();
-            }, 3000);
+            // Event listeners are now set up globally at the end of the script
             
             // === RESOURCE MANAGER ===
             const ResourceManager = {
@@ -6998,6 +6945,79 @@
                 
             }, 2000);
         });
+        
+        // === GLOBAL GOAL EDIT MODAL EVENT LISTENERS SETUP ===
+        // This needs to be outside of DOMContentLoaded to ensure it runs
+        console.log('🎯 GLOBAL: Setting up goal edit modal event listeners...');
+        
+        // Make event listener initialization globally available
+        window.initGoalEditModalEventListeners = function() {
+            console.log('🎯 GLOBAL: Initializing goal edit modal event listeners...');
+            
+            const cancelEditGoalBtn = document.getElementById('cancel-edit-goal-value-btn');
+            if (cancelEditGoalBtn) {
+                console.log('✅ GLOBAL: Found cancel-edit-goal-value-btn, adding event listener');
+                // Remove existing listeners first
+                const newCancelBtn = cancelEditGoalBtn.cloneNode(true);
+                cancelEditGoalBtn.parentNode.replaceChild(newCancelBtn, cancelEditGoalBtn);
+                
+                newCancelBtn.addEventListener('click', () => {
+                    console.log('🎯 GLOBAL: Cancel button clicked');
+                    if (window.GoalManager && window.GoalManager.hideEditGoalValueModal) {
+                        window.GoalManager.hideEditGoalValueModal();
+                    } else {
+                        console.error('❌ GoalManager not available');
+                    }
+                });
+            } else {
+                console.error('❌ GLOBAL: cancel-edit-goal-value-btn not found');
+            }
+
+            const editGoalForm = document.getElementById('edit-goal-value-form');
+            if (editGoalForm) {
+                console.log('✅ GLOBAL: Found edit-goal-value-form, adding event listener');
+                // Remove existing listeners first
+                const newForm = editGoalForm.cloneNode(true);
+                editGoalForm.parentNode.replaceChild(newForm, editGoalForm);
+                
+                newForm.addEventListener('submit', async (e) => {
+                    console.log('🎯 GLOBAL: Form submit event triggered');
+                    e.preventDefault();
+                    
+                    const goalId = e.target.dataset.goalId;
+                    console.log('🎯 GLOBAL: Form submit goalId:', goalId);
+                    if (goalId && window.GoalManager && window.GoalManager.editGoalValue) {
+                        await window.GoalManager.editGoalValue(goalId);
+                    } else {
+                        console.error('❌ GLOBAL: No goalId found or GoalManager not available');
+                    }
+                });
+            } else {
+                console.error('❌ GLOBAL: edit-goal-value-form not found');
+            }
+        };
+        
+        // Try to initialize immediately
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('🎯 GLOBAL: DOM ready, initializing...');
+                window.initGoalEditModalEventListeners();
+            });
+        } else {
+            console.log('🎯 GLOBAL: DOM already ready, initializing now...');
+            window.initGoalEditModalEventListeners();
+        }
+        
+        // Also try with delays
+        setTimeout(() => {
+            console.log('🎯 GLOBAL: Retry after 2s...');
+            window.initGoalEditModalEventListeners();
+        }, 2000);
+        
+        setTimeout(() => {
+            console.log('🎯 GLOBAL: Retry after 5s...');
+            window.initGoalEditModalEventListeners();
+        }, 5000);
     </script>
 </body>
 </html>
