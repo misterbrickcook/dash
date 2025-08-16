@@ -2222,6 +2222,7 @@
     <!-- Scripts -->
     <script src="supabase-config.js"></script>
     <script src="cloud-storage.js"></script>
+    <script src="cloud-counters.js"></script>
     <script src="simple-routine-system.js"></script>
     <script>
         // Debug: Check if basic JavaScript works
@@ -2378,18 +2379,14 @@
                         // Load Wiki data if available
                         window.Wiki ? window.Wiki.loadEntries() : Promise.resolve(),
                         // Load ResourceManager data if it exists (after login)
-                        window.ResourceManager ? window.ResourceManager.loadResources() : Promise.resolve()
+                        window.ResourceManager ? window.ResourceManager.loadResources() : Promise.resolve(),
+                        // Initialize pure cloud counters
+                        window.CloudCounters ? window.CloudCounters.init() : Promise.resolve()
                     ]);
                     
                     // Render Wiki after data is loaded
                     if (window.Wiki) {
                         window.Wiki.render();
-                    }
-                    
-                    // Initialize todo counter once after all data is loaded
-                    if (window.initializeTodoCounter) {
-                        window.initializeTodoCounter.running = false;
-                        await window.initializeTodoCounter();
                     }
                     
                     console.log('✅ Dashboard data loaded');
@@ -4110,12 +4107,12 @@
                             
                             console.log('✅ Database update successful');
                             
-                            // Refresh cloud-based counter after successful database update
+                            // Refresh cloud counter after successful database update
                             if (todo.completed !== wasCompleted) {
-                                console.log('☁️ Refreshing todo counter from cloud...');
-                                setTimeout(() => {
-                                    initializeTodoCounter(); // This now uses cloud data
-                                }, 100);
+                                console.log('☁️ Refreshing todo counter via CloudCounters...');
+                                if (window.CloudCounters) {
+                                    window.CloudCounters.onTodoCompleted();
+                                }
                             }
                             
                         } catch (error) {
@@ -6502,43 +6499,13 @@
                 }
             }, 100);
             
-            // Force refresh counters after initialization to fix any race conditions
+            // Pure cloud counter system - no force refresh needed
             setTimeout(() => {
-                console.log('🔄 Force refreshing counters after initialization...');
+                console.log('☁️ Ensuring cloud counters are initialized...');
                 
-                // Check if todo counter is already set correctly
-                const todoTile = document.querySelectorAll('.streak-tile')[2];
-                const currentTodoCount = todoTile?.querySelector('.streak-number')?.textContent;
-                
-                if (!currentTodoCount || currentTodoCount === '0') {
-                    console.log('🔄 Todo counter needs refresh...');
-                    // Only refresh todo counter if it's not already set
-                    if (window.initializeTodoCounter && !window.initializeTodoCounter.running) {
-                        window.initializeTodoCounter();
-                    }
-                } else {
-                    console.log(`✅ Todo counter already set correctly: ${currentTodoCount}`);
-                }
-                
-                // Refresh routine counters (but not overwrite if already set)
-                if (window.simpleRoutineManager) {
-                    // Only update progress bars, not counters
-                    window.simpleRoutineManager.updateProgressBarsOnly();
-                }
-                
-                // Update monthly streak displays if available (but check if already set)
-                const morningTile = document.querySelectorAll('.streak-tile')[0];
-                const eveningTile = document.querySelectorAll('.streak-tile')[1];
-                const morningCount = morningTile?.querySelector('.streak-number')?.textContent;
-                const eveningCount = eveningTile?.querySelector('.streak-number')?.textContent;
-                
-                if ((!morningCount || morningCount === '0') || (!eveningCount || eveningCount === '0')) {
-                    console.log('🔄 Routine counters need refresh...');
-                    if (window.updateMonthlyStreakDisplaysFromMemory) {
-                        window.updateMonthlyStreakDisplaysFromMemory();
-                    }
-                } else {
-                    console.log(`✅ Routine counters already set: Morning=${morningCount}, Evening=${eveningCount}`);
+                // Only initialize cloud counters if not already done
+                if (window.CloudCounters && !window.CloudCounters.isInitialized && supabase?.isAuthenticated()) {
+                    window.CloudCounters.init();
                 }
             }, 2000);
             
