@@ -5,11 +5,23 @@ class SimpleRoutineManager {
     constructor() {
         this.routineData = {};
         this.today = new Date().toISOString().split('T')[0];
+        // DOM Cache for performance optimization
+        this.domCache = {
+            allCheckboxes: null,
+            morningCheckboxes: null,
+            eveningCheckboxes: null,
+            morningProgressFill: null,
+            eveningProgressFill: null,
+            streakTiles: null
+        };
         this.init();
     }
 
     async init() {
         console.log('🔄 Initializing SimpleRoutineManager...');
+        
+        // Cache DOM elements for performance
+        this.cacheDOMElements();
         
         // First clear any existing visual styles
         this.clearVisualStyles();
@@ -20,10 +32,20 @@ class SimpleRoutineManager {
         console.log('✅ SimpleRoutineManager initialized');
     }
 
+    cacheDOMElements() {
+        // Cache all frequently used DOM elements
+        this.domCache.allCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"], #evening-routine input[type="checkbox"]');
+        this.domCache.morningCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"]');
+        this.domCache.eveningCheckboxes = document.querySelectorAll('#evening-routine input[type="checkbox"]');
+        this.domCache.morningProgressFill = document.querySelector('#morning-routine .progress-fill');
+        this.domCache.eveningProgressFill = document.querySelector('#evening-routine .progress-fill');
+        this.domCache.streakTiles = document.querySelectorAll('.streak-tile');
+        console.log('💾 DOM elements cached for performance');
+    }
+
     clearVisualStyles() {
-        // Reset all checkboxes and labels to clean state
-        const allCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"], #evening-routine input[type="checkbox"]');
-        allCheckboxes.forEach(checkbox => {
+        // Reset all checkboxes and labels to clean state using cached elements
+        this.domCache.allCheckboxes.forEach(checkbox => {
             checkbox.checked = false;
             const label = checkbox.nextElementSibling;
             if (label) {
@@ -218,15 +240,13 @@ class SimpleRoutineManager {
     }
 
     setupEventListeners() {
-        // Morning routine checkboxes
-        const morningCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"]');
-        morningCheckboxes.forEach(checkbox => {
+        // Morning routine checkboxes using cached elements
+        this.domCache.morningCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', () => this.handleCheckboxChange(checkbox, 'morning'));
         });
 
-        // Evening routine checkboxes  
-        const eveningCheckboxes = document.querySelectorAll('#evening-routine input[type="checkbox"]');
-        eveningCheckboxes.forEach(checkbox => {
+        // Evening routine checkboxes using cached elements
+        this.domCache.eveningCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', () => this.handleCheckboxChange(checkbox, 'evening'));
         });
 
@@ -287,9 +307,9 @@ class SimpleRoutineManager {
         const morningTotal = Object.keys(todayData.morning).length;
         const morningProgress = (morningChecked / morningTotal) * 100;
 
-        const morningProgressFill = document.querySelector('#morning-routine .progress-fill');
-        if (morningProgressFill) {
-            morningProgressFill.style.width = `${morningProgress}%`;
+        // Use cached progress fill element
+        if (this.domCache.morningProgressFill) {
+            this.domCache.morningProgressFill.style.width = `${morningProgress}%`;
         }
 
         // Evening progress
@@ -297,9 +317,9 @@ class SimpleRoutineManager {
         const eveningTotal = Object.keys(todayData.evening).length;
         const eveningProgress = (eveningChecked / eveningTotal) * 100;
 
-        const eveningProgressFill = document.querySelector('#evening-routine .progress-fill');
-        if (eveningProgressFill) {
-            eveningProgressFill.style.width = `${eveningProgress}%`;
+        // Use cached progress fill element
+        if (this.domCache.eveningProgressFill) {
+            this.domCache.eveningProgressFill.style.width = `${eveningProgress}%`;
         }
     }
 
@@ -326,11 +346,10 @@ class SimpleRoutineManager {
             }
         });
 
-        // Update counter tiles
-        const streakTiles = document.querySelectorAll('.streak-tile');
-        if (streakTiles.length >= 2) {
-            const morningTile = streakTiles[0];
-            const eveningTile = streakTiles[1];
+        // Update counter tiles using cached elements
+        if (this.domCache.streakTiles.length >= 2) {
+            const morningTile = this.domCache.streakTiles[0];
+            const eveningTile = this.domCache.streakTiles[1];
 
             const morningNumber = morningTile?.querySelector('.streak-number');
             const eveningNumber = eveningTile?.querySelector('.streak-number');
@@ -403,9 +422,8 @@ class SimpleRoutineManager {
         localStorage.setItem('simple_routine_data', JSON.stringify(this.routineData));
         await this.saveToCloud();
         
-        // Reset UI
-        const allCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"], #evening-routine input[type="checkbox"]');
-        allCheckboxes.forEach(checkbox => {
+        // Reset UI using cached elements
+        this.domCache.allCheckboxes.forEach(checkbox => {
             checkbox.checked = false;
             const label = checkbox.nextElementSibling;
             if (label) {
