@@ -6200,11 +6200,13 @@
                 });
             }
             
-            // Load resources when Resources tab is selected  
+            // Render resources when Resources tab is selected (don't reload from scratch)
             const ressourcenTab = document.querySelector('[data-tab="ressourcen"]');
             if (ressourcenTab) {
                 ressourcenTab.addEventListener('click', () => {
-                    ResourceManager.loadResources();
+                    // Only render existing resources, don't reload from cloud/storage
+                    ResourceManager.renderResources();
+                    console.log('🎨 Resources tab clicked - rendering existing resources');
                 });
             }
             
