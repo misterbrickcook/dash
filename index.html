@@ -6616,8 +6616,11 @@
                 const tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag);
                 const category = tags[0] || 'general'; // First tag becomes primary category
                 
+                // Generate a unique ID for the wiki entry
+                const entryId = Date.now(); // Use timestamp as ID
+                
                 const entry = {
-                    // Don't set id - let database auto-generate BIGSERIAL id
+                    id: entryId, // Manually set ID since table doesn't auto-generate
                     title,
                     category,
                     content,
