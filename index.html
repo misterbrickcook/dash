@@ -2570,10 +2570,8 @@
         async function saveCheckboxState(checkboxId, isChecked) {
             const today = new Date().toISOString().split('T')[0];
             
-            // Save to localStorage (existing functionality)
-            const savedStates = JSON.parse(localStorage.getItem(`routineStates_${today}`) || '{}');
-            savedStates[checkboxId] = isChecked;
-            localStorage.setItem(`routineStates_${today}`, JSON.stringify(savedStates));
+            // Pure cloud mode - no localStorage saving needed
+            console.log(`☁️ Pure cloud mode: Checkbox state ${checkboxId} = ${isChecked} (not saved to localStorage)`);
             
             // Skip database save for routine checkboxes - handled by routine completion system
             const checkbox = document.getElementById(checkboxId);
@@ -6614,7 +6612,33 @@
                 }
                 
                 const tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag);
-                const category = tags[0] || 'general'; // First tag becomes primary category
+                
+                // Map tags to allowed categories for database constraint
+                const allowedCategories = ['crypto', 'trading', 'defi', 'nft', 'blockchain', 'general'];
+                let category = 'general'; // Default category
+                
+                // Try to match first tag to allowed categories
+                if (tags.length > 0) {
+                    const firstTag = tags[0].toLowerCase();
+                    // Check if first tag matches any allowed category
+                    if (allowedCategories.includes(firstTag)) {
+                        category = firstTag;
+                    } else {
+                        // Try to find matching category from tag keywords
+                        if (firstTag.includes('crypto') || firstTag.includes('coin') || firstTag.includes('token')) {
+                            category = 'crypto';
+                        } else if (firstTag.includes('trade') || firstTag.includes('trading')) {
+                            category = 'trading';
+                        } else if (firstTag.includes('defi') || firstTag.includes('yield') || firstTag.includes('staking')) {
+                            category = 'defi';
+                        } else if (firstTag.includes('nft') || firstTag.includes('art') || firstTag.includes('collectible')) {
+                            category = 'nft';
+                        } else if (firstTag.includes('blockchain') || firstTag.includes('web3')) {
+                            category = 'blockchain';
+                        }
+                        // Otherwise keep 'general' as default
+                    }
+                }
                 
                 // Generate a unique ID for the wiki entry
                 const entryId = Date.now(); // Use timestamp as ID
