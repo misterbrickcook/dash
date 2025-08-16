@@ -6380,7 +6380,9 @@
                     });
                     console.log('✅ Reset all routine checkboxes');
                     
-                    // 4. Reset routine counters to 0
+                    // 4. Reset routine counters to 0 - DISABLED to prevent CloudCounters conflict
+                    // NOTE: This code was interfering with CloudCounters by overriding the correct values
+                    /*
                     const streakTiles = document.querySelectorAll('.streak-tile');
                     if (streakTiles.length >= 2) {
                         const morningTile = streakTiles[0];
@@ -6394,6 +6396,7 @@
                         
                         console.log('✅ Reset routine counters to 0');
                     }
+                    */
                     
                     // 5. Reset new simple routine manager if available
                     if (window.simpleRoutineManager) {

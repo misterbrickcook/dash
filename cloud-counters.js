@@ -176,7 +176,8 @@ class CloudCounters {
         this.counters.morning_routines = morningCount;
         this.counters.evening_routines = eveningCount;
         
-        console.log(`☁️ CloudCounters: Batched load complete - Todos: ${this.counters.todos}, Morning: ${morningCount}, Evening: ${eveningCount}`);
+        // Reduced logging for better performance
+        console.log(`☁️ CloudCounters: Updated - Todos: ${this.counters.todos}, Morning: ${morningCount}, Evening: ${eveningCount}`);
     }
 
     updateDisplay() {
@@ -192,7 +193,6 @@ class CloudCounters {
             const dateElement = streakTiles[0].querySelector('.streak-date');
             if (numberElement) numberElement.textContent = this.counters.morning_routines;
             if (dateElement) dateElement.textContent = `${monthName} ${currentYear}`;
-            console.log(`☁️ CloudCounters: Set morning counter to ${this.counters.morning_routines}`);
         }
 
         // Update evening routine counter (second tile)
@@ -201,7 +201,6 @@ class CloudCounters {
             const dateElement = streakTiles[1].querySelector('.streak-date');
             if (numberElement) numberElement.textContent = this.counters.evening_routines;
             if (dateElement) dateElement.textContent = `${monthName} ${currentYear}`;
-            console.log(`☁️ CloudCounters: Set evening counter to ${this.counters.evening_routines}`);
         }
 
         // Update todo counter (third tile)
@@ -210,7 +209,6 @@ class CloudCounters {
             const dateElement = streakTiles[2].querySelector('.streak-date');
             if (numberElement) numberElement.textContent = this.counters.todos;
             if (dateElement) dateElement.textContent = `${monthName} ${currentYear}`;
-            console.log(`☁️ CloudCounters: Set todo counter to ${this.counters.todos}`);
         }
     }
 
@@ -248,7 +246,6 @@ class CloudCounters {
     // Method to call when routines are completed
     async onRoutineCompleted() {
         // Small delay to ensure database is updated
-        console.log('🔄 CloudCounters: onRoutineCompleted triggered, refreshing in 200ms...');
         setTimeout(() => {
             this.refreshRoutineCounters();
         }, 200);

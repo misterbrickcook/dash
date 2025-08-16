@@ -282,8 +282,7 @@ class SimpleRoutineManager {
 
         // Refresh cloud counters after routine completion
         if (window.CloudCounters) {
-            console.log('🔄 SimpleRoutineManager: Triggering CloudCounters refresh...');
-            window.CloudCounters.onRoutineCompleted();
+                window.CloudCounters.onRoutineCompleted();
         } else {
             console.warn('⚠️ SimpleRoutineManager: CloudCounters not available for refresh');
         }
