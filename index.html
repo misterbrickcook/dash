@@ -6507,6 +6507,37 @@
                 if (window.CloudCounters && !window.CloudCounters.isInitialized && supabase?.isAuthenticated()) {
                     window.CloudCounters.init();
                 }
+                
+                // Debug function for checking todo counts
+                window.debugTodoCount = async function() {
+                    if (!supabase?.isAuthenticated()) {
+                        console.log('❌ Not authenticated');
+                        return;
+                    }
+                    
+                    const now = new Date();
+                    const currentMonth = now.getMonth() + 1;
+                    const currentYear = now.getFullYear();
+                    const startOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
+                    const endOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-31`;
+                    
+                    const user = supabase.getCurrentUser();
+                    
+                    console.log('🔍 Debug Todo Count for', `${currentMonth}/${currentYear}`);
+                    console.log('📅 Date range:', startOfMonth, 'to', endOfMonth);
+                    
+                    // All todos this month
+                    const allTodos = await supabase.query(`todos?user_id=eq.${user.id}&created_at=gte.${startOfMonth}&created_at=lt.${endOfMonth}&select=*`);
+                    console.log('📝 All todos this month:', allTodos?.length || 0, allTodos);
+                    
+                    // Completed todos this month  
+                    const completedTodos = await supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&created_at=gte.${startOfMonth}&created_at=lt.${endOfMonth}&select=*`);
+                    console.log('✅ Completed todos this month:', completedTodos?.length || 0, completedTodos);
+                    
+                    return { all: allTodos, completed: completedTodos };
+                };
+                
+                console.log('🔧 Debug function available: debugTodoCount()');
             }, 2000);
             
             // Mobile debug removed for cleaner console output
@@ -6763,7 +6794,7 @@
                         return;
                     }
 
-                    const data = await supabase.query(`wiki_entries?user_id=eq.${user.id}&order=updated_at.desc&select=*`);
+                    const data = await supabase.query(`crypto_wiki_entries?user_id=eq.${user.id}&order=updated_at.desc&select=*`);
                     const error = !data;
 
                     if (error) {
@@ -6804,7 +6835,7 @@
                         user_id: user.id
                     };
 
-                    const data = await supabase.insert('wiki_entries', entryWithUserId);
+                    const data = await supabase.insert('crypto_wiki_entries', entryWithUserId);
                     const error = !data;
 
                     if (error) {
@@ -6825,7 +6856,7 @@
                     const user = supabase.getCurrentUser();
                     if (!user) return;
 
-                    const result = await supabase.delete('wiki_entries', `id=eq.${entryId}`);
+                    const result = await supabase.delete('crypto_wiki_entries', `id=eq.${entryId}`);
                     const error = !result;
 
                     if (error) {
