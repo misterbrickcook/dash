@@ -2238,9 +2238,6 @@
             alert('JavaScript Error: ' + e.message + ' at line ' + e.lineno);
         });
         
-        window.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ DOM loaded');
-        });
         // === AUTHENTICATION ===
         const Auth = {
             isAuthenticated: false,
@@ -2341,60 +2338,29 @@
                 document.getElementById('auth-screen').classList.remove('hide');
             },
             
-            async forceRoutineUpdate() {
-                // Retry mechanism for routine updates
-                for (let attempt = 0; attempt < 5; attempt++) {
-                    console.log(`🔄 Routine update attempt ${attempt + 1}/5`);
-                    
-                    try {
-                        // Wait a bit for scripts to load
-                        await new Promise(resolve => setTimeout(resolve, attempt * 500));
-                        
-                        // Try to update routine UI
-                        if (window.updateRoutineUI) {
-                            console.log('✅ Found updateRoutineUI, calling...');
-                            await window.updateRoutineUI();
-                        } else {
-                            console.log('❌ updateRoutineUI not found');
-                        }
-                        
-                        // Try to update counters
-                        if (window.updateRoutineCounters) {
-                            console.log('✅ Found updateRoutineCounters, calling...');
-                            window.updateRoutineCounters();
-                        } else {
-                            console.log('❌ updateRoutineCounters not found');
-                        }
-                        
-                        // Try to initialize todo counter
-                        if (window.initializeTodoCounter) {
-                            console.log('✅ Found initializeTodoCounter, calling...');
-                            window.initializeTodoCounter.running = false;
-                            await window.initializeTodoCounter();
-                        } else {
-                            console.log('❌ initializeTodoCounter not found');
-                        }
-                        
-                        // Force render routine sections
-                        const routineSections = document.querySelectorAll('.routine-item, .habit-item');
-                        if (routineSections.length > 0) {
-                            console.log(`✅ Found ${routineSections.length} routine elements, forcing render`);
-                            // Trigger a re-render by dispatching events
-                            routineSections.forEach(section => {
-                                const event = new Event('routineUpdate', { bubbles: true });
-                                section.dispatchEvent(event);
-                            });
-                            break; // Success, exit retry loop
-                        } else {
-                            console.log('❌ No routine elements found, retrying...');
-                        }
-                        
-                    } catch (error) {
-                        console.error(`❌ Routine update attempt ${attempt + 1} failed:`, error);
-                    }
-                }
+            async refreshRoutineUI() {
+                // Simple refresh for routine UI without retries
+                console.log('🔄 Refreshing routine UI...');
                 
-                console.log('✅ Routine update process completed');
+                try {
+                    // Initialize todo counter if available
+                    if (window.initializeTodoCounter && !window.initializeTodoCounter.running) {
+                        await window.initializeTodoCounter();
+                    }
+                    
+                    // Dispatch update event for routine elements
+                    const routineSections = document.querySelectorAll('.routine-item, .habit-item');
+                    if (routineSections.length > 0) {
+                        routineSections.forEach(section => {
+                            const event = new Event('routineUpdate', { bubbles: true });
+                            section.dispatchEvent(event);
+                        });
+                    }
+                    
+                    console.log('✅ Routine UI refreshed');
+                } catch (error) {
+                    console.error('❌ Error refreshing routine UI:', error);
+                }
             },
             
             async showDashboard() {
@@ -2402,58 +2368,34 @@
                 
                 // Load all data after successful login
                 if (supabase?.isAuthenticated()) {
-                    // First load routine completions
-                    await loadRoutineCompletions();
+                    console.log('🔄 Loading dashboard data...');
                     
-                    // Then load everything else including routine states
+                    // Load all data in parallel for better performance
                     await Promise.all([
+                        loadRoutineCompletions(),
                         TodoManager.loadTodos(),
                         GoalManager.loadGoals(),
                         JournalManager.loadEntries(),
                         TerminManager.loadTermine(),
-                        loadRoutineStates()
+                        loadRoutineStates(),
+                        // Load CryptoWiki data if available
+                        window.CryptoWiki ? window.CryptoWiki.loadEntries() : Promise.resolve(),
+                        // Load ResourceManager if available
+                        window.ResourceManager?.loadResources ? window.ResourceManager.loadResources() : Promise.resolve()
                     ]);
                     
-                    // Force routine UI update after data load with retries
-                    console.log('🔄 Forcing routine UI update after login...');
-                    await this.forceRoutineUpdate();
-                    
-                    // Load CryptoWiki data
-                    console.log('🔄 Loading CryptoWiki after login...');
+                    // Render CryptoWiki after data is loaded
                     if (window.CryptoWiki) {
-                        await window.CryptoWiki.loadEntries();
                         window.CryptoWiki.render();
                     }
                     
-                    // Load ResourceManager separately after all other managers
-                    if (window.ResourceManager && window.ResourceManager.loadResources) {
-                        console.log('🔄 Loading ResourceManager after login...');
-                        await window.ResourceManager.loadResources();
-                        console.log('✅ ResourceManager loaded after login');
-                        
-                        // CRITICAL: Force todo counter update after ResourceManager loads
-                        console.log('🚨 CRITICAL: Forcing todo counter update after ResourceManager...');
-                        
-                        // Additional retry for critical post-ResourceManager updates
-                        for (let attempt = 0; attempt < 3; attempt++) {
-                            await new Promise(resolve => setTimeout(resolve, attempt * 200));
-                            if (window.initializeTodoCounter) {
-                                window.initializeTodoCounter.running = false;
-                                await window.initializeTodoCounter();
-                                console.log('✅ CRITICAL: Todo counter updated after ResourceManager');
-                                break;
-                            } else {
-                                console.log(`❌ CRITICAL: initializeTodoCounter not found, attempt ${attempt + 1}/3`);
-                            }
-                        }
-                        
-                        // Final UI refresh
-                        console.log('🔄 Final UI refresh after all data loaded');
-                        setTimeout(() => {
-                            if (window.updateRoutineUI) window.updateRoutineUI();
-                            if (window.updateRoutineCounters) window.updateRoutineCounters();
-                        }, 1000);
+                    // Initialize todo counter once after all data is loaded
+                    if (window.initializeTodoCounter) {
+                        window.initializeTodoCounter.running = false;
+                        await window.initializeTodoCounter();
                     }
+                    
+                    console.log('✅ Dashboard data loaded');
                 } else {
                     // Initialize displays for local storage mode
                     TodoManager.updateHomeTodos();
@@ -5433,39 +5375,62 @@
         document.addEventListener('DOMContentLoaded', async () => {
             // Logout is now handled by separate logout.html page
             
+            console.log('✅ DOM loaded');
+            
             // Initialize Supabase first
             if (window.initializeSupabase) {
                 window.initializeSupabase();
             }
             
-            // Then initialize authentication
+            // Initialize authentication (this will handle data loading via showDashboard)
             await Auth.init();
             
-            // Load all data from database if authenticated
-            if (supabase?.isAuthenticated()) {
-                await Promise.all([
-                    TodoManager.loadTodos(),
-                    GoalManager.loadGoals(),
-                    JournalManager.loadEntries(),
-                    TerminManager.loadTermine(),
-                    loadRoutineCompletions()
-                ]);
+            // Initialize CryptoWiki
+            if (window.CryptoWiki) {
+                CryptoWiki.init();
+            }
+            
+            // Initialize Lucide icons globally
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+            
+            // Initialize ResourceManager and add sample data if needed
+            if (window.ResourceManager) {
+                ResourceManager.loadResources();
                 
-                // Load ResourceManager separately after it's defined
-                setTimeout(async () => {
-                    if (window.ResourceManager && window.ResourceManager.loadResources) {
-                        console.log('🔄 Loading ResourceManager after initialization...');
-                        await window.ResourceManager.loadResources();
-                        console.log('✅ ResourceManager loaded successfully');
-                    } else {
-                        console.warn('⚠️ ResourceManager still not available');
+                // Add sample resources if none exist
+                setTimeout(() => {
+                    if (ResourceManager.resources.length === 0) {
+                        console.log('🌱 Adding sample resources...');
+                        const sampleResources = [
+                            { title: 'Mail', category: 'Privat', url: 'https://gmail.com', icon: 'mail', description: 'Personal email access' },
+                            { title: 'MyFitnessPal', category: 'Privat', url: 'https://myfitnesspal.com', icon: 'activity', description: 'Fitness tracking app' },
+                            { title: 'Telegram', category: 'Privat', url: 'https://web.telegram.org', icon: 'message-circle', description: 'Telegram web client' },
+                            { title: 'ChatGPT', category: 'Privat', url: 'https://chat.openai.com', icon: 'bot', description: 'AI assistant' },
+                            { title: 'Sparkasse', category: 'Privat', url: 'https://sparkasse.de', icon: 'building', description: 'Online banking' },
+                            { title: 'Mail', category: 'Work', url: 'https://outlook.com', icon: 'mail', description: 'Work email access' },
+                            { title: 'Gartenpflege Lose', category: 'Work', url: 'https://example.com', icon: 'sprout', description: 'Garden maintenance system' },
+                            { title: 'Techem', category: 'Work', url: 'https://techem.de', icon: 'wrench', description: 'Heating service portal' },
+                            { title: 'BGWeb', category: 'Work', url: 'https://example.com', icon: 'home', description: 'Building management' },
+                            { title: 'CO2', category: 'Work', url: 'https://example.com', icon: 'bar-chart-3', description: 'CO2 monitoring' },
+                            { title: 'DAML Notes', category: 'Studium', url: 'https://example.com', icon: 'file-text', description: 'DAML study notes' },
+                            { title: 'Teams', category: 'Studium', url: 'https://teams.microsoft.com', icon: 'users', description: 'Microsoft Teams' }
+                        ];
+                        
+                        sampleResources.forEach((resourceData, index) => {
+                            const resource = {
+                                id: `sample_${Date.now()}_${index}`,
+                                ...resourceData,
+                                created_at: new Date().toISOString()
+                            };
+                            ResourceManager.resources.push(resource);
+                        });
+                        
+                        localStorage.setItem('resources', JSON.stringify(ResourceManager.resources));
+                        ResourceManager.renderResources();
                     }
-                }, 100);
-            } else {
-                // Initialize displays for local storage mode
-                TodoManager.updateHomeTodos();
-                // Don't call TerminManager.displayTermine() here - it will show empty termine
-                // Let it be handled by authentication flow
+                }, 500);
             }
             
             // Logout button is already handled by Auth.setupEventListeners()
@@ -5769,13 +5734,7 @@
             // Initialize settings functionality
             initializeSettings();
             
-            // Initialize todo counter after short delay to allow auth to complete
-            setTimeout(() => {
-                if (window.initializeTodoCounter) {
-                    console.log('🔄 Initial todo counter setup...');
-                    window.initializeTodoCounter();
-                }
-            }, 1000);
+            // Todo counter is now initialized in showDashboard() after authentication
             
             // === EDIT GOAL VALUE MODAL EVENT LISTENERS ===
             document.getElementById('cancel-edit-goal-value-btn').addEventListener('click', () => {
@@ -6193,43 +6152,7 @@
                 });
             }
             
-            // Initialize resources with sample data if empty
-            document.addEventListener('DOMContentLoaded', () => {
-                ResourceManager.loadResources();
-                
-                // Add sample resources if none exist
-                setTimeout(() => {
-                    if (ResourceManager.resources.length === 0) {
-                        console.log('🌱 Adding sample resources...');
-                        const sampleResources = [
-                            { title: 'Mail', category: 'Privat', url: 'https://gmail.com', icon: 'mail', description: 'Personal email access' },
-                            { title: 'MyFitnessPal', category: 'Privat', url: 'https://myfitnesspal.com', icon: 'activity', description: 'Fitness tracking app' },
-                            { title: 'Telegram', category: 'Privat', url: 'https://web.telegram.org', icon: 'message-circle', description: 'Telegram web client' },
-                            { title: 'ChatGPT', category: 'Privat', url: 'https://chat.openai.com', icon: 'bot', description: 'AI assistant' },
-                            { title: 'Sparkasse', category: 'Privat', url: 'https://sparkasse.de', icon: 'building', description: 'Online banking' },
-                            { title: 'Mail', category: 'Work', url: 'https://outlook.com', icon: 'mail', description: 'Work email access' },
-                            { title: 'Gartenpflege Lose', category: 'Work', url: 'https://example.com', icon: 'sprout', description: 'Garden maintenance system' },
-                            { title: 'Techem', category: 'Work', url: 'https://techem.de', icon: 'wrench', description: 'Heating service portal' },
-                            { title: 'BGWeb', category: 'Work', url: 'https://example.com', icon: 'home', description: 'Building management' },
-                            { title: 'CO2', category: 'Work', url: 'https://example.com', icon: 'bar-chart-3', description: 'CO2 monitoring' },
-                            { title: 'DAML Notes', category: 'Studium', url: 'https://example.com', icon: 'file-text', description: 'DAML study notes' },
-                            { title: 'Teams', category: 'Studium', url: 'https://teams.microsoft.com', icon: 'users', description: 'Microsoft Teams' }
-                        ];
-                        
-                        sampleResources.forEach((resourceData, index) => {
-                            const resource = {
-                                id: `sample_${Date.now()}_${index}`,
-                                ...resourceData,
-                                created_at: new Date().toISOString()
-                            };
-                            ResourceManager.resources.push(resource);
-                        });
-                        
-                        localStorage.setItem('resources', JSON.stringify(ResourceManager.resources));
-                        ResourceManager.renderResources();
-                    }
-                }, 500);
-            });
+            // ResourceManager initialization moved to main DOMContentLoaded listener
             
             // === SIMPLE LOGOUT (URL-based) ===
             console.log('✅ Logout is now URL-based, no JavaScript needed');
@@ -6761,15 +6684,7 @@
         // Make CryptoWiki globally available
         window.CryptoWiki = CryptoWiki;
         
-        // Initialize CryptoWiki when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            CryptoWiki.init();
-            
-            // Initialize Lucide icons globally
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-        });
+        // CryptoWiki and Lucide icons initialization moved to main DOMContentLoaded listener
     </script>
 </body>
 </html>
