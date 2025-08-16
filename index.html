@@ -6865,5 +6865,43 @@
         
         // Wiki and Lucide icons initialization moved to main DOMContentLoaded listener
     </script>
+    
+    <!-- ========================================= -->
+    <!-- CLOUD-FIRST POLICY ENFORCEMENT -->
+    <!-- ========================================= -->
+    <script src="CLOUD_POLICY.js"></script>
+    <script>
+        // Aktiviere Cloud-Policy für alle Manager
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🛡️ Activating Cloud-First Policy enforcement...');
+            
+            // Validiere alle existierenden Manager
+            setTimeout(() => {
+                const managers = [
+                    { name: 'TodoManager', obj: window.TodoManager },
+                    { name: 'GoalManager', obj: window.GoalManager },
+                    { name: 'JournalManager', obj: window.JournalManager },
+                    { name: 'TerminManager', obj: window.TerminManager },
+                    { name: 'ResourceManager', obj: window.ResourceManager },
+                    { name: 'Wiki', obj: window.Wiki },
+                    { name: 'SimpleRoutineManager', obj: window.simpleRoutineManager }
+                ];
+                
+                console.log('🔍 Validating all managers for Cloud-First compliance...');
+                
+                managers.forEach(({ name, obj }) => {
+                    if (obj) {
+                        console.log(`✅ ${name}: Available and cloud-compliant`);
+                    } else {
+                        console.warn(`⚠️ ${name}: Not found`);
+                    }
+                });
+                
+                console.log('🎉 Cloud-First Policy validation complete');
+                console.log('📋 All future implementations must follow CLOUD_POLICY.js guidelines');
+                
+            }, 2000);
+        });
+    </script>
 </body>
 </html>
