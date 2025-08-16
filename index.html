@@ -2380,8 +2380,8 @@
                         loadRoutineStates(),
                         // Load CryptoWiki data if available
                         window.CryptoWiki ? window.CryptoWiki.loadEntries() : Promise.resolve(),
-                        // Load ResourceManager if available
-                        window.ResourceManager?.loadResources ? window.ResourceManager.loadResources() : Promise.resolve()
+                        // Skip ResourceManager early load - it will be loaded after definition
+                        Promise.resolve().then(() => console.log('🔄 ResourceManager will be loaded after definition'))
                     ]);
                     
                     // Render CryptoWiki after data is loaded
@@ -5453,6 +5453,7 @@
             
             // Initialize ResourceManager and add sample data if needed
             if (window.ResourceManager) {
+                console.log('🔄 Proper ResourceManager initialization starting...');
                 ResourceManager.loadResources();
                 
                 // Add sample resources if none exist
