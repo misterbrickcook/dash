@@ -2304,6 +2304,14 @@
             <div class="portfolio-overview">
                 <div class="portfolio-stats">
                     <div class="portfolio-stat">
+                        <div class="stat-number" id="sol-balance">0.00 SOL</div>
+                        <div class="stat-label">SOL Balance</div>
+                    </div>
+                    <div class="portfolio-stat">
+                        <div class="stat-number" id="sol-in-trades">0.00 SOL</div>
+                        <div class="stat-label">SOL in Open Trades</div>
+                    </div>
+                    <div class="portfolio-stat">
                         <div class="stat-number" id="total-pnl">+0.00 SOL</div>
                         <div class="stat-label">Total P&L</div>
                     </div>
@@ -2818,6 +2826,13 @@
                     const activeTab = document.querySelector('.resource-tab.active');
                     const activeCategory = activeTab ? activeTab.getAttribute('data-resource-category') : 'alle';
                     ResourceManager.displayResourcesForCategory(activeCategory);
+                }
+            }
+            
+            // If switching to trading tab, update portfolio stats
+            if (tabId === 'tab-trading') {
+                if (window.TradingManager) {
+                    window.TradingManager.updatePortfolioStats();
                 }
             }
         }
@@ -7587,14 +7602,27 @@
                 container.innerHTML = html;
             }
 
-            updatePortfolioStats() {
+            async updatePortfolioStats() {
                 const openTrades = this.trades.filter(t => t.status === 'open');
                 const closedTrades = this.trades.filter(t => t.status === 'closed');
                 
+                // Calculate existing stats
                 const totalPnl = closedTrades.reduce((sum, t) => sum + (t.final_pnl || 0), 0);
                 const winningTrades = closedTrades.filter(t => (t.final_pnl || 0) > 0).length;
                 const winRate = closedTrades.length > 0 ? (winningTrades / closedTrades.length * 100) : 0;
+                
+                // Calculate SOL in open trades
+                const solInTrades = openTrades.reduce((sum, t) => sum + (t.sol_amount || 0), 0);
+                
+                // Get SOL balance from SimpleCounters
+                let solBalance = 0;
+                if (window.SimpleCounters) {
+                    solBalance = await window.SimpleCounters.getSolBalance();
+                }
 
+                // Update all stats
+                document.getElementById('sol-balance').textContent = `${solBalance.toFixed(2)} SOL`;
+                document.getElementById('sol-in-trades').textContent = `${solInTrades.toFixed(2)} SOL`;
                 document.getElementById('total-pnl').textContent = `${totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)} SOL`;
                 document.getElementById('total-pnl').className = `stat-number ${totalPnl >= 0 ? 'positive' : 'negative'}`;
                 document.getElementById('open-trades').textContent = openTrades.length;
