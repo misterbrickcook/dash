@@ -7722,10 +7722,15 @@
                     exitMcapInput.addEventListener('input', () => this.calculateReceivedSol());
                 }
 
-                // Auto-calculate when sol to sell input changes
+                // Auto-calculate when sol to sell input changes (but not when programmatically set)
                 const solToSellInput = document.getElementById('close-sol-to-sell');
                 if (solToSellInput) {
-                    solToSellInput.addEventListener('input', () => this.calculateReceivedSol());
+                    solToSellInput.addEventListener('input', (e) => {
+                        // Only recalculate if user manually typed (not programmatic change)
+                        if (e.isTrusted) {
+                            this.calculateReceivedSol();
+                        }
+                    });
                 }
 
                 // Percentage buttons for SOL to sell (based on current value, not entry amount)
@@ -8076,9 +8081,11 @@
                     console.log(`DEBUG: ${percent}% of ${currentTotalValue.toFixed(3)} = ${targetReceived.toFixed(3)} SOL target`);
                     console.log(`DEBUG: Need to sell ${solToSell.toFixed(3)} SOL to get ${targetReceived.toFixed(3)} SOL`);
                     
-                    // Update inputs directly
+                    // Update inputs directly - don't call calculateReceivedSol() as we already have the target
                     document.getElementById('close-sol-to-sell').value = Math.min(originalAmount, Math.max(0, solToSell)).toFixed(3);
                     document.getElementById('close-received-sol').value = targetReceived.toFixed(3);
+                    
+                    console.log(`FINAL: Set SOL Received to ${targetReceived.toFixed(3)} SOL`);
                     
                 } catch (error) {
                     console.error('Error calculating SOL to sell from percent:', error);
