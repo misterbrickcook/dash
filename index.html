@@ -8165,6 +8165,14 @@
                 const originalTrade = this.currentTradeToClose;
                 const originalAmount = originalTrade.sol_amount;
                 
+                // Parse market caps for calculations
+                const entryMcap = originalTrade.entry_mcap;
+                const entryValue = parseFloat(entryMcap);
+                const entryUnit = entryMcap.slice(-1).toUpperCase();
+                const multipliers = { 'K': 1000, 'M': 1000000, 'B': 1000000000 };
+                const entryActual = entryValue * (multipliers[entryUnit] || 1000000000);
+                const exitActual = mcapValue * (multipliers[activeMultiplier] || 1000000000);
+                
                 // Calculate how much SOL to sell to get the take profit
                 const solToSell = originalAmount - keepPosition;
 
@@ -8199,9 +8207,16 @@
                             user_id: originalTrade.user_id
                         };
 
-                        // Update original trade with remaining amount
-                        originalTrade.sol_amount = originalAmount - solToSell;
-                        originalTrade.entry_price = (originalTrade.entry_price / originalAmount) * originalTrade.sol_amount; // Proportional entry price
+                        // Calculate actual tokens to keep (not value)
+                        const percentageChange = (exitActual - entryActual) / entryActual;
+                        const currentTotalValue = originalAmount * (1 + percentageChange);
+                        const keepPositionValue = currentTotalValue - takeProfit;
+                        const keepPositionTokens = keepPositionValue / (1 + percentageChange); // Convert value back to tokens
+                        
+                        // Update original trade: reset entry to current level (break-even point)
+                        originalTrade.sol_amount = keepPositionTokens;
+                        originalTrade.entry_mcap = exitMcap; // New entry = current exit level
+                        originalTrade.entry_price = this.solPrice; // Current SOL price as new entry
 
                         // Save both trades to cloud
                         await this.saveTradeToCloud(closedTrade);
