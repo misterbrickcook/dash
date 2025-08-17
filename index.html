@@ -133,10 +133,12 @@
         }
         
         /* Quick-add button specific styles */
+        .quick-add-btn i {
+            transition: transform 0.2s ease;
+        }
         .quick-add-btn:hover i {
             stroke: #059669 !important;
             transform: rotate(90deg);
-            transition: transform 0.2s ease;
         }
         
         .settings-btn:hover span, .settings-btn:active span, .settings-btn:focus span {
@@ -6827,7 +6829,6 @@
                         
                         <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
                             <select id="quick-todo-category" style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="heute">Heute</option>
                                 <option value="privat">Privat</option>
                                 <option value="uni">Uni</option>
                                 <option value="arbeit">Arbeit</option>
