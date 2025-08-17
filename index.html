@@ -3302,59 +3302,68 @@
                 }
             });
             
-            // NUCLEAR APPROACH: Clear all existing styles and force animation
-            console.log('🚀 NUCLEAR: Setting up quick-add animation...');
+            // WAIT FOR LUCIDE TO LOAD: Set up animation after icons are processed
+            console.log('🚀 LUCIDE-AWARE: Waiting for Lucide to process icons...');
             
-            // Find the icon with multiple methods
-            let quickAddIcon = quickAddBtn.querySelector('i');
-            if (!quickAddIcon) {
-                quickAddIcon = quickAddBtn.querySelector('svg');
-            }
-            if (!quickAddIcon) {
-                quickAddIcon = quickAddBtn.firstElementChild;
+            function setupQuickAddAnimation() {
+                // Find the actual SVG element (Lucide converts <i> to <svg>)
+                let quickAddIcon = quickAddBtn.querySelector('svg');
+                
+                if (quickAddIcon) {
+                    console.log('🎯 LUCIDE-AWARE: SVG icon found:', quickAddIcon);
+                    console.log('🎯 LUCIDE-AWARE: SVG viewBox:', quickAddIcon.getAttribute('viewBox'));
+                    
+                    // Set up hover animation on the SVG
+                    quickAddIcon.style.cssText = `
+                        transition: all 0.3s ease !important;
+                        transform-origin: center !important;
+                        display: inline-block !important;
+                    `;
+                    
+                    // Test immediate rotation
+                    console.log('🧪 LUCIDE-AWARE: Testing SVG rotation...');
+                    quickAddIcon.style.transform = 'rotate(45deg)';
+                    setTimeout(() => {
+                        quickAddIcon.style.transform = 'rotate(0deg)';
+                        console.log('✅ LUCIDE-AWARE: Test rotation complete');
+                    }, 1000);
+                    
+                    // Setup hover events on button targeting SVG
+                    quickAddBtn.onmouseenter = function() {
+                        console.log('🎯 LUCIDE-AWARE: mouseenter - rotating SVG');
+                        const svg = quickAddBtn.querySelector('svg');
+                        if (svg) {
+                            svg.style.transform = 'rotate(90deg)';
+                            svg.style.stroke = '#059669';
+                        }
+                    };
+                    
+                    quickAddBtn.onmouseleave = function() {
+                        console.log('🎯 LUCIDE-AWARE: mouseleave - resetting SVG');
+                        const svg = quickAddBtn.querySelector('svg');
+                        if (svg) {
+                            svg.style.transform = 'rotate(0deg)';
+                            svg.style.stroke = '';
+                        }
+                    };
+                    
+                    console.log('✅ LUCIDE-AWARE: Animation setup complete');
+                    return true;
+                } else {
+                    console.log('⚠️ LUCIDE-AWARE: SVG not ready yet...');
+                    return false;
+                }
             }
             
-            if (quickAddIcon) {
-                console.log('🎯 NUCLEAR: Icon found:', quickAddIcon);
-                console.log('🎯 NUCLEAR: Icon tagName:', quickAddIcon.tagName);
-                console.log('🎯 NUCLEAR: Icon classes:', quickAddIcon.className);
-                
-                // Clear ALL existing styles first
-                quickAddIcon.removeAttribute('style');
-                
-                // Set base styles with brute force
-                const baseStyles = `
-                    transition: all 0.3s ease !important;
-                    transform-origin: center !important;
-                    display: inline-block !important;
-                `;
-                quickAddIcon.style.cssText = baseStyles;
-                
-                // Test immediate rotation
-                console.log('🧪 NUCLEAR: Testing immediate rotation...');
-                quickAddIcon.style.transform = 'rotate(45deg)';
+            // Try immediately, then retry with delays
+            if (!setupQuickAddAnimation()) {
+                console.log('🔄 LUCIDE-AWARE: Retrying in 500ms...');
                 setTimeout(() => {
-                    quickAddIcon.style.transform = 'rotate(0deg)';
-                }, 1000);
-                
-                // Setup hover events
-                quickAddBtn.onmouseenter = function() {
-                    console.log('🎯 NUCLEAR: mouseenter');
-                    quickAddIcon.style.transform = 'rotate(90deg)';
-                    quickAddIcon.style.stroke = '#059669';
-                    quickAddIcon.style.color = '#059669';
-                };
-                
-                quickAddBtn.onmouseleave = function() {
-                    console.log('🎯 NUCLEAR: mouseleave');
-                    quickAddIcon.style.transform = 'rotate(0deg)';
-                    quickAddIcon.style.stroke = '';
-                    quickAddIcon.style.color = '';
-                };
-                
-            } else {
-                console.log('❌ NUCLEAR: No icon found at all!');
-                console.log('❌ NUCLEAR: Button innerHTML:', quickAddBtn.innerHTML);
+                    if (!setupQuickAddAnimation()) {
+                        console.log('🔄 LUCIDE-AWARE: Retrying in 1000ms...');
+                        setTimeout(setupQuickAddAnimation, 1000);
+                    }
+                }, 500);
             }
         }
 
