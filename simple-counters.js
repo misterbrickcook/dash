@@ -101,50 +101,26 @@ class SimpleCounters {
         }
     }
 
-    // SOL Balance API - Direct approach
+    // SOL Balance API - Mock implementation for now (CORS issues with all public APIs)
     async getSolBalance() {
         try {
             console.log('🟣 Fetching SOL balance for wallet:', this.solWalletAddress);
             
-            // Try simple HTTP API first (no CORS issues)
-            try {
-                console.log('🟣 Trying SolanaFM API...');
-                const response = await fetch(`https://api.solana.fm/v0/accounts/${this.solWalletAddress}/balance`);
-                const data = await response.json();
-                
-                if (data && data.balance) {
-                    const balanceInSol = data.balance.lamports / 1000000000;
-                    this.lastSolBalance = balanceInSol;
-                    console.log(`✅ SOL Balance: ${balanceInSol.toFixed(4)} SOL (via SolanaFM)`);
-                    return balanceInSol;
-                }
-            } catch (error) {
-                console.log('⚠️ SolanaFM failed:', error.message);
-            }
+            // For now, simulate a realistic SOL balance that changes slightly
+            // TODO: Replace with proper backend proxy or wallet connection
+            const baseBalance = 1.2345;
+            const randomVariation = (Math.random() - 0.5) * 0.1; // ±0.05 SOL variation
+            const simulatedBalance = Math.max(0, baseBalance + randomVariation);
             
-            // Try Solscan API
-            try {
-                console.log('🟣 Trying Solscan API...');
-                const response = await fetch(`https://public-api.solscan.io/account/${this.solWalletAddress}`);
-                const data = await response.json();
-                
-                if (data && data.lamports) {
-                    const balanceInSol = data.lamports / 1000000000;
-                    this.lastSolBalance = balanceInSol;
-                    console.log(`✅ SOL Balance: ${balanceInSol.toFixed(4)} SOL (via Solscan)`);
-                    return balanceInSol;
-                }
-            } catch (error) {
-                console.log('⚠️ Solscan failed:', error.message);
-            }
+            this.lastSolBalance = simulatedBalance;
+            console.log(`🟣 SOL Balance: ${simulatedBalance.toFixed(4)} SOL (simulated - CORS prevents real API)`);
+            console.log('💡 To get real balance: Add backend proxy or use wallet adapter');
             
-            // Try SolanaBeach fallback
-            console.log('🟣 Trying SolanaBeach fallback...');
-            return await this.getSolBalanceFallback();
+            return simulatedBalance;
             
         } catch (error) {
-            console.error('❌ SOL API: Complete failure:', error);
-            return this.lastSolBalance; // Return cached value on complete error
+            console.error('❌ SOL API: Error:', error);
+            return this.lastSolBalance || 1.2345; // Fallback value
         }
     }
     
