@@ -6912,11 +6912,19 @@
                     return;
                 }
                 
+                // Map priority string to integer for database
+                const priorityMap = {
+                    'mittel': 2,
+                    'wichtig': 3,
+                    'dringend': 4
+                };
+                
                 const todo = {
-                    title: title,
+                    text: title,  // Database uses 'text', not 'title'
                     category: category,
-                    priority: priority,
-                    deadline: deadline || null,
+                    priority: priorityMap[priority] || 2,  // Convert to integer
+                    date: deadline || null,  // Database uses 'date', not 'deadline'
+                    time: null,  // No time specified in quick-add
                     completed: false,
                     created_at: new Date().toISOString()
                 };
