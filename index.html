@@ -3372,6 +3372,58 @@
                     }
                 }, 500);
             }
+            
+            // Setup Timer and Settings hover animations (same Lucide issue)
+            function setupActionButtonHovers() {
+                const timerBtn = document.getElementById('timer-btn');
+                const settingsBtn = document.getElementById('settings-btn');
+                
+                if (timerBtn) {
+                    const timerIcon = timerBtn.querySelector('svg');
+                    if (timerIcon) {
+                        console.log('🎯 Timer SVG found, setting up hover');
+                        timerBtn.onmouseenter = function() {
+                            const svg = timerBtn.querySelector('svg');
+                            if (svg && !timerBtn.classList.contains('timer-running') && !timerBtn.classList.contains('timer-paused')) {
+                                svg.style.stroke = '#059669';
+                                svg.style.color = '#059669';
+                            }
+                        };
+                        timerBtn.onmouseleave = function() {
+                            const svg = timerBtn.querySelector('svg');
+                            if (svg && !timerBtn.classList.contains('timer-running') && !timerBtn.classList.contains('timer-paused')) {
+                                svg.style.stroke = '';
+                                svg.style.color = '';
+                            }
+                        };
+                    }
+                }
+                
+                if (settingsBtn) {
+                    const settingsIcon = settingsBtn.querySelector('svg');
+                    if (settingsIcon) {
+                        console.log('🎯 Settings SVG found, setting up hover');
+                        settingsBtn.onmouseenter = function() {
+                            const svg = settingsBtn.querySelector('svg');
+                            if (svg) {
+                                svg.style.stroke = '#059669';
+                                svg.style.color = '#059669';
+                            }
+                        };
+                        settingsBtn.onmouseleave = function() {
+                            const svg = settingsBtn.querySelector('svg');
+                            if (svg) {
+                                svg.style.stroke = '';
+                                svg.style.color = '';
+                            }
+                        };
+                    }
+                }
+            }
+            
+            // Setup action button hovers with delays for Lucide
+            setTimeout(setupActionButtonHovers, 1000);
+            setTimeout(setupActionButtonHovers, 2000);
         }
 
         // Timer button event listener
