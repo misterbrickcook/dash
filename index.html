@@ -8074,9 +8074,8 @@
                     // Calculate take profit (percent of current value)
                     const takeProfit = currentTotalValue * (percent / 100);
                     
-                    // Calculate how much position to sell to get that profit
-                    const solToSell = takeProfit / (1 + percentageChange);
-                    const keepPosition = originalAmount - solToSell;
+                    // Keep position is simply the rest of current value
+                    const keepPosition = currentTotalValue - takeProfit;
                     
                     // Debug
                     console.log(`DEBUG: Entry ${originalAmount} SOL, Exit change: ${(percentageChange*100).toFixed(1)}%`);
