@@ -60,7 +60,7 @@ class SimpleRoutineManager {
         try {
             // Pure cloud mode - authentication required
             if (!window.supabase || !window.supabase.isAuthenticated()) {
-                console.error('❌ SimpleRoutineManager: Not authenticated - pure cloud mode requires authentication');
+                console.warn('⚠️ SimpleRoutineManager: Not authenticated yet - will reload after login');
                 this.routineData = this.getEmptyData();
                 return;
             }
