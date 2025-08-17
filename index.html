@@ -73,7 +73,7 @@
             align-items: center;
         }
         
-        .logout-btn, .settings-btn, .timer-btn {
+        .logout-btn, .settings-btn, .timer-btn, .quick-add-btn {
             color: #666666 !important;
             font-weight: 400 !important;
             background: transparent !important;
@@ -91,16 +91,16 @@
         }
         
         /* Mobile-safe hover states - override nav-tab hover */
-        .logout-btn:hover, .settings-btn:hover, .timer-btn:hover,
-        .logout-btn:active, .settings-btn:active, .timer-btn:active,
-        .logout-btn:focus, .settings-btn:focus, .timer-btn:focus {
+        .logout-btn:hover, .settings-btn:hover, .timer-btn:hover, .quick-add-btn:hover,
+        .logout-btn:active, .settings-btn:active, .timer-btn:active, .quick-add-btn:active,
+        .logout-btn:focus, .settings-btn:focus, .timer-btn:focus, .quick-add-btn:focus {
             background: transparent !important;
             border: none !important;
             border-color: transparent !important;
         }
         
         /* Specific override for nav-tab hover border */
-        .nav-tab.logout-btn:hover, .nav-tab.settings-btn:hover, .nav-tab.timer-btn:hover {
+        .nav-tab.logout-btn:hover, .nav-tab.settings-btn:hover, .nav-tab.timer-btn:hover, .nav-tab.quick-add-btn:hover {
             border: none !important;
             border-color: transparent !important;
             background: transparent !important;
@@ -130,6 +130,13 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
+        }
+        
+        /* Quick-add button specific styles */
+        .quick-add-btn:hover i {
+            stroke: #059669 !important;
+            transform: rotate(90deg);
+            transition: transform 0.2s ease;
         }
         
         .settings-btn:hover span, .settings-btn:active span, .settings-btn:focus span {
@@ -1795,6 +1802,9 @@
             <button class="nav-tab" data-tab="tab-wiki">Wiki</button>
             <button class="nav-tab" data-tab="tab-settings" style="display: none;">Settings</button>
             <div class="nav-actions">
+                <button id="quick-add-btn" class="nav-tab quick-add-btn" title="Quick Add Todo">
+                    <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                </button>
                 <button id="timer-btn" class="nav-tab timer-btn" title="Pomodoro Timer (25 min) | Right-click to reset">
                     <i data-lucide="timer" style="width: 18px; height: 18px;"></i>
                 </button>
@@ -3261,8 +3271,8 @@
         // === EVENT LISTENERS ===
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => {
-                // Skip logout, settings and timer buttons - they have their own handlers
-                if (tab.id === 'logout-btn' || tab.id === 'settings-btn' || tab.id === 'timer-btn') return;
+                // Skip action buttons - they have their own handlers
+                if (tab.id === 'logout-btn' || tab.id === 'settings-btn' || tab.id === 'timer-btn' || tab.id === 'quick-add-btn') return;
                 
                 const tabId = tab.getAttribute('data-tab');
                 if (tabId) switchTab(tabId);
@@ -3275,6 +3285,17 @@
             settingsBtn.addEventListener('click', () => {
                 console.log('Settings clicked');
                 switchTab('tab-settings');
+            });
+        }
+
+        // Quick-add button event listener
+        const quickAddBtn = document.getElementById('quick-add-btn');
+        if (quickAddBtn) {
+            quickAddBtn.addEventListener('click', () => {
+                console.log('Quick-add clicked');
+                if (window.QuickAdd) {
+                    window.QuickAdd.show();
+                }
             });
         }
 
@@ -6741,6 +6762,188 @@
         
         // Make PomodoroTimer globally available
         window.PomodoroTimer = new PomodoroTimer();
+        
+        // === QUICK ADD CLASS ===
+        class QuickAdd {
+            constructor() {
+                this.isVisible = false;
+                this.overlay = null;
+                this.modal = null;
+                console.log('⚡ QuickAdd initialized');
+            }
+            
+            show() {
+                if (this.isVisible) return;
+                
+                console.log('⚡ QuickAdd: Showing modal');
+                this.createModal();
+                this.isVisible = true;
+            }
+            
+            hide() {
+                if (!this.isVisible) return;
+                
+                console.log('⚡ QuickAdd: Hiding modal');
+                if (this.overlay) {
+                    this.overlay.remove();
+                    this.overlay = null;
+                    this.modal = null;
+                }
+                this.isVisible = false;
+            }
+            
+            createModal() {
+                // Create overlay
+                this.overlay = document.createElement('div');
+                this.overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    z-index: 2000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                
+                // Create modal
+                this.modal = document.createElement('div');
+                this.modal.style.cssText = `
+                    background: white;
+                    border-radius: 8px;
+                    padding: 2rem;
+                    min-width: 400px;
+                    max-width: 500px;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                `;
+                
+                this.modal.innerHTML = `
+                    <h3 style="margin: 0 0 1rem 0; font-size: 1.2rem;">⚡ Quick Add Todo</h3>
+                    <form id="quick-add-form">
+                        <input type="text" id="quick-todo-title" placeholder="Todo eingeben..." 
+                               style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 1rem; font-size: 1rem;" />
+                        
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                            <select id="quick-todo-category" style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="heute">Heute</option>
+                                <option value="privat">Privat</option>
+                                <option value="uni">Uni</option>
+                                <option value="arbeit">Arbeit</option>
+                            </select>
+                            
+                            <select id="quick-todo-priority" style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="mittel">Mittel</option>
+                                <option value="wichtig">Wichtig</option>
+                                <option value="dringend">Dringend</option>
+                            </select>
+                        </div>
+                        
+                        <input type="date" id="quick-todo-deadline" 
+                               style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 1rem;" />
+                        
+                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            <button type="button" id="quick-add-cancel" 
+                                    style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">
+                                Abbrechen
+                            </button>
+                            <button type="submit" 
+                                    style="padding: 0.5rem 1rem; border: none; background: #059669; color: white; border-radius: 4px; cursor: pointer;">
+                                Hinzufügen
+                            </button>
+                        </div>
+                    </form>
+                `;
+                
+                this.overlay.appendChild(this.modal);
+                document.body.appendChild(this.overlay);
+                
+                // Set today as default deadline
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('quick-todo-deadline').value = today;
+                
+                // Focus title input
+                const titleInput = document.getElementById('quick-todo-title');
+                setTimeout(() => titleInput.focus(), 100);
+                
+                // Event listeners
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                // Close on overlay click
+                this.overlay.addEventListener('click', (e) => {
+                    if (e.target === this.overlay) {
+                        this.hide();
+                    }
+                });
+                
+                // Close on ESC key
+                document.addEventListener('keydown', this.handleKeydown.bind(this));
+                
+                // Cancel button
+                document.getElementById('quick-add-cancel').addEventListener('click', () => {
+                    this.hide();
+                });
+                
+                // Form submit
+                document.getElementById('quick-add-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleSubmit();
+                });
+            }
+            
+            handleKeydown(e) {
+                if (e.key === 'Escape' && this.isVisible) {
+                    this.hide();
+                }
+            }
+            
+            async handleSubmit() {
+                const title = document.getElementById('quick-todo-title').value.trim();
+                const category = document.getElementById('quick-todo-category').value;
+                const priority = document.getElementById('quick-todo-priority').value;
+                const deadline = document.getElementById('quick-todo-deadline').value;
+                
+                if (!title) {
+                    alert('Bitte gib einen Todo-Titel ein!');
+                    return;
+                }
+                
+                const todo = {
+                    title: title,
+                    category: category,
+                    priority: priority,
+                    deadline: deadline || null,
+                    completed: false,
+                    created_at: new Date().toISOString()
+                };
+                
+                try {
+                    console.log('⚡ QuickAdd: Saving todo:', todo);
+                    
+                    // Save using TodoManager
+                    if (window.TodoManager) {
+                        await window.TodoManager.saveTodo(todo);
+                        console.log('✅ QuickAdd: Todo saved successfully');
+                        
+                        // Refresh todo display if on todos tab
+                        if (window.location.hash === '#todos' || document.querySelector('[data-tab="tab-todos"].active')) {
+                            await window.TodoManager.loadAndDisplayTodos();
+                        }
+                    }
+                    
+                    this.hide();
+                } catch (error) {
+                    console.error('❌ QuickAdd: Error saving todo:', error);
+                    alert('Fehler beim Speichern des Todos!');
+                }
+            }
+        }
+        
+        // Make QuickAdd globally available
+        window.QuickAdd = new QuickAdd();
         
         // Wiki and Lucide icons initialization moved to main DOMContentLoaded listener
     </script>
