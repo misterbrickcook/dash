@@ -7527,8 +7527,8 @@
                                 ${trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)} SOL
                             </div>
                             <div class="trade-actions" data-label="Actions">
-                                <button class="btn secondary" onclick="TradingManager.editTrade('${trade.id}')">Edit</button>
-                                <button class="btn secondary" onclick="TradingManager.closeTrade('${trade.id}')">Close</button>
+                                <button class="btn secondary" onclick="window.TradingManager.editTrade('${trade.id}')">Edit</button>
+                                <button class="btn secondary" onclick="window.TradingManager.closeTrade('${trade.id}')">Close</button>
                             </div>
                         </div>
                     `).join('')}
