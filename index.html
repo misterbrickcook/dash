@@ -7728,15 +7728,12 @@
                     solToSellInput.addEventListener('input', () => this.calculateReceivedSol());
                 }
 
-                // Percentage buttons for SOL to sell
+                // Percentage buttons for SOL to sell (based on current value, not entry amount)
                 document.addEventListener('click', (e) => {
                     if (e.target.matches('#close-trade-modal .sol-percent-btn')) {
                         const percent = parseFloat(e.target.getAttribute('data-percent'));
                         if (this.currentTradeToClose && percent) {
-                            const totalAmount = this.currentTradeToClose.sol_amount;
-                            const sellAmount = (totalAmount * percent / 100).toFixed(3);
-                            document.getElementById('close-sol-to-sell').value = sellAmount;
-                            this.calculateReceivedSol();
+                            this.calculateSolToSellFromPercent(percent);
                         }
                     }
                 });
@@ -8033,6 +8030,60 @@
             hideCloseTradeModal() {
                 document.getElementById('close-trade-modal').style.display = 'none';
                 this.currentTradeToClose = null;
+            }
+
+            calculateSolToSellFromPercent(percent) {
+                if (!this.currentTradeToClose) return;
+
+                const exitMcapValue = parseFloat(document.getElementById('close-exit-mcap').value);
+                const activeMultiplier = document.querySelector('#close-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
+                
+                if (!exitMcapValue || isNaN(exitMcapValue)) {
+                    // No exit mcap set yet, fall back to entry amount percentage
+                    const totalAmount = this.currentTradeToClose.sol_amount;
+                    const sellAmount = (totalAmount * percent / 100).toFixed(3);
+                    document.getElementById('close-sol-to-sell').value = sellAmount;
+                    return;
+                }
+
+                try {
+                    // Parse entry market cap
+                    const entryMcap = this.currentTradeToClose.entry_mcap;
+                    const entryValue = parseFloat(entryMcap);
+                    const entryUnit = entryMcap.slice(-1).toUpperCase();
+                    
+                    // Convert both to same base (use actual numbers)
+                    const multipliers = { 'K': 1000, 'M': 1000000, 'B': 1000000000 };
+                    const entryActual = entryValue * (multipliers[entryUnit] || 1000000000);
+                    const exitActual = exitMcapValue * (multipliers[activeMultiplier] || 1000000000);
+                    
+                    // Calculate percentage change
+                    const percentageChange = (exitActual - entryActual) / entryActual;
+                    
+                    // Calculate current total value in SOL
+                    const originalAmount = this.currentTradeToClose.sol_amount;
+                    const currentTotalValue = originalAmount * (1 + percentageChange);
+                    
+                    // Calculate target SOL to receive (percent of current value)
+                    const targetReceived = currentTotalValue * (percent / 100);
+                    
+                    // Calculate how much SOL to sell to get that target
+                    // receivedSol = solToSell * (1 + percentageChange)
+                    // solToSell = receivedSol / (1 + percentageChange)
+                    const solToSell = targetReceived / (1 + percentageChange);
+                    
+                    // Update inputs
+                    document.getElementById('close-sol-to-sell').value = Math.min(originalAmount, Math.max(0, solToSell)).toFixed(3);
+                    this.calculateReceivedSol();
+                    
+                } catch (error) {
+                    console.error('Error calculating SOL to sell from percent:', error);
+                    // Fall back to simple percentage of entry amount
+                    const totalAmount = this.currentTradeToClose.sol_amount;
+                    const sellAmount = (totalAmount * percent / 100).toFixed(3);
+                    document.getElementById('close-sol-to-sell').value = sellAmount;
+                    this.calculateReceivedSol();
+                }
             }
 
             calculateReceivedSol() {
