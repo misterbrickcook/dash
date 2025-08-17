@@ -7709,8 +7709,16 @@
                         const modalMcapButtons = document.querySelectorAll('#close-trade-modal .mcap-btn');
                         modalMcapButtons.forEach(b => b.classList.remove('active'));
                         e.target.classList.add('active');
+                        // Auto-calculate SOL received when unit changes
+                        this.calculateReceivedSol();
                     }
                 });
+
+                // Auto-calculate when exit mcap input changes
+                const exitMcapInput = document.getElementById('close-exit-mcap');
+                if (exitMcapInput) {
+                    exitMcapInput.addEventListener('input', () => this.calculateReceivedSol());
+                }
             }
 
             setupTabListener() {
@@ -8003,6 +8011,44 @@
             hideCloseTradeModal() {
                 document.getElementById('close-trade-modal').style.display = 'none';
                 this.currentTradeToClose = null;
+            }
+
+            calculateReceivedSol() {
+                if (!this.currentTradeToClose) return;
+
+                const exitMcapValue = parseFloat(document.getElementById('close-exit-mcap').value);
+                const activeMultiplier = document.querySelector('#close-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
+                
+                if (!exitMcapValue || isNaN(exitMcapValue)) {
+                    document.getElementById('close-received-sol').value = '';
+                    return;
+                }
+
+                try {
+                    // Parse entry market cap
+                    const entryMcap = this.currentTradeToClose.entry_mcap;
+                    const entryValue = parseFloat(entryMcap);
+                    const entryUnit = entryMcap.slice(-1).toUpperCase();
+                    
+                    // Convert both to same base (use actual numbers)
+                    const multipliers = { 'K': 1000, 'M': 1000000, 'B': 1000000000 };
+                    const entryActual = entryValue * (multipliers[entryUnit] || 1000000000);
+                    const exitActual = exitMcapValue * (multipliers[activeMultiplier] || 1000000000);
+                    
+                    // Calculate percentage change
+                    const percentageChange = (exitActual - entryActual) / entryActual;
+                    
+                    // Calculate received SOL based on percentage change
+                    const entryAmount = this.currentTradeToClose.sol_amount;
+                    const receivedSol = entryAmount * (1 + percentageChange);
+                    
+                    // Update the input field
+                    document.getElementById('close-received-sol').value = Math.max(0, receivedSol).toFixed(3);
+                    
+                } catch (error) {
+                    console.error('Error calculating received SOL:', error);
+                    // Don't show errors to user, just don't auto-calculate
+                }
             }
 
             async confirmCloseTrade() {
