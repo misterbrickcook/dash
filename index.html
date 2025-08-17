@@ -7431,13 +7431,11 @@
                 const trade = {
                     id: Date.now().toString(),
                     token,
-                    tokenName: token, // Use symbol as name for simplicity
-                    solAmount,
-                    entryMcap,
-                    entryPrice: this.solPrice * solAmount,
-                    entryDate: new Date().toISOString(),
+                    sol_amount: solAmount,
+                    entry_mcap: entryMcap,
+                    entry_price: this.solPrice * solAmount,
+                    entry_date: new Date().toISOString(),
                     status: 'open',
-                    currentMcap: entryMcap,
                     pnl: 0,
                     user_id: window.supabase?.getCurrentUser()?.id
                 };
@@ -7521,11 +7519,10 @@
                         <div class="trade-row">
                             <div class="trade-token" data-label="Token">
                                 <strong>${trade.token}</strong>
-                                <br><small>${trade.tokenName || 'Unknown Token'}</small>
                             </div>
-                            <div class="trade-amount" data-label="SOL Amount">${trade.solAmount} SOL</div>
-                            <div class="trade-entry-price" data-label="Entry McAP">${trade.entryMcap}</div>
-                            <div class="trade-entry-price" data-label="Entry Price">$${trade.entryPrice.toFixed(0)}</div>
+                            <div class="trade-amount" data-label="SOL Amount">${trade.sol_amount} SOL</div>
+                            <div class="trade-entry-price" data-label="Entry McAP">${trade.entry_mcap}</div>
+                            <div class="trade-entry-price" data-label="Entry Price">$${trade.entry_price.toFixed(0)}</div>
                             <div class="trade-pnl ${trade.pnl >= 0 ? 'positive' : 'negative'}" data-label="P&L">
                                 ${trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)} SOL
                             </div>
@@ -7561,15 +7558,14 @@
                         <div class="trade-row">
                             <div class="trade-token" data-label="Token">
                                 <strong>${trade.token}</strong>
-                                <br><small>${trade.tokenName || 'Unknown Token'}</small>
                             </div>
-                            <div class="trade-amount" data-label="SOL Amount">${trade.solAmount} SOL</div>
-                            <div class="trade-entry-price" data-label="McAP">${trade.entryMcap} → ${trade.exitMcap || 'N/A'}</div>
-                            <div class="trade-entry-price" data-label="Price">$${trade.entryPrice.toFixed(0)} → $${(trade.exitPrice || 0).toFixed(0)}</div>
-                            <div class="trade-pnl ${trade.finalPnl >= 0 ? 'positive' : 'negative'}" data-label="P&L">
-                                ${trade.finalPnl >= 0 ? '+' : ''}${trade.finalPnl.toFixed(2)} SOL
+                            <div class="trade-amount" data-label="SOL Amount">${trade.sol_amount} SOL</div>
+                            <div class="trade-entry-price" data-label="McAP">${trade.entry_mcap} → ${trade.exit_mcap || 'N/A'}</div>
+                            <div class="trade-entry-price" data-label="Price">$${trade.entry_price.toFixed(0)} → $${(trade.exit_price || 0).toFixed(0)}</div>
+                            <div class="trade-pnl ${trade.final_pnl >= 0 ? 'positive' : 'negative'}" data-label="P&L">
+                                ${trade.final_pnl >= 0 ? '+' : ''}${trade.final_pnl.toFixed(2)} SOL
                             </div>
-                            <div data-label="Date">${new Date(trade.exitDate || trade.entryDate).toLocaleDateString()}</div>
+                            <div data-label="Date">${new Date(trade.exit_date || trade.entry_date).toLocaleDateString()}</div>
                         </div>
                     `).join('')}
                 `;
@@ -7581,8 +7577,8 @@
                 const openTrades = this.trades.filter(t => t.status === 'open');
                 const closedTrades = this.trades.filter(t => t.status === 'closed');
                 
-                const totalPnl = closedTrades.reduce((sum, t) => sum + (t.finalPnl || 0), 0);
-                const winningTrades = closedTrades.filter(t => (t.finalPnl || 0) > 0).length;
+                const totalPnl = closedTrades.reduce((sum, t) => sum + (t.final_pnl || 0), 0);
+                const winningTrades = closedTrades.filter(t => (t.final_pnl || 0) > 0).length;
                 const winRate = closedTrades.length > 0 ? (winningTrades / closedTrades.length * 100) : 0;
 
                 document.getElementById('total-pnl').textContent = `${totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)} SOL`;
@@ -7595,13 +7591,13 @@
                 const trade = this.trades.find(t => t.id === tradeId);
                 if (!trade) return;
 
-                const newMcap = prompt(`Current Market Cap for ${trade.token}:`, trade.currentMcap);
-                const newSol = prompt(`Received SOL amount:`, trade.solAmount);
+                const newMcap = prompt(`Current Market Cap for ${trade.token}:`, trade.entry_mcap);
+                const newSol = prompt(`Current SOL value:`, trade.sol_amount);
 
                 if (newMcap && newSol) {
-                    trade.currentMcap = newMcap;
-                    trade.receivedSol = parseFloat(newSol);
-                    trade.pnl = trade.receivedSol - trade.solAmount;
+                    trade.current_mcap = newMcap;
+                    trade.current_sol = parseFloat(newSol);
+                    trade.pnl = trade.current_sol - trade.sol_amount;
 
                     await this.updateTradeInCloud(trade);
                     this.renderTrades();
@@ -7613,16 +7609,16 @@
                 const trade = this.trades.find(t => t.id === tradeId);
                 if (!trade) return;
 
-                const exitMcap = prompt(`Exit Market Cap for ${trade.token}:`, trade.currentMcap);
-                const receivedSol = prompt(`SOL received:`, trade.solAmount);
+                const exitMcap = prompt(`Exit Market Cap for ${trade.token}:`, trade.entry_mcap);
+                const receivedSol = prompt(`SOL received:`, trade.sol_amount);
 
                 if (exitMcap && receivedSol) {
                     trade.status = 'closed';
-                    trade.exitMcap = exitMcap;
-                    trade.exitPrice = this.solPrice * parseFloat(receivedSol);
-                    trade.receivedSol = parseFloat(receivedSol);
-                    trade.finalPnl = trade.receivedSol - trade.solAmount;
-                    trade.exitDate = new Date().toISOString();
+                    trade.exit_mcap = exitMcap;
+                    trade.exit_price = this.solPrice * parseFloat(receivedSol);
+                    trade.received_sol = parseFloat(receivedSol);
+                    trade.final_pnl = trade.received_sol - trade.sol_amount;
+                    trade.exit_date = new Date().toISOString();
 
                     await this.updateTradeInCloud(trade);
                     this.renderTrades();
@@ -7634,6 +7630,7 @@
                 if (!window.supabase || !window.supabase.isAuthenticated()) return;
                 await window.supabase.update('trades', trade, trade.id);
             }
+
 
             async refreshPrices() {
                 await this.updateSolPrice();
