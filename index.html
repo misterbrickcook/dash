@@ -7974,9 +7974,27 @@
                 document.getElementById('close-exit-mcap').value = '';
                 document.getElementById('close-received-sol').value = '';
 
-                // Reset buttons
+                // Auto-select same market cap unit as entry
+                const entryMcap = trade.entry_mcap;
+                let entryUnit = 'B'; // Default fallback
+                
+                // Extract unit from entry market cap (e.g., "2.1B" -> "B")
+                if (entryMcap) {
+                    const lastChar = entryMcap.slice(-1).toUpperCase();
+                    if (['K', 'M', 'B'].includes(lastChar)) {
+                        entryUnit = lastChar;
+                    }
+                }
+
+                // Set the same unit for exit
                 document.querySelectorAll('#close-trade-modal .mcap-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelector('#close-trade-modal .mcap-btn[data-multiplier="B"]').classList.add('active');
+                const targetButton = document.querySelector(`#close-trade-modal .mcap-btn[data-multiplier="${entryUnit}"]`);
+                if (targetButton) {
+                    targetButton.classList.add('active');
+                } else {
+                    // Fallback to B if unit not found
+                    document.querySelector('#close-trade-modal .mcap-btn[data-multiplier="B"]').classList.add('active');
+                }
 
                 // Show modal
                 document.getElementById('close-trade-modal').style.display = 'flex';
