@@ -1535,13 +1535,13 @@
             width: 100%;
         }
 
-        .sol-buttons, .mcap-buttons {
+        .sol-buttons, .mcap-buttons, .sol-sell-buttons {
             display: flex;
             gap: 0.25rem;
             flex-wrap: wrap;
         }
 
-        .sol-btn, .mcap-btn {
+        .sol-btn, .mcap-btn, .sol-percent-btn {
             padding: 0.4rem 0.6rem;
             border: 1px solid #e0e0e0;
             background: #ffffff;
@@ -1553,7 +1553,7 @@
             text-align: center;
         }
 
-        .sol-btn:hover, .mcap-btn:hover {
+        .sol-btn:hover, .mcap-btn:hover, .sol-percent-btn:hover {
             border-color: #000000;
             background: #f5f5f5;
         }
@@ -2557,19 +2557,21 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="close-received-sol">SOL Received</label>
+                            <label for="close-sol-to-sell">SOL to Sell</label>
                             <div class="sol-input-group">
-                                <input type="number" id="close-received-sol" placeholder="0.6" step="0.001" autocomplete="off">
-                                <div class="sol-buttons">
-                                    <button type="button" class="sol-btn" data-amount="0.1">0.1</button>
-                                    <button type="button" class="sol-btn" data-amount="0.25">0.25</button>
-                                    <button type="button" class="sol-btn" data-amount="0.5">0.5</button>
-                                    <button type="button" class="sol-btn" data-amount="1">1</button>
-                                    <button type="button" class="sol-btn" data-amount="2">2</button>
-                                    <button type="button" class="sol-btn" data-amount="2.5">2.5</button>
-                                    <button type="button" class="sol-btn" data-amount="5">5</button>
+                                <input type="number" id="close-sol-to-sell" placeholder="0.5" step="0.001" autocomplete="off">
+                                <div class="sol-sell-buttons">
+                                    <button type="button" class="sol-percent-btn" data-percent="25">25%</button>
+                                    <button type="button" class="sol-percent-btn" data-percent="50">50%</button>
+                                    <button type="button" class="sol-percent-btn" data-percent="75">75%</button>
+                                    <button type="button" class="sol-percent-btn" data-percent="100">100%</button>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="close-received-sol">SOL Received</label>
+                            <input type="number" id="close-received-sol" placeholder="0.6" step="0.001" autocomplete="off" readonly style="background: #f8f9fa;">
                         </div>
                     </div>
                 </div>
@@ -7719,6 +7721,25 @@
                 if (exitMcapInput) {
                     exitMcapInput.addEventListener('input', () => this.calculateReceivedSol());
                 }
+
+                // Auto-calculate when sol to sell input changes
+                const solToSellInput = document.getElementById('close-sol-to-sell');
+                if (solToSellInput) {
+                    solToSellInput.addEventListener('input', () => this.calculateReceivedSol());
+                }
+
+                // Percentage buttons for SOL to sell
+                document.addEventListener('click', (e) => {
+                    if (e.target.matches('#close-trade-modal .sol-percent-btn')) {
+                        const percent = parseFloat(e.target.getAttribute('data-percent'));
+                        if (this.currentTradeToClose && percent) {
+                            const totalAmount = this.currentTradeToClose.sol_amount;
+                            const sellAmount = (totalAmount * percent / 100).toFixed(3);
+                            document.getElementById('close-sol-to-sell').value = sellAmount;
+                            this.calculateReceivedSol();
+                        }
+                    }
+                });
             }
 
             setupTabListener() {
@@ -7980,6 +8001,7 @@
 
                 // Clear form
                 document.getElementById('close-exit-mcap').value = '';
+                document.getElementById('close-sol-to-sell').value = trade.sol_amount; // Default to full amount
                 document.getElementById('close-received-sol').value = '';
 
                 // Auto-select same market cap unit as entry
@@ -8017,9 +8039,10 @@
                 if (!this.currentTradeToClose) return;
 
                 const exitMcapValue = parseFloat(document.getElementById('close-exit-mcap').value);
+                const solToSell = parseFloat(document.getElementById('close-sol-to-sell').value);
                 const activeMultiplier = document.querySelector('#close-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
                 
-                if (!exitMcapValue || isNaN(exitMcapValue)) {
+                if (!exitMcapValue || isNaN(exitMcapValue) || !solToSell || isNaN(solToSell)) {
                     document.getElementById('close-received-sol').value = '';
                     return;
                 }
@@ -8038,9 +8061,8 @@
                     // Calculate percentage change
                     const percentageChange = (exitActual - entryActual) / entryActual;
                     
-                    // Calculate received SOL based on percentage change
-                    const entryAmount = this.currentTradeToClose.sol_amount;
-                    const receivedSol = entryAmount * (1 + percentageChange);
+                    // Calculate received SOL based on percentage change and amount to sell
+                    const receivedSol = solToSell * (1 + percentageChange);
                     
                     // Update the input field
                     document.getElementById('close-received-sol').value = Math.max(0, receivedSol).toFixed(3);
@@ -8056,25 +8078,61 @@
 
                 const mcapValue = parseFloat(document.getElementById('close-exit-mcap').value);
                 const activeMultiplier = document.querySelector('#close-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
+                const solToSell = parseFloat(document.getElementById('close-sol-to-sell').value);
                 const receivedSol = parseFloat(document.getElementById('close-received-sol').value);
 
-                if (!mcapValue || !receivedSol) {
+                if (!mcapValue || !solToSell || !receivedSol) {
                     alert('Please fill in all fields');
                     return;
                 }
 
                 const exitMcap = `${mcapValue}${activeMultiplier}`;
-                const trade = this.currentTradeToClose;
+                const originalTrade = this.currentTradeToClose;
+                const originalAmount = originalTrade.sol_amount;
 
                 try {
-                    trade.status = 'closed';
-                    trade.exit_mcap = exitMcap;
-                    trade.exit_price = this.solPrice * receivedSol;
-                    trade.received_sol = receivedSol;
-                    trade.final_pnl = trade.received_sol - trade.sol_amount;
-                    trade.exit_date = new Date().toISOString();
+                    if (solToSell >= originalAmount) {
+                        // Full close - close the entire trade
+                        originalTrade.status = 'closed';
+                        originalTrade.exit_mcap = exitMcap;
+                        originalTrade.exit_price = this.solPrice * receivedSol;
+                        originalTrade.received_sol = receivedSol;
+                        originalTrade.final_pnl = originalTrade.received_sol - originalTrade.sol_amount;
+                        originalTrade.exit_date = new Date().toISOString();
 
-                    await this.updateTradeInCloud(trade);
+                        await this.updateTradeInCloud(originalTrade);
+                    } else {
+                        // Partial close - create new closed trade for sold portion and reduce original
+                        
+                        // Create closed trade for sold portion
+                        const closedTrade = {
+                            id: Date.now().toString(),
+                            token: originalTrade.token,
+                            sol_amount: solToSell,
+                            entry_mcap: originalTrade.entry_mcap,
+                            entry_price: (originalTrade.entry_price / originalTrade.sol_amount) * solToSell, // Proportional entry price
+                            entry_date: originalTrade.entry_date,
+                            status: 'closed',
+                            exit_mcap: exitMcap,
+                            exit_price: this.solPrice * receivedSol,
+                            received_sol: receivedSol,
+                            final_pnl: receivedSol - solToSell,
+                            exit_date: new Date().toISOString(),
+                            user_id: originalTrade.user_id
+                        };
+
+                        // Update original trade with remaining amount
+                        originalTrade.sol_amount = originalAmount - solToSell;
+                        originalTrade.entry_price = (originalTrade.entry_price / originalAmount) * originalTrade.sol_amount; // Proportional entry price
+
+                        // Save both trades to cloud
+                        await this.saveTradeToCloud(closedTrade);
+                        await this.updateTradeInCloud(originalTrade);
+
+                        // Add closed trade to local array
+                        this.trades.push(closedTrade);
+                    }
+
                     this.renderTrades();
                     this.updatePortfolioStats();
                     this.hideCloseTradeModal();
