@@ -2748,6 +2748,7 @@
             'tab-todos': 'todos',
             'tab-ziele': 'goals', 
             'tab-journal': 'journal',
+            'tab-trading': 'trading',
             'tab-ressourcen': 'resources',
             'tab-wiki': 'wiki',
             'tab-settings': 'settings'
@@ -2776,8 +2777,16 @@
                 // Update URL hash
                 if (updateHash && tabHashMapping[tabId]) {
                     const hash = tabHashMapping[tabId];
-                    window.history.replaceState(null, null, `#${hash}`);
-                    console.log(`🔗 Tab switched to ${tabId}, URL updated to #${hash}`);
+                    
+                    // Special handling for trading tab to include .de domain
+                    if (tabId === 'tab-trading') {
+                        const newUrl = `https://alexanderbarzik.de/#${hash}`;
+                        window.history.replaceState(null, null, newUrl);
+                        console.log(`🔗 Trading tab: URL updated to ${newUrl}`);
+                    } else {
+                        window.history.replaceState(null, null, `#${hash}`);
+                        console.log(`🔗 Tab switched to ${tabId}, URL updated to #${hash}`);
+                    }
                 } else if (updateHash) {
                     // Fallback: if no hash mapping, clear hash
                     window.history.replaceState(null, null, window.location.pathname);
