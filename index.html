@@ -6949,11 +6949,26 @@
                         throw new Error('No todo saving mechanism available');
                     }
                     
-                    // Refresh todo display if on todos tab
-                    const todosTab = document.querySelector('[data-tab="tab-todos"].active');
-                    if (todosTab && window.TodoManager) {
-                        console.log('🔄 QuickAdd: Refreshing todo display');
-                        await window.TodoManager.loadAndDisplayTodos();
+                    // Refresh todo display immediately after saving
+                    if (window.TodoManager) {
+                        console.log('🔄 QuickAdd: Refreshing todo display...');
+                        
+                        // Load todos from database first
+                        await window.TodoManager.loadTodos();
+                        
+                        // Then refresh the current view
+                        if (typeof window.TodoManager.refreshCurrentView === 'function') {
+                            window.TodoManager.refreshCurrentView();
+                        }
+                        
+                        // Also update home view for counters
+                        if (typeof window.TodoManager.updateHomeTodos === 'function') {
+                            window.TodoManager.updateHomeTodos();
+                        }
+                        
+                        console.log('✅ QuickAdd: Todo display refreshed');
+                    } else {
+                        console.log('⚠️ QuickAdd: TodoManager not available');
                     }
                     
                     console.log('✅ QuickAdd: All done, hiding modal');
