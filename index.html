@@ -1525,6 +1525,40 @@
             gap: 0.5rem;
         }
 
+        .token-info {
+            border: 1px solid #e0e0e0;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+
+        .token-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .token-name {
+            font-weight: 600;
+            color: #000000;
+        }
+
+        .token-symbol {
+            color: #666666;
+            text-transform: uppercase;
+        }
+
+        .token-mcap {
+            color: #059669;
+            font-weight: 500;
+        }
+
+        .token-price {
+            color: #dc2626;
+            font-weight: 500;
+        }
+
         .portfolio-overview {
             margin-bottom: 2rem;
         }
@@ -2274,20 +2308,24 @@
                 <div class="trade-form">
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="trade-token">Token Symbol</label>
-                            <input type="text" id="trade-token" placeholder="BONK" autocomplete="off">
+                            <label for="trade-contract">Contract Address</label>
+                            <input type="text" id="trade-contract" placeholder="5EaYZcaKfTVdpQ2avVtJ7BNWJ1Rnj86F1dWxppawpump" autocomplete="off">
                         </div>
                         <div class="form-group">
                             <label for="trade-sol-amount">SOL Amount</label>
                             <input type="number" id="trade-sol-amount" placeholder="0.5" step="0.001" autocomplete="off">
                         </div>
-                        <div class="form-group">
-                            <label for="trade-entry-mcap">Entry Market Cap</label>
-                            <input type="text" id="trade-entry-mcap" placeholder="Auto-fetch or manual" autocomplete="off">
+                        <div class="form-group token-info" style="display: none;">
+                            <div class="token-details">
+                                <div class="token-name" id="token-name">-</div>
+                                <div class="token-symbol" id="token-symbol">-</div>
+                                <div class="token-mcap" id="token-mcap">-</div>
+                                <div class="token-price" id="token-price">-</div>
+                            </div>
                         </div>
                     </div>
                     <div class="form-actions">
-                        <button id="fetch-mcap-btn" class="btn secondary">🔄 Fetch Live McAP</button>
+                        <button id="fetch-token-btn" class="btn secondary">🔍 Fetch Token Info</button>
                         <button id="add-trade-btn" class="btn">Add Trade</button>
                     </div>
                 </div>
@@ -7387,16 +7425,24 @@
                     addTradeBtn.addEventListener('click', () => this.addTrade());
                 }
 
-                // Fetch market cap button
-                const fetchMcapBtn = document.getElementById('fetch-mcap-btn');
-                if (fetchMcapBtn) {
-                    fetchMcapBtn.addEventListener('click', () => this.fetchMarketCap());
+                // Fetch token info button
+                const fetchTokenBtn = document.getElementById('fetch-token-btn');
+                if (fetchTokenBtn) {
+                    fetchTokenBtn.addEventListener('click', () => this.fetchTokenInfo());
                 }
 
                 // Refresh prices button
                 const refreshPricesBtn = document.getElementById('refresh-prices-btn');
                 if (refreshPricesBtn) {
                     refreshPricesBtn.addEventListener('click', () => this.refreshPrices());
+                }
+
+                // Auto-fetch when contract address is pasted
+                const contractInput = document.getElementById('trade-contract');
+                if (contractInput) {
+                    contractInput.addEventListener('paste', () => {
+                        setTimeout(() => this.fetchTokenInfo(), 100);
+                    });
                 }
             }
 
@@ -7435,50 +7481,150 @@
                 }
             }
 
-            async fetchMarketCap() {
-                const tokenInput = document.getElementById('trade-token');
-                const mcapInput = document.getElementById('trade-entry-mcap');
-                const token = tokenInput.value.trim().toUpperCase();
+            async fetchTokenInfo() {
+                const contractInput = document.getElementById('trade-contract');
+                const contractAddress = contractInput.value.trim();
 
-                if (!token) {
-                    alert('Please enter a token symbol first');
+                if (!contractAddress) {
+                    alert('Please enter a contract address first');
+                    return;
+                }
+
+                if (contractAddress.length !== 44) {
+                    alert('Invalid contract address format');
                     return;
                 }
 
                 try {
-                    mcapInput.value = 'Fetching...';
-                    
-                    // Simple API call to get market cap (would need proper token lookup)
-                    // For demo, we'll set a placeholder
-                    setTimeout(() => {
-                        mcapInput.value = `${(Math.random() * 5 + 0.5).toFixed(1)}B`; // Random mcap
-                    }, 1000);
+                    this.requestCount++;
+                    if (this.requestCount >= this.maxRequestsPerHour) {
+                        alert('Rate limit reached. Please wait.');
+                        return;
+                    }
+
+                    // Show loading
+                    this.showTokenInfo('Loading...', 'Loading...', 'Fetching...', 'Fetching...');
+
+                    // Fetch token metadata from Helius
+                    const response = await fetch(`https://api.helius.xyz/v0/token-metadata?api-key=${this.apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            mintAccounts: [contractAddress]
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    const tokenData = data[0];
+
+                    if (!tokenData) {
+                        throw new Error('Token not found');
+                    }
+
+                    // Get token price from Helius
+                    const priceResponse = await fetch(`https://api.helius.xyz/v0/token-price?api-key=${this.apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            tokens: [contractAddress]
+                        })
+                    });
+
+                    let price = 0;
+                    let marketCap = 'Unknown';
+
+                    if (priceResponse.ok) {
+                        const priceData = await priceResponse.json();
+                        const tokenPrice = priceData[contractAddress];
+                        if (tokenPrice) {
+                            price = tokenPrice.price_per_token || 0;
+                            
+                            // Calculate market cap if we have supply and price
+                            if (tokenData.supply && price > 0) {
+                                const supply = parseInt(tokenData.supply) / Math.pow(10, tokenData.decimals || 6);
+                                const mcap = supply * price;
+                                
+                                if (mcap >= 1000000000) {
+                                    marketCap = `$${(mcap / 1000000000).toFixed(2)}B`;
+                                } else if (mcap >= 1000000) {
+                                    marketCap = `$${(mcap / 1000000).toFixed(2)}M`;
+                                } else if (mcap >= 1000) {
+                                    marketCap = `$${(mcap / 1000).toFixed(2)}K`;
+                                } else {
+                                    marketCap = `$${mcap.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    }
+
+                    // Store token info for trade creation
+                    this.currentTokenInfo = {
+                        address: contractAddress,
+                        name: tokenData.name || 'Unknown',
+                        symbol: tokenData.symbol || 'UNKNOWN',
+                        decimals: tokenData.decimals || 6,
+                        price: price,
+                        marketCap: marketCap
+                    };
+
+                    // Show token info
+                    this.showTokenInfo(
+                        tokenData.name || 'Unknown Token',
+                        tokenData.symbol || 'UNKNOWN',
+                        marketCap,
+                        price > 0 ? `$${price.toFixed(8)}` : 'No price data'
+                    );
 
                 } catch (error) {
-                    mcapInput.value = 'Failed to fetch';
-                    console.error('Market cap fetch error:', error);
+                    console.error('Token info fetch error:', error);
+                    this.showTokenInfo('Error', 'Failed to fetch', 'Error', 'Error');
+                    alert(`Failed to fetch token info: ${error.message}`);
+                }
+            }
+
+            showTokenInfo(name, symbol, mcap, price) {
+                document.getElementById('token-name').textContent = name;
+                document.getElementById('token-symbol').textContent = symbol;
+                document.getElementById('token-mcap').textContent = mcap;
+                document.getElementById('token-price').textContent = price;
+                
+                const tokenInfo = document.querySelector('.token-info');
+                if (tokenInfo) {
+                    tokenInfo.style.display = 'block';
                 }
             }
 
             async addTrade() {
-                const token = document.getElementById('trade-token').value.trim().toUpperCase();
+                const contractAddress = document.getElementById('trade-contract').value.trim();
                 const solAmount = parseFloat(document.getElementById('trade-sol-amount').value);
-                const entryMcap = document.getElementById('trade-entry-mcap').value.trim();
 
-                if (!token || !solAmount || !entryMcap) {
-                    alert('Please fill in all fields');
+                if (!contractAddress || !solAmount) {
+                    alert('Please enter contract address and SOL amount');
+                    return;
+                }
+
+                if (!this.currentTokenInfo) {
+                    alert('Please fetch token info first');
                     return;
                 }
 
                 const trade = {
                     id: Date.now().toString(),
-                    token,
+                    contractAddress,
+                    token: this.currentTokenInfo.symbol,
+                    tokenName: this.currentTokenInfo.name,
                     solAmount,
-                    entryMcap,
+                    entryMcap: this.currentTokenInfo.marketCap,
                     entryPrice: this.solPrice * solAmount,
+                    entryTokenPrice: this.currentTokenInfo.price,
                     entryDate: new Date().toISOString(),
                     status: 'open',
-                    currentMcap: entryMcap, // Will be updated
+                    currentMcap: this.currentTokenInfo.marketCap,
+                    currentTokenPrice: this.currentTokenInfo.price,
                     pnl: 0,
                     user_id: window.supabase?.getCurrentUser()?.id
                 };
@@ -7491,9 +7637,10 @@
                     this.trades.push(trade);
                     
                     // Clear form
-                    document.getElementById('trade-token').value = '';
+                    document.getElementById('trade-contract').value = '';
                     document.getElementById('trade-sol-amount').value = '';
-                    document.getElementById('trade-entry-mcap').value = '';
+                    document.querySelector('.token-info').style.display = 'none';
+                    this.currentTokenInfo = null;
                     
                     // Refresh display
                     this.renderTrades();
@@ -7560,7 +7707,10 @@
                     </div>
                     ${trades.map(trade => `
                         <div class="trade-row">
-                            <div class="trade-token" data-label="Token">${trade.token}</div>
+                            <div class="trade-token" data-label="Token">
+                                <strong>${trade.token}</strong>
+                                <br><small>${trade.tokenName || 'Unknown Token'}</small>
+                            </div>
                             <div class="trade-amount" data-label="SOL Amount">${trade.solAmount} SOL</div>
                             <div class="trade-entry-price" data-label="Entry McAP">${trade.entryMcap}</div>
                             <div class="trade-entry-price" data-label="Entry Price">$${trade.entryPrice.toFixed(0)}</div>
@@ -7597,7 +7747,10 @@
                     </div>
                     ${trades.map(trade => `
                         <div class="trade-row">
-                            <div class="trade-token" data-label="Token">${trade.token}</div>
+                            <div class="trade-token" data-label="Token">
+                                <strong>${trade.token}</strong>
+                                <br><small>${trade.tokenName || 'Unknown Token'}</small>
+                            </div>
                             <div class="trade-amount" data-label="SOL Amount">${trade.solAmount} SOL</div>
                             <div class="trade-entry-price" data-label="McAP">${trade.entryMcap} → ${trade.exitMcap || 'N/A'}</div>
                             <div class="trade-entry-price" data-label="Price">$${trade.entryPrice.toFixed(0)} → $${(trade.exitPrice || 0).toFixed(0)}</div>
