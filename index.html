@@ -2370,7 +2370,11 @@
                     </div>
                     <div class="portfolio-stat">
                         <div class="stat-number" id="total-pnl">+0.00 SOL</div>
-                        <div class="stat-label">Total P&L</div>
+                        <div class="stat-label">Total P&L (SOL)</div>
+                    </div>
+                    <div class="portfolio-stat">
+                        <div class="stat-number" id="total-pnl-usd">+$0.00</div>
+                        <div class="stat-label">Total P&L (USD)</div>
                     </div>
                     <div class="portfolio-stat">
                         <div class="stat-number" id="open-trades">0</div>
@@ -7705,11 +7709,16 @@
                     solBalance = await window.SimpleCounters.getSolBalance();
                 }
 
+                // Calculate P&L in USD
+                const totalPnlUsd = totalPnl * this.solPrice;
+
                 // Update all stats
                 document.getElementById('sol-balance').textContent = `${solBalance.toFixed(2)} SOL`;
                 document.getElementById('sol-in-trades').textContent = `${solInTrades.toFixed(2)} SOL`;
                 document.getElementById('total-pnl').textContent = `${totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)} SOL`;
                 document.getElementById('total-pnl').className = `stat-number ${totalPnl >= 0 ? 'positive' : 'negative'}`;
+                document.getElementById('total-pnl-usd').textContent = `${totalPnlUsd >= 0 ? '+' : ''}$${Math.abs(totalPnlUsd).toFixed(2)}`;
+                document.getElementById('total-pnl-usd').className = `stat-number ${totalPnlUsd >= 0 ? 'positive' : 'negative'}`;
                 document.getElementById('open-trades').textContent = openTrades.length;
                 document.getElementById('win-rate').textContent = `${winRate.toFixed(1)}%`;
             }
