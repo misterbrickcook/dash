@@ -106,36 +106,77 @@ class SimpleCounters {
         try {
             console.log('🟣 Fetching SOL balance for wallet:', this.solWalletAddress);
             
-            const response = await fetch('https://api.mainnet-beta.solana.com', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    jsonrpc: '2.0',
-                    id: 1,
-                    method: 'getBalance',
-                    params: [this.solWalletAddress]
-                })
-            });
+            // Try multiple RPC endpoints for better reliability
+            const rpcEndpoints = [
+                'https://solana-api.projectserum.com',
+                'https://api.mainnet-beta.solana.com',
+                'https://solana-mainnet.g.alchemy.com/v2/demo'
+            ];
             
-            const data = await response.json();
+            for (const endpoint of rpcEndpoints) {
+                try {
+                    console.log(`🟣 Trying RPC endpoint: ${endpoint}`);
+                    
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            jsonrpc: '2.0',
+                            id: 1,
+                            method: 'getBalance',
+                            params: [this.solWalletAddress]
+                        })
+                    });
             
-            if (data.result && data.result.value !== undefined) {
-                // Convert lamports to SOL (1 SOL = 1,000,000,000 lamports)
-                const balanceInSol = data.result.value / 1000000000;
-                this.lastSolBalance = balanceInSol;
-                console.log(`🟣 SOL Balance: ${balanceInSol.toFixed(4)} SOL`);
-                return balanceInSol;
-            } else {
-                console.error('❌ SOL API: Invalid response', data);
-                return this.lastSolBalance; // Return cached value
+                    const data = await response.json();
+                    
+                    if (data.result && data.result.value !== undefined) {
+                        // Convert lamports to SOL (1 SOL = 1,000,000,000 lamports)
+                        const balanceInSol = data.result.value / 1000000000;
+                        this.lastSolBalance = balanceInSol;
+                        console.log(`✅ SOL Balance: ${balanceInSol.toFixed(4)} SOL (via ${endpoint})`);
+                        return balanceInSol;
+                    } else if (data.error) {
+                        console.log(`⚠️ RPC Error from ${endpoint}:`, data.error.message);
+                        continue; // Try next endpoint
+                    }
+                    
+                } catch (endpointError) {
+                    console.log(`⚠️ Failed to reach ${endpoint}:`, endpointError.message);
+                    continue; // Try next endpoint
+                }
             }
             
+            // If all endpoints failed, try a public API as fallback
+            console.log('🟣 All RPC endpoints failed, trying public API fallback...');
+            return await this.getSolBalanceFallback();
+            
         } catch (error) {
-            console.error('❌ SOL API: Failed to fetch balance:', error);
-            return this.lastSolBalance; // Return cached value on error
+            console.error('❌ SOL API: Complete failure:', error);
+            return this.lastSolBalance; // Return cached value on complete error
         }
+    }
+    
+    // Fallback method using a public API
+    async getSolBalanceFallback() {
+        try {
+            // Using SolanaBeach public API as fallback
+            const response = await fetch(`https://api.solanabeach.io/v1/account/${this.solWalletAddress}`);
+            const data = await response.json();
+            
+            if (data && data.lamports) {
+                const balanceInSol = data.lamports / 1000000000;
+                this.lastSolBalance = balanceInSol;
+                console.log(`✅ SOL Balance: ${balanceInSol.toFixed(4)} SOL (via SolanaBeach fallback)`);
+                return balanceInSol;
+            }
+        } catch (error) {
+            console.error('❌ Fallback API also failed:', error);
+        }
+        
+        return this.lastSolBalance; // Return cached value
     }
 
     // Simple trigger methods
