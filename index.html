@@ -6924,21 +6924,36 @@
                 try {
                     console.log('⚡ QuickAdd: Saving todo:', todo);
                     
-                    // Save using TodoManager
-                    if (window.TodoManager) {
-                        await window.TodoManager.saveTodo(todo);
-                        console.log('✅ QuickAdd: Todo saved successfully');
-                        
-                        // Refresh todo display if on todos tab
-                        if (window.location.hash === '#todos' || document.querySelector('[data-tab="tab-todos"].active')) {
-                            await window.TodoManager.loadAndDisplayTodos();
-                        }
+                    // Check if authenticated
+                    if (!window.supabase?.isAuthenticated()) {
+                        alert('Nicht authentifiziert! Bitte logge dich ein.');
+                        return;
                     }
                     
+                    // Save using CloudStorage directly for more reliability
+                    if (window.cloudStorage) {
+                        await window.cloudStorage.saveTodo(todo);
+                        console.log('✅ QuickAdd: Todo saved successfully via CloudStorage');
+                    } else if (window.TodoManager) {
+                        await window.TodoManager.saveTodo(todo);
+                        console.log('✅ QuickAdd: Todo saved successfully via TodoManager');
+                    } else {
+                        throw new Error('No todo saving mechanism available');
+                    }
+                    
+                    // Refresh todo display if on todos tab
+                    const todosTab = document.querySelector('[data-tab="tab-todos"].active');
+                    if (todosTab && window.TodoManager) {
+                        console.log('🔄 QuickAdd: Refreshing todo display');
+                        await window.TodoManager.loadAndDisplayTodos();
+                    }
+                    
+                    console.log('✅ QuickAdd: All done, hiding modal');
                     this.hide();
                 } catch (error) {
                     console.error('❌ QuickAdd: Error saving todo:', error);
-                    alert('Fehler beim Speichern des Todos!');
+                    console.error('❌ QuickAdd: Error details:', error.message, error.stack);
+                    alert(`Fehler beim Speichern des Todos: ${error.message}`);
                 }
             }
         }
