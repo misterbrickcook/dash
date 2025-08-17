@@ -66,10 +66,14 @@ class SimpleCounters {
                 });
             }
 
+            // Get SOL balance
+            const solBalance = await this.getSolBalance();
+
             // Update display immediately
             this.setCounterDisplay(0, morningCount); // Morning
             this.setCounterDisplay(1, eveningCount); // Evening  
             this.setCounterDisplay(2, todoCount);    // Todos
+            this.setCounterDisplay(3, solBalance);   // SOL Balance
 
 
         } catch (error) {
@@ -82,8 +86,49 @@ class SimpleCounters {
         if (tiles[index]) {
             const numberEl = tiles[index].querySelector('.streak-number');
             if (numberEl) {
-                numberEl.textContent = value;
+                // Format SOL balance (index 3) to 2 decimal places
+                if (index === 3 && typeof value === 'number') {
+                    numberEl.textContent = value.toFixed(2);
+                } else {
+                    numberEl.textContent = value;
+                }
             }
+        }
+    }
+
+    async getSolBalance() {
+        try {
+            // Helius RPC endpoint (free tier) - better CORS support
+            const response = await fetch('https://rpc.helius.xyz/?api-key=demo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    jsonrpc: "2.0",
+                    id: 1,
+                    method: "getBalance",
+                    params: [
+                        "4vChGDq5TgpceVBEiY7BAEXd2AaK7gtBJzwZzbrdrrQM" // Your wallet address
+                    ]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.result && typeof data.result.value === 'number') {
+                // Convert lamports to SOL (1 SOL = 1,000,000,000 lamports)
+                return data.result.value / 1000000000;
+            }
+            
+            return 0;
+        } catch (error) {
+            console.error('SOL Balance fetch error:', error);
+            return 0; // Return 0 on error
         }
     }
 
