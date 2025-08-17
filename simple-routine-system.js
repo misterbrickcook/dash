@@ -18,7 +18,6 @@ class SimpleRoutineManager {
     }
 
     async init() {
-        console.log('🔄 Initializing SimpleRoutineManager...');
         
         // Cache DOM elements for performance
         this.cacheDOMElements();
@@ -29,7 +28,6 @@ class SimpleRoutineManager {
         await this.loadTodaysData();
         this.setupEventListeners();
         this.updateUI();
-        console.log('✅ SimpleRoutineManager initialized');
     }
 
     cacheDOMElements() {
@@ -40,7 +38,6 @@ class SimpleRoutineManager {
         this.domCache.morningProgressFill = document.querySelector('#morning-routine .progress-fill');
         this.domCache.eveningProgressFill = document.querySelector('#evening-routine .progress-fill');
         this.domCache.streakTiles = document.querySelectorAll('.streak-tile');
-        console.log('💾 DOM elements cached for performance');
     }
 
     clearVisualStyles() {
@@ -53,7 +50,6 @@ class SimpleRoutineManager {
                 label.style.color = 'inherit';
             }
         });
-        console.log('🧹 Cleared existing visual styles');
     }
 
     async loadTodaysData() {
@@ -69,7 +65,6 @@ class SimpleRoutineManager {
             const cloudData = await this.loadFromCloud();
             if (cloudData) {
                 this.routineData = cloudData;
-                console.log('☁️ Loaded routine data from cloud:', cloudData);
                 return;
             }
 
@@ -77,13 +72,11 @@ class SimpleRoutineManager {
             const migratedData = await this.migrateFromOldSystem();
             if (migratedData) {
                 this.routineData = migratedData;
-                console.log('🔄 Migrated data from old system and saved to cloud:', migratedData);
                 return;
             }
 
             // No data found - start fresh
             this.routineData = this.getEmptyData();
-            console.log('🆕 Starting with fresh routine data');
         } catch (error) {
             console.error('❌ Error loading routine data:', error);
             this.routineData = this.getEmptyData();
@@ -253,14 +246,12 @@ class SimpleRoutineManager {
             checkbox.addEventListener('change', () => this.handleCheckboxChange(checkbox, 'evening'));
         });
 
-        console.log('✅ Event listeners set up for routine checkboxes');
     }
 
     async handleCheckboxChange(checkbox, routineType) {
         const checkboxId = checkbox.id;
         const isChecked = checkbox.checked;
 
-        console.log(`📝 Checkbox changed: ${checkboxId} = ${isChecked} (${routineType})`);
 
         // Ensure today exists in data
         if (!this.routineData[this.today]) {
@@ -293,7 +284,6 @@ class SimpleRoutineManager {
             window.SimpleCounters.onRoutineChanged();
         }
 
-        console.log('✅ Routine data updated and saved');
     }
 
     updateUI() {
@@ -336,7 +326,6 @@ class SimpleRoutineManager {
     updateCounters() {
         // DISABLED: Let the main counter system handle this to avoid conflicts
         // The main system has access to cloud data and historical records
-        console.log('⚠️ SimpleRoutineManager: Counter update disabled to prevent conflicts with main counter system');
         
         // Only update if the main counter system hasn't set values yet
         if (this.domCache.streakTiles.length >= 2) {
@@ -348,7 +337,6 @@ class SimpleRoutineManager {
 
             // Only set if they are currently "0" or empty (not set by main system)
             if (morningNumber && (morningNumber.textContent === '0' || morningNumber.textContent === '')) {
-                console.log('📊 SimpleRoutineManager: Setting morning counter as fallback');
                 // Count completed days in current month as fallback
                 const currentMonth = new Date().getMonth();
                 const currentYear = new Date().getFullYear();
@@ -367,7 +355,6 @@ class SimpleRoutineManager {
             }
             
             if (eveningNumber && (eveningNumber.textContent === '0' || eveningNumber.textContent === '')) {
-                console.log('📊 SimpleRoutineManager: Setting evening counter as fallback');
                 // Count completed days in current month as fallback
                 const currentMonth = new Date().getMonth();
                 const currentYear = new Date().getFullYear();
@@ -390,11 +377,9 @@ class SimpleRoutineManager {
     restoreCheckboxes() {
         const todayData = this.routineData[this.today];
         if (!todayData) {
-            console.log('⚠️ No data for today:', this.today);
-            return;
+                return;
         }
 
-        console.log('🔄 Restoring checkboxes from data:', todayData);
 
         // Restore morning checkboxes
         Object.keys(todayData.morning).forEach(checkboxId => {
@@ -414,7 +399,6 @@ class SimpleRoutineManager {
                     }
                 }
                 
-                console.log(`📋 Morning: ${checkboxId} = ${isChecked}`);
             }
         });
 
@@ -436,11 +420,9 @@ class SimpleRoutineManager {
                     }
                 }
                 
-                console.log(`📋 Evening: ${checkboxId} = ${isChecked}`);
             }
         });
 
-        console.log('✅ Checkboxes restored from data');
     }
 
     async reset() {
@@ -459,7 +441,6 @@ class SimpleRoutineManager {
         });
 
         this.updateUI();
-        console.log('🔄 Routine system reset (cloud-only)');
     }
 }
 
@@ -468,7 +449,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Disable old routine system functions
     if (window.initializeRoutineProgress) {
         window.initializeRoutineProgress = function() {
-            console.log('🚫 Old routine system disabled - using SimpleRoutineManager instead');
         };
     }
     
@@ -476,6 +456,5 @@ document.addEventListener('DOMContentLoaded', function() {
     // The login system will handle re-initialization with proper data loading
     if (!window.simpleRoutineManager) {
         window.simpleRoutineManager = new SimpleRoutineManager();
-        console.log('✅ SimpleRoutineManager created and ready for login data loading');
     }
 });

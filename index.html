@@ -3309,35 +3309,18 @@
                 }
             });
             
-            // WAIT FOR LUCIDE TO LOAD: Set up animation after icons are processed
-            console.log('🚀 LUCIDE-AWARE: Waiting for Lucide to process icons...');
-            
+            // Setup Quick-Add animation after Lucide processes icons
             function setupQuickAddAnimation() {
-                // Find the actual SVG element (Lucide converts <i> to <svg>)
                 let quickAddIcon = quickAddBtn.querySelector('svg');
                 
                 if (quickAddIcon) {
-                    console.log('🎯 LUCIDE-AWARE: SVG icon found:', quickAddIcon);
-                    console.log('🎯 LUCIDE-AWARE: SVG viewBox:', quickAddIcon.getAttribute('viewBox'));
-                    
-                    // Set up hover animation on the SVG
                     quickAddIcon.style.cssText = `
                         transition: all 0.3s ease !important;
                         transform-origin: center !important;
                         display: inline-block !important;
                     `;
                     
-                    // Test immediate rotation
-                    console.log('🧪 LUCIDE-AWARE: Testing SVG rotation...');
-                    quickAddIcon.style.transform = 'rotate(45deg)';
-                    setTimeout(() => {
-                        quickAddIcon.style.transform = 'rotate(0deg)';
-                        console.log('✅ LUCIDE-AWARE: Test rotation complete');
-                    }, 1000);
-                    
-                    // Setup hover events on button targeting SVG
                     quickAddBtn.onmouseenter = function() {
-                        console.log('🎯 LUCIDE-AWARE: mouseenter - rotating SVG');
                         const svg = quickAddBtn.querySelector('svg');
                         if (svg) {
                             svg.style.transform = 'rotate(90deg)';
@@ -3346,7 +3329,6 @@
                     };
                     
                     quickAddBtn.onmouseleave = function() {
-                        console.log('🎯 LUCIDE-AWARE: mouseleave - resetting SVG');
                         const svg = quickAddBtn.querySelector('svg');
                         if (svg) {
                             svg.style.transform = 'rotate(0deg)';
@@ -3354,76 +3336,62 @@
                         }
                     };
                     
-                    console.log('✅ LUCIDE-AWARE: Animation setup complete');
                     return true;
-                } else {
-                    console.log('⚠️ LUCIDE-AWARE: SVG not ready yet...');
-                    return false;
                 }
+                return false;
             }
             
-            // Try immediately, then retry with delays
+            // Retry setup with delays for Lucide
             if (!setupQuickAddAnimation()) {
-                console.log('🔄 LUCIDE-AWARE: Retrying in 500ms...');
                 setTimeout(() => {
                     if (!setupQuickAddAnimation()) {
-                        console.log('🔄 LUCIDE-AWARE: Retrying in 1000ms...');
                         setTimeout(setupQuickAddAnimation, 1000);
                     }
                 }, 500);
             }
             
-            // Setup Timer and Settings hover animations (same Lucide issue)
+            // Setup Timer and Settings hover animations
             function setupActionButtonHovers() {
                 const timerBtn = document.getElementById('timer-btn');
                 const settingsBtn = document.getElementById('settings-btn');
                 
-                if (timerBtn) {
-                    const timerIcon = timerBtn.querySelector('svg');
-                    if (timerIcon) {
-                        console.log('🎯 Timer SVG found, setting up hover');
-                        timerBtn.onmouseenter = function() {
-                            const svg = timerBtn.querySelector('svg');
-                            if (svg && !timerBtn.classList.contains('timer-running') && !timerBtn.classList.contains('timer-paused')) {
-                                svg.style.stroke = '#059669';
-                                svg.style.color = '#059669';
-                            }
-                        };
-                        timerBtn.onmouseleave = function() {
-                            const svg = timerBtn.querySelector('svg');
-                            if (svg && !timerBtn.classList.contains('timer-running') && !timerBtn.classList.contains('timer-paused')) {
-                                svg.style.stroke = '';
-                                svg.style.color = '';
-                            }
-                        };
-                    }
+                if (timerBtn?.querySelector('svg')) {
+                    timerBtn.onmouseenter = function() {
+                        const svg = timerBtn.querySelector('svg');
+                        if (svg && !timerBtn.classList.contains('timer-running') && !timerBtn.classList.contains('timer-paused')) {
+                            svg.style.stroke = '#059669';
+                            svg.style.color = '#059669';
+                        }
+                    };
+                    timerBtn.onmouseleave = function() {
+                        const svg = timerBtn.querySelector('svg');
+                        if (svg && !timerBtn.classList.contains('timer-running') && !timerBtn.classList.contains('timer-paused')) {
+                            svg.style.stroke = '';
+                            svg.style.color = '';
+                        }
+                    };
                 }
                 
-                if (settingsBtn) {
-                    const settingsIcon = settingsBtn.querySelector('svg');
-                    if (settingsIcon) {
-                        console.log('🎯 Settings SVG found, setting up hover');
-                        settingsBtn.onmouseenter = function() {
-                            const svg = settingsBtn.querySelector('svg');
-                            if (svg) {
-                                svg.style.stroke = '#059669';
-                                svg.style.color = '#059669';
-                            }
-                        };
-                        settingsBtn.onmouseleave = function() {
-                            const svg = settingsBtn.querySelector('svg');
-                            if (svg) {
-                                svg.style.stroke = '';
-                                svg.style.color = '';
-                            }
-                        };
-                    }
+                if (settingsBtn?.querySelector('svg')) {
+                    settingsBtn.onmouseenter = function() {
+                        const svg = settingsBtn.querySelector('svg');
+                        if (svg) {
+                            svg.style.stroke = '#059669';
+                            svg.style.color = '#059669';
+                        }
+                    };
+                    settingsBtn.onmouseleave = function() {
+                        const svg = settingsBtn.querySelector('svg');
+                        if (svg) {
+                            svg.style.stroke = '';
+                            svg.style.color = '';
+                        }
+                    };
                 }
             }
             
-            // Setup action button hovers with delays for Lucide
+            // Setup action button hovers after Lucide
             setTimeout(setupActionButtonHovers, 1000);
-            setTimeout(setupActionButtonHovers, 2000);
         }
 
         // Timer button event listener

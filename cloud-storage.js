@@ -8,15 +8,12 @@ class CloudStorage {
         // Listen for online/offline events
         window.addEventListener('online', () => {
             this.isOnline = true;
-            console.log('🌐 Back online - direct cloud operations available');
         });
         
         window.addEventListener('offline', () => {
             this.isOnline = false;
-            console.log('📡 Offline - direct cloud operations unavailable');
         });
         
-        console.log('☁️ Cloud Storage initialized - DIRECT CLOUD MODE (no localStorage cache)');
     }
     
     // Helper method to safely check if Supabase is authenticated
@@ -34,19 +31,16 @@ class CloudStorage {
     setupRoutineMethods() {
         // Ensure routine methods are available immediately
         if (typeof this.getLocalRoutineCompletions !== 'function') {
-            console.log('⚠️ Adding routine methods to CloudStorage instance');
             this.setupRoutineMethods();
         }
     }
     
     setupRoutineMethods() {
         this.getLocalRoutineCompletions = function(date = null) {
-            console.log('⚠️ Direct cloud mode: No local cache for routine completions');
             return [];
         };
         
         this.saveLocalRoutineCompletion = function(completion) {
-            console.log('⚠️ Direct cloud mode: Skipping local completion save, using cloud only');
         };
         
         this.saveRoutineCompletion = async function(templateId, date, completed) {
@@ -58,7 +52,6 @@ class CloudStorage {
                 user_id: window.supabase?.getCurrentUser()?.id || 'local'
             };
             
-            console.log('☁️ Direct cloud save for routine completion:', templateId, completed);
         };
     }
 
@@ -67,7 +60,6 @@ class CloudStorage {
     async getTodos() {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                console.warn('☁️ Direct cloud mode: Cannot fetch todos - not authenticated or offline');
                 return [];
             }
             
@@ -104,7 +96,6 @@ class CloudStorage {
                 }
             }
             
-            console.log('✅ Todo synced to cloud:', todo.title);
         } catch (error) {
             console.error('Error saving todo:', error);
             throw error;
@@ -118,7 +109,6 @@ class CloudStorage {
             }
             
             await supabase.delete('todos', todoId);
-            console.log('✅ Todo deleted from cloud:', todoId);
         } catch (error) {
             console.error('Error deleting todo:', error);
             throw error;
@@ -130,7 +120,6 @@ class CloudStorage {
     async getDeadlines() {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                console.warn('☁️ Direct cloud mode: Cannot fetch deadlines - not authenticated or offline');
                 return [];
             }
             
@@ -166,7 +155,6 @@ class CloudStorage {
                 }
             }
             
-            console.log('✅ Deadline synced to cloud:', deadline.title);
         } catch (error) {
             console.error('Error saving deadline:', error);
             throw error;
@@ -180,7 +168,6 @@ class CloudStorage {
             }
             
             await supabase.delete('deadlines', deadlineId);
-            console.log('✅ Deadline deleted from cloud:', deadlineId);
         } catch (error) {
             console.error('Error deleting deadline:', error);
             throw error;
@@ -192,7 +179,6 @@ class CloudStorage {
     async getLinks() {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                console.warn('☁️ Direct cloud mode: Cannot fetch links - not authenticated or offline');
                 return [];
             }
             
@@ -228,7 +214,6 @@ class CloudStorage {
                 }
             }
             
-            console.log('✅ Link synced to cloud:', link.title);
         } catch (error) {
             console.error('Error saving link:', error);
             throw error;
@@ -240,7 +225,6 @@ class CloudStorage {
     async getRoutineTemplates() {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                console.warn('☁️ Direct cloud mode: Cannot fetch routine templates - not authenticated or offline');
                 return this.getDefaultRoutineTemplates();
             }
             
@@ -259,7 +243,6 @@ class CloudStorage {
     async getRoutineCompletions(date = null) {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                console.warn('☁️ Direct cloud mode: Cannot fetch routine completions - not authenticated or offline');
                 return [];
             }
             
@@ -277,7 +260,6 @@ class CloudStorage {
     
     // Direct cloud mode - no legacy format conversion needed
     updateLegacyRoutineFormat(cloudData) {
-        console.log('☁️ Direct cloud mode: Skipping legacy format conversion');
     }
     
     async saveRoutineCompletion(templateId, date, completed) {
@@ -291,7 +273,6 @@ class CloudStorage {
             };
             
             // Pure cloud mode - no local saving needed
-            console.log('☁️ CloudStorage: Pure cloud save mode for routine completion');
             
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
                 console.error('❌ CloudStorage: Cannot save routine completion - not authenticated or offline');
@@ -307,7 +288,6 @@ class CloudStorage {
                 await supabase.insert('routine_completions', [completion]);
             }
             
-            console.log('✅ Routine completion synced:', templateId, completed);
         } catch (error) {
             console.error('Error saving routine completion:', error);
             // Pure cloud mode - don't queue for sync, just throw error
@@ -317,7 +297,6 @@ class CloudStorage {
     
     async getRoutineData() {
         // Legacy method - redirect to new system
-        console.log('⚠️ Using legacy getRoutineData - redirecting to localStorage');
         return this.getLocalRoutineData();
     }
     
@@ -325,7 +304,6 @@ class CloudStorage {
         try {
             // Save locally only - legacy cloud sync disabled
             this.saveLocalRoutineData(key, value);
-            console.log('✅ Routine data saved locally:', key);
         } catch (error) {
             console.error('Error saving routine data:', error);
         }
@@ -364,7 +342,6 @@ class CloudStorage {
     async getNotes(category) {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                console.warn('☁️ Direct cloud mode: Cannot fetch notes - not authenticated or offline');
                 return '';
             }
             
@@ -398,7 +375,6 @@ class CloudStorage {
                 await supabase.insert('notes', [{ category, content, user_id: userId }]);
             }
             
-            console.log('✅ Notes synced to cloud:', category);
         } catch (error) {
             console.error('Error saving notes:', error);
             throw error;
@@ -408,47 +384,37 @@ class CloudStorage {
     // === DIRECT CLOUD MODE - NO LOCAL STORAGE FALLBACKS ===
     
     getLocalTodos() {
-        console.warn('☁️ Direct cloud mode: getLocalTodos() should not be used');
         return [];
     }
     
     saveLocalTodo(todo) {
-        console.warn('☁️ Direct cloud mode: saveLocalTodo() should not be used');
     }
     
     deleteLocalTodo(todoId) {
-        console.warn('☁️ Direct cloud mode: deleteLocalTodo() should not be used');
     }
     
     getLocalDeadlines() {
-        console.warn('☁️ Direct cloud mode: getLocalDeadlines() should not be used');
         return [];
     }
     
     saveLocalDeadline(deadline) {
-        console.warn('☁️ Direct cloud mode: saveLocalDeadline() should not be used');
     }
     
     deleteLocalDeadline(deadlineId) {
-        console.warn('☁️ Direct cloud mode: deleteLocalDeadline() should not be used');
     }
     
     getLocalLinks() {
-        console.warn('☁️ Direct cloud mode: getLocalLinks() should not be used');
         return [];
     }
     
     saveLocalLink(link) {
-        console.warn('☁️ Direct cloud mode: saveLocalLink() should not be used');
     }
     
     getLocalNotes(category) {
-        console.warn('☁️ Direct cloud mode: getLocalNotes() should not be used');
         return '';
     }
     
     saveLocalNotes(category, content) {
-        console.warn('☁️ Direct cloud mode: saveLocalNotes() should not be used');
     }
 
     // === RESOURCES CLOUD STORAGE ===
@@ -568,7 +534,6 @@ class CloudStorage {
     }
     
     getLocalRoutineData() {
-        console.warn('☁️ Direct cloud mode: Using minimal localStorage for backward compatibility only');
         return {
             routineCompletionData: localStorage.getItem('routineCompletionData'),
             routineResetTime: localStorage.getItem('routineResetTime') || '06:00',
@@ -591,18 +556,14 @@ class CloudStorage {
     
     getLocalRoutineCompletions(date = null) {
         // Pure cloud mode - no localStorage cache, return empty array
-        console.log('☁️ Pure cloud mode: No local routine completions cache');
         return [];
     }
     
     saveLocalRoutineCompletion(completion) {
         // Pure cloud mode - no local saving, just log the attempt
-        console.log(`☁️ Pure cloud mode: Skipping local save for routine completion:`, completion);
-        console.log(`☁️ Data will be saved directly to cloud database only`);
     }
     
     saveLocalRoutineData(key, value) {
-        console.warn('☁️ Direct cloud mode: saveLocalRoutineData() for backward compatibility only');
         // Only save to individual keys for minimal backward compatibility
         localStorage.setItem(key, value);
     }
@@ -610,32 +571,26 @@ class CloudStorage {
     // === DIRECT CLOUD MODE - NO SYNC QUEUE ===
     
     queueSync(table, action, data) {
-        console.warn('☁️ Direct cloud mode: Sync queue disabled - operations must succeed immediately');
     }
     
     async processSyncQueue() {
-        console.warn('☁️ Direct cloud mode: processSyncQueue() disabled - no sync queue in direct mode');
     }
     
     // === DIRECT CLOUD MODE - NO PERIODIC SYNC ===
     
     startPeriodicSync(intervalMs = 30000) {
-        console.log('☁️ Direct cloud mode: Periodic sync disabled - operations are immediate');
     }
     
     // === LEGACY ROUTINE COMPLETION METHODS ===
     // Minimal localStorage support for backward compatibility only
     
     async getRoutineCompletionData() {
-        console.warn('☁️ Direct cloud mode: Using legacy localStorage for backward compatibility');
         const data = localStorage.getItem('routineCompletionData');
         return data ? JSON.parse(data) : {};
     }
     
     async saveRoutineCompletionData(data) {
-        console.warn('☁️ Direct cloud mode: Using legacy localStorage for backward compatibility');
         localStorage.setItem('routineCompletionData', JSON.stringify(data));
-        console.log('💾 Saved routine completion data to localStorage (compatibility mode)');
     }
 }
 
@@ -714,5 +669,4 @@ window.checkResourceState = function() {
     console.log('================================');
 };
 
-console.log('☁️ Cloud Storage System loaded - DIRECT CLOUD MODE (no localStorage cache)');
 console.log('🔍 Debug functions available: debugResources(), forceSyncResources(), testResourceSave(), checkResourceState()');

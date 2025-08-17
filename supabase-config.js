@@ -128,8 +128,6 @@ class SupabaseClient {
         // Store in localStorage
         localStorage.setItem('supabase.auth.token', JSON.stringify(session));
         
-        console.log('✅ User authenticated:', this.user.email);
-        console.log('⏰ Session expires in 24 hours');
     }
     
     clearSession() {
@@ -137,7 +135,6 @@ class SupabaseClient {
         this.user = null;
         this.headers.Authorization = `Bearer ${this.key}`;
         localStorage.removeItem('supabase.auth.token');
-        console.log('🚪 User signed out');
     }
     
     loadSession() {
@@ -151,7 +148,6 @@ class SupabaseClient {
                 const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
                 
                 if (sessionAge > maxAge) {
-                    console.log('🕐 Session expired after 24 hours');
                     localStorage.removeItem('supabase.auth.token');
                     return;
                 }
@@ -181,15 +177,6 @@ class SupabaseClient {
             throw new Error('Session expired - page will reload');
         }
         
-        // Debug: Check auth status before making request
-        console.log('🔍 Query debug:', {
-            table,
-            method,
-            isAuthenticated: this.isAuthenticated(),
-            hasUser: !!this.user,
-            hasSession: !!this.session,
-            authHeader: this.headers.Authorization.substring(0, 20) + '...'
-        });
         
         const url = `${this.url}/rest/v1/${table}`;
         const options = {
@@ -206,7 +193,6 @@ class SupabaseClient {
             
             // Check if token expired
             if (response.status === 401) {
-                console.log('🔄 JWT expired, forcing logout...');
                 
                 // Set flag to prevent further requests
                 this.sessionExpired = true;
@@ -268,7 +254,6 @@ class SupabaseClient {
             
             const text = await response.text();
             const result = text ? JSON.parse(text) : [];
-            console.log('🔍 Insert result for', table, ':', result);
             return result;
         } catch (error) {
             console.error('Insert error:', error);
@@ -299,15 +284,8 @@ function initializeSupabase() {
         SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE') {
         supabase = new SupabaseClient();
         window.supabase = supabase; // Set window.supabase AFTER creation
-        console.log('✅ Supabase connected');
-        console.log('🔍 Auth status:', {
-            isAuthenticated: supabase.isAuthenticated(),
-            hasUser: !!supabase.user,
-            userEmail: supabase.user?.email || 'Not logged in'
-        });
         return true;
     }
-    console.log('📱 Using localStorage (Supabase not configured)');
     return false;
 }
 

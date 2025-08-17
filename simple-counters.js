@@ -14,10 +14,8 @@ class SimpleCounters {
             return;
         }
 
-        console.log('🔄 SimpleCounters: Initializing...');
         await this.updateAllCounters();
         this.isInitialized = true;
-        console.log('✅ SimpleCounters: Ready');
     }
 
     async updateAllCounters() {
@@ -73,7 +71,6 @@ class SimpleCounters {
             this.setCounterDisplay(1, eveningCount); // Evening  
             this.setCounterDisplay(2, todoCount);    // Todos
 
-            console.log(`📊 SimpleCounters: M:${morningCount} E:${eveningCount} T:${todoCount}`);
 
         } catch (error) {
             console.error('❌ SimpleCounters: Update failed:', error);
@@ -104,4 +101,3 @@ class SimpleCounters {
 // Global instance
 window.SimpleCounters = new SimpleCounters();
 
-console.log('✅ SimpleCounters loaded');
