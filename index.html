@@ -1795,7 +1795,7 @@
             <button class="nav-tab" data-tab="tab-wiki">Wiki</button>
             <button class="nav-tab" data-tab="tab-settings" style="display: none;">Settings</button>
             <div class="nav-actions">
-                <button id="timer-btn" class="nav-tab timer-btn" title="Pomodoro Timer (25 min)">
+                <button id="timer-btn" class="nav-tab timer-btn" title="Pomodoro Timer (25 min) | Right-click to reset">
                     <i data-lucide="timer" style="width: 18px; height: 18px;"></i>
                 </button>
                 <button id="settings-btn" class="nav-tab settings-btn">
@@ -3281,10 +3281,20 @@
         // Timer button event listener
         const timerBtn = document.getElementById('timer-btn');
         if (timerBtn) {
+            // Left click: start/stop
             timerBtn.addEventListener('click', () => {
                 console.log('Timer clicked');
                 if (window.PomodoroTimer) {
                     window.PomodoroTimer.toggle();
+                }
+            });
+            
+            // Right click: reset to 25:00
+            timerBtn.addEventListener('contextmenu', (e) => {
+                e.preventDefault(); // Prevent context menu
+                console.log('Timer right-clicked - reset');
+                if (window.PomodoroTimer) {
+                    window.PomodoroTimer.reset();
                 }
             });
         }
@@ -6594,7 +6604,12 @@
                 this.originalTitle = document.title;
                 this.timerBtn = document.getElementById('timer-btn');
                 
-                console.log('🍅 PomodoroTimer initialized (25 min)');
+                // Set initial tooltip
+                if (this.timerBtn) {
+                    this.timerBtn.title = 'Pomodoro Timer (25 min) | Right-click to reset';
+                }
+                
+                console.log('🍅 PomodoroTimer initialized (25 min) - Left click: start/stop, Right click: reset');
             }
             
             toggle() {
@@ -6653,13 +6668,14 @@
             }
             
             reset() {
+                console.log('🍅 Timer reset to 25:00');
                 this.isRunning = false;
                 this.isPaused = false;
                 this.timeLeft = this.duration;
                 
                 // Reset button appearance
                 this.timerBtn.classList.remove('timer-running', 'timer-paused');
-                this.timerBtn.title = 'Pomodoro Timer (25 min)';
+                this.timerBtn.title = 'Pomodoro Timer (25 min) | Right-click to reset';
                 
                 if (this.interval) {
                     clearInterval(this.interval);
