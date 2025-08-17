@@ -3302,37 +3302,59 @@
                 }
             });
             
-            // Force hover animation with JavaScript - pure JS approach
-            const quickAddIcon = quickAddBtn.querySelector('i[data-lucide="plus"]');
+            // NUCLEAR APPROACH: Clear all existing styles and force animation
+            console.log('🚀 NUCLEAR: Setting up quick-add animation...');
+            
+            // Find the icon with multiple methods
+            let quickAddIcon = quickAddBtn.querySelector('i');
+            if (!quickAddIcon) {
+                quickAddIcon = quickAddBtn.querySelector('svg');
+            }
+            if (!quickAddIcon) {
+                quickAddIcon = quickAddBtn.firstElementChild;
+            }
+            
             if (quickAddIcon) {
-                console.log('🎯 Quick-add icon found, setting up hover events');
+                console.log('🎯 NUCLEAR: Icon found:', quickAddIcon);
+                console.log('🎯 NUCLEAR: Icon tagName:', quickAddIcon.tagName);
+                console.log('🎯 NUCLEAR: Icon classes:', quickAddIcon.className);
                 
-                quickAddBtn.addEventListener('mouseenter', (e) => {
-                    console.log('🎯 Quick-add mouseenter');
-                    quickAddIcon.style.setProperty('transform', 'rotate(90deg)', 'important');
-                    quickAddIcon.style.setProperty('stroke', '#059669', 'important');
-                    quickAddIcon.style.setProperty('color', '#059669', 'important');
-                    quickAddIcon.style.setProperty('transition', 'transform 0.3s ease', 'important');
-                });
+                // Clear ALL existing styles first
+                quickAddIcon.removeAttribute('style');
                 
-                quickAddBtn.addEventListener('mouseleave', (e) => {
-                    console.log('🎯 Quick-add mouseleave');
-                    quickAddIcon.style.setProperty('transform', 'rotate(0deg)', 'important');
-                    quickAddIcon.style.setProperty('transition', 'transform 0.3s ease', 'important');
-                    quickAddIcon.style.removeProperty('stroke');
-                    quickAddIcon.style.removeProperty('color');
-                });
+                // Set base styles with brute force
+                const baseStyles = `
+                    transition: all 0.3s ease !important;
+                    transform-origin: center !important;
+                    display: inline-block !important;
+                `;
+                quickAddIcon.style.cssText = baseStyles;
                 
-                // Test the animation immediately
+                // Test immediate rotation
+                console.log('🧪 NUCLEAR: Testing immediate rotation...');
+                quickAddIcon.style.transform = 'rotate(45deg)';
                 setTimeout(() => {
-                    console.log('🧪 Testing quick-add animation...');
-                    quickAddIcon.style.setProperty('transform', 'rotate(90deg)', 'important');
-                    setTimeout(() => {
-                        quickAddIcon.style.setProperty('transform', 'rotate(0deg)', 'important');
-                    }, 500);
-                }, 2000);
+                    quickAddIcon.style.transform = 'rotate(0deg)';
+                }, 1000);
+                
+                // Setup hover events
+                quickAddBtn.onmouseenter = function() {
+                    console.log('🎯 NUCLEAR: mouseenter');
+                    quickAddIcon.style.transform = 'rotate(90deg)';
+                    quickAddIcon.style.stroke = '#059669';
+                    quickAddIcon.style.color = '#059669';
+                };
+                
+                quickAddBtn.onmouseleave = function() {
+                    console.log('🎯 NUCLEAR: mouseleave');
+                    quickAddIcon.style.transform = 'rotate(0deg)';
+                    quickAddIcon.style.stroke = '';
+                    quickAddIcon.style.color = '';
+                };
+                
             } else {
-                console.log('❌ Quick-add icon not found!');
+                console.log('❌ NUCLEAR: No icon found at all!');
+                console.log('❌ NUCLEAR: Button innerHTML:', quickAddBtn.innerHTML);
             }
         }
 
