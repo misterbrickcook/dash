@@ -101,56 +101,45 @@ class SimpleCounters {
         }
     }
 
-    // SOL Balance API
+    // SOL Balance API - Direct approach
     async getSolBalance() {
         try {
             console.log('🟣 Fetching SOL balance for wallet:', this.solWalletAddress);
             
-            // Try multiple RPC endpoints for better reliability
-            const rpcEndpoints = [
-                'https://solana-api.projectserum.com',
-                'https://api.mainnet-beta.solana.com',
-                'https://solana-mainnet.g.alchemy.com/v2/demo'
-            ];
-            
-            for (const endpoint of rpcEndpoints) {
-                try {
-                    console.log(`🟣 Trying RPC endpoint: ${endpoint}`);
-                    
-                    const response = await fetch(endpoint, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            jsonrpc: '2.0',
-                            id: 1,
-                            method: 'getBalance',
-                            params: [this.solWalletAddress]
-                        })
-                    });
-            
-                    const data = await response.json();
-                    
-                    if (data.result && data.result.value !== undefined) {
-                        // Convert lamports to SOL (1 SOL = 1,000,000,000 lamports)
-                        const balanceInSol = data.result.value / 1000000000;
-                        this.lastSolBalance = balanceInSol;
-                        console.log(`✅ SOL Balance: ${balanceInSol.toFixed(4)} SOL (via ${endpoint})`);
-                        return balanceInSol;
-                    } else if (data.error) {
-                        console.log(`⚠️ RPC Error from ${endpoint}:`, data.error.message);
-                        continue; // Try next endpoint
-                    }
-                    
-                } catch (endpointError) {
-                    console.log(`⚠️ Failed to reach ${endpoint}:`, endpointError.message);
-                    continue; // Try next endpoint
+            // Try simple HTTP API first (no CORS issues)
+            try {
+                console.log('🟣 Trying SolanaFM API...');
+                const response = await fetch(`https://api.solana.fm/v0/accounts/${this.solWalletAddress}/balance`);
+                const data = await response.json();
+                
+                if (data && data.balance) {
+                    const balanceInSol = data.balance.lamports / 1000000000;
+                    this.lastSolBalance = balanceInSol;
+                    console.log(`✅ SOL Balance: ${balanceInSol.toFixed(4)} SOL (via SolanaFM)`);
+                    return balanceInSol;
                 }
+            } catch (error) {
+                console.log('⚠️ SolanaFM failed:', error.message);
             }
             
-            // If all endpoints failed, try a public API as fallback
-            console.log('🟣 All RPC endpoints failed, trying public API fallback...');
+            // Try Solscan API
+            try {
+                console.log('🟣 Trying Solscan API...');
+                const response = await fetch(`https://public-api.solscan.io/account/${this.solWalletAddress}`);
+                const data = await response.json();
+                
+                if (data && data.lamports) {
+                    const balanceInSol = data.lamports / 1000000000;
+                    this.lastSolBalance = balanceInSol;
+                    console.log(`✅ SOL Balance: ${balanceInSol.toFixed(4)} SOL (via Solscan)`);
+                    return balanceInSol;
+                }
+            } catch (error) {
+                console.log('⚠️ Solscan failed:', error.message);
+            }
+            
+            // Try SolanaBeach fallback
+            console.log('🟣 Trying SolanaBeach fallback...');
             return await this.getSolBalanceFallback();
             
         } catch (error) {
