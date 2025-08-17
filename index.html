@@ -1525,6 +1525,44 @@
             gap: 0.5rem;
         }
 
+        .mcap-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mcap-input-group input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .mcap-buttons {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .mcap-btn {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 40px;
+        }
+
+        .mcap-btn:hover {
+            border-color: #000000;
+            background: #f5f5f5;
+        }
+
+        .mcap-btn.active {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
+
         .portfolio-overview {
             margin-bottom: 2rem;
         }
@@ -2282,7 +2320,7 @@
                 <div class="trade-form">
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="trade-token">Token Symbol</label>
+                            <label for="trade-token">Token</label>
                             <input type="text" id="trade-token" placeholder="BONK" autocomplete="off">
                         </div>
                         <div class="form-group">
@@ -2291,7 +2329,14 @@
                         </div>
                         <div class="form-group">
                             <label for="trade-mcap">Market Cap</label>
-                            <input type="text" id="trade-mcap" placeholder="2.1B" autocomplete="off">
+                            <div class="mcap-input-group">
+                                <input type="number" id="trade-mcap" placeholder="2.1" autocomplete="off" step="0.1">
+                                <div class="mcap-buttons">
+                                    <button type="button" class="mcap-btn" data-multiplier="K">K</button>
+                                    <button type="button" class="mcap-btn" data-multiplier="M">M</button>
+                                    <button type="button" class="mcap-btn active" data-multiplier="B">B</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="form-actions">
@@ -7416,6 +7461,17 @@
                 if (refreshPricesBtn) {
                     refreshPricesBtn.addEventListener('click', () => this.refreshPrices());
                 }
+
+                // Market cap buttons
+                const mcapButtons = document.querySelectorAll('.mcap-btn');
+                mcapButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Remove active from all buttons
+                        mcapButtons.forEach(b => b.classList.remove('active'));
+                        // Add active to clicked button
+                        e.target.classList.add('active');
+                    });
+                });
             }
 
             setupTabListener() {
@@ -7446,12 +7502,16 @@
             async addTrade() {
                 const token = document.getElementById('trade-token').value.trim().toUpperCase();
                 const solAmount = parseFloat(document.getElementById('trade-sol-amount').value);
-                const entryMcap = document.getElementById('trade-mcap').value.trim();
+                const mcapValue = parseFloat(document.getElementById('trade-mcap').value);
+                const activeMultiplier = document.querySelector('.mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
 
-                if (!token || !solAmount || !entryMcap) {
+                if (!token || !solAmount || !mcapValue) {
                     alert('Please fill in all fields');
                     return;
                 }
+
+                // Combine mcap value with multiplier (e.g., "2.1B")
+                const entryMcap = `${mcapValue}${activeMultiplier}`;
 
                 const trade = {
                     id: Date.now().toString(),
@@ -7476,6 +7536,10 @@
                     document.getElementById('trade-token').value = '';
                     document.getElementById('trade-sol-amount').value = '';
                     document.getElementById('trade-mcap').value = '';
+                    
+                    // Reset market cap buttons to default (B)
+                    document.querySelectorAll('.mcap-btn').forEach(btn => btn.classList.remove('active'));
+                    document.querySelector('.mcap-btn[data-multiplier="B"]').classList.add('active');
                     
                     // Refresh display
                     this.renderTrades();
