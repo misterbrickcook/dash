@@ -8070,6 +8070,12 @@
                     // Calculate how much SOL to sell to get that target
                     const solToSell = targetReceived / (1 + percentageChange);
                     
+                    // Debug what we're calculating
+                    console.log(`DEBUG: Entry ${originalAmount} SOL, Exit change: ${(percentageChange*100).toFixed(1)}%`);
+                    console.log(`DEBUG: Current total value: ${currentTotalValue.toFixed(3)} SOL`);
+                    console.log(`DEBUG: ${percent}% of ${currentTotalValue.toFixed(3)} = ${targetReceived.toFixed(3)} SOL target`);
+                    console.log(`DEBUG: Need to sell ${solToSell.toFixed(3)} SOL to get ${targetReceived.toFixed(3)} SOL`);
+                    
                     // Update inputs directly
                     document.getElementById('close-sol-to-sell').value = Math.min(originalAmount, Math.max(0, solToSell)).toFixed(3);
                     document.getElementById('close-received-sol').value = targetReceived.toFixed(3);
