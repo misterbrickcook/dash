@@ -2557,9 +2557,9 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="close-sol-to-sell">SOL to Sell</label>
+                            <label for="close-take-profit">Take Profit</label>
                             <div class="sol-input-group">
-                                <input type="number" id="close-sol-to-sell" placeholder="0.5" step="0.001" autocomplete="off">
+                                <input type="number" id="close-take-profit" placeholder="2.0" step="0.001" autocomplete="off">
                                 <div class="sol-sell-buttons">
                                     <button type="button" class="sol-percent-btn" data-percent="25">25%</button>
                                     <button type="button" class="sol-percent-btn" data-percent="50">50%</button>
@@ -2570,8 +2570,8 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="close-received-sol">SOL Received</label>
-                            <input type="number" id="close-received-sol" placeholder="0.6" step="0.001" autocomplete="off" readonly style="background: #f8f9fa;">
+                            <label for="close-keep-position">Keep Position</label>
+                            <input type="number" id="close-keep-position" placeholder="2.0" step="0.001" autocomplete="off" readonly style="background: #f8f9fa;">
                         </div>
                     </div>
                 </div>
@@ -7722,23 +7722,22 @@
                     exitMcapInput.addEventListener('input', () => this.calculateReceivedSol());
                 }
 
-                // Auto-calculate when sol to sell input changes (but not when programmatically set)
-                const solToSellInput = document.getElementById('close-sol-to-sell');
-                if (solToSellInput) {
-                    solToSellInput.addEventListener('input', (e) => {
-                        // Only recalculate if user manually typed (not programmatic change)
+                // Auto-calculate when take profit input changes
+                const takeProfitInput = document.getElementById('close-take-profit');
+                if (takeProfitInput) {
+                    takeProfitInput.addEventListener('input', (e) => {
                         if (e.isTrusted) {
-                            this.calculateReceivedSol();
+                            this.calculateKeepPosition();
                         }
                     });
                 }
 
-                // Percentage buttons for SOL to sell (based on current value, not entry amount)
+                // Percentage buttons for take profit (based on current value)
                 document.addEventListener('click', (e) => {
                     if (e.target.matches('#close-trade-modal .sol-percent-btn')) {
                         const percent = parseFloat(e.target.getAttribute('data-percent'));
                         if (this.currentTradeToClose && percent) {
-                            this.calculateSolToSellFromPercent(percent);
+                            this.calculateTakeProfitFromPercent(percent);
                         }
                     }
                 });
@@ -8003,8 +8002,8 @@
 
                 // Clear form
                 document.getElementById('close-exit-mcap').value = '';
-                document.getElementById('close-sol-to-sell').value = trade.sol_amount; // Default to full amount
-                document.getElementById('close-received-sol').value = '';
+                document.getElementById('close-take-profit').value = '';
+                document.getElementById('close-keep-position').value = trade.sol_amount.toFixed(3); // Show current position
 
                 // Auto-select same market cap unit as entry
                 const entryMcap = trade.entry_mcap;
@@ -8037,17 +8036,20 @@
                 this.currentTradeToClose = null;
             }
 
-            calculateSolToSellFromPercent(percent) {
+            calculateTakeProfitFromPercent(percent) {
                 if (!this.currentTradeToClose) return;
 
                 const exitMcapValue = parseFloat(document.getElementById('close-exit-mcap').value);
                 const activeMultiplier = document.querySelector('#close-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
                 
                 if (!exitMcapValue || isNaN(exitMcapValue)) {
-                    // No exit mcap set yet, fall back to entry amount percentage
-                    const totalAmount = this.currentTradeToClose.sol_amount;
-                    const sellAmount = (totalAmount * percent / 100).toFixed(3);
-                    document.getElementById('close-sol-to-sell').value = sellAmount;
+                    // No exit mcap set yet, show percentage of current position
+                    const currentPosition = this.currentTradeToClose.sol_amount;
+                    const takeProfit = (currentPosition * percent / 100).toFixed(3);
+                    const keepPosition = (currentPosition * (100 - percent) / 100).toFixed(3);
+                    
+                    document.getElementById('close-take-profit').value = takeProfit;
+                    document.getElementById('close-keep-position').value = keepPosition;
                     return;
                 }
 
@@ -8057,7 +8059,7 @@
                     const entryValue = parseFloat(entryMcap);
                     const entryUnit = entryMcap.slice(-1).toUpperCase();
                     
-                    // Convert both to same base (use actual numbers)
+                    // Convert both to same base
                     const multipliers = { 'K': 1000, 'M': 1000000, 'B': 1000000000 };
                     const entryActual = entryValue * (multipliers[entryUnit] || 1000000000);
                     const exitActual = exitMcapValue * (multipliers[activeMultiplier] || 1000000000);
@@ -8069,43 +8071,53 @@
                     const originalAmount = this.currentTradeToClose.sol_amount;
                     const currentTotalValue = originalAmount * (1 + percentageChange);
                     
-                    // Calculate target SOL to receive (percent of current value)
-                    const targetReceived = currentTotalValue * (percent / 100);
+                    // Calculate take profit (percent of current value)
+                    const takeProfit = currentTotalValue * (percent / 100);
                     
-                    // Calculate how much SOL to sell to get that target
-                    const solToSell = targetReceived / (1 + percentageChange);
+                    // Calculate how much position to sell to get that profit
+                    const solToSell = takeProfit / (1 + percentageChange);
+                    const keepPosition = originalAmount - solToSell;
                     
-                    // Debug what we're calculating
+                    // Debug
                     console.log(`DEBUG: Entry ${originalAmount} SOL, Exit change: ${(percentageChange*100).toFixed(1)}%`);
                     console.log(`DEBUG: Current total value: ${currentTotalValue.toFixed(3)} SOL`);
-                    console.log(`DEBUG: ${percent}% of ${currentTotalValue.toFixed(3)} = ${targetReceived.toFixed(3)} SOL target`);
-                    console.log(`DEBUG: Need to sell ${solToSell.toFixed(3)} SOL to get ${targetReceived.toFixed(3)} SOL`);
+                    console.log(`DEBUG: ${percent}% take profit = ${takeProfit.toFixed(3)} SOL`);
+                    console.log(`DEBUG: Keep position: ${keepPosition.toFixed(3)} SOL`);
                     
-                    // Update inputs directly - don't call calculateReceivedSol() as we already have the target
-                    document.getElementById('close-sol-to-sell').value = Math.min(originalAmount, Math.max(0, solToSell)).toFixed(3);
-                    document.getElementById('close-received-sol').value = targetReceived.toFixed(3);
-                    
-                    console.log(`FINAL: Set SOL Received to ${targetReceived.toFixed(3)} SOL`);
+                    // Update inputs
+                    document.getElementById('close-take-profit').value = takeProfit.toFixed(3);
+                    document.getElementById('close-keep-position').value = Math.max(0, keepPosition).toFixed(3);
                     
                 } catch (error) {
-                    console.error('Error calculating SOL to sell from percent:', error);
+                    console.error('Error calculating take profit from percent:', error);
                     // Fall back to simple percentage of entry amount
-                    const totalAmount = this.currentTradeToClose.sol_amount;
-                    const sellAmount = (totalAmount * percent / 100).toFixed(3);
-                    document.getElementById('close-sol-to-sell').value = sellAmount;
-                    this.calculateReceivedSol();
+                    const currentPosition = this.currentTradeToClose.sol_amount;
+                    const takeProfit = (currentPosition * percent / 100).toFixed(3);
+                    const keepPosition = (currentPosition * (100 - percent) / 100).toFixed(3);
+                    
+                    document.getElementById('close-take-profit').value = takeProfit;
+                    document.getElementById('close-keep-position').value = keepPosition;
                 }
             }
 
-            calculateReceivedSol() {
+            calculateKeepPosition() {
                 if (!this.currentTradeToClose) return;
 
+                const takeProfit = parseFloat(document.getElementById('close-take-profit').value);
+                const originalAmount = this.currentTradeToClose.sol_amount;
+                
+                if (!takeProfit || isNaN(takeProfit)) {
+                    document.getElementById('close-keep-position').value = originalAmount.toFixed(3);
+                    return;
+                }
+
                 const exitMcapValue = parseFloat(document.getElementById('close-exit-mcap').value);
-                const solToSell = parseFloat(document.getElementById('close-sol-to-sell').value);
                 const activeMultiplier = document.querySelector('#close-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
                 
-                if (!exitMcapValue || isNaN(exitMcapValue) || !solToSell || isNaN(solToSell)) {
-                    document.getElementById('close-received-sol').value = '';
+                if (!exitMcapValue || isNaN(exitMcapValue)) {
+                    // No exit mcap, simple calculation
+                    const keepPosition = Math.max(0, originalAmount - takeProfit);
+                    document.getElementById('close-keep-position').value = keepPosition.toFixed(3);
                     return;
                 }
 
@@ -8115,7 +8127,7 @@
                     const entryValue = parseFloat(entryMcap);
                     const entryUnit = entryMcap.slice(-1).toUpperCase();
                     
-                    // Convert both to same base (use actual numbers)
+                    // Convert both to same base
                     const multipliers = { 'K': 1000, 'M': 1000000, 'B': 1000000000 };
                     const entryActual = entryValue * (multipliers[entryUnit] || 1000000000);
                     const exitActual = exitMcapValue * (multipliers[activeMultiplier] || 1000000000);
@@ -8123,15 +8135,17 @@
                     // Calculate percentage change
                     const percentageChange = (exitActual - entryActual) / entryActual;
                     
-                    // Calculate received SOL based on percentage change and amount to sell
-                    const receivedSol = solToSell * (1 + percentageChange);
+                    // Calculate how much position to sell to get that take profit
+                    const solToSell = takeProfit / (1 + percentageChange);
+                    const keepPosition = Math.max(0, originalAmount - solToSell);
                     
-                    // Update the input field
-                    document.getElementById('close-received-sol').value = Math.max(0, receivedSol).toFixed(3);
+                    // Update keep position
+                    document.getElementById('close-keep-position').value = keepPosition.toFixed(3);
                     
                 } catch (error) {
-                    console.error('Error calculating received SOL:', error);
-                    // Don't show errors to user, just don't auto-calculate
+                    console.error('Error calculating keep position:', error);
+                    const keepPosition = Math.max(0, originalAmount - takeProfit);
+                    document.getElementById('close-keep-position').value = keepPosition.toFixed(3);
                 }
             }
 
@@ -8140,10 +8154,10 @@
 
                 const mcapValue = parseFloat(document.getElementById('close-exit-mcap').value);
                 const activeMultiplier = document.querySelector('#close-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
-                const solToSell = parseFloat(document.getElementById('close-sol-to-sell').value);
-                const receivedSol = parseFloat(document.getElementById('close-received-sol').value);
+                const takeProfit = parseFloat(document.getElementById('close-take-profit').value);
+                const keepPosition = parseFloat(document.getElementById('close-keep-position').value);
 
-                if (!mcapValue || !solToSell || !receivedSol) {
+                if (!mcapValue || !takeProfit) {
                     alert('Please fill in all fields');
                     return;
                 }
@@ -8151,14 +8165,17 @@
                 const exitMcap = `${mcapValue}${activeMultiplier}`;
                 const originalTrade = this.currentTradeToClose;
                 const originalAmount = originalTrade.sol_amount;
+                
+                // Calculate how much SOL to sell to get the take profit
+                const solToSell = originalAmount - keepPosition;
 
                 try {
                     if (solToSell >= originalAmount) {
                         // Full close - close the entire trade
                         originalTrade.status = 'closed';
                         originalTrade.exit_mcap = exitMcap;
-                        originalTrade.exit_price = this.solPrice * receivedSol;
-                        originalTrade.received_sol = receivedSol;
+                        originalTrade.exit_price = this.solPrice * takeProfit;
+                        originalTrade.received_sol = takeProfit;
                         originalTrade.final_pnl = originalTrade.received_sol - originalTrade.sol_amount;
                         originalTrade.exit_date = new Date().toISOString();
 
@@ -8176,9 +8193,9 @@
                             entry_date: originalTrade.entry_date,
                             status: 'closed',
                             exit_mcap: exitMcap,
-                            exit_price: this.solPrice * receivedSol,
-                            received_sol: receivedSol,
-                            final_pnl: receivedSol - solToSell,
+                            exit_price: this.solPrice * takeProfit,
+                            received_sol: takeProfit,
+                            final_pnl: takeProfit - solToSell,
                             exit_date: new Date().toISOString(),
                             user_id: originalTrade.user_id
                         };
