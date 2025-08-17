@@ -137,16 +137,10 @@
             50% { opacity: 0.5; }
         }
         
-        /* Quick-add button specific styles - highest specificity */
-        button.nav-tab.quick-add-btn i {
+        /* Quick-add button - JavaScript only approach */
+        .nav-tab.quick-add-btn i {
             transition: transform 0.2s ease, stroke 0.2s ease !important;
-            will-change: transform;
-        }
-        button.nav-tab.quick-add-btn:hover i,
-        button#quick-add-btn:hover i {
-            stroke: #059669 !important;
-            transform: rotate(90deg) !important;
-            color: #059669 !important;
+            will-change: transform !important;
         }
         
         .settings-btn:hover span, .settings-btn:active span, .settings-btn:focus span {
@@ -3308,20 +3302,35 @@
                 }
             });
             
-            // Force hover animation with JavaScript (CSS backup)
-            const quickAddIcon = quickAddBtn.querySelector('i');
+            // Force hover animation with JavaScript - pure JS approach
+            const quickAddIcon = quickAddBtn.querySelector('i[data-lucide="plus"]');
             if (quickAddIcon) {
-                quickAddBtn.addEventListener('mouseenter', () => {
-                    quickAddIcon.style.transform = 'rotate(90deg)';
-                    quickAddIcon.style.stroke = '#059669';
-                    quickAddIcon.style.color = '#059669';
+                console.log('🎯 Quick-add icon found, setting up hover events');
+                
+                quickAddBtn.addEventListener('mouseenter', (e) => {
+                    console.log('🎯 Quick-add mouseenter');
+                    quickAddIcon.style.setProperty('transform', 'rotate(90deg)', 'important');
+                    quickAddIcon.style.setProperty('stroke', '#059669', 'important');
+                    quickAddIcon.style.setProperty('color', '#059669', 'important');
                 });
                 
-                quickAddBtn.addEventListener('mouseleave', () => {
-                    quickAddIcon.style.transform = 'rotate(0deg)';
-                    quickAddIcon.style.stroke = '';
-                    quickAddIcon.style.color = '';
+                quickAddBtn.addEventListener('mouseleave', (e) => {
+                    console.log('🎯 Quick-add mouseleave');
+                    quickAddIcon.style.setProperty('transform', 'rotate(0deg)', 'important');
+                    quickAddIcon.style.removeProperty('stroke');
+                    quickAddIcon.style.removeProperty('color');
                 });
+                
+                // Test the animation immediately
+                setTimeout(() => {
+                    console.log('🧪 Testing quick-add animation...');
+                    quickAddIcon.style.setProperty('transform', 'rotate(90deg)', 'important');
+                    setTimeout(() => {
+                        quickAddIcon.style.setProperty('transform', 'rotate(0deg)', 'important');
+                    }, 500);
+                }, 2000);
+            } else {
+                console.log('❌ Quick-add icon not found!');
             }
         }
 
