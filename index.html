@@ -2209,6 +2209,7 @@
                 <div class="section-header">
                     <h3>Recent Trades</h3>
                     <button id="refresh-trades-btn" class="btn secondary">🔄 Refresh</button>
+                    <button id="debug-trades-btn" class="btn secondary">🔍 Debug</button>
                 </div>
                 <div class="trades-list" id="trades-list">
                     <div class="loading-trades">Loading trades...</div>
@@ -7261,8 +7262,30 @@
                     refreshBtn.addEventListener('click', () => this.refreshTrades());
                 }
 
+                const debugBtn = document.getElementById('debug-trades-btn');
+                if (debugBtn) {
+                    debugBtn.addEventListener('click', () => this.toggleDebug());
+                }
+
                 // Load trading data when tab is first opened
                 this.setupTabListener();
+            }
+
+            toggleDebug() {
+                window.TRADING_DEBUG = !window.TRADING_DEBUG;
+                const debugBtn = document.getElementById('debug-trades-btn');
+                if (debugBtn) {
+                    debugBtn.textContent = window.TRADING_DEBUG ? '🔍 Debug ON' : '🔍 Debug';
+                    debugBtn.style.background = window.TRADING_DEBUG ? '#059669' : '';
+                    debugBtn.style.color = window.TRADING_DEBUG ? 'white' : '';
+                }
+                
+                if (window.TRADING_DEBUG) {
+                    console.log('🔍 Trading Debug Mode ON - will log all transaction descriptions');
+                    this.refreshTrades(); // Reload with debug info
+                } else {
+                    console.log('🔍 Trading Debug Mode OFF');
+                }
             }
 
             setupTabListener() {
@@ -7354,19 +7377,47 @@
 
                 transactions.forEach(tx => {
                     try {
-                        // Look for Jupiter/Raydium swaps in transaction description
+                        // Look for various trading patterns
                         const description = tx.description || '';
                         const timestamp = new Date(tx.timestamp * 1000);
                         
-                        if (description.includes('swapped') || description.includes('Swap')) {
-                            // Parse swap info from description
-                            const trade = this.parseSwapDescription(description, timestamp, tx);
+                        // Debug: Log all descriptions to see what we're missing
+                        if (window.TRADING_DEBUG) {
+                            console.log('🔍 Transaction description:', description);
+                        }
+                        
+                        // Check for various trading patterns
+                        const isTradeTransaction = 
+                            description.includes('swapped') || 
+                            description.includes('Swap') ||
+                            description.includes('sold') ||
+                            description.includes('bought') ||
+                            description.includes('trade') ||
+                            description.includes('exchange') ||
+                            description.toLowerCase().includes('axiom') ||
+                            description.toLowerCase().includes('jupiter') ||
+                            description.toLowerCase().includes('raydium') ||
+                            description.toLowerCase().includes('orca') ||
+                            // Token transfers that look like trades
+                            (description.includes('→') && (description.includes('SOL') || description.includes('USDC'))) ||
+                            // Check token balances changes
+                            (tx.tokenBalanceChanges && tx.tokenBalanceChanges.length > 0);
+                        
+                        if (isTradeTransaction) {
+                            // Try multiple parsing methods
+                            let trade = this.parseSwapDescription(description, timestamp, tx) ||
+                                       this.parseTokenBalanceChanges(tx, timestamp) ||
+                                       this.parseGenericTrade(description, timestamp, tx);
+                            
                             if (trade) {
                                 trades.push(trade);
                             }
                         }
                     } catch (e) {
                         // Skip invalid transactions
+                        if (window.TRADING_DEBUG) {
+                            console.error('Parse error:', e, tx);
+                        }
                     }
                 });
 
@@ -7375,23 +7426,47 @@
 
             parseSwapDescription(description, timestamp, tx) {
                 try {
-                    // Basic parsing for common swap formats
-                    // Example: "Swapped 1000 BONK for 0.5 SOL"
-                    const swapMatch = description.match(/swapped?\s+([\d.]+)\s+(\w+)\s+for\s+([\d.]+)\s+(\w+)/i);
+                    // Multiple parsing patterns for different DEX formats
+                    
+                    // Pattern 1: "Swapped 1000 BONK for 0.5 SOL"
+                    let swapMatch = description.match(/swapped?\s+([\d.,]+)\s+(\w+)\s+for\s+([\d.,]+)\s+(\w+)/i);
+                    
+                    // Pattern 2: "Sold 1000 BONK for 0.5 SOL"
+                    if (!swapMatch) {
+                        swapMatch = description.match(/sold\s+([\d.,]+)\s+(\w+)\s+for\s+([\d.,]+)\s+(\w+)/i);
+                    }
+                    
+                    // Pattern 3: "Bought 0.5 SOL with 1000 BONK"
+                    if (!swapMatch) {
+                        const buyMatch = description.match(/bought\s+([\d.,]+)\s+(\w+)\s+with\s+([\d.,]+)\s+(\w+)/i);
+                        if (buyMatch) {
+                            // Flip the order for bought transactions
+                            swapMatch = [buyMatch[0], buyMatch[3], buyMatch[4], buyMatch[1], buyMatch[2]];
+                        }
+                    }
+                    
+                    // Pattern 4: "1000 BONK → 0.5 SOL"
+                    if (!swapMatch) {
+                        swapMatch = description.match(/([\d.,]+)\s+(\w+)\s*→\s*([\d.,]+)\s+(\w+)/i);
+                    }
                     
                     if (swapMatch) {
                         const [, fromAmount, fromToken, toAmount, toToken] = swapMatch;
                         
+                        // Clean up amounts (remove commas)
+                        const cleanFromAmount = parseFloat(fromAmount.replace(/,/g, ''));
+                        const cleanToAmount = parseFloat(toAmount.replace(/,/g, ''));
+                        
                         // Estimate P&L (simplified)
-                        const pnl = this.estimatePnL(fromToken, toToken, parseFloat(toAmount));
+                        const pnl = this.estimatePnL(fromToken, toToken, cleanToAmount);
                         
                         return {
                             id: tx.signature,
                             timestamp,
-                            fromToken,
-                            toToken,
-                            fromAmount: parseFloat(fromAmount),
-                            toAmount: parseFloat(toAmount),
+                            fromToken: fromToken.toUpperCase(),
+                            toToken: toToken.toUpperCase(),
+                            fromAmount: cleanFromAmount,
+                            toAmount: cleanToAmount,
                             pnl,
                             signature: tx.signature,
                             source: this.detectSource(description)
@@ -7404,6 +7479,99 @@
                 }
             }
 
+            parseTokenBalanceChanges(tx, timestamp) {
+                try {
+                    // Parse from token balance changes if description parsing fails
+                    if (!tx.tokenBalanceChanges || tx.tokenBalanceChanges.length < 2) {
+                        return null;
+                    }
+                    
+                    const changes = tx.tokenBalanceChanges;
+                    const decreases = changes.filter(c => c.rawTokenAmount?.tokenAmount && parseFloat(c.rawTokenAmount.tokenAmount) < 0);
+                    const increases = changes.filter(c => c.rawTokenAmount?.tokenAmount && parseFloat(c.rawTokenAmount.tokenAmount) > 0);
+                    
+                    if (decreases.length > 0 && increases.length > 0) {
+                        const fromChange = decreases[0];
+                        const toChange = increases[0];
+                        
+                        const fromToken = fromChange.mint ? this.getTokenSymbol(fromChange.mint) : 'UNKNOWN';
+                        const toToken = toChange.mint ? this.getTokenSymbol(toChange.mint) : 'UNKNOWN';
+                        
+                        const fromAmount = Math.abs(parseFloat(fromChange.rawTokenAmount.tokenAmount));
+                        const toAmount = parseFloat(toChange.rawTokenAmount.tokenAmount);
+                        
+                        const pnl = this.estimatePnL(fromToken, toToken, toAmount);
+                        
+                        return {
+                            id: tx.signature,
+                            timestamp,
+                            fromToken,
+                            toToken,
+                            fromAmount,
+                            toAmount,
+                            pnl,
+                            signature: tx.signature,
+                            source: 'Token Transfer'
+                        };
+                    }
+                    
+                    return null;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            parseGenericTrade(description, timestamp, tx) {
+                try {
+                    // Last resort: look for any token symbols and amounts
+                    const tokens = ['SOL', 'USDC', 'BONK', 'WIF', 'JUP', 'RAY', 'ORCA', 'MSOL', 'USDT'];
+                    const amountPattern = /[\d.,]+/g;
+                    const amounts = description.match(amountPattern) || [];
+                    
+                    let foundTokens = [];
+                    tokens.forEach(token => {
+                        if (description.includes(token)) {
+                            foundTokens.push(token);
+                        }
+                    });
+                    
+                    if (foundTokens.length >= 2 && amounts.length >= 2) {
+                        const fromToken = foundTokens[0];
+                        const toToken = foundTokens[1];
+                        const fromAmount = parseFloat(amounts[0].replace(/,/g, ''));
+                        const toAmount = parseFloat(amounts[1].replace(/,/g, ''));
+                        
+                        const pnl = this.estimatePnL(fromToken, toToken, toAmount);
+                        
+                        return {
+                            id: tx.signature,
+                            timestamp,
+                            fromToken,
+                            toToken,
+                            fromAmount,
+                            toAmount,
+                            pnl,
+                            signature: tx.signature,
+                            source: 'Generic Parse'
+                        };
+                    }
+                    
+                    return null;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            getTokenSymbol(mint) {
+                // Map common token mints to symbols
+                const tokenMap = {
+                    'So11111111111111111111111111111111111111112': 'SOL',
+                    'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
+                    // Add more as needed
+                };
+                return tokenMap[mint] || mint.substring(0, 4) + '...';
+            }
+
             estimatePnL(fromToken, toToken, toAmount) {
                 // Simplified P&L estimation (would need price API for accurate calculation)
                 // For demo, we'll show random values
@@ -7414,10 +7582,18 @@
             }
 
             detectSource(description) {
-                if (description.toLowerCase().includes('jupiter')) return 'Jupiter';
-                if (description.toLowerCase().includes('raydium')) return 'Raydium';
-                if (description.toLowerCase().includes('orca')) return 'Orca';
-                return 'Unknown';
+                const desc = description.toLowerCase();
+                if (desc.includes('jupiter')) return 'Jupiter';
+                if (desc.includes('raydium')) return 'Raydium';
+                if (desc.includes('orca')) return 'Orca';
+                if (desc.includes('axiom')) return 'Axiom';
+                if (desc.includes('meteora')) return 'Meteora';
+                if (desc.includes('serum')) return 'Serum';
+                if (desc.includes('aldrin')) return 'Aldrin';
+                if (desc.includes('saber')) return 'Saber';
+                if (desc.includes('dexlab')) return 'DexLab';
+                if (desc.includes('cropper')) return 'Cropper';
+                return 'DEX';
             }
 
             calculateStats(trades) {
