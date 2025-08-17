@@ -139,7 +139,7 @@
         
         /* Quick-add button - JavaScript only approach */
         .nav-tab.quick-add-btn i {
-            transition: transform 0.2s ease, stroke 0.2s ease !important;
+            transition: transform 0.3s ease !important;
             will-change: transform !important;
         }
         
@@ -3312,11 +3312,13 @@
                     quickAddIcon.style.setProperty('transform', 'rotate(90deg)', 'important');
                     quickAddIcon.style.setProperty('stroke', '#059669', 'important');
                     quickAddIcon.style.setProperty('color', '#059669', 'important');
+                    quickAddIcon.style.setProperty('transition', 'transform 0.3s ease', 'important');
                 });
                 
                 quickAddBtn.addEventListener('mouseleave', (e) => {
                     console.log('🎯 Quick-add mouseleave');
                     quickAddIcon.style.setProperty('transform', 'rotate(0deg)', 'important');
+                    quickAddIcon.style.setProperty('transition', 'transform 0.3s ease', 'important');
                     quickAddIcon.style.removeProperty('stroke');
                     quickAddIcon.style.removeProperty('color');
                 });
