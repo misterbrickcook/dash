@@ -8135,9 +8135,9 @@
                     // Calculate percentage change
                     const percentageChange = (exitActual - entryActual) / entryActual;
                     
-                    // Calculate how much position to sell to get that take profit
-                    const solToSell = takeProfit / (1 + percentageChange);
-                    const keepPosition = Math.max(0, originalAmount - solToSell);
+                    // Calculate current total value and keep position
+                    const currentTotalValue = originalAmount * (1 + percentageChange);
+                    const keepPosition = Math.max(0, currentTotalValue - takeProfit);
                     
                     // Update keep position
                     document.getElementById('close-keep-position').value = keepPosition.toFixed(3);
