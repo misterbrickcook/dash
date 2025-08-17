@@ -1584,11 +1584,15 @@
 
         .trade-row {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr auto;
             gap: 1rem;
             padding: 0.75rem 0;
             border-bottom: 1px solid #f0f0f0;
             align-items: center;
+        }
+
+        .open-trades .trade-row {
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
         }
 
         .trade-row:last-child {
@@ -1597,7 +1601,7 @@
 
         .trade-header {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr auto;
             gap: 1rem;
             padding: 0.5rem 0;
             border-bottom: 2px solid #e0e0e0;
@@ -1606,6 +1610,10 @@
             color: #666666;
             text-transform: uppercase;
             letter-spacing: 0.1em;
+        }
+
+        .open-trades .trade-header {
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
         }
 
         .trade-token {
@@ -7553,6 +7561,7 @@
                         <div>Entry → Exit Price</div>
                         <div>Final P&L</div>
                         <div>Date</div>
+                        <div>Actions</div>
                     </div>
                     ${trades.map(trade => `
                         <div class="trade-row">
@@ -7566,6 +7575,9 @@
                                 ${trade.final_pnl >= 0 ? '+' : ''}${trade.final_pnl.toFixed(2)} SOL
                             </div>
                             <div data-label="Date">${new Date(trade.exit_date || trade.entry_date).toLocaleDateString()}</div>
+                            <div class="trade-actions" data-label="Actions">
+                                <button class="btn secondary" onclick="window.TradingManager.deleteTrade('${trade.id}')">Delete</button>
+                            </div>
                         </div>
                     `).join('')}
                 `;
@@ -7629,6 +7641,28 @@
             async updateTradeInCloud(trade) {
                 if (!window.supabase || !window.supabase.isAuthenticated()) return;
                 await window.supabase.update('trades', trade, trade.id);
+            }
+
+            async deleteTrade(tradeId) {
+                if (!confirm('Are you sure you want to delete this trade?')) return;
+
+                try {
+                    // Remove from cloud
+                    if (window.supabase && window.supabase.isAuthenticated()) {
+                        await window.supabase.delete('trades', tradeId);
+                    }
+                    
+                    // Remove from local array
+                    this.trades = this.trades.filter(t => t.id !== tradeId);
+                    
+                    // Refresh display
+                    this.renderTrades();
+                    this.updatePortfolioStats();
+
+                } catch (error) {
+                    console.error('Error deleting trade:', error);
+                    alert('Failed to delete trade');
+                }
             }
 
 
