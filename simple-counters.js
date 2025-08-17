@@ -99,7 +99,8 @@ class SimpleCounters {
     async getSolBalance() {
         try {
             // Helius RPC endpoint (free tier) - better CORS support
-            const response = await fetch('https://rpc.helius.xyz/?api-key=demo', {
+            const HELIUS_API_KEY = '35ffdb6a-2061-4573-a66b-ea263c5eaa34';
+            const response = await fetch(`https://rpc.helius.xyz/?api-key=${HELIUS_API_KEY}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
