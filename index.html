@@ -73,7 +73,7 @@
             align-items: center;
         }
         
-        .logout-btn, .settings-btn {
+        .logout-btn, .settings-btn, .timer-btn {
             color: #666666 !important;
             font-weight: 400 !important;
             background: transparent !important;
@@ -91,16 +91,16 @@
         }
         
         /* Mobile-safe hover states - override nav-tab hover */
-        .logout-btn:hover, .settings-btn:hover,
-        .logout-btn:active, .settings-btn:active,
-        .logout-btn:focus, .settings-btn:focus {
+        .logout-btn:hover, .settings-btn:hover, .timer-btn:hover,
+        .logout-btn:active, .settings-btn:active, .timer-btn:active,
+        .logout-btn:focus, .settings-btn:focus, .timer-btn:focus {
             background: transparent !important;
             border: none !important;
             border-color: transparent !important;
         }
         
         /* Specific override for nav-tab hover border */
-        .nav-tab.logout-btn:hover, .nav-tab.settings-btn:hover {
+        .nav-tab.logout-btn:hover, .nav-tab.settings-btn:hover, .nav-tab.timer-btn:hover {
             border: none !important;
             border-color: transparent !important;
             background: transparent !important;
@@ -110,6 +110,26 @@
         .logout-btn:hover svg, .logout-btn:active svg, .logout-btn:focus svg {
             color: #dc2626 !important;
             stroke: #dc2626 !important;
+        }
+        
+        /* Timer button specific styles */
+        .timer-btn.timer-running {
+            color: #059669 !important;
+        }
+        .timer-btn.timer-running i {
+            stroke: #059669 !important;
+            animation: pulse 2s infinite;
+        }
+        .timer-btn.timer-paused {
+            color: #d97706 !important;
+        }
+        .timer-btn.timer-paused i {
+            stroke: #d97706 !important;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         .settings-btn:hover span, .settings-btn:active span, .settings-btn:focus span {
@@ -1775,6 +1795,9 @@
             <button class="nav-tab" data-tab="tab-wiki">Wiki</button>
             <button class="nav-tab" data-tab="tab-settings" style="display: none;">Settings</button>
             <div class="nav-actions">
+                <button id="timer-btn" class="nav-tab timer-btn" title="Pomodoro Timer (25 min)">
+                    <i data-lucide="timer" style="width: 18px; height: 18px;"></i>
+                </button>
                 <button id="settings-btn" class="nav-tab settings-btn">
                     <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
                 </button>
@@ -3238,8 +3261,8 @@
         // === EVENT LISTENERS ===
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => {
-                // Skip logout and settings buttons - they have their own handlers
-                if (tab.id === 'logout-btn' || tab.id === 'settings-btn') return;
+                // Skip logout, settings and timer buttons - they have their own handlers
+                if (tab.id === 'logout-btn' || tab.id === 'settings-btn' || tab.id === 'timer-btn') return;
                 
                 const tabId = tab.getAttribute('data-tab');
                 if (tabId) switchTab(tabId);
@@ -3252,6 +3275,17 @@
             settingsBtn.addEventListener('click', () => {
                 console.log('Settings clicked');
                 switchTab('tab-settings');
+            });
+        }
+
+        // Timer button event listener
+        const timerBtn = document.getElementById('timer-btn');
+        if (timerBtn) {
+            timerBtn.addEventListener('click', () => {
+                console.log('Timer clicked');
+                if (window.PomodoroTimer) {
+                    window.PomodoroTimer.toggle();
+                }
             });
         }
 
@@ -6548,6 +6582,149 @@
 
         // Make Wiki globally available
         window.Wiki = Wiki;
+        
+        // === POMODORO TIMER CLASS ===
+        class PomodoroTimer {
+            constructor() {
+                this.duration = 25 * 60; // 25 minutes in seconds
+                this.timeLeft = this.duration;
+                this.isRunning = false;
+                this.isPaused = false;
+                this.interval = null;
+                this.originalTitle = document.title;
+                this.timerBtn = document.getElementById('timer-btn');
+                
+                console.log('🍅 PomodoroTimer initialized (25 min)');
+            }
+            
+            toggle() {
+                if (this.isRunning) {
+                    this.pause();
+                } else {
+                    this.start();
+                }
+            }
+            
+            start() {
+                console.log('🍅 Timer started');
+                this.isRunning = true;
+                this.isPaused = false;
+                
+                // Update button appearance
+                this.timerBtn.classList.add('timer-running');
+                this.timerBtn.classList.remove('timer-paused');
+                this.timerBtn.title = 'Running - Click to pause';
+                
+                this.interval = setInterval(() => {
+                    this.timeLeft--;
+                    this.updateDisplay();
+                    
+                    if (this.timeLeft <= 0) {
+                        this.complete();
+                    }
+                }, 1000);
+            }
+            
+            pause() {
+                console.log('🍅 Timer paused');
+                this.isRunning = false;
+                this.isPaused = true;
+                
+                // Update button appearance
+                this.timerBtn.classList.remove('timer-running');
+                this.timerBtn.classList.add('timer-paused');
+                this.timerBtn.title = 'Paused - Click to resume';
+                
+                if (this.interval) {
+                    clearInterval(this.interval);
+                    this.interval = null;
+                }
+            }
+            
+            complete() {
+                console.log('🍅 Timer completed!');
+                this.reset();
+                
+                // Show notification
+                this.showNotification();
+                
+                // Play sound (if available)
+                this.playCompletionSound();
+            }
+            
+            reset() {
+                this.isRunning = false;
+                this.isPaused = false;
+                this.timeLeft = this.duration;
+                
+                // Reset button appearance
+                this.timerBtn.classList.remove('timer-running', 'timer-paused');
+                this.timerBtn.title = 'Pomodoro Timer (25 min)';
+                
+                if (this.interval) {
+                    clearInterval(this.interval);
+                    this.interval = null;
+                }
+                
+                // Reset title
+                document.title = this.originalTitle;
+            }
+            
+            updateDisplay() {
+                const minutes = Math.floor(this.timeLeft / 60);
+                const seconds = this.timeLeft % 60;
+                const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Update page title
+                document.title = `🍅 ${timeString} | ${this.originalTitle}`;
+            }
+            
+            showNotification() {
+                // Browser notification
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('🍅 Pomodoro Complete!', {
+                        body: '25 minutes focused work completed. Time for a break!',
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="80">🍅</text></svg>'
+                    });
+                } else if ('Notification' in window && Notification.permission !== 'denied') {
+                    // Request permission
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            this.showNotification();
+                        }
+                    });
+                }
+                
+                // Fallback alert
+                alert('🍅 Pomodoro Complete!\n\n25 minutes focused work completed.\nTime for a break!');
+            }
+            
+            playCompletionSound() {
+                // Create a simple beep sound
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch (error) {
+                    console.log('🔇 Could not play completion sound:', error);
+                }
+            }
+        }
+        
+        // Make PomodoroTimer globally available
+        window.PomodoroTimer = new PomodoroTimer();
         
         // Wiki and Lucide icons initialization moved to main DOMContentLoaded listener
     </script>
