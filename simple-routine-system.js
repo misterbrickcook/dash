@@ -58,27 +58,32 @@ class SimpleRoutineManager {
 
     async loadTodaysData() {
         try {
-            // Try cloud first if authenticated
-            if (window.supabase && window.supabase.isAuthenticated()) {
-                const cloudData = await this.loadFromCloud();
-                if (cloudData) {
-                    this.routineData = cloudData;
-                    console.log('☁️ Loaded routine data from cloud:', cloudData);
-                    return;
-                }
-            }
-
-            // Check if we can migrate from old system
-            const migratedData = await this.migrateFromOldSystem();
-            if (migratedData) {
-                this.routineData = migratedData;
-                console.log('🔄 Migrated data from old system:', migratedData);
+            // Pure cloud mode - authentication required
+            if (!window.supabase || !window.supabase.isAuthenticated()) {
+                console.error('❌ SimpleRoutineManager: Not authenticated - pure cloud mode requires authentication');
+                this.routineData = this.getEmptyData();
                 return;
             }
 
-            // Pure cloud mode - no localStorage fallback
-            console.error('❌ SimpleRoutineManager: Not authenticated - pure cloud mode requires authentication');
+            // Load from cloud only
+            const cloudData = await this.loadFromCloud();
+            if (cloudData) {
+                this.routineData = cloudData;
+                console.log('☁️ Loaded routine data from cloud:', cloudData);
+                return;
+            }
+
+            // Try migration from old system only if no cloud data exists
+            const migratedData = await this.migrateFromOldSystem();
+            if (migratedData) {
+                this.routineData = migratedData;
+                console.log('🔄 Migrated data from old system and saved to cloud:', migratedData);
+                return;
+            }
+
+            // No data found - start fresh
             this.routineData = this.getEmptyData();
+            console.log('🆕 Starting with fresh routine data');
         } catch (error) {
             console.error('❌ Error loading routine data:', error);
             this.routineData = this.getEmptyData();
@@ -152,8 +157,13 @@ class SimpleRoutineManager {
             }
             
             if (foundData) {
-                // Save migrated data to cloud only
+                // Save migrated data to cloud only and clean up old localStorage
+                this.routineData = newData;
                 await this.saveToCloud();
+                
+                // Clean up old localStorage data after successful migration
+                localStorage.removeItem('routineCompletionData');
+                console.log('🧹 Cleaned up old localStorage data after migration');
                 
                 console.log('✅ Successfully migrated old system data');
                 return newData;
@@ -272,9 +282,7 @@ class SimpleRoutineManager {
             }
         }
 
-        // Pure cloud mode - no localStorage saving
-
-        // Save to cloud
+        // Save to cloud (pure cloud mode - no localStorage)
         await this.saveToCloud();
 
         // Update UI
@@ -437,7 +445,7 @@ class SimpleRoutineManager {
 
     async reset() {
         this.routineData = this.getEmptyData();
-        // Pure cloud mode - no localStorage
+        // Pure cloud mode - save to cloud only
         await this.saveToCloud();
         
         // Reset UI using cached elements
@@ -451,11 +459,11 @@ class SimpleRoutineManager {
         });
 
         this.updateUI();
-        console.log('🔄 Routine system reset');
+        console.log('🔄 Routine system reset (cloud-only)');
     }
 }
 
-// Initialize when DOM is ready
+// Initialize when DOM is ready - simplified version for cloud-only mode
 document.addEventListener('DOMContentLoaded', function() {
     // Disable old routine system functions
     if (window.initializeRoutineProgress) {
@@ -464,29 +472,10 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
     
-    // Wait a bit for other systems to load
-    setTimeout(() => {
+    // Initialize routine manager without complex delays
+    // The login system will handle re-initialization with proper data loading
+    if (!window.simpleRoutineManager) {
         window.simpleRoutineManager = new SimpleRoutineManager();
-        
-        // Restore checkboxes after initialization and check if migration is needed
-        setTimeout(async () => {
-            // First try to migrate if no data exists yet
-            if (Object.keys(window.simpleRoutineManager.routineData[window.simpleRoutineManager.today] || {}).length === 0) {
-                console.log('🔄 No data found, attempting migration...');
-                const migrated = await window.simpleRoutineManager.migrateFromOldSystem();
-                if (migrated) {
-                    window.simpleRoutineManager.routineData = migrated;
-                }
-            }
-            
-            window.simpleRoutineManager.restoreCheckboxes();
-            window.simpleRoutineManager.updateUI();
-            
-            // Additional force update after a delay to ensure proper counter display
-            setTimeout(() => {
-                console.log('🔄 Final routine counter update...');
-                window.simpleRoutineManager.updateUI();
-            }, 1000);
-        }, 500);
-    }, 1000);
+        console.log('✅ SimpleRoutineManager created and ready for login data loading');
+    }
 });

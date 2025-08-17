@@ -4,20 +4,19 @@
 class CloudStorage {
     constructor() {
         this.isOnline = navigator.onLine;
-        this.syncQueue = [];
-        this.lastSyncTime = {};
         
         // Listen for online/offline events
         window.addEventListener('online', () => {
             this.isOnline = true;
-            this.processSyncQueue();
+            console.log('🌐 Back online - direct cloud operations available');
         });
         
         window.addEventListener('offline', () => {
             this.isOnline = false;
+            console.log('📡 Offline - direct cloud operations unavailable');
         });
         
-        console.log('📡 Cloud Storage initialized');
+        console.log('☁️ Cloud Storage initialized - DIRECT CLOUD MODE (no localStorage cache)');
     }
     
     // Helper method to safely check if Supabase is authenticated
@@ -42,33 +41,12 @@ class CloudStorage {
     
     setupRoutineMethods() {
         this.getLocalRoutineCompletions = function(date = null) {
-            const cached = localStorage.getItem('routine_completions_cache');
-            if (cached) {
-                const completions = JSON.parse(cached);
-                return date ? completions.filter(c => c.date === date) : completions;
-            }
+            console.log('⚠️ Direct cloud mode: No local cache for routine completions');
             return [];
         };
         
         this.saveLocalRoutineCompletion = function(completion) {
-            const completions = this.getLocalRoutineCompletions();
-            console.log(`💾 Saving routine completion:`, completion);
-            console.log(`📊 Current completions count: ${completions.length}`);
-            
-            const existingIndex = completions.findIndex(c => 
-                c.template_id === completion.template_id && c.date === completion.date
-            );
-            
-            if (existingIndex >= 0) {
-                console.log(`✏️ Updating existing completion at index ${existingIndex}`);
-                completions[existingIndex] = completion;
-            } else {
-                console.log(`➕ Adding new completion to cache`);
-                completions.push(completion);
-            }
-            
-            localStorage.setItem('routine_completions_cache', JSON.stringify(completions));
-            console.log(`✅ Saved to localStorage, new total: ${completions.length}`);
+            console.log('⚠️ Direct cloud mode: Skipping local completion save, using cloud only');
         };
         
         this.saveRoutineCompletion = async function(templateId, date, completed) {
@@ -80,8 +58,7 @@ class CloudStorage {
                 user_id: window.supabase?.getCurrentUser()?.id || 'local'
             };
             
-            this.saveLocalRoutineCompletion(completion);
-            console.log('✅ Routine completion saved:', templateId, completed);
+            console.log('☁️ Direct cloud save for routine completion:', templateId, completed);
         };
     }
 
@@ -90,30 +67,25 @@ class CloudStorage {
     async getTodos() {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                return this.getLocalTodos();
+                console.warn('☁️ Direct cloud mode: Cannot fetch todos - not authenticated or offline');
+                return [];
             }
             
             const data = await supabase.select('todos', '*');
             if (data) {
-                // Cache locally for offline use
-                localStorage.setItem('todos_cache', JSON.stringify(data));
                 return data;
             }
-            return this.getLocalTodos();
+            return [];
         } catch (error) {
             console.error('Error fetching todos:', error);
-            return this.getLocalTodos();
+            return [];
         }
     }
     
     async saveTodo(todo) {
         try {
-            // Always save locally first (immediate UI update)
-            this.saveLocalTodo(todo);
-            
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                this.queueSync('todos', 'save', todo);
-                return;
+                throw new Error('Direct cloud mode: Cannot save todo - not authenticated or offline');
             }
             
             // Add user_id to todo before saving
@@ -129,32 +101,27 @@ class CloudStorage {
                 const result = await supabase.insert('todos', [todo]);
                 if (result && result[0]) {
                     todo.id = result[0].id;
-                    this.saveLocalTodo(todo); // Update local with new ID
                 }
             }
             
             console.log('✅ Todo synced to cloud:', todo.title);
         } catch (error) {
             console.error('Error saving todo:', error);
-            this.queueSync('todos', 'save', todo);
+            throw error;
         }
     }
     
     async deleteTodo(todoId) {
         try {
-            // Delete locally first
-            this.deleteLocalTodo(todoId);
-            
             if (!supabase || !this.isOnline) {
-                this.queueSync('todos', 'delete', { id: todoId });
-                return;
+                throw new Error('Direct cloud mode: Cannot delete todo - not authenticated or offline');
             }
             
             await supabase.delete('todos', todoId);
             console.log('✅ Todo deleted from cloud:', todoId);
         } catch (error) {
             console.error('Error deleting todo:', error);
-            this.queueSync('todos', 'delete', { id: todoId });
+            throw error;
         }
     }
 
@@ -163,28 +130,25 @@ class CloudStorage {
     async getDeadlines() {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                return this.getLocalDeadlines();
+                console.warn('☁️ Direct cloud mode: Cannot fetch deadlines - not authenticated or offline');
+                return [];
             }
             
             const data = await supabase.select('deadlines', '*');
             if (data) {
-                localStorage.setItem('deadlines_cache', JSON.stringify(data));
                 return data;
             }
-            return this.getLocalDeadlines();
+            return [];
         } catch (error) {
             console.error('Error fetching deadlines:', error);
-            return this.getLocalDeadlines();
+            return [];
         }
     }
     
     async saveDeadline(deadline) {
         try {
-            this.saveLocalDeadline(deadline);
-            
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                this.queueSync('deadlines', 'save', deadline);
-                return;
+                throw new Error('Direct cloud mode: Cannot save deadline - not authenticated or offline');
             }
             
             // Add user_id to deadline before saving
@@ -199,31 +163,27 @@ class CloudStorage {
                 const result = await supabase.insert('deadlines', [deadline]);
                 if (result && result[0]) {
                     deadline.id = result[0].id;
-                    this.saveLocalDeadline(deadline);
                 }
             }
             
             console.log('✅ Deadline synced to cloud:', deadline.title);
         } catch (error) {
             console.error('Error saving deadline:', error);
-            this.queueSync('deadlines', 'save', deadline);
+            throw error;
         }
     }
     
     async deleteDeadline(deadlineId) {
         try {
-            this.deleteLocalDeadline(deadlineId);
-            
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                this.queueSync('deadlines', 'delete', { id: deadlineId });
-                return;
+                throw new Error('Direct cloud mode: Cannot delete deadline - not authenticated or offline');
             }
             
             await supabase.delete('deadlines', deadlineId);
             console.log('✅ Deadline deleted from cloud:', deadlineId);
         } catch (error) {
             console.error('Error deleting deadline:', error);
-            this.queueSync('deadlines', 'delete', { id: deadlineId });
+            throw error;
         }
     }
 
@@ -232,28 +192,25 @@ class CloudStorage {
     async getLinks() {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                return this.getLocalLinks();
+                console.warn('☁️ Direct cloud mode: Cannot fetch links - not authenticated or offline');
+                return [];
             }
             
             const data = await supabase.select('links', '*');
             if (data) {
-                localStorage.setItem('links_cache', JSON.stringify(data));
                 return data;
             }
-            return this.getLocalLinks();
+            return [];
         } catch (error) {
             console.error('Error fetching links:', error);
-            return this.getLocalLinks();
+            return [];
         }
     }
     
     async saveLink(link) {
         try {
-            this.saveLocalLink(link);
-            
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                this.queueSync('links', 'save', link);
-                return;
+                throw new Error('Direct cloud mode: Cannot save link - not authenticated or offline');
             }
             
             // Add user_id to link before saving
@@ -268,14 +225,13 @@ class CloudStorage {
                 const result = await supabase.insert('links', [link]);
                 if (result && result[0]) {
                     link.id = result[0].id;
-                    this.saveLocalLink(link);
                 }
             }
             
             console.log('✅ Link synced to cloud:', link.title);
         } catch (error) {
             console.error('Error saving link:', error);
-            this.queueSync('links', 'save', link);
+            throw error;
         }
     }
 
@@ -284,74 +240,44 @@ class CloudStorage {
     async getRoutineTemplates() {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                return this.getLocalRoutineTemplates();
+                console.warn('☁️ Direct cloud mode: Cannot fetch routine templates - not authenticated or offline');
+                return this.getDefaultRoutineTemplates();
             }
             
             // Get user's routine templates (both system and personal)
             const data = await supabase.query('routine_templates?order=order_index.asc');
             if (data) {
-                localStorage.setItem('routine_templates_cache', JSON.stringify(data));
                 return data;
             }
-            return this.getLocalRoutineTemplates();
+            return this.getDefaultRoutineTemplates();
         } catch (error) {
             console.error('Error fetching routine templates:', error);
-            return this.getLocalRoutineTemplates();
+            return this.getDefaultRoutineTemplates();
         }
     }
     
     async getRoutineCompletions(date = null) {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                return this.getLocalRoutineCompletions(date);
+                console.warn('☁️ Direct cloud mode: Cannot fetch routine completions - not authenticated or offline');
+                return [];
             }
             
             const dateFilter = date ? `&date=eq.${date}` : '';
             const data = await supabase.query(`routine_completions?select=*${dateFilter}`);
             if (data) {
-                localStorage.setItem('routine_completions_cache', JSON.stringify(data));
-                
-                // Convert cloud data to legacy format for UI compatibility
-                this.updateLegacyRoutineFormat(data);
-                
                 return data;
             }
-            return this.getLocalRoutineCompletions(date);
+            return [];
         } catch (error) {
             console.error('Error fetching routine completions:', error);
-            return this.getLocalRoutineCompletions(date);
+            return [];
         }
     }
     
-    // Convert cloud routine data to legacy localStorage format for UI
+    // Direct cloud mode - no legacy format conversion needed
     updateLegacyRoutineFormat(cloudData) {
-        try {
-            const legacyData = JSON.parse(localStorage.getItem('routineCompletionData') || '{}');
-            
-            cloudData.forEach(completion => {
-                const date = completion.date;
-                if (!legacyData[date]) {
-                    legacyData[date] = {};
-                }
-                
-                // Map template_id to routine type
-                let routineType = null;
-                if (completion.template_id.includes('morning')) {
-                    routineType = 'morning';
-                } else if (completion.template_id.includes('evening')) {
-                    routineType = 'evening';
-                }
-                
-                if (routineType) {
-                    legacyData[date][routineType] = completion.completed;
-                }
-            });
-            
-            localStorage.setItem('routineCompletionData', JSON.stringify(legacyData));
-            console.log('✅ Updated legacy routine format from cloud data');
-        } catch (error) {
-            console.error('Error updating legacy routine format:', error);
-        }
+        console.log('☁️ Direct cloud mode: Skipping legacy format conversion');
     }
     
     async saveRoutineCompletion(templateId, date, completed) {
@@ -438,28 +364,25 @@ class CloudStorage {
     async getNotes(category) {
         try {
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                return this.getLocalNotes(category);
+                console.warn('☁️ Direct cloud mode: Cannot fetch notes - not authenticated or offline');
+                return '';
             }
             
             const data = await supabase.query(`notes?category=eq.${category}`);
             if (data && data[0]) {
-                localStorage.setItem(`notes_${category}_cache`, JSON.stringify(data[0]));
                 return data[0].content || '';
             }
-            return this.getLocalNotes(category);
+            return '';
         } catch (error) {
             console.error('Error fetching notes:', error);
-            return this.getLocalNotes(category);
+            return '';
         }
     }
     
     async saveNotes(category, content) {
         try {
-            this.saveLocalNotes(category, content);
-            
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                this.queueSync('notes', 'save', { category, content });
-                return;
+                throw new Error('Direct cloud mode: Cannot save notes - not authenticated or offline');
             }
             
             // Add user_id for notes
@@ -478,88 +401,54 @@ class CloudStorage {
             console.log('✅ Notes synced to cloud:', category);
         } catch (error) {
             console.error('Error saving notes:', error);
-            this.queueSync('notes', 'save', { category, content });
+            throw error;
         }
     }
 
-    // === LOCAL STORAGE FALLBACKS ===
+    // === DIRECT CLOUD MODE - NO LOCAL STORAGE FALLBACKS ===
     
     getLocalTodos() {
-        const cached = localStorage.getItem('todos_cache');
-        return cached ? JSON.parse(cached) : [];
+        console.warn('☁️ Direct cloud mode: getLocalTodos() should not be used');
+        return [];
     }
     
     saveLocalTodo(todo) {
-        const todos = this.getLocalTodos();
-        const existingIndex = todos.findIndex(t => t.id === todo.id);
-        
-        if (existingIndex >= 0) {
-            todos[existingIndex] = todo;
-        } else {
-            todos.push(todo);
-        }
-        
-        localStorage.setItem('todos_cache', JSON.stringify(todos));
+        console.warn('☁️ Direct cloud mode: saveLocalTodo() should not be used');
     }
     
     deleteLocalTodo(todoId) {
-        const todos = this.getLocalTodos().filter(t => t.id !== todoId);
-        localStorage.setItem('todos_cache', JSON.stringify(todos));
+        console.warn('☁️ Direct cloud mode: deleteLocalTodo() should not be used');
     }
     
     getLocalDeadlines() {
-        const cached = localStorage.getItem('deadlines_cache');
-        return cached ? JSON.parse(cached) : [];
+        console.warn('☁️ Direct cloud mode: getLocalDeadlines() should not be used');
+        return [];
     }
     
     saveLocalDeadline(deadline) {
-        const deadlines = this.getLocalDeadlines();
-        const existingIndex = deadlines.findIndex(d => d.id === deadline.id);
-        
-        if (existingIndex >= 0) {
-            deadlines[existingIndex] = deadline;
-        } else {
-            deadlines.push(deadline);
-        }
-        
-        localStorage.setItem('deadlines_cache', JSON.stringify(deadlines));
+        console.warn('☁️ Direct cloud mode: saveLocalDeadline() should not be used');
     }
     
     deleteLocalDeadline(deadlineId) {
-        const deadlines = this.getLocalDeadlines().filter(d => d.id !== deadlineId);
-        localStorage.setItem('deadlines_cache', JSON.stringify(deadlines));
+        console.warn('☁️ Direct cloud mode: deleteLocalDeadline() should not be used');
     }
     
     getLocalLinks() {
-        const cached = localStorage.getItem('links_cache');
-        return cached ? JSON.parse(cached) : [];
+        console.warn('☁️ Direct cloud mode: getLocalLinks() should not be used');
+        return [];
     }
     
     saveLocalLink(link) {
-        const links = this.getLocalLinks();
-        const existingIndex = links.findIndex(l => l.id === link.id);
-        
-        if (existingIndex >= 0) {
-            links[existingIndex] = link;
-        } else {
-            links.push(link);
-        }
-        
-        localStorage.setItem('links_cache', JSON.stringify(links));
+        console.warn('☁️ Direct cloud mode: saveLocalLink() should not be used');
     }
     
     getLocalNotes(category) {
-        const cached = localStorage.getItem(`notes_${category}_cache`);
-        if (cached) {
-            const data = JSON.parse(cached);
-            return data.content || '';
-        }
-        return localStorage.getItem(`notes_${category}`) || '';
+        console.warn('☁️ Direct cloud mode: getLocalNotes() should not be used');
+        return '';
     }
     
     saveLocalNotes(category, content) {
-        localStorage.setItem(`notes_${category}`, content);
-        localStorage.setItem(`notes_${category}_cache`, JSON.stringify({ category, content }));
+        console.warn('☁️ Direct cloud mode: saveLocalNotes() should not be used');
     }
 
     // === RESOURCES CLOUD STORAGE ===
@@ -679,12 +568,7 @@ class CloudStorage {
     }
     
     getLocalRoutineData() {
-        const cached = localStorage.getItem('routines_cache');
-        if (cached) {
-            return JSON.parse(cached);
-        }
-        
-        // Fallback to individual localStorage keys
+        console.warn('☁️ Direct cloud mode: Using minimal localStorage for backward compatibility only');
         return {
             routineCompletionData: localStorage.getItem('routineCompletionData'),
             routineResetTime: localStorage.getItem('routineResetTime') || '06:00',
@@ -692,13 +576,7 @@ class CloudStorage {
         };
     }
     
-    getLocalRoutineTemplates() {
-        const cached = localStorage.getItem('routine_templates_cache');
-        if (cached) {
-            return JSON.parse(cached);
-        }
-        
-        // Default templates if none cached  
+    getDefaultRoutineTemplates() {
         return [
             {id: 'morning_1', text: '💧 Wasser und Kreatin', routine_type: 'morning', order_index: 1},
             {id: 'morning_2', text: '💪 BBÜ und Sport', routine_type: 'morning', order_index: 2},
@@ -724,145 +602,53 @@ class CloudStorage {
     }
     
     saveLocalRoutineData(key, value) {
-        const routineData = this.getLocalRoutineData();
-        routineData[key] = value;
-        localStorage.setItem('routines_cache', JSON.stringify(routineData));
-        
-        // Also save to individual keys for backward compatibility
+        console.warn('☁️ Direct cloud mode: saveLocalRoutineData() for backward compatibility only');
+        // Only save to individual keys for minimal backward compatibility
         localStorage.setItem(key, value);
     }
 
-    // === SYNC QUEUE SYSTEM ===
+    // === DIRECT CLOUD MODE - NO SYNC QUEUE ===
     
     queueSync(table, action, data) {
-        this.syncQueue.push({ table, action, data, timestamp: Date.now() });
-        console.log('📦 Queued for sync:', table, action);
+        console.warn('☁️ Direct cloud mode: Sync queue disabled - operations must succeed immediately');
     }
     
     async processSyncQueue() {
-        if (!supabase || !this.isOnline || this.syncQueue.length === 0) {
-            if (this.syncQueue.length > 0) {
-                console.log('🔍 Sync queue not processed:', this.syncQueue.length, 'items waiting');
-                console.log('🔍 Reasons: supabase=' + !!supabase + ', online=' + this.isOnline);
-            }
-            return;
-        }
-        
-        console.log('🔄 Processing sync queue:', this.syncQueue.length, 'items');
-        
-        const queue = [...this.syncQueue];
-        this.syncQueue = [];
-        
-        for (const item of queue) {
-            try {
-                console.log('🔄 Syncing:', item.table, item.action, item.data?.title || item.data?.id);
-                
-                switch (item.action) {
-                    case 'save':
-                        if (item.data.id && item.data.id.toString().indexOf('sample_') === -1 && item.data.id.toString().indexOf('temp_') === -1) {
-                            console.log('🔄 Updating queued item:', item.data.id);
-                            await supabase.update(item.table, item.data, item.data.id);
-                        } else {
-                            console.log('➕ Inserting queued item');
-                            // Remove temp/sample IDs - let database auto-generate
-                            if (item.data.id && (item.data.id.toString().indexOf('sample_') === 0 || item.data.id.toString().indexOf('temp_') === 0)) {
-                                console.log('🔄 Removing temp/sample ID from queued item:', item.data.id);
-                                delete item.data.id;
-                            }
-                            const result = await supabase.insert(item.table, [item.data]);
-                            console.log('🔍 Queued insert result:', result);
-                            
-                            // Update local storage with proper database ID if resources table
-                            if (item.table === 'resources' && result && result.length > 0 && result[0]) {
-                                const newId = result[0].id;
-                                item.data.id = newId;
-                                this.saveLocalResource(item.data);
-                                console.log('✅ Updated local resource with database ID:', newId);
-                            }
-                        }
-                        break;
-                    case 'delete':
-                        console.log('🗑️ Deleting queued item:', item.data.id);
-                        await supabase.delete(item.table, item.data.id);
-                        break;
-                    case 'notes':
-                        if (item.action === 'save') {
-                            const existing = await supabase.query(`notes?category=eq.${item.data.category}`);
-                            if (existing && existing.length > 0) {
-                                await supabase.update('notes', { content: item.data.content, updated_at: new Date().toISOString() }, existing[0].id);
-                            } else {
-                                await supabase.insert('notes', [{ category: item.data.category, content: item.data.content }]);
-                            }
-                        }
-                        break;
-                    case 'routines':
-                        // Legacy routines sync disabled
-                        console.log('⚠️ Skipping legacy routines sync');
-                        break;
-                }
-                console.log('✅ Synced:', item.table, item.action);
-            } catch (error) {
-                console.error('❌ Sync failed:', item, error);
-                console.error('❌ Sync error details:', error.message);
-                this.syncQueue.push(item); // Re-queue failed items
-            }
-        }
-        
-        if (this.syncQueue.length > 0) {
-            console.log('⚠️ Sync queue still has', this.syncQueue.length, 'items after processing');
-        }
+        console.warn('☁️ Direct cloud mode: processSyncQueue() disabled - no sync queue in direct mode');
     }
     
-    // === PERIODIC SYNC ===
+    // === DIRECT CLOUD MODE - NO PERIODIC SYNC ===
     
-    startPeriodicSync(intervalMs = 30000) { // 30 seconds
-        setInterval(() => {
-            if (this.isOnline) {
-                this.processSyncQueue();
-            }
-        }, intervalMs);
-        
-        console.log('🔄 Periodic sync started');
+    startPeriodicSync(intervalMs = 30000) {
+        console.log('☁️ Direct cloud mode: Periodic sync disabled - operations are immediate');
     }
     
     // === LEGACY ROUTINE COMPLETION METHODS ===
-    // These are needed by script.js for backward compatibility
+    // Minimal localStorage support for backward compatibility only
     
     async getRoutineCompletionData() {
-        // Return data from localStorage in the expected format
+        console.warn('☁️ Direct cloud mode: Using legacy localStorage for backward compatibility');
         const data = localStorage.getItem('routineCompletionData');
         return data ? JSON.parse(data) : {};
     }
     
     async saveRoutineCompletionData(data) {
-        // Save to localStorage in the expected format
+        console.warn('☁️ Direct cloud mode: Using legacy localStorage for backward compatibility');
         localStorage.setItem('routineCompletionData', JSON.stringify(data));
-        console.log('💾 Saved routine completion data to localStorage');
-        
-        // Also queue for cloud sync if authenticated
-        if (this.isSupabaseAuthenticated()) {
-            this.queueSync('routine_completions', 'save', {
-                user_id: supabase.getCurrentUser()?.id,
-                completion_data: data,
-                updated_at: new Date().toISOString()
-            });
-        }
+        console.log('💾 Saved routine completion data to localStorage (compatibility mode)');
     }
 }
 
 // Global cloud storage instance
 window.cloudStorage = new CloudStorage();
 
-// Auto-start periodic sync
+// Direct cloud mode - no periodic sync needed
 cloudStorage.startPeriodicSync();
 
 // Add global debug functions for resources
 window.debugResources = function() {
-    console.log('🔍 === RESOURCE DEBUG ===');
-    console.log('📦 Sync queue items:', cloudStorage.syncQueue.length);
-    if (cloudStorage.syncQueue.length > 0) {
-        console.log('📦 Queued items:', cloudStorage.syncQueue);
-    }
+    console.log('🔍 === RESOURCE DEBUG (DIRECT CLOUD MODE) ===');
+    console.log('☁️ Direct cloud mode: No sync queue (immediate operations)');
     console.log('🔍 Auth status:', cloudStorage.isSupabaseAuthenticated());
     console.log('🌐 Online status:', cloudStorage.isOnline);
     console.log('🔌 Supabase available:', !!window.supabase);
@@ -875,9 +661,7 @@ window.debugResources = function() {
         }
     }
     
-    // Check local resources
-    const localResources = cloudStorage.getLocalResources();
-    console.log('📱 Local resources:', localResources.length);
+    console.log('☁️ Direct cloud mode - no local resource storage');
     
     if (window.ResourceManager) {
         console.log('🏠 ResourceManager resources:', window.ResourceManager.resources.length);
@@ -885,13 +669,7 @@ window.debugResources = function() {
 };
 
 window.forceSyncResources = async function() {
-    console.log('🔧 Force syncing resources...');
-    try {
-        await cloudStorage.processSyncQueue();
-        console.log('✅ Force sync completed');
-    } catch (error) {
-        console.error('❌ Force sync failed:', error);
-    }
+    console.log('☁️ Direct cloud mode: No sync queue to process - operations are immediate');
 };
 
 window.testResourceSave = async function() {
@@ -922,24 +700,19 @@ window.testResourceSave = async function() {
 };
 
 window.checkResourceState = function() {
-    console.log('🔍 === RESOURCE STATE CHECK ===');
-    console.log('📦 CloudStorage sync queue:', cloudStorage.syncQueue.length, 'items');
+    console.log('🔍 === RESOURCE STATE CHECK (DIRECT CLOUD MODE) ===');
+    console.log('☁️ Direct cloud mode: No sync queue (immediate operations)');
     console.log('📱 ResourceManager resources:', window.ResourceManager?.resources?.length || 0);
-    console.log('💾 localStorage resources:', JSON.parse(localStorage.getItem('resources') || '[]').length);
-    console.log('💾 localStorage resources_cache:', JSON.parse(localStorage.getItem('resources_cache') || '[]').length);
+    console.log('☁️ Direct cloud mode - no localStorage cache for resources');
     
     if (window.ResourceManager && window.ResourceManager.resources.length > 0) {
         console.log('📋 Sample ResourceManager resource IDs:', 
             window.ResourceManager.resources.slice(0, 3).map(r => `${r.id} (${typeof r.id})`));
     }
     
-    const cached = JSON.parse(localStorage.getItem('resources_cache') || '[]');
-    if (cached.length > 0) {
-        console.log('📋 Sample cached resource IDs:', 
-            cached.slice(0, 3).map(r => `${r.id} (${typeof r.id})`));
-    }
+    console.log('☁️ Direct cloud mode - no cached resources');
     console.log('================================');
 };
 
-console.log('☁️ Cloud Storage System loaded');
+console.log('☁️ Cloud Storage System loaded - DIRECT CLOUD MODE (no localStorage cache)');
 console.log('🔍 Debug functions available: debugResources(), forceSyncResources(), testResourceSave(), checkResourceState()');

@@ -2375,19 +2375,28 @@
                     
                     // Load all data in parallel for better performance
                     await Promise.all([
-                        // loadRoutineCompletions(), // DISABLED - SimpleRoutineManager handles routines
                         TodoManager.loadTodos(),
                         GoalManager.loadGoals(),
                         JournalManager.loadEntries(),
                         TerminManager.loadTermine(),
-                        // loadRoutineStates(), // DISABLED - conflicts with SimpleRoutineManager
                         // Load Wiki data if available
                         window.Wiki ? window.Wiki.loadEntries() : Promise.resolve(),
                         // Load ResourceManager data if it exists (after login)
-                        window.ResourceManager ? window.ResourceManager.loadResources() : Promise.resolve(),
-                        // Initialize simple counters
-                        window.SimpleCounters ? window.SimpleCounters.init() : Promise.resolve()
+                        window.ResourceManager ? window.ResourceManager.loadResources() : Promise.resolve()
                     ]);
+                    
+                    // Initialize routine system FIRST, then counters to avoid race condition
+                    if (window.simpleRoutineManager) {
+                        console.log('🔄 Re-initializing routine manager after login...');
+                        await window.simpleRoutineManager.loadTodaysData();
+                        window.simpleRoutineManager.restoreCheckboxes();
+                        window.simpleRoutineManager.updateProgressBarsOnly();
+                    }
+                    
+                    // Initialize counters AFTER routine system is ready
+                    if (window.SimpleCounters) {
+                        await window.SimpleCounters.init();
+                    }
                     
                     // Render Wiki after data is loaded
                     if (window.Wiki) {

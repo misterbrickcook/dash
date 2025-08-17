@@ -214,15 +214,8 @@ class SupabaseClient {
                 
                 // Force immediate logout and reload (only once)
                 setTimeout(() => {
-                    // Clear only auth-related localStorage, preserve user data
+                    // Clear only auth-related localStorage in pure cloud mode
                     localStorage.removeItem('supabase.auth.token');
-                    // Clear cached cloud data that requires auth
-                    const authRelatedKeys = [
-                        'todos_cache', 'deadlines_cache', 'links_cache', 
-                        'resources_cache', 'routine_templates_cache', 
-                        'routine_completions_cache', 'routines_cache'
-                    ];
-                    authRelatedKeys.forEach(key => localStorage.removeItem(key));
                     
                     window.location.reload(); // Force page reload to show auth
                 }, 100);
