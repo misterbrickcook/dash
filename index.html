@@ -7711,15 +7711,15 @@
                         const modalMcapButtons = document.querySelectorAll('#close-trade-modal .mcap-btn');
                         modalMcapButtons.forEach(b => b.classList.remove('active'));
                         e.target.classList.add('active');
-                        // Auto-calculate SOL received when unit changes
-                        this.calculateReceivedSol();
+                        // Auto-calculate keep position when unit changes
+                        this.calculateKeepPosition();
                     }
                 });
 
                 // Auto-calculate when exit mcap input changes
                 const exitMcapInput = document.getElementById('close-exit-mcap');
                 if (exitMcapInput) {
-                    exitMcapInput.addEventListener('input', () => this.calculateReceivedSol());
+                    exitMcapInput.addEventListener('input', () => this.calculateKeepPosition());
                 }
 
                 // Auto-calculate when take profit input changes
