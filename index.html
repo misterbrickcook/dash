@@ -8068,9 +8068,19 @@
                     const targetReceived = currentTotalValue * (percent / 100);
                     
                     // Calculate how much SOL to sell to get that target
-                    // receivedSol = solToSell * (1 + percentageChange)
-                    // solToSell = receivedSol / (1 + percentageChange)
+                    // We want to receive targetReceived SOL
+                    // If percentageChange is 100% (doubled), and we want 1 SOL back, we need to sell 0.5 SOL
+                    // Formula: solToSell = targetReceived / (1 + percentageChange)
                     const solToSell = targetReceived / (1 + percentageChange);
+                    
+                    // Debug log
+                    console.log(`Debug ${percent}%:`, {
+                        originalAmount,
+                        percentageChange,
+                        currentTotalValue,
+                        targetReceived,
+                        solToSell
+                    });
                     
                     // Update inputs
                     document.getElementById('close-sol-to-sell').value = Math.min(originalAmount, Math.max(0, solToSell)).toFixed(3);
