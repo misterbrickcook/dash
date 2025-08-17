@@ -4,6 +4,8 @@
 class SimpleCounters {
     constructor() {
         this.isInitialized = false;
+        this.solWalletAddress = '4vChGDq5TgpceVBEiY7BAEXd2AaK7gtBJzwZzbrdrrQM';
+        this.lastSolBalance = 0;
     }
 
     async init() {
@@ -42,6 +44,9 @@ class SimpleCounters {
             // Count routine completions
             let morningCount = 0;
             let eveningCount = 0;
+            
+            // Get SOL balance
+            const solBalance = await this.getSolBalance();
 
             if (routineData) {
                 routineData.forEach(entry => {
@@ -72,8 +77,9 @@ class SimpleCounters {
             this.setCounterDisplay(0, morningCount); // Morning
             this.setCounterDisplay(1, eveningCount); // Evening  
             this.setCounterDisplay(2, todoCount);    // Todos
+            this.setCounterDisplay(3, solBalance);   // SOL Balance
 
-            console.log(`📊 SimpleCounters: M:${morningCount} E:${eveningCount} T:${todoCount}`);
+            console.log(`📊 SimpleCounters: M:${morningCount} E:${eveningCount} T:${todoCount} SOL:${solBalance}`);
 
         } catch (error) {
             console.error('❌ SimpleCounters: Update failed:', error);
@@ -85,8 +91,50 @@ class SimpleCounters {
         if (tiles[index]) {
             const numberEl = tiles[index].querySelector('.streak-number');
             if (numberEl) {
-                numberEl.textContent = value;
+                // Format SOL balance with 2 decimals
+                if (index === 3) {
+                    numberEl.textContent = typeof value === 'number' ? value.toFixed(2) : '0.00';
+                } else {
+                    numberEl.textContent = value;
+                }
             }
+        }
+    }
+
+    // SOL Balance API
+    async getSolBalance() {
+        try {
+            console.log('🟣 Fetching SOL balance for wallet:', this.solWalletAddress);
+            
+            const response = await fetch('https://api.mainnet-beta.solana.com', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    id: 1,
+                    method: 'getBalance',
+                    params: [this.solWalletAddress]
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.result && data.result.value !== undefined) {
+                // Convert lamports to SOL (1 SOL = 1,000,000,000 lamports)
+                const balanceInSol = data.result.value / 1000000000;
+                this.lastSolBalance = balanceInSol;
+                console.log(`🟣 SOL Balance: ${balanceInSol.toFixed(4)} SOL`);
+                return balanceInSol;
+            } else {
+                console.error('❌ SOL API: Invalid response', data);
+                return this.lastSolBalance; // Return cached value
+            }
+            
+        } catch (error) {
+            console.error('❌ SOL API: Failed to fetch balance:', error);
+            return this.lastSolBalance; // Return cached value on error
         }
     }
 
