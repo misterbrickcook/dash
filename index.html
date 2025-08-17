@@ -106,6 +106,11 @@
             background: transparent !important;
         }
         
+        /* Override conflicting nav-tab hover rules for quick-add */
+        .nav-tab.quick-add-btn:hover {
+            border-color: transparent !important;
+        }
+        
         .logout-btn:hover span, .logout-btn:active span, .logout-btn:focus span,
         .logout-btn:hover svg, .logout-btn:active svg, .logout-btn:focus svg {
             color: #dc2626 !important;
@@ -132,13 +137,16 @@
             50% { opacity: 0.5; }
         }
         
-        /* Quick-add button specific styles */
-        .nav-tab.quick-add-btn i {
+        /* Quick-add button specific styles - highest specificity */
+        button.nav-tab.quick-add-btn i {
             transition: transform 0.2s ease, stroke 0.2s ease !important;
+            will-change: transform;
         }
-        .nav-tab.quick-add-btn:hover i {
+        button.nav-tab.quick-add-btn:hover i,
+        button#quick-add-btn:hover i {
             stroke: #059669 !important;
             transform: rotate(90deg) !important;
+            color: #059669 !important;
         }
         
         .settings-btn:hover span, .settings-btn:active span, .settings-btn:focus span {
@@ -3299,6 +3307,22 @@
                     window.QuickAdd.show();
                 }
             });
+            
+            // Force hover animation with JavaScript (CSS backup)
+            const quickAddIcon = quickAddBtn.querySelector('i');
+            if (quickAddIcon) {
+                quickAddBtn.addEventListener('mouseenter', () => {
+                    quickAddIcon.style.transform = 'rotate(90deg)';
+                    quickAddIcon.style.stroke = '#059669';
+                    quickAddIcon.style.color = '#059669';
+                });
+                
+                quickAddBtn.addEventListener('mouseleave', () => {
+                    quickAddIcon.style.transform = 'rotate(0deg)';
+                    quickAddIcon.style.stroke = '';
+                    quickAddIcon.style.color = '';
+                });
+            }
         }
 
         // Timer button event listener
