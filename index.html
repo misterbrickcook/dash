@@ -8870,9 +8870,32 @@
             async updateTradeInCloud(trade) {
                 if (!window.supabase || !window.supabase.isAuthenticated()) return;
                 
-                // Create a copy without local-only fields for DB storage
-                const dbTrade = { ...trade };
-                delete dbTrade._cost_basis; // Remove local field before saving
+                // Create a copy with only fields that exist in the database
+                const dbTrade = {
+                    id: trade.id,
+                    token: trade.token,
+                    sol_amount: trade.sol_amount,
+                    entry_mcap: trade.entry_mcap,
+                    entry_price: trade.entry_price,
+                    entry_date: trade.entry_date,
+                    status: trade.status,
+                    pnl: trade.pnl,
+                    user_id: trade.user_id
+                };
+
+                // Add fields that might exist for closed trades
+                if (trade.exit_mcap !== undefined) dbTrade.exit_mcap = trade.exit_mcap;
+                if (trade.exit_price !== undefined) dbTrade.exit_price = trade.exit_price;
+                if (trade.exit_date !== undefined) dbTrade.exit_date = trade.exit_date;
+                if (trade.final_pnl !== undefined) dbTrade.final_pnl = trade.final_pnl;
+                if (trade.received_sol !== undefined) dbTrade.received_sol = trade.received_sol;
+                if (trade.current_mcap !== undefined) dbTrade.current_mcap = trade.current_mcap;
+                if (trade.current_sol !== undefined) dbTrade.current_sol = trade.current_sol;
+                
+                // TODO: Add these fields when database schema is updated
+                // if (trade.stop_loss !== undefined) dbTrade.stop_loss = trade.stop_loss;
+                // if (trade.take_profit !== undefined) dbTrade.take_profit = trade.take_profit;
+                // if (trade.notes !== undefined) dbTrade.notes = trade.notes;
                 
                 await window.supabase.update('trades', dbTrade, trade.id);
             }
