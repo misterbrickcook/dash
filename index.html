@@ -7,6 +7,7 @@
     <title>DASHBOARD v2.3</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22 font-family=%22-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif%22 font-weight=%22700%22 fill=%22%23000000%22>A</text></svg>">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* === RESET & BASE === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1853,6 +1854,36 @@
             font-size: 1rem;
         }
 
+        .chart-section {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .chart-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #000000;
+        }
+
+        .chart-info {
+            font-size: 0.9rem;
+            color: #666666;
+            font-weight: 500;
+        }
+
         .performers-section {
             background: #ffffff;
             border: 1px solid #e0e0e0;
@@ -2866,59 +2897,18 @@
         <!-- === ANALYTICS TAB === -->
         <section id="tab-analytics" class="tab-section">
             <div class="analytics-container">
+                <h1 class="section-title">Analytics</h1>
                 
-                <!-- Portfolio Overview Cards -->
-                <div class="analytics-grid">
-                    <div class="analytics-card">
-                        <h3>Total P&L</h3>
-                        <div class="metric-value positive" id="total-pnl">+0.00 SOL</div>
-                        <div class="metric-subtitle">All time performance</div>
+                <!-- SOL Balance Chart -->
+                <div class="chart-section">
+                    <div class="chart-header">
+                        <h3>Daily SOL Balance</h3>
+                        <div class="chart-info">
+                            <span id="current-sol-balance">Loading...</span>
+                        </div>
                     </div>
-                    
-                    <div class="analytics-card">
-                        <h3>Win Rate</h3>
-                        <div class="metric-value" id="win-rate">0%</div>
-                        <div class="metric-subtitle">Profitable trades</div>
-                    </div>
-                    
-                    <div class="analytics-card">
-                        <h3>Total Trades</h3>
-                        <div class="metric-value" id="total-trades">0</div>
-                        <div class="metric-subtitle">Completed trades</div>
-                    </div>
-                    
-                    <div class="analytics-card">
-                        <h3>Avg Hold Time</h3>
-                        <div class="metric-value" id="avg-hold-time">0d</div>
-                        <div class="metric-subtitle">Per trade</div>
-                    </div>
-                </div>
-                
-                <!-- Charts Section -->
-                <div class="charts-section">
                     <div class="chart-container">
-                        <h3>Portfolio Performance</h3>
-                        <div class="chart-placeholder">
-                            📈 Portfolio value chart will go here
-                        </div>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <h3>Token Distribution</h3>
-                        <div class="chart-placeholder">
-                            🥧 Token distribution pie chart will go here
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Top Performers -->
-                <div class="performers-section">
-                    <h3>Top Performers</h3>
-                    <div class="performers-list" id="top-performers">
-                        <div class="performer-item">
-                            <span class="token-name">No trades yet</span>
-                            <span class="token-pnl">Start trading to see analytics!</span>
-                        </div>
+                        <canvas id="solBalanceChart" width="400" height="200"></canvas>
                     </div>
                 </div>
                 
@@ -8969,6 +8959,177 @@
                 console.log('🎨 Lucide icons initialized for trade action buttons');
             }
         }, 100);
+    </script>
+    
+    <!-- ========================================= -->
+    <!-- ANALYTICS MANAGER -->
+    <!-- ========================================= -->
+    <script>
+        class AnalyticsManager {
+            constructor() {
+                this.chart = null;
+                this.balanceHistory = JSON.parse(localStorage.getItem('solBalanceHistory') || '[]');
+                this.checkAndRecordDailyBalance();
+            }
+
+            async init() {
+                await this.setupChart();
+                await this.updateCurrentBalance();
+            }
+
+            async checkAndRecordDailyBalance() {
+                const today = new Date().toISOString().split('T')[0];
+                const lastRecorded = this.balanceHistory[this.balanceHistory.length - 1];
+                
+                // Only record once per day
+                if (!lastRecorded || lastRecorded.date !== today) {
+                    await this.recordDailyBalance();
+                }
+            }
+
+            async recordDailyBalance() {
+                try {
+                    let balance = 0;
+                    
+                    // Get SOL balance from SimpleCounters
+                    if (window.SimpleCounters) {
+                        balance = await window.SimpleCounters.getSolBalance();
+                    }
+                    
+                    const today = new Date().toISOString().split('T')[0];
+                    
+                    // Add new balance record
+                    this.balanceHistory.push({
+                        date: today,
+                        balance: balance
+                    });
+                    
+                    // Keep only last 30 days
+                    if (this.balanceHistory.length > 30) {
+                        this.balanceHistory = this.balanceHistory.slice(-30);
+                    }
+                    
+                    // Save to localStorage
+                    localStorage.setItem('solBalanceHistory', JSON.stringify(this.balanceHistory));
+                    
+                    console.log(`📊 Recorded daily SOL balance: ${balance} SOL for ${today}`);
+                    
+                    // Update chart if it exists
+                    if (this.chart) {
+                        this.updateChart();
+                    }
+                } catch (error) {
+                    console.error('Error recording daily balance:', error);
+                }
+            }
+
+            async updateCurrentBalance() {
+                try {
+                    let balance = 0;
+                    
+                    if (window.SimpleCounters) {
+                        balance = await window.SimpleCounters.getSolBalance();
+                    }
+                    
+                    const balanceElement = document.getElementById('current-sol-balance');
+                    if (balanceElement) {
+                        balanceElement.textContent = `Current: ${balance.toFixed(3)} SOL`;
+                    }
+                } catch (error) {
+                    console.error('Error updating current balance:', error);
+                }
+            }
+
+            async setupChart() {
+                const canvas = document.getElementById('solBalanceChart');
+                if (!canvas || !window.Chart) return;
+
+                const ctx = canvas.getContext('2d');
+                
+                // Prepare data
+                const labels = this.balanceHistory.map(record => {
+                    const date = new Date(record.date);
+                    return date.toLocaleDateString('de-DE', { month: 'short', day: 'numeric' });
+                });
+                
+                const data = this.balanceHistory.map(record => record.balance);
+                
+                this.chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'SOL Balance',
+                            data: data,
+                            borderColor: '#000000',
+                            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'SOL Balance'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            updateChart() {
+                if (!this.chart) return;
+                
+                const labels = this.balanceHistory.map(record => {
+                    const date = new Date(record.date);
+                    return date.toLocaleDateString('de-DE', { month: 'short', day: 'numeric' });
+                });
+                
+                const data = this.balanceHistory.map(record => record.balance);
+                
+                this.chart.data.labels = labels;
+                this.chart.data.datasets[0].data = data;
+                this.chart.update();
+            }
+        }
+
+        // Initialize Analytics Manager
+        window.AnalyticsManager = new AnalyticsManager();
+        
+        // Initialize when analytics tab is opened
+        document.addEventListener('DOMContentLoaded', () => {
+            const analyticsTab = document.querySelector('[data-tab="tab-analytics"]');
+            if (analyticsTab) {
+                analyticsTab.addEventListener('click', () => {
+                    setTimeout(() => {
+                        if (window.AnalyticsManager) {
+                            window.AnalyticsManager.init();
+                        }
+                    }, 100);
+                });
+            }
+        });
     </script>
     
     <!-- ========================================= -->
