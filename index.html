@@ -8340,9 +8340,6 @@
                             </div>
                             <div class="trade-notes" data-label="Notes" title="${trade.notes || ''}">${trade.notes ? (trade.notes.length > 20 ? trade.notes.substring(0, 20) + '...' : trade.notes) : '-'}</div>
                             <div class="trade-actions" data-label="Actions">
-                                <button class="trade-action-btn" onclick="window.TradingManager.editTrade('${trade.id}')" title="Edit Trade">
-                                    <i data-lucide="edit-3" style="width: 16px; height: 16px;"></i>
-                                </button>
                                 <button class="trade-action-btn" onclick="window.TradingManager.closeTrade('${trade.id}')" title="Close Trade">
                                     <i data-lucide="x-circle" style="width: 16px; height: 16px;"></i>
                                 </button>
