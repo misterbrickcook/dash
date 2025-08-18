@@ -8297,12 +8297,12 @@
                     user_id: trade.user_id
                 };
                 
-                // Add badge-related flags if they exist
-                if (trade._initials_recovered !== undefined) dbTrade._initials_recovered = trade._initials_recovered;
-                if (trade._is_free_ride_trade !== undefined) dbTrade._is_free_ride_trade = trade._is_free_ride_trade;
-                if (trade._is_free_ride !== undefined) dbTrade._is_free_ride = trade._is_free_ride;
-                if (trade._initials_taken !== undefined) dbTrade._initials_taken = trade._initials_taken;
-                if (trade._cost_basis !== undefined) dbTrade._cost_basis = trade._cost_basis;
+                // Badge flags are stored locally only - database schema doesn't have these columns yet
+                // if (trade._initials_recovered !== undefined) dbTrade._initials_recovered = trade._initials_recovered;
+                // if (trade._is_free_ride_trade !== undefined) dbTrade._is_free_ride_trade = trade._is_free_ride_trade;
+                // if (trade._is_free_ride !== undefined) dbTrade._is_free_ride = trade._is_free_ride;
+                // if (trade._initials_taken !== undefined) dbTrade._initials_taken = trade._initials_taken;
+                // if (trade._cost_basis !== undefined) dbTrade._cost_basis = trade._cost_basis;
                 
                 // TODO: Add these fields when database schema is updated
                 // stop_loss: trade.stop_loss,
@@ -8457,29 +8457,32 @@
             }
 
             getBadgeForClosedTrade(trade) {
-                console.log(`🔍 Badge check for ${trade.token}:`, {
-                    _initials_recovered: trade._initials_recovered,
-                    _is_free_ride_trade: trade._is_free_ride_trade,
-                    cost_basis: trade._cost_basis,
-                    final_pnl: trade.final_pnl
-                });
-                
-                // Check if this trade has positive P&L first
-                if ((trade.final_pnl || 0) < 0) {
-                    console.log(`❌ Negative P&L, no badge`);
-                    return '';
+                // Since flags don't persist to database, reconstruct badge logic from available data
+                if ((trade.final_pnl || 0) <= 0) {
+                    return ''; // No badge for losing trades
                 }
                 
-                // Use the flags that were set during trade processing
-                if (trade._initials_recovered === true) {
-                    console.log(`🟢 Initials recovered flag is set → Initials Raus`);
-                    return '<span class="initials-badge">Initials Raus</span>';
-                } else if (trade._is_free_ride_trade === true) {
-                    console.log(`🔵 Free ride trade flag is set → Free Ride`);
+                // For trades with cost_basis = 0, always show Free Ride
+                if (trade.cost_basis === 0) {
                     return '<span class="free-ride-badge">Free Ride</span>';
                 }
                 
-                console.log(`❌ No badge flags set, no badge`);
+                // For profitable trades with cost_basis > 0, check if this is first recovery
+                if (trade.cost_basis > 0 && (trade.final_pnl || 0) >= 0) {
+                    // Get all closed trades for this token, sorted by exit date
+                    const allClosedTrades = this.trades.filter(t => 
+                        t.status === 'closed' && 
+                        t.token === trade.token &&
+                        t.cost_basis > 0 && 
+                        (t.final_pnl || 0) >= 0
+                    ).sort((a, b) => new Date(a.exit_date) - new Date(b.exit_date));
+                    
+                    // If this is the first profitable trade with cost_basis > 0, it's "Initials Raus"
+                    if (allClosedTrades.length > 0 && allClosedTrades[0].id === trade.id) {
+                        return '<span class="initials-badge">Initials Raus</span>';
+                    }
+                }
+                
                 return '';
             }
 
@@ -8993,12 +8996,12 @@
                 if (trade.current_mcap !== undefined) dbTrade.current_mcap = trade.current_mcap;
                 if (trade.current_sol !== undefined) dbTrade.current_sol = trade.current_sol;
                 
-                // Add badge-related flags if they exist
-                if (trade._initials_recovered !== undefined) dbTrade._initials_recovered = trade._initials_recovered;
-                if (trade._is_free_ride_trade !== undefined) dbTrade._is_free_ride_trade = trade._is_free_ride_trade;
-                if (trade._is_free_ride !== undefined) dbTrade._is_free_ride = trade._is_free_ride;
-                if (trade._initials_taken !== undefined) dbTrade._initials_taken = trade._initials_taken;
-                if (trade._cost_basis !== undefined) dbTrade._cost_basis = trade._cost_basis;
+                // Badge flags are stored locally only - database schema doesn't have these columns yet
+                // if (trade._initials_recovered !== undefined) dbTrade._initials_recovered = trade._initials_recovered;
+                // if (trade._is_free_ride_trade !== undefined) dbTrade._is_free_ride_trade = trade._is_free_ride_trade;
+                // if (trade._is_free_ride !== undefined) dbTrade._is_free_ride = trade._is_free_ride;
+                // if (trade._initials_taken !== undefined) dbTrade._initials_taken = trade._initials_taken;
+                // if (trade._cost_basis !== undefined) dbTrade._cost_basis = trade._cost_basis;
                 
                 // TODO: Add these fields when database schema is updated
                 // if (trade.stop_loss !== undefined) dbTrade.stop_loss = trade.stop_loss;
