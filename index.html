@@ -1713,11 +1713,16 @@
             letter-spacing: 0.1em;
         }
 
-        .open-trades, .closed-trades {
+        .trading-container {
             background: #ffffff;
             border: 1px solid #e0e0e0;
             padding: 1.5rem;
             margin-bottom: 2rem;
+        }
+
+        .trades-view {
+            /* Ensure only one view is visible at a time */
+            width: 100%;
         }
 
         .section-header {
@@ -1949,7 +1954,7 @@
             align-items: center;
         }
 
-        .open-trades .trade-row {
+        #open-trades-view .trade-row {
             grid-template-columns: 1fr 0.8fr 1fr 1fr 0.8fr 0.8fr 0.8fr 1fr auto;
         }
 
@@ -1970,7 +1975,7 @@
             letter-spacing: 0.1em;
         }
 
-        .open-trades .trade-header {
+        #open-trades-view .trade-header {
             grid-template-columns: 1fr 0.8fr 1fr 1fr 0.8fr 0.8fr 0.8fr 1fr auto;
         }
 
