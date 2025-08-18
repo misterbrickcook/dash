@@ -2816,19 +2816,17 @@
                             </div>
                             <div class="form-group">
                                 <label for="modal-trade-sol-amount">SOL</label>
-                                <div class="sol-input-group">
-                                    <input type="number" id="modal-trade-sol-amount" placeholder="0.5" step="0.001" autocomplete="off">
-                                    <div class="sol-buttons">
-                                        <button type="button" class="sol-btn" data-amount="0.1" tabindex="-1">0.1</button>
-                                        <button type="button" class="sol-btn" data-amount="2" tabindex="-1">2</button>
-                                        <button type="button" class="sol-btn" data-amount="0.25" tabindex="-1">0.25</button>
-                                        <button type="button" class="sol-btn" data-amount="2.5" tabindex="-1">2.5</button>
-                                        <button type="button" class="sol-btn" data-amount="0.5" tabindex="-1">0.5</button>
-                                        <button type="button" class="sol-btn" data-amount="3" tabindex="-1">3</button>
-                                        <button type="button" class="sol-btn" data-amount="1" tabindex="-1">1</button>
-                                        <button type="button" class="sol-btn" data-amount="5" tabindex="-1">5</button>
-                                    </div>
-                                </div>
+                                <select id="modal-trade-sol-amount" class="form-select">
+                                    <option value="">Select amount</option>
+                                    <option value="0.1">0.1 SOL</option>
+                                    <option value="0.25">0.25 SOL</option>
+                                    <option value="0.5">0.5 SOL</option>
+                                    <option value="1">1 SOL</option>
+                                    <option value="2">2 SOL</option>
+                                    <option value="2.5">2.5 SOL</option>
+                                    <option value="3">3 SOL</option>
+                                    <option value="5">5 SOL</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label for="modal-trade-mcap">Market Cap</label>
@@ -2843,36 +2841,9 @@
                             </div>
                         </div>
                         
-                        <!-- Optional Fields -->
-                        <div class="form-section">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="modal-trade-stoploss">Stop Loss</label>
-                                    <div class="mcap-input-group">
-                                        <input type="number" id="modal-trade-stoploss" placeholder="0.8" autocomplete="off" step="0.1">
-                                        <div class="mcap-buttons">
-                                            <button type="button" class="mcap-btn stoploss-btn" data-multiplier="K" tabindex="-1">K</button>
-                                            <button type="button" class="mcap-btn stoploss-btn" data-multiplier="M" tabindex="-1">M</button>
-                                            <button type="button" class="mcap-btn stoploss-btn" data-multiplier="B" tabindex="-1">B</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="modal-trade-takeprofit">Take Profit</label>
-                                    <div class="mcap-input-group">
-                                        <input type="number" id="modal-trade-takeprofit" placeholder="5.0" autocomplete="off" step="0.1">
-                                        <div class="mcap-buttons">
-                                            <button type="button" class="mcap-btn takeprofit-btn" data-multiplier="K" tabindex="-1">K</button>
-                                            <button type="button" class="mcap-btn takeprofit-btn" data-multiplier="M" tabindex="-1">M</button>
-                                            <button type="button" class="mcap-btn takeprofit-btn" data-multiplier="B" tabindex="-1">B</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="modal-trade-notes">Notes</label>
-                                <textarea id="modal-trade-notes" placeholder="e.g., Strong community, upcoming catalyst, technical breakout..." rows="3" autocomplete="off"></textarea>
-                            </div>
+                        <div class="form-group">
+                            <label for="modal-trade-notes">Notes</label>
+                            <textarea id="modal-trade-notes" placeholder="e.g., Strong community, upcoming catalyst, technical breakout, stop loss, take profit..." rows="3" autocomplete="off"></textarea>
                         </div>
                     </div>
                 </div>
@@ -8035,17 +8006,9 @@
                     lockBtn.addEventListener('click', () => this.handleLockButton());
                 }
 
-                // SOL amount buttons (for modal)
-                const solButtons = document.querySelectorAll('#add-trade-modal .sol-btn');
-                solButtons.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const amount = e.target.getAttribute('data-amount');
-                        document.getElementById('modal-trade-sol-amount').value = amount;
-                    });
-                });
 
                 // Market cap buttons (for modal)
-                const mcapButtons = document.querySelectorAll('#add-trade-modal .mcap-btn:not(.stoploss-btn):not(.takeprofit-btn)');
+                const mcapButtons = document.querySelectorAll('#add-trade-modal .mcap-btn');
                 mcapButtons.forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         // Remove active from all modal buttons (same type)
@@ -8055,27 +8018,6 @@
                     });
                 });
 
-                // StopLoss market cap buttons
-                const stoplossButtons = document.querySelectorAll('#add-trade-modal .stoploss-btn');
-                stoplossButtons.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        // Remove active from all stoploss buttons
-                        stoplossButtons.forEach(b => b.classList.remove('active'));
-                        // Add active to clicked button
-                        e.target.classList.add('active');
-                    });
-                });
-
-                // TakeProfit market cap buttons
-                const takeprofitButtons = document.querySelectorAll('#add-trade-modal .takeprofit-btn');
-                takeprofitButtons.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        // Remove active from all takeprofit buttons
-                        takeprofitButtons.forEach(b => b.classList.remove('active'));
-                        // Add active to clicked button
-                        e.target.classList.add('active');
-                    });
-                });
 
                 // Close trade modal buttons
                 const closeModal = document.getElementById('close-trade-modal');
@@ -8181,16 +8123,10 @@
                 const solAmount = parseFloat(document.getElementById('modal-trade-sol-amount').value);
                 const mcapValue = parseFloat(document.getElementById('modal-trade-mcap').value);
                 const activeMultiplier = document.querySelector('#add-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier');
-
-                // Get optional fields
-                const stopLossValue = parseFloat(document.getElementById('modal-trade-stoploss').value);
-                const stopLossMultiplier = document.querySelector('.stoploss-btn.active')?.getAttribute('data-multiplier');
-                const takeProfitValue = parseFloat(document.getElementById('modal-trade-takeprofit').value);
-                const takeProfitMultiplier = document.querySelector('.takeprofit-btn.active')?.getAttribute('data-multiplier');
                 const notes = document.getElementById('modal-trade-notes').value.trim();
 
                 if (!token || !solAmount || !mcapValue || !activeMultiplier) {
-                    alert('Please fill in all fields and select a market cap unit (K/M/B)');
+                    alert('Please fill in all required fields and select a market cap unit (K/M/B)');
                     return;
                 }
 
@@ -8209,13 +8145,7 @@
                     user_id: window.supabase?.getCurrentUser()?.id
                 };
 
-                // Add optional risk management fields
-                if (stopLossValue && stopLossMultiplier) {
-                    trade.stop_loss = `${stopLossValue}${stopLossMultiplier}`;
-                }
-                if (takeProfitValue && takeProfitMultiplier) {
-                    trade.take_profit = `${takeProfitValue}${takeProfitMultiplier}`;
-                }
+                // Add notes if provided
                 if (notes) {
                     trade.notes = notes;
                 }
@@ -8254,16 +8184,12 @@
 
             clearAddTradeForm() {
                 document.getElementById('modal-trade-token').value = '';
-                document.getElementById('modal-trade-sol-amount').value = '';
+                document.getElementById('modal-trade-sol-amount').selectedIndex = 0;
                 document.getElementById('modal-trade-mcap').value = '';
-                document.getElementById('modal-trade-stoploss').value = '';
-                document.getElementById('modal-trade-takeprofit').value = '';
                 document.getElementById('modal-trade-notes').value = '';
                 
                 // Reset all market cap buttons (no default selection)
                 document.querySelectorAll('#add-trade-modal .mcap-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.stoploss-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.takeprofit-btn').forEach(btn => btn.classList.remove('active'));
             }
 
             async saveTradeToCloud(trade) {
