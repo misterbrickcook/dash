@@ -1865,10 +1865,43 @@
         .chart-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin: 0 0 1rem 0;
             padding-bottom: 0.5rem;
             border-bottom: 1px solid #f0f0f0;
+        }
+
+        .chart-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+
+        .time-period-buttons {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .period-btn {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            color: #666666;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .period-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .period-btn.active {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
         }
 
         .chart-header h3 {
@@ -2902,9 +2935,17 @@
                 <!-- SOL Balance Chart -->
                 <div class="chart-section">
                     <div class="chart-header">
-                        <h3>Daily SOL Balance</h3>
-                        <div class="chart-info">
-                            <span id="current-sol-balance">Loading...</span>
+                        <h3>SOL Balance History</h3>
+                        <div class="chart-controls">
+                            <div class="time-period-buttons">
+                                <button class="period-btn active" data-period="week">Woche</button>
+                                <button class="period-btn" data-period="month">Monat</button>
+                                <button class="period-btn" data-period="quarter">Quartal</button>
+                                <button class="period-btn" data-period="year">Jahr</button>
+                            </div>
+                            <div class="chart-info">
+                                <span id="current-sol-balance">Loading...</span>
+                            </div>
                         </div>
                     </div>
                     <div class="chart-container">
@@ -8968,11 +9009,13 @@
         class AnalyticsManager {
             constructor() {
                 this.chart = null;
+                this.currentPeriod = 'week';
                 this.balanceHistory = JSON.parse(localStorage.getItem('solBalanceHistory') || '[]');
                 this.checkAndRecordDailyBalance();
             }
 
             async init() {
+                this.setupPeriodButtons();
                 await this.setupChart();
                 await this.updateCurrentBalance();
             }
@@ -9004,9 +9047,9 @@
                         balance: balance
                     });
                     
-                    // Keep only last 30 days
-                    if (this.balanceHistory.length > 30) {
-                        this.balanceHistory = this.balanceHistory.slice(-30);
+                    // Keep only last 365 days (1 year)
+                    if (this.balanceHistory.length > 365) {
+                        this.balanceHistory = this.balanceHistory.slice(-365);
                     }
                     
                     // Save to localStorage
@@ -9040,6 +9083,48 @@
                 }
             }
 
+            setupPeriodButtons() {
+                const buttons = document.querySelectorAll('.period-btn');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Remove active from all buttons
+                        buttons.forEach(b => b.classList.remove('active'));
+                        // Add active to clicked button
+                        e.target.classList.add('active');
+                        // Update period and refresh chart
+                        this.currentPeriod = e.target.dataset.period;
+                        this.updateChart();
+                    });
+                });
+            }
+
+            getFilteredData() {
+                const now = new Date();
+                let cutoffDate;
+                
+                switch(this.currentPeriod) {
+                    case 'week':
+                        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        break;
+                    case 'month':
+                        cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        break;
+                    case 'quarter':
+                        cutoffDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+                        break;
+                    case 'year':
+                        cutoffDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                        break;
+                    default:
+                        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                }
+                
+                return this.balanceHistory.filter(record => {
+                    const recordDate = new Date(record.date);
+                    return recordDate >= cutoffDate;
+                });
+            }
+
             async setupChart() {
                 const canvas = document.getElementById('solBalanceChart');
                 if (!canvas || !window.Chart) return;
@@ -9047,12 +9132,13 @@
                 const ctx = canvas.getContext('2d');
                 
                 // Prepare data
-                const labels = this.balanceHistory.map(record => {
+                const filteredData = this.getFilteredData();
+                const labels = filteredData.map(record => {
                     const date = new Date(record.date);
                     return date.toLocaleDateString('de-DE', { month: 'short', day: 'numeric' });
                 });
                 
-                const data = this.balanceHistory.map(record => record.balance);
+                const data = filteredData.map(record => record.balance);
                 
                 this.chart = new Chart(ctx, {
                     type: 'line',
@@ -9101,12 +9187,13 @@
             updateChart() {
                 if (!this.chart) return;
                 
-                const labels = this.balanceHistory.map(record => {
+                const filteredData = this.getFilteredData();
+                const labels = filteredData.map(record => {
                     const date = new Date(record.date);
                     return date.toLocaleDateString('de-DE', { month: 'short', day: 'numeric' });
                 });
                 
-                const data = this.balanceHistory.map(record => record.balance);
+                const data = filteredData.map(record => record.balance);
                 
                 this.chart.data.labels = labels;
                 this.chart.data.datasets[0].data = data;
