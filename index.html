@@ -39,17 +39,17 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 3rem;
+            gap: 2rem;
             position: relative;
         }
         .nav-tab {
             text-decoration: none;
             color: #666666;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 400;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 0.5rem 1rem;
+            letter-spacing: 0.08em;
+            padding: 0.4rem 0.75rem;
             border: 1px solid transparent;
             transition: all 0.2s ease;
             cursor: pointer;
@@ -1746,6 +1746,124 @@
             transition: all 0.2s ease;
         }
 
+        /* === ANALYTICS STYLES === */
+        .analytics-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .analytics-card {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .analytics-card h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #000000;
+            margin: 0.5rem 0;
+        }
+
+        .metric-value.positive { color: #22c55e; }
+        .metric-value.negative { color: #ef4444; }
+
+        .metric-subtitle {
+            font-size: 0.8rem;
+            color: #888888;
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .chart-container {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .chart-container h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .chart-placeholder {
+            height: 200px;
+            background: #f8f9fa;
+            border: 2px dashed #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666666;
+            font-size: 1rem;
+        }
+
+        .performers-section {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .performers-section h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .performer-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .performer-item:last-child {
+            border-bottom: none;
+        }
+
+        .token-name {
+            font-weight: 500;
+        }
+
+        .token-pnl.positive { color: #22c55e; }
+        .token-pnl.negative { color: #ef4444; }
+
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .analytics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         .trades-table {
             overflow-x: auto;
         }
@@ -2185,6 +2303,7 @@
             <button class="nav-tab" data-tab="tab-ziele">Ziele</button>
             <button class="nav-tab" data-tab="tab-journal">Journal</button>
             <button class="nav-tab" data-tab="tab-trading">Trading</button>
+            <button class="nav-tab" data-tab="tab-analytics">Analytics</button>
             <button class="nav-tab" data-tab="tab-ressourcen">Ressourcen</button>
             <button class="nav-tab" data-tab="tab-wiki">Wiki</button>
             <button class="nav-tab" data-tab="tab-settings" style="display: none;">Settings</button>
@@ -2616,6 +2735,70 @@
                 </div>
             </div>
         </div>
+
+        <!-- === ANALYTICS TAB === -->
+        <section id="tab-analytics" class="tab-section">
+            <h1 class="section-title">Analytics & Insights</h1>
+            
+            <div class="analytics-container">
+                
+                <!-- Portfolio Overview Cards -->
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Total P&L</h3>
+                        <div class="metric-value positive" id="total-pnl">+0.00 SOL</div>
+                        <div class="metric-subtitle">All time performance</div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>Win Rate</h3>
+                        <div class="metric-value" id="win-rate">0%</div>
+                        <div class="metric-subtitle">Profitable trades</div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>Total Trades</h3>
+                        <div class="metric-value" id="total-trades">0</div>
+                        <div class="metric-subtitle">Completed trades</div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>Avg Hold Time</h3>
+                        <div class="metric-value" id="avg-hold-time">0d</div>
+                        <div class="metric-subtitle">Per trade</div>
+                    </div>
+                </div>
+                
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-container">
+                        <h3>Portfolio Performance</h3>
+                        <div class="chart-placeholder">
+                            📈 Portfolio value chart will go here
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Token Distribution</h3>
+                        <div class="chart-placeholder">
+                            🥧 Token distribution pie chart will go here
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Performers -->
+                <div class="performers-section">
+                    <h3>Top Performers</h3>
+                    <div class="performers-list" id="top-performers">
+                        <div class="performer-item">
+                            <span class="token-name">No trades yet</span>
+                            <span class="token-pnl">Start trading to see analytics!</span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
 
         <!-- === RESSOURCEN TAB === -->
         <section id="tab-ressourcen" class="tab-section">
