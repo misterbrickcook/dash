@@ -1919,15 +1919,15 @@
 
         .trade-row {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr auto;
-            gap: 1rem;
+            grid-template-columns: 1fr 0.8fr 1fr 1fr 0.8fr 1fr 0.8fr auto;
+            gap: 0.5rem;
             padding: 0.75rem 0;
             border-bottom: 1px solid #f0f0f0;
             align-items: center;
         }
 
         .open-trades .trade-row {
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+            grid-template-columns: 1fr 0.8fr 1fr 1fr 0.8fr 0.8fr 0.8fr 1fr auto;
         }
 
         .trade-row:last-child {
@@ -1936,8 +1936,8 @@
 
         .trade-header {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr auto;
-            gap: 1rem;
+            grid-template-columns: 1fr 0.8fr 1fr 1fr 0.8fr 1fr 0.8fr auto;
+            gap: 0.5rem;
             padding: 0.5rem 0;
             border-bottom: 2px solid #e0e0e0;
             font-weight: 600;
@@ -1948,7 +1948,7 @@
         }
 
         .open-trades .trade-header {
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+            grid-template-columns: 1fr 0.8fr 1fr 1fr 0.8fr 0.8fr 0.8fr 1fr auto;
         }
 
         .trade-token {
@@ -1958,6 +1958,20 @@
 
         .trade-amount {
             font-size: 0.9rem;
+        }
+
+        .trade-risk {
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .trade-notes {
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .trade-entry-price {
