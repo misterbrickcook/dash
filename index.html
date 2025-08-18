@@ -8451,21 +8451,30 @@
 
             getBadgeForClosedTrade(trade) {
                 // Check if this trade has positive P&L first
-                if ((trade.final_pnl || 0) < 0) {
+                if ((trade.final_pnl || 0) <= 0) {
                     return '';
                 }
                 
-                // If cost basis is 0, it's definitely a free ride
-                if (trade._cost_basis === 0) {
-                    return '<span class="free-ride-badge">Free Ride</span>';
-                }
+                // Debug logging
+                console.log(`Badge check for trade:`, {
+                    token: trade.token,
+                    cost_basis: trade._cost_basis,
+                    initials_recovered: trade._initials_recovered,
+                    is_free_ride_trade: trade._is_free_ride_trade,
+                    final_pnl: trade.final_pnl
+                });
                 
-                // If this trade recovered initials (sold amount >= cost basis) AND it's the first recovery
+                // Priority 1: If this trade specifically recovered initials
                 if (trade._initials_recovered === true) {
                     return '<span class="initials-badge">Initials Raus</span>';
                 }
                 
-                // If marked as free ride trade
+                // Priority 2: If cost basis is 0, it's definitely a free ride  
+                if (trade._cost_basis === 0) {
+                    return '<span class="free-ride-badge">Free Ride</span>';
+                }
+                
+                // Priority 3: If marked as free ride trade
                 if (trade._is_free_ride_trade === true) {
                     return '<span class="free-ride-badge">Free Ride</span>';
                 }
