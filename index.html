@@ -1535,6 +1535,30 @@
             width: 100%;
         }
 
+        .mcap-container {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .mcap-container input {
+            flex: 1;
+        }
+
+        .mcap-select {
+            min-width: 60px;
+            padding: 0.75rem 0.5rem;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: 0.9rem;
+            border-radius: 6px;
+        }
+
+        .mcap-select:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
         .sol-buttons, .mcap-buttons, .sol-sell-buttons {
             display: flex;
             gap: 0.25rem;
@@ -2830,13 +2854,13 @@
                             </div>
                             <div class="form-group">
                                 <label for="modal-trade-mcap">Market Cap</label>
-                                <div class="mcap-input-group">
+                                <div class="mcap-container">
                                     <input type="number" id="modal-trade-mcap" placeholder="2.1" autocomplete="off" step="0.1">
-                                    <div class="mcap-buttons">
-                                        <button type="button" class="mcap-btn" data-multiplier="K" tabindex="-1">K</button>
-                                        <button type="button" class="mcap-btn" data-multiplier="M" tabindex="-1">M</button>
-                                        <button type="button" class="mcap-btn" data-multiplier="B" tabindex="-1">B</button>
-                                    </div>
+                                    <select id="modal-trade-mcap-unit" class="form-select mcap-select">
+                                        <option value="K" selected>K</option>
+                                        <option value="M">M</option>
+                                        <option value="B">B</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -8007,16 +8031,6 @@
                 }
 
 
-                // Market cap buttons (for modal)
-                const mcapButtons = document.querySelectorAll('#add-trade-modal .mcap-btn');
-                mcapButtons.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        // Remove active from all modal buttons (same type)
-                        mcapButtons.forEach(b => b.classList.remove('active'));
-                        // Add active to clicked button
-                        e.target.classList.add('active');
-                    });
-                });
 
 
                 // Close trade modal buttons
@@ -8122,11 +8136,11 @@
                 const token = document.getElementById('modal-trade-token').value.trim().toUpperCase();
                 const solAmount = parseFloat(document.getElementById('modal-trade-sol-amount').value);
                 const mcapValue = parseFloat(document.getElementById('modal-trade-mcap').value);
-                const activeMultiplier = document.querySelector('#add-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier');
+                const activeMultiplier = document.getElementById('modal-trade-mcap-unit').value;
                 const notes = document.getElementById('modal-trade-notes').value.trim();
 
                 if (!token || !solAmount || !mcapValue || !activeMultiplier) {
-                    alert('Please fill in all required fields and select a market cap unit (K/M/B)');
+                    alert('Please fill in all required fields');
                     return;
                 }
 
@@ -8177,9 +8191,8 @@
             showAddTradeModal() {
                 document.getElementById('add-trade-modal').style.display = 'flex';
                 
-                // Set K button as active by default
-                document.querySelectorAll('#add-trade-modal .mcap-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelector('#add-trade-modal .mcap-btn[data-multiplier="K"]').classList.add('active');
+                // Set K as default in dropdown
+                document.getElementById('modal-trade-mcap-unit').value = 'K';
             }
 
             hideAddTradeModal() {
@@ -8190,11 +8203,8 @@
                 document.getElementById('modal-trade-token').value = '';
                 document.getElementById('modal-trade-sol-amount').selectedIndex = 0;
                 document.getElementById('modal-trade-mcap').value = '';
+                document.getElementById('modal-trade-mcap-unit').value = 'K';
                 document.getElementById('modal-trade-notes').value = '';
-                
-                // Set K button as active by default
-                document.querySelectorAll('#add-trade-modal .mcap-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelector('#add-trade-modal .mcap-btn[data-multiplier="K"]').classList.add('active');
             }
 
             async saveTradeToCloud(trade) {
