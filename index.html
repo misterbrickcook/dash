@@ -8239,11 +8239,22 @@
                 const originalAmount = originalTrade.sol_amount;
                 const originalCostBasis = originalTrade._cost_basis || originalAmount; // Fallback for older trades
                 
+                // Calculate current position value based on mcap change
+                const entryMcap = originalTrade.entry_mcap;
+                const entryValue = parseFloat(entryMcap);
+                const entryUnit = entryMcap.slice(-1).toUpperCase();
+                const multipliers = { 'K': 1000, 'M': 1000000, 'B': 1000000000 };
+                const entryActual = entryValue * (multipliers[entryUnit] || 1000000000);
+                const exitActual = mcapValue * (multipliers[activeMultiplier] || 1000000000);
+                const percentageChange = (exitActual - entryActual) / entryActual;
+                const currentPositionValue = originalAmount * (1 + percentageChange);
+                
                 console.log(`CLOSE TRADE: Selling ${solToSell} SOL, keeping ${solRemaining} SOL`);
                 console.log(`ORIGINAL: ${originalAmount} SOL with cost basis ${originalCostBasis} SOL`);
+                console.log(`CURRENT POSITION VALUE: ${currentPositionValue.toFixed(3)} SOL (${(percentageChange*100).toFixed(1)}% change)`);
 
                 try {
-                    if (solToSell >= originalAmount) {
+                    if (solToSell >= currentPositionValue) {
                         // Full close - close the entire trade
                         originalTrade.status = 'closed';
                         originalTrade.exit_mcap = exitMcap;
