@@ -1513,6 +1513,8 @@
             border: 1px solid #e0e0e0;
             background: #ffffff;
             font-size: 0.9rem;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .trade-form .form-group input:focus {
@@ -2840,33 +2842,11 @@
                             </div>
                             <div class="form-group">
                                 <label for="modal-trade-sol-amount">SOL</label>
-                                <select id="modal-trade-sol-amount" class="form-select">
-                                    <option value="">Select amount</option>
-                                    <option value="0.1">0.1 SOL</option>
-                                    <option value="0.25">0.25 SOL</option>
-                                    <option value="0.5">0.5 SOL</option>
-                                    <option value="1">1 SOL</option>
-                                    <option value="2">2 SOL</option>
-                                    <option value="2.5">2.5 SOL</option>
-                                    <option value="3">3 SOL</option>
-                                    <option value="5">5 SOL</option>
-                                </select>
+                                <input type="number" id="modal-trade-sol-amount" placeholder="0.5" step="0.001" autocomplete="off">
                             </div>
                             <div class="form-group">
                                 <label for="modal-trade-mcap">Market Cap</label>
-                                <select id="modal-trade-mcap" class="form-select">
-                                    <option value="">Select range</option>
-                                    <option value="100K">100K</option>
-                                    <option value="500K">500K</option>
-                                    <option value="1M" selected>1M</option>
-                                    <option value="5M">5M</option>
-                                    <option value="10M">10M</option>
-                                    <option value="50M">50M</option>
-                                    <option value="100M">100M</option>
-                                    <option value="500M">500M</option>
-                                    <option value="1B">1B</option>
-                                    <option value="5B">5B</option>
-                                </select>
+                                <input type="text" id="modal-trade-mcap" placeholder="2.1M" autocomplete="off">
                             </div>
                         </div>
                         
@@ -8140,7 +8120,7 @@
             async addTrade() {
                 const token = document.getElementById('modal-trade-token').value.trim().toUpperCase();
                 const solAmount = parseFloat(document.getElementById('modal-trade-sol-amount').value);
-                const entryMcap = document.getElementById('modal-trade-mcap').value;
+                const entryMcap = document.getElementById('modal-trade-mcap').value.trim();
                 const notes = document.getElementById('modal-trade-notes').value.trim();
 
                 if (!token || !solAmount || !entryMcap) {
@@ -8191,9 +8171,6 @@
 
             showAddTradeModal() {
                 document.getElementById('add-trade-modal').style.display = 'flex';
-                
-                // Set 1M as default in dropdown
-                document.getElementById('modal-trade-mcap').value = '1M';
             }
 
             hideAddTradeModal() {
@@ -8202,8 +8179,8 @@
 
             clearAddTradeForm() {
                 document.getElementById('modal-trade-token').value = '';
-                document.getElementById('modal-trade-sol-amount').selectedIndex = 0;
-                document.getElementById('modal-trade-mcap').selectedIndex = 0;
+                document.getElementById('modal-trade-sol-amount').value = '';
+                document.getElementById('modal-trade-mcap').value = '';
                 document.getElementById('modal-trade-notes').value = '';
             }
 
