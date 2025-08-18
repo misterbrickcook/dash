@@ -8259,22 +8259,32 @@
             handleLockButton() {
                 const closedTradesSection = document.getElementById('closed-trades-section');
                 const lockBtn = document.getElementById('lock-btn');
-                const lockIcon = lockBtn.querySelector('i');
+                
+                if (!closedTradesSection || !lockBtn) {
+                    console.error('Cannot find required elements for lock button');
+                    return;
+                }
+                
+                const lockIcon = lockBtn.querySelector('i[data-lucide]');
                 
                 if (closedTradesSection.style.display === 'none') {
                     // Show closed trades
                     closedTradesSection.style.display = 'block';
-                    lockIcon.setAttribute('data-lucide', 'unlock');
+                    if (lockIcon) {
+                        lockIcon.setAttribute('data-lucide', 'unlock');
+                    }
                     console.log('🔓 Closed trades shown');
                 } else {
                     // Hide closed trades
                     closedTradesSection.style.display = 'none';
-                    lockIcon.setAttribute('data-lucide', 'lock');
+                    if (lockIcon) {
+                        lockIcon.setAttribute('data-lucide', 'lock');
+                    }
                     console.log('🔒 Closed trades hidden');
                 }
                 
                 // Recreate icons to update the changed icon
-                if (window.lucide) {
+                if (window.lucide && lockIcon) {
                     lucide.createIcons();
                 }
             }
