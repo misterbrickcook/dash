@@ -3012,6 +3012,16 @@
                 </div>
                 
                 <div class="setting-group">
+                    <h3>Analytics</h3>
+                    <div class="setting-item">
+                        <label for="balance-tracking-time">SOL Balance Tracking Zeit:</label>
+                        <input type="time" id="balance-tracking-time" value="06:00">
+                        <span class="setting-description">Zeit, zu der täglich die SOL Balance für den Chart aufgezeichnet wird</span>
+                    </div>
+                    <button id="save-analytics-settings" class="btn">Speichern</button>
+                </div>
+                
+                <div class="setting-group">
                     <h3>Routines Reset</h3>
                     <div class="setting-item">
                         <label>Routine-Datenbank komplett zurücksetzen:</label>
@@ -9021,12 +9031,39 @@
             }
 
             async checkAndRecordDailyBalance() {
-                const today = new Date().toISOString().split('T')[0];
+                const now = new Date();
+                const today = now.toISOString().split('T')[0];
                 const lastRecorded = this.balanceHistory[this.balanceHistory.length - 1];
                 
-                // Only record once per day
-                if (!lastRecorded || lastRecorded.date !== today) {
+                // Get tracking time from settings (default 06:00)
+                const trackingTime = localStorage.getItem('balanceTrackingTime') || '06:00';
+                const [hours, minutes] = trackingTime.split(':').map(Number);
+                
+                // Create target time for today
+                const targetTime = new Date();
+                targetTime.setHours(hours, minutes, 0, 0);
+                
+                // Check if we haven't recorded today AND it's past the target time
+                const hasRecordedToday = lastRecorded && lastRecorded.date === today;
+                const isPastTargetTime = now >= targetTime;
+                
+                if (!hasRecordedToday && isPastTargetTime) {
                     await this.recordDailyBalance();
+                } else if (!hasRecordedToday) {
+                    // Schedule recording for target time
+                    this.scheduleNextRecording(targetTime);
+                }
+            }
+
+            scheduleNextRecording(targetTime) {
+                const now = new Date();
+                const msUntilTarget = targetTime.getTime() - now.getTime();
+                
+                if (msUntilTarget > 0) {
+                    console.log(`📊 Next SOL balance recording scheduled for ${targetTime.toLocaleTimeString('de-DE')}`);
+                    setTimeout(() => {
+                        this.recordDailyBalance();
+                    }, msUntilTarget);
                 }
             }
 
@@ -9214,6 +9251,25 @@
                             window.AnalyticsManager.init();
                         }
                     }, 100);
+                });
+            }
+            
+            // Load saved balance tracking time
+            const savedTime = localStorage.getItem('balanceTrackingTime');
+            if (savedTime) {
+                const timeInput = document.getElementById('balance-tracking-time');
+                if (timeInput) timeInput.value = savedTime;
+            }
+            
+            // Save analytics settings
+            const saveAnalyticsBtn = document.getElementById('save-analytics-settings');
+            if (saveAnalyticsBtn) {
+                saveAnalyticsBtn.addEventListener('click', () => {
+                    const timeInput = document.getElementById('balance-tracking-time');
+                    if (timeInput) {
+                        localStorage.setItem('balanceTrackingTime', timeInput.value);
+                        alert(`Analytics Einstellungen gespeichert! SOL Balance wird täglich um ${timeInput.value} Uhr aufgezeichnet.`);
+                    }
                 });
             }
         });
