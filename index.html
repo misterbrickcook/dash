@@ -2504,11 +2504,6 @@
                     <button id="refresh-prices-btn" class="btn secondary">🔄 Update Prices</button>
                 </div>
                 
-                <!-- TODO: FIX PARTIAL CLOSE LOGIC TOMORROW -->
-                <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px; font-size: 0.9rem; color: #856404;">
-                    <strong>⚠️ TODO:</strong> Partial close logic needs to be fixed tomorrow. 
-                    Current percentage calculations don't work correctly for position splits.
-                </div>
                 
                 <div class="trades-table" id="open-trades-list">
                     <div class="empty-trades">No open trades yet</div>
@@ -2564,10 +2559,11 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="close-take-profit">Take Profit</label>
+                            <label for="close-take-profit">SOL zu verkaufen</label>
                             <div class="sol-input-group">
                                 <input type="number" id="close-take-profit" placeholder="2.0" step="0.001" autocomplete="off">
                                 <div class="sol-sell-buttons">
+                                    <button type="button" class="sol-percent-btn" data-percent="initials">Initials</button>
                                     <button type="button" class="sol-percent-btn" data-percent="25">25%</button>
                                     <button type="button" class="sol-percent-btn" data-percent="50">50%</button>
                                     <button type="button" class="sol-percent-btn" data-percent="75">75%</button>
@@ -2577,7 +2573,7 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="close-keep-position">Keep Position</label>
+                            <label for="close-keep-position">SOL verbleibend</label>
                             <input type="number" id="close-keep-position" placeholder="2.0" step="0.001" autocomplete="off" readonly style="background: #f8f9fa;">
                         </div>
                     </div>
@@ -7795,6 +7791,7 @@
                     sol_amount: solAmount,
                     entry_mcap: entryMcap,
                     entry_price: this.solPrice * solAmount,
+                    cost_basis: solAmount, // Cost basis in SOL (what we invested)
                     entry_date: new Date().toISOString(),
                     status: 'open',
                     pnl: 0,
@@ -8049,11 +8046,26 @@
                 const exitMcapValue = parseFloat(document.getElementById('close-exit-mcap').value);
                 const activeMultiplier = document.querySelector('#close-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
                 
+                // Get original investment amounts
+                const originalSolAmount = this.currentTradeToClose.sol_amount;
+                const originalCostBasis = this.currentTradeToClose.cost_basis || originalSolAmount; // Fallback for older trades
+                
+                if (percent === 'initials') {
+                    // Initials button: Verkaufe genau die ursprüngliche Kostenbasis
+                    const solToSell = originalCostBasis;
+                    const solRemaining = Math.max(0, originalSolAmount - solToSell);
+                    
+                    document.getElementById('close-take-profit').value = solToSell.toFixed(3);
+                    document.getElementById('close-keep-position').value = solRemaining.toFixed(3);
+                    
+                    console.log(`INITIALS: Selling ${solToSell} SOL (cost basis), keeping ${solRemaining} SOL (free ride)`);
+                    return;
+                }
+
                 if (!exitMcapValue || isNaN(exitMcapValue)) {
                     // No exit mcap set yet, show percentage of current position
-                    const currentPosition = this.currentTradeToClose.sol_amount;
-                    const takeProfit = (currentPosition * percent / 100).toFixed(3);
-                    const keepPosition = (currentPosition * (100 - percent) / 100).toFixed(3);
+                    const takeProfit = (originalSolAmount * percent / 100).toFixed(3);
+                    const keepPosition = (originalSolAmount * (100 - percent) / 100).toFixed(3);
                     
                     document.getElementById('close-take-profit').value = takeProfit;
                     document.getElementById('close-keep-position').value = keepPosition;
@@ -8075,31 +8087,27 @@
                     const percentageChange = (exitActual - entryActual) / entryActual;
                     
                     // Calculate current total value in SOL
-                    const originalAmount = this.currentTradeToClose.sol_amount;
-                    const currentTotalValue = originalAmount * (1 + percentageChange);
+                    const currentTotalValue = originalSolAmount * (1 + percentageChange);
                     
-                    // Calculate take profit (percent of current value)
-                    const takeProfit = currentTotalValue * (percent / 100);
-                    
-                    // Keep position is simply the rest of current value
-                    const keepPosition = currentTotalValue - takeProfit;
+                    // Calculate SOL to sell (percent of current value)
+                    const solToSell = currentTotalValue * (percent / 100);
+                    const solRemaining = Math.max(0, currentTotalValue - solToSell);
                     
                     // Debug
-                    console.log(`DEBUG: Entry ${originalAmount} SOL, Exit change: ${(percentageChange*100).toFixed(1)}%`);
+                    console.log(`DEBUG: Entry ${originalSolAmount} SOL, Exit change: ${(percentageChange*100).toFixed(1)}%`);
                     console.log(`DEBUG: Current total value: ${currentTotalValue.toFixed(3)} SOL`);
-                    console.log(`DEBUG: ${percent}% take profit = ${takeProfit.toFixed(3)} SOL`);
-                    console.log(`DEBUG: Keep position: ${keepPosition.toFixed(3)} SOL`);
+                    console.log(`DEBUG: ${percent}% = ${solToSell.toFixed(3)} SOL to sell`);
+                    console.log(`DEBUG: Remaining: ${solRemaining.toFixed(3)} SOL`);
                     
                     // Update inputs
-                    document.getElementById('close-take-profit').value = takeProfit.toFixed(3);
-                    document.getElementById('close-keep-position').value = Math.max(0, keepPosition).toFixed(3);
+                    document.getElementById('close-take-profit').value = solToSell.toFixed(3);
+                    document.getElementById('close-keep-position').value = solRemaining.toFixed(3);
                     
                 } catch (error) {
                     console.error('Error calculating take profit from percent:', error);
                     // Fall back to simple percentage of entry amount
-                    const currentPosition = this.currentTradeToClose.sol_amount;
-                    const takeProfit = (currentPosition * percent / 100).toFixed(3);
-                    const keepPosition = (currentPosition * (100 - percent) / 100).toFixed(3);
+                    const takeProfit = (originalSolAmount * percent / 100).toFixed(3);
+                    const keepPosition = (originalSolAmount * (100 - percent) / 100).toFixed(3);
                     
                     document.getElementById('close-take-profit').value = takeProfit;
                     document.getElementById('close-keep-position').value = keepPosition;
@@ -8109,10 +8117,10 @@
             calculateKeepPosition() {
                 if (!this.currentTradeToClose) return;
 
-                const takeProfit = parseFloat(document.getElementById('close-take-profit').value);
+                const solToSell = parseFloat(document.getElementById('close-take-profit').value);
                 const originalAmount = this.currentTradeToClose.sol_amount;
                 
-                if (!takeProfit || isNaN(takeProfit)) {
+                if (!solToSell || isNaN(solToSell)) {
                     document.getElementById('close-keep-position').value = originalAmount.toFixed(3);
                     return;
                 }
@@ -8122,8 +8130,8 @@
                 
                 if (!exitMcapValue || isNaN(exitMcapValue)) {
                     // No exit mcap, simple calculation
-                    const keepPosition = Math.max(0, originalAmount - takeProfit);
-                    document.getElementById('close-keep-position').value = keepPosition.toFixed(3);
+                    const solRemaining = Math.max(0, originalAmount - solToSell);
+                    document.getElementById('close-keep-position').value = solRemaining.toFixed(3);
                     return;
                 }
 
@@ -8141,17 +8149,17 @@
                     // Calculate percentage change
                     const percentageChange = (exitActual - entryActual) / entryActual;
                     
-                    // Calculate current total value and keep position
+                    // Calculate current total value and remaining position
                     const currentTotalValue = originalAmount * (1 + percentageChange);
-                    const keepPosition = Math.max(0, currentTotalValue - takeProfit);
+                    const solRemaining = Math.max(0, currentTotalValue - solToSell);
                     
-                    // Update keep position
-                    document.getElementById('close-keep-position').value = keepPosition.toFixed(3);
+                    // Update remaining position
+                    document.getElementById('close-keep-position').value = solRemaining.toFixed(3);
                     
                 } catch (error) {
                     console.error('Error calculating keep position:', error);
-                    const keepPosition = Math.max(0, originalAmount - takeProfit);
-                    document.getElementById('close-keep-position').value = keepPosition.toFixed(3);
+                    const solRemaining = Math.max(0, originalAmount - solToSell);
+                    document.getElementById('close-keep-position').value = solRemaining.toFixed(3);
                 }
             }
 
@@ -8160,10 +8168,10 @@
 
                 const mcapValue = parseFloat(document.getElementById('close-exit-mcap').value);
                 const activeMultiplier = document.querySelector('#close-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
-                const takeProfit = parseFloat(document.getElementById('close-take-profit').value);
-                const keepPosition = parseFloat(document.getElementById('close-keep-position').value);
+                const solToSell = parseFloat(document.getElementById('close-take-profit').value);
+                const solRemaining = parseFloat(document.getElementById('close-keep-position').value);
 
-                if (!mcapValue || !takeProfit) {
+                if (!mcapValue || !solToSell) {
                     alert('Please fill in all fields');
                     return;
                 }
@@ -8171,59 +8179,71 @@
                 const exitMcap = `${mcapValue}${activeMultiplier}`;
                 const originalTrade = this.currentTradeToClose;
                 const originalAmount = originalTrade.sol_amount;
+                const originalCostBasis = originalTrade.cost_basis || originalAmount; // Fallback for older trades
                 
-                // Parse market caps for calculations
-                const entryMcap = originalTrade.entry_mcap;
-                const entryValue = parseFloat(entryMcap);
-                const entryUnit = entryMcap.slice(-1).toUpperCase();
-                const multipliers = { 'K': 1000, 'M': 1000000, 'B': 1000000000 };
-                const entryActual = entryValue * (multipliers[entryUnit] || 1000000000);
-                const exitActual = mcapValue * (multipliers[activeMultiplier] || 1000000000);
-                
-                // Calculate how much SOL to sell to get the take profit
-                const solToSell = originalAmount - keepPosition;
+                console.log(`CLOSE TRADE: Selling ${solToSell} SOL, keeping ${solRemaining} SOL`);
+                console.log(`ORIGINAL: ${originalAmount} SOL with cost basis ${originalCostBasis} SOL`);
 
                 try {
                     if (solToSell >= originalAmount) {
                         // Full close - close the entire trade
                         originalTrade.status = 'closed';
                         originalTrade.exit_mcap = exitMcap;
-                        originalTrade.exit_price = this.solPrice * takeProfit;
-                        originalTrade.received_sol = takeProfit;
-                        originalTrade.final_pnl = originalTrade.received_sol - originalTrade.sol_amount;
+                        originalTrade.exit_price = this.solPrice;
+                        originalTrade.received_sol = solToSell;
+                        originalTrade.final_pnl = solToSell - originalCostBasis;
                         originalTrade.exit_date = new Date().toISOString();
 
+                        console.log(`FULL CLOSE: PnL = ${originalTrade.final_pnl.toFixed(3)} SOL`);
                         await this.updateTradeInCloud(originalTrade);
                     } else {
-                        // Partial close - create new closed trade for sold portion and reduce original
+                        // Partial close - FREE RIDE LOGIC
+                        
+                        // Determine cost basis for sold portion
+                        let soldCostBasis, remainingCostBasis;
+                        
+                        if (solToSell <= originalCostBasis) {
+                            // Selling less than or equal to original cost basis
+                            soldCostBasis = solToSell;
+                            remainingCostBasis = originalCostBasis - solToSell;
+                        } else {
+                            // Selling more than original cost basis (taking profits)
+                            soldCostBasis = originalCostBasis;
+                            remainingCostBasis = 0; // FREE RIDE!
+                        }
+                        
+                        console.log(`PARTIAL CLOSE: Sold cost basis = ${soldCostBasis}, Remaining cost basis = ${remainingCostBasis}`);
                         
                         // Create closed trade for sold portion
                         const closedTrade = {
                             id: Date.now().toString(),
                             token: originalTrade.token,
                             sol_amount: solToSell,
+                            cost_basis: soldCostBasis,
                             entry_mcap: originalTrade.entry_mcap,
-                            entry_price: (originalTrade.entry_price / originalTrade.sol_amount) * solToSell, // Proportional entry price
+                            entry_price: this.solPrice,
                             entry_date: originalTrade.entry_date,
                             status: 'closed',
                             exit_mcap: exitMcap,
-                            exit_price: this.solPrice * takeProfit,
-                            received_sol: takeProfit,
-                            final_pnl: takeProfit - solToSell,
+                            exit_price: this.solPrice,
+                            received_sol: solToSell,
+                            final_pnl: solToSell - soldCostBasis,
                             exit_date: new Date().toISOString(),
                             user_id: originalTrade.user_id
                         };
 
-                        // Calculate actual tokens to keep (not value)
-                        const percentageChange = (exitActual - entryActual) / entryActual;
-                        const currentTotalValue = originalAmount * (1 + percentageChange);
-                        const keepPositionValue = currentTotalValue - takeProfit;
-                        const keepPositionTokens = keepPositionValue / (1 + percentageChange); // Convert value back to tokens
+                        console.log(`CLOSED TRADE: ${solToSell} SOL out, cost basis ${soldCostBasis} SOL, PnL = ${closedTrade.final_pnl.toFixed(3)} SOL`);
                         
-                        // Update original trade: reset entry to current level (break-even point)
-                        originalTrade.sol_amount = keepPositionTokens;
-                        originalTrade.entry_mcap = exitMcap; // New entry = current exit level
-                        originalTrade.entry_price = this.solPrice; // Current SOL price as new entry
+                        // Update original trade for remaining position
+                        originalTrade.sol_amount = solRemaining;
+                        originalTrade.cost_basis = remainingCostBasis;
+                        originalTrade.entry_mcap = exitMcap; // New entry = current level
+                        originalTrade.entry_price = this.solPrice;
+
+                        console.log(`REMAINING TRADE: ${solRemaining} SOL with cost basis ${remainingCostBasis} SOL`);
+                        if (remainingCostBasis === 0) {
+                            console.log(`🎉 FREE RIDE ACTIVATED!`);
+                        }
 
                         // Save both trades to cloud
                         await this.saveTradeToCloud(closedTrade);
