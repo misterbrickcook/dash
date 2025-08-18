@@ -1917,6 +1917,94 @@
             font-weight: 500;
         }
 
+        /* Heatmap Styles */
+        .heatmap-container {
+            padding: 1rem 0;
+        }
+
+        .heatmap-months {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding-left: 20px;
+            font-size: 0.75rem;
+            color: #666666;
+        }
+
+        .heatmap-month {
+            flex: 1;
+            text-align: left;
+            min-width: 0;
+        }
+
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(53, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+            gap: 2px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .heatmap-square {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .heatmap-square:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .heatmap-square.level-0 {
+            background-color: #ebedf0;
+        }
+
+        .heatmap-square.level-1 {
+            background-color: #9be9a8;
+        }
+
+        .heatmap-square.level-2 {
+            background-color: #40c463;
+        }
+
+        .heatmap-square.level-3 {
+            background-color: #30a14e;
+        }
+
+        .heatmap-square.level-4 {
+            background-color: #216e39;
+        }
+
+        .heatmap-legend {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #666666;
+            gap: 0.5rem;
+        }
+
+        .legend-colors {
+            display: flex;
+            gap: 2px;
+        }
+
+        .legend-square {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .heatmap-info {
+            font-size: 0.9rem;
+            color: #666666;
+            font-weight: 500;
+        }
+
         .performers-section {
             background: #ffffff;
             border: 1px solid #e0e0e0;
@@ -2949,6 +3037,31 @@
                     </div>
                     <div class="chart-container">
                         <canvas id="solBalanceChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Todo Heatmap -->
+                <div class="chart-section">
+                    <div class="chart-header">
+                        <h3>Todo Activity</h3>
+                        <div class="heatmap-info">
+                            <span id="heatmap-stats">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="heatmap-container">
+                        <div class="heatmap-months" id="heatmap-months"></div>
+                        <div class="heatmap-grid" id="heatmap-grid"></div>
+                        <div class="heatmap-legend">
+                            <span>Less</span>
+                            <div class="legend-colors">
+                                <div class="legend-square level-0"></div>
+                                <div class="legend-square level-1"></div>
+                                <div class="legend-square level-2"></div>
+                                <div class="legend-square level-3"></div>
+                                <div class="legend-square level-4"></div>
+                            </div>
+                            <span>More</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -9005,6 +9118,7 @@
                 this.setupPeriodButtons();
                 await this.setupChart();
                 await this.updateCurrentBalance();
+                this.setupHeatmap();
             }
 
             async checkAndRecordDailyBalance() {
@@ -9212,6 +9326,113 @@
                 this.chart.data.labels = labels;
                 this.chart.data.datasets[0].data = data;
                 this.chart.update();
+            }
+
+            setupHeatmap() {
+                this.generateHeatmapData();
+                this.renderHeatmap();
+                this.updateHeatmapStats();
+            }
+
+            generateHeatmapData() {
+                // Generate data for the last 365 days (like GitHub)
+                const today = new Date();
+                const startDate = new Date(today);
+                startDate.setDate(today.getDate() - 364); // 365 days including today
+                
+                // Start from Sunday of the week containing startDate
+                const startSunday = new Date(startDate);
+                startSunday.setDate(startDate.getDate() - startDate.getDay());
+                
+                this.heatmapData = [];
+                
+                for (let i = 0; i < 371; i++) { // 53 weeks * 7 days = 371
+                    const date = new Date(startSunday);
+                    date.setDate(startSunday.getDate() + i);
+                    
+                    // Generate random todo count for demo (replace with real data later)
+                    const todoCount = this.getTodoCountForDate(date);
+                    
+                    this.heatmapData.push({
+                        date: date.toISOString().split('T')[0],
+                        count: todoCount,
+                        level: this.getIntensityLevel(todoCount)
+                    });
+                }
+            }
+
+            getTodoCountForDate(date) {
+                // Demo data - replace with actual todo tracking later
+                const random = Math.random();
+                if (random < 0.3) return 0; // 30% no todos
+                if (random < 0.6) return Math.floor(Math.random() * 3) + 1; // 1-3 todos
+                if (random < 0.85) return Math.floor(Math.random() * 7) + 4; // 4-10 todos
+                return Math.floor(Math.random() * 10) + 11; // 11-20 todos
+            }
+
+            getIntensityLevel(count) {
+                if (count === 0) return 0;
+                if (count <= 2) return 1;
+                if (count <= 5) return 2;
+                if (count <= 10) return 3;
+                return 4;
+            }
+
+            renderHeatmap() {
+                const gridContainer = document.getElementById('heatmap-grid');
+                const monthsContainer = document.getElementById('heatmap-months');
+                
+                if (!gridContainer || !monthsContainer) return;
+                
+                // Clear existing content
+                gridContainer.innerHTML = '';
+                monthsContainer.innerHTML = '';
+                
+                // Render month labels
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                let currentMonth = -1;
+                
+                for (let week = 0; week < 53; week++) {
+                    const weekStart = week * 7;
+                    if (weekStart < this.heatmapData.length) {
+                        const date = new Date(this.heatmapData[weekStart].date);
+                        const month = date.getMonth();
+                        
+                        if (month !== currentMonth && week % 4 === 0) {
+                            const monthDiv = document.createElement('div');
+                            monthDiv.className = 'heatmap-month';
+                            monthDiv.textContent = months[month];
+                            monthDiv.style.gridColumn = `${week + 1} / span 4`;
+                            monthsContainer.appendChild(monthDiv);
+                            currentMonth = month;
+                        }
+                    }
+                }
+                
+                // Render squares
+                this.heatmapData.forEach((day, index) => {
+                    const square = document.createElement('div');
+                    square.className = `heatmap-square level-${day.level}`;
+                    square.title = `${day.date}: ${day.count} todos completed`;
+                    
+                    square.addEventListener('click', () => {
+                        alert(`${day.date}: ${day.count} todos completed`);
+                    });
+                    
+                    gridContainer.appendChild(square);
+                });
+            }
+
+            updateHeatmapStats() {
+                const statsElement = document.getElementById('heatmap-stats');
+                if (!statsElement) return;
+                
+                const totalTodos = this.heatmapData.reduce((sum, day) => sum + day.count, 0);
+                const activeDays = this.heatmapData.filter(day => day.count > 0).length;
+                const avgPerDay = totalTodos / this.heatmapData.length;
+                
+                statsElement.textContent = `${totalTodos} todos in ${activeDays} active days (avg ${avgPerDay.toFixed(1)}/day)`;
             }
         }
 
