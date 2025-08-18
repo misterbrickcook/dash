@@ -8810,7 +8810,11 @@
                             received_sol: solToSell,
                             final_pnl: solToSell - soldCostBasis,
                             exit_date: new Date().toISOString(),
-                            user_id: originalTrade.user_id
+                            user_id: originalTrade.user_id,
+                            // Copy optional fields from original trade
+                            notes: originalTrade.notes,
+                            stop_loss: originalTrade.stop_loss,
+                            take_profit: originalTrade.take_profit
                         };
                         
                         // Store cost_basis locally
