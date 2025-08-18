@@ -8282,6 +8282,7 @@
                         }
                         
                         console.log(`PARTIAL CLOSE: Sold cost basis = ${soldCostBasis}, Remaining cost basis = ${remainingCostBasis}`);
+                        console.log(`PNL CALCULATION: ${solToSell} SOL sold - ${soldCostBasis} SOL cost = ${(solToSell - soldCostBasis).toFixed(3)} SOL PnL`);
                         
                         // Create closed trade for sold portion
                         const closedTrade = {
