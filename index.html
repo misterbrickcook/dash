@@ -8450,11 +8450,26 @@
             }
 
             getBadgeForClosedTrade(trade) {
-                if (trade._is_free_ride_trade === true && (trade.final_pnl || 0) >= 0) {
+                // Check if this trade has positive P&L first
+                if ((trade.final_pnl || 0) < 0) {
+                    return '';
+                }
+                
+                // If cost basis is 0, it's definitely a free ride
+                if (trade._cost_basis === 0) {
                     return '<span class="free-ride-badge">Free Ride</span>';
-                } else if (trade._initials_recovered === true && (trade.final_pnl || 0) >= 0) {
+                }
+                
+                // If this trade recovered initials (sold amount >= cost basis) AND it's the first recovery
+                if (trade._initials_recovered === true) {
                     return '<span class="initials-badge">Initials Raus</span>';
                 }
+                
+                // If marked as free ride trade
+                if (trade._is_free_ride_trade === true) {
+                    return '<span class="free-ride-badge">Free Ride</span>';
+                }
+                
                 return '';
             }
 
@@ -8861,13 +8876,17 @@
                         // Store cost_basis locally
                         closedTrade._cost_basis = soldCostBasis;
                         
-                        // Mark trade type based on original position
+                        // Mark trade type based on original position and what happens
                         if (originalTrade._is_free_ride === true) {
                             // This trade is from a free ride position
                             closedTrade._is_free_ride_trade = true;
-                        } else if (soldCostBasis > 0 && solToSell >= soldCostBasis) {
-                            // This is an "initials raus" trade (cost basis recovered or more)
+                        } else if (soldCostBasis > 0 && solToSell >= soldCostBasis && !originalTrade._initials_taken) {
+                            // This is the FIRST "initials raus" trade (cost basis recovered or more)
                             closedTrade._initials_recovered = true;
+                            originalTrade._initials_taken = true; // Mark that initials have been taken from this position
+                        } else if (originalTrade._initials_taken === true) {
+                            // Any subsequent trade after initials have been taken is a free ride
+                            closedTrade._is_free_ride_trade = true;
                         }
                         
                         // Mark if remaining position becomes free ride
