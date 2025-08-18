@@ -9528,9 +9528,9 @@
                     const dateStart = date.toISOString().split('T')[0];
                     const dateEnd = nextDay.toISOString().split('T')[0];
                     
-                    // Query completed todos for this specific date
+                    // Query completed todos for this specific date using updated_at (when they were completed)
                     const completedTodos = await window.supabase.query(
-                        `todos?user_id=eq.${user.id}&completed=eq.true&created_at=gte.${dateStart}&created_at=lt.${dateEnd}&select=id`
+                        `todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${dateStart}&updated_at=lt.${dateEnd}&select=id`
                     );
                     
                     return completedTodos ? completedTodos.length : 0;
