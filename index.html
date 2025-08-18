@@ -8894,6 +8894,12 @@
                             // Any subsequent trade after initials have been taken is a free ride
                             closedTrade._is_free_ride_trade = true;
                             console.log(`Setting _is_free_ride_trade = true (subsequent after initials)`);
+                        } else {
+                            // Fallback: if cost basis is 0, it's definitely a free ride trade
+                            if (soldCostBasis === 0) {
+                                closedTrade._is_free_ride_trade = true;
+                                console.log(`Setting _is_free_ride_trade = true (cost basis is 0)`);
+                            }
                         }
                         
                         // Mark if remaining position becomes free ride
