@@ -9130,15 +9130,62 @@
             constructor() {
                 this.chart = null;
                 this.currentPeriod = 'week';
-                this.balanceHistory = JSON.parse(localStorage.getItem('solBalanceHistory') || '[]');
-                this.checkAndRecordDailyBalance();
+                this.balanceHistory = [];
+                this.init();
             }
 
             async init() {
+                await this.loadBalanceHistory();
+                await this.checkAndRecordDailyBalance();
                 this.setupPeriodButtons();
                 await this.setupChart();
                 await this.updateCurrentBalance();
                 await this.setupHeatmap();
+            }
+
+            async loadBalanceHistory() {
+                try {
+                    if (!window.supabase?.isAuthenticated()) {
+                        this.balanceHistory = [];
+                        return;
+                    }
+
+                    const user = window.supabase.getCurrentUser();
+                    if (!user) {
+                        this.balanceHistory = [];
+                        return;
+                    }
+
+                    // Query balance history from cloud
+                    const data = await window.supabase.query(
+                        `analytics_balance_history?user_id=eq.${user.id}&select=*&order=date.asc`
+                    );
+
+                    this.balanceHistory = data || [];
+                    console.log(`📊 Loaded ${this.balanceHistory.length} balance history records from cloud`);
+                } catch (error) {
+                    console.error('Error loading balance history:', error);
+                    this.balanceHistory = [];
+                }
+            }
+
+            async getTrackingTime() {
+                try {
+                    if (!window.supabase?.isAuthenticated()) return '06:00';
+                    
+                    const user = window.supabase.getCurrentUser();
+                    if (!user) return '06:00';
+
+                    // Query user settings from cloud
+                    const settings = await window.supabase.query(
+                        `user_settings?user_id=eq.${user.id}&setting_key=eq.balanceTrackingTime&select=setting_value`
+                    );
+
+                    return settings && settings.length > 0 ? settings[0].setting_value : '06:00';
+                } catch (error) {
+                    console.error('Error getting tracking time:', error);
+                    return '06:00';
+                }
             }
 
             async checkAndRecordDailyBalance() {
@@ -9147,7 +9194,7 @@
                 const lastRecorded = this.balanceHistory[this.balanceHistory.length - 1];
                 
                 // Get tracking time from settings (default 06:00)
-                const trackingTime = localStorage.getItem('balanceTrackingTime') || '06:00';
+                const trackingTime = await this.getTrackingTime();
                 const [hours, minutes] = trackingTime.split(':').map(Number);
                 
                 // Create target time for today
@@ -9180,6 +9227,14 @@
 
             async recordDailyBalance() {
                 try {
+                    if (!window.supabase?.isAuthenticated()) {
+                        console.log('📊 Not authenticated, skipping balance recording');
+                        return;
+                    }
+
+                    const user = window.supabase.getCurrentUser();
+                    if (!user) return;
+
                     let balance = 0;
                     
                     // Get SOL balance from SimpleCounters
@@ -9189,19 +9244,26 @@
                     
                     const today = new Date().toISOString().split('T')[0];
                     
-                    // Add new balance record
+                    // Save to cloud database
+                    const balanceRecord = {
+                        user_id: user.id,
+                        date: today,
+                        balance: balance,
+                        created_at: new Date().toISOString()
+                    };
+
+                    await window.supabase.create('analytics_balance_history', balanceRecord);
+                    
+                    // Add to local array
                     this.balanceHistory.push({
                         date: today,
                         balance: balance
                     });
                     
-                    // Keep only last 365 days (1 year)
+                    // Keep only last 365 days in memory
                     if (this.balanceHistory.length > 365) {
                         this.balanceHistory = this.balanceHistory.slice(-365);
                     }
-                    
-                    // Save to localStorage
-                    localStorage.setItem('solBalanceHistory', JSON.stringify(this.balanceHistory));
                     
                     console.log(`📊 Recorded daily SOL balance: ${balance} SOL for ${today}`);
                     
@@ -9492,21 +9554,38 @@
                 });
             }
             
-            // Load saved balance tracking time
-            const savedTime = localStorage.getItem('balanceTrackingTime');
-            if (savedTime) {
-                const timeInput = document.getElementById('balance-tracking-time');
-                if (timeInput) timeInput.value = savedTime;
+            // Load saved balance tracking time from cloud
+            if (window.AnalyticsManager) {
+                window.AnalyticsManager.getTrackingTime().then(savedTime => {
+                    const timeInput = document.getElementById('balance-tracking-time');
+                    if (timeInput) timeInput.value = savedTime;
+                });
             }
             
             // Save analytics settings
             const saveAnalyticsBtn = document.getElementById('save-analytics-settings');
             if (saveAnalyticsBtn) {
-                saveAnalyticsBtn.addEventListener('click', () => {
+                saveAnalyticsBtn.addEventListener('click', async () => {
                     const timeInput = document.getElementById('balance-tracking-time');
-                    if (timeInput) {
-                        localStorage.setItem('balanceTrackingTime', timeInput.value);
-                        alert(`Analytics Einstellungen gespeichert! SOL Balance wird täglich um ${timeInput.value} Uhr aufgezeichnet.`);
+                    if (timeInput && window.supabase?.isAuthenticated()) {
+                        const user = window.supabase.getCurrentUser();
+                        if (user) {
+                            try {
+                                // Save to cloud
+                                const setting = {
+                                    user_id: user.id,
+                                    setting_key: 'balanceTrackingTime',
+                                    setting_value: timeInput.value,
+                                    updated_at: new Date().toISOString()
+                                };
+                                
+                                await window.supabase.upsert('user_settings', setting, ['user_id', 'setting_key']);
+                                alert(`Analytics Einstellungen gespeichert! SOL Balance wird täglich um ${timeInput.value} Uhr aufgezeichnet.`);
+                            } catch (error) {
+                                console.error('Error saving analytics settings:', error);
+                                alert('Fehler beim Speichern der Einstellungen.');
+                            }
+                        }
                     }
                 });
             }
