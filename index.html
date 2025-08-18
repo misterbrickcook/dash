@@ -1727,6 +1727,19 @@
             font-weight: 600;
         }
 
+        .section-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .section-actions .btn {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
         .trades-table {
             overflow-x: auto;
         }
@@ -2425,47 +2438,6 @@
         <!-- === TRADING TAB === -->
         <section id="tab-trading" class="tab-section">
             
-            <!-- Add New Trade -->
-            <div class="add-trade-section">
-                <h3>Add New Trade</h3>
-                <div class="trade-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="trade-token">Token</label>
-                            <input type="text" id="trade-token" placeholder="BONK" autocomplete="off">
-                        </div>
-                        <div class="form-group">
-                            <label for="trade-sol-amount">SOL Amount</label>
-                            <div class="sol-input-group">
-                                <input type="number" id="trade-sol-amount" placeholder="0.5" step="0.001" autocomplete="off">
-                                <div class="sol-buttons">
-                                    <button type="button" class="sol-btn" data-amount="0.1">0.1</button>
-                                    <button type="button" class="sol-btn" data-amount="0.25">0.25</button>
-                                    <button type="button" class="sol-btn" data-amount="0.5">0.5</button>
-                                    <button type="button" class="sol-btn" data-amount="1">1</button>
-                                    <button type="button" class="sol-btn" data-amount="2">2</button>
-                                    <button type="button" class="sol-btn" data-amount="2.5">2.5</button>
-                                    <button type="button" class="sol-btn" data-amount="5">5</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="trade-mcap">Market Cap</label>
-                            <div class="mcap-input-group">
-                                <input type="number" id="trade-mcap" placeholder="2.1" autocomplete="off" step="0.1">
-                                <div class="mcap-buttons">
-                                    <button type="button" class="mcap-btn" data-multiplier="K">K</button>
-                                    <button type="button" class="mcap-btn" data-multiplier="M">M</button>
-                                    <button type="button" class="mcap-btn active" data-multiplier="B">B</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button id="add-trade-btn" class="btn">Add Trade</button>
-                    </div>
-                </div>
-            </div>
 
             <!-- Portfolio Overview -->
             <div class="portfolio-overview">
@@ -2501,7 +2473,10 @@
             <div class="open-trades">
                 <div class="section-header">
                     <h3>Open Positions</h3>
-                    <button id="refresh-prices-btn" class="btn secondary">🔄 Update Prices</button>
+                    <div class="section-actions">
+                        <button id="add-trade-btn" class="btn">+ Add Trade</button>
+                        <button id="refresh-prices-btn" class="btn secondary">🔄 Update Prices</button>
+                    </div>
                 </div>
                 
                 
@@ -2581,6 +2556,56 @@
                 <div class="modal-footer">
                     <button class="btn secondary" id="close-trade-cancel">Cancel</button>
                     <button class="btn" id="close-trade-confirm">Close Trade</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- === ADD TRADE MODAL === -->
+        <div id="add-trade-modal" class="modal-overlay" style="display: none;">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Add New Trade</h2>
+                    <button class="modal-close" id="add-trade-modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="trade-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="modal-trade-token">Token</label>
+                                <input type="text" id="modal-trade-token" placeholder="BONK" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal-trade-sol-amount">SOL Amount</label>
+                                <div class="sol-input-group">
+                                    <input type="number" id="modal-trade-sol-amount" placeholder="0.5" step="0.001" autocomplete="off">
+                                    <div class="sol-buttons">
+                                        <button type="button" class="sol-btn" data-amount="0.1">0.1</button>
+                                        <button type="button" class="sol-btn" data-amount="0.25">0.25</button>
+                                        <button type="button" class="sol-btn" data-amount="0.5">0.5</button>
+                                        <button type="button" class="sol-btn" data-amount="1">1</button>
+                                        <button type="button" class="sol-btn" data-amount="2">2</button>
+                                        <button type="button" class="sol-btn" data-amount="2.5">2.5</button>
+                                        <button type="button" class="sol-btn" data-amount="5">5</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="modal-trade-mcap">Market Cap</label>
+                                <div class="mcap-input-group">
+                                    <input type="number" id="modal-trade-mcap" placeholder="2.1" autocomplete="off" step="0.1">
+                                    <div class="mcap-buttons">
+                                        <button type="button" class="mcap-btn" data-multiplier="K">K</button>
+                                        <button type="button" class="mcap-btn" data-multiplier="M">M</button>
+                                        <button type="button" class="mcap-btn active" data-multiplier="B">B</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn secondary" id="add-trade-cancel">Cancel</button>
+                    <button class="btn" id="add-trade-confirm">Add Trade</button>
                 </div>
             </div>
         </div>
@@ -7641,10 +7666,26 @@
             }
 
             setupEventListeners() {
-                // Add trade button
+                // Add trade button - show modal
                 const addTradeBtn = document.getElementById('add-trade-btn');
                 if (addTradeBtn) {
-                    addTradeBtn.addEventListener('click', () => this.addTrade());
+                    addTradeBtn.addEventListener('click', () => this.showAddTradeModal());
+                }
+
+                // Add trade modal buttons
+                const addTradeConfirm = document.getElementById('add-trade-confirm');
+                if (addTradeConfirm) {
+                    addTradeConfirm.addEventListener('click', () => this.addTrade());
+                }
+
+                const addTradeCancel = document.getElementById('add-trade-cancel');
+                if (addTradeCancel) {
+                    addTradeCancel.addEventListener('click', () => this.hideAddTradeModal());
+                }
+
+                const addTradeModalClose = document.getElementById('add-trade-modal-close');
+                if (addTradeModalClose) {
+                    addTradeModalClose.addEventListener('click', () => this.hideAddTradeModal());
                 }
 
                 // Refresh prices button
@@ -7653,20 +7694,20 @@
                     refreshPricesBtn.addEventListener('click', () => this.refreshPrices());
                 }
 
-                // SOL amount buttons
-                const solButtons = document.querySelectorAll('.sol-btn');
+                // SOL amount buttons (for modal)
+                const solButtons = document.querySelectorAll('#add-trade-modal .sol-btn');
                 solButtons.forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const amount = e.target.getAttribute('data-amount');
-                        document.getElementById('trade-sol-amount').value = amount;
+                        document.getElementById('modal-trade-sol-amount').value = amount;
                     });
                 });
 
-                // Market cap buttons
-                const mcapButtons = document.querySelectorAll('.mcap-btn');
+                // Market cap buttons (for modal)
+                const mcapButtons = document.querySelectorAll('#add-trade-modal .mcap-btn');
                 mcapButtons.forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        // Remove active from all buttons
+                        // Remove active from all modal buttons
                         mcapButtons.forEach(b => b.classList.remove('active'));
                         // Add active to clicked button
                         e.target.classList.add('active');
@@ -7773,10 +7814,10 @@
 
 
             async addTrade() {
-                const token = document.getElementById('trade-token').value.trim().toUpperCase();
-                const solAmount = parseFloat(document.getElementById('trade-sol-amount').value);
-                const mcapValue = parseFloat(document.getElementById('trade-mcap').value);
-                const activeMultiplier = document.querySelector('.mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
+                const token = document.getElementById('modal-trade-token').value.trim().toUpperCase();
+                const solAmount = parseFloat(document.getElementById('modal-trade-sol-amount').value);
+                const mcapValue = parseFloat(document.getElementById('modal-trade-mcap').value);
+                const activeMultiplier = document.querySelector('#add-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
 
                 if (!token || !solAmount || !mcapValue) {
                     alert('Please fill in all fields');
@@ -7808,14 +7849,9 @@
                     // Add to local array
                     this.trades.push(trade);
                     
-                    // Clear form
-                    document.getElementById('trade-token').value = '';
-                    document.getElementById('trade-sol-amount').value = '';
-                    document.getElementById('trade-mcap').value = '';
-                    
-                    // Reset market cap buttons to default (B)
-                    document.querySelectorAll('.mcap-btn').forEach(btn => btn.classList.remove('active'));
-                    document.querySelector('.mcap-btn[data-multiplier="B"]').classList.add('active');
+                    // Clear form and close modal
+                    this.clearAddTradeForm();
+                    this.hideAddTradeModal();
                     
                     // Refresh display
                     this.renderTrades();
@@ -7825,6 +7861,24 @@
                     console.error('Error adding trade:', error);
                     alert('Failed to save trade');
                 }
+            }
+
+            showAddTradeModal() {
+                document.getElementById('add-trade-modal').style.display = 'flex';
+            }
+
+            hideAddTradeModal() {
+                document.getElementById('add-trade-modal').style.display = 'none';
+            }
+
+            clearAddTradeForm() {
+                document.getElementById('modal-trade-token').value = '';
+                document.getElementById('modal-trade-sol-amount').value = '';
+                document.getElementById('modal-trade-mcap').value = '';
+                
+                // Reset market cap buttons to default (B)
+                document.querySelectorAll('#add-trade-modal .mcap-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('#add-trade-modal .mcap-btn[data-multiplier="B"]').classList.add('active');
             }
 
             async saveTradeToCloud(trade) {
