@@ -8446,7 +8446,9 @@
                 // Calculate existing stats
                 const totalPnl = closedTrades.reduce((sum, t) => sum + (t.final_pnl || 0), 0);
                 const winningTrades = closedTrades.filter(t => (t.final_pnl || 0) > 0).length;
-                const winRate = closedTrades.length > 0 ? (winningTrades / closedTrades.length * 100) : 0;
+                const losingTrades = closedTrades.filter(t => (t.final_pnl || 0) < 0).length;
+                const nonBreakevenTrades = winningTrades + losingTrades;
+                const winRate = nonBreakevenTrades > 0 ? (winningTrades / nonBreakevenTrades * 100) : 0;
                 
                 // Calculate SOL in open trades
                 const solInTrades = openTrades.reduce((sum, t) => sum + (t.sol_amount || 0), 0);
