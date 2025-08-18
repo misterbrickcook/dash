@@ -2704,7 +2704,7 @@
             </div>
 
             <!-- Closed Trades -->
-            <div class="closed-trades">
+            <div id="closed-trades-section" class="closed-trades" style="display: none;">
                 <div class="section-header">
                     <h3>Closed Trades</h3>
                 </div>
@@ -8257,9 +8257,26 @@
             }
 
             handleLockButton() {
-                // Placeholder for lock functionality
-                alert('Lock button clicked! Functionality will be implemented later.');
-                console.log('🔒 Lock button activated');
+                const closedTradesSection = document.getElementById('closed-trades-section');
+                const lockBtn = document.getElementById('lock-btn');
+                const lockIcon = lockBtn.querySelector('i');
+                
+                if (closedTradesSection.style.display === 'none') {
+                    // Show closed trades
+                    closedTradesSection.style.display = 'block';
+                    lockIcon.setAttribute('data-lucide', 'unlock');
+                    console.log('🔓 Closed trades shown');
+                } else {
+                    // Hide closed trades
+                    closedTradesSection.style.display = 'none';
+                    lockIcon.setAttribute('data-lucide', 'lock');
+                    console.log('🔒 Closed trades hidden');
+                }
+                
+                // Recreate icons to update the changed icon
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
             }
 
             async loadTrades() {
