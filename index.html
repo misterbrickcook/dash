@@ -2662,8 +2662,9 @@
                 <div class="section-header">
                     <h3>Open Positions</h3>
                     <div class="section-actions">
-                        <button id="add-trade-btn" class="btn">+ Add Trade</button>
-                        <button id="refresh-prices-btn" class="btn secondary">🔄 Update Prices</button>
+                        <button id="add-trade-btn" class="btn">+</button>
+                        <button id="refresh-prices-btn" class="btn secondary">🔄</button>
+                        <button id="lock-btn" class="btn secondary">🔒</button>
                     </div>
                 </div>
                 
@@ -7977,6 +7978,12 @@
                     refreshPricesBtn.addEventListener('click', () => this.refreshPrices());
                 }
 
+                // Lock button (placeholder for future functionality)
+                const lockBtn = document.getElementById('lock-btn');
+                if (lockBtn) {
+                    lockBtn.addEventListener('click', () => this.handleLockButton());
+                }
+
                 // SOL amount buttons (for modal)
                 const solButtons = document.querySelectorAll('#add-trade-modal .sol-btn');
                 solButtons.forEach(btn => {
@@ -8218,6 +8225,12 @@
                 delete dbTrade._cost_basis; // Remove local field before saving
                 
                 await window.supabase.insert('trades', [dbTrade]);
+            }
+
+            handleLockButton() {
+                // Placeholder for lock functionality
+                alert('Lock button clicked! Functionality will be implemented later.');
+                console.log('🔒 Lock button activated');
             }
 
             async loadTrades() {
