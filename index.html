@@ -8455,28 +8455,27 @@
                     return '';
                 }
                 
-                // Debug logging
-                console.log(`Badge check for trade:`, {
-                    token: trade.token,
-                    cost_basis: trade._cost_basis,
-                    initials_recovered: trade._initials_recovered,
-                    is_free_ride_trade: trade._is_free_ride_trade,
-                    final_pnl: trade.final_pnl
-                });
+                // Simple logic based on available data:
+                // If cost basis is 0 → Free Ride
+                // If cost basis > 0 AND final_pnl >= cost_basis → Initials Raus
                 
-                // Priority 1: If this trade specifically recovered initials
-                if (trade._initials_recovered === true) {
-                    return '<span class="initials-badge">Initials Raus</span>';
-                }
-                
-                // Priority 2: If cost basis is 0, it's definitely a free ride  
                 if (trade._cost_basis === 0) {
                     return '<span class="free-ride-badge">Free Ride</span>';
-                }
-                
-                // Priority 3: If marked as free ride trade
-                if (trade._is_free_ride_trade === true) {
-                    return '<span class="free-ride-badge">Free Ride</span>';
+                } else if (trade._cost_basis > 0 && trade.final_pnl >= trade._cost_basis) {
+                    // Check if this is likely the first initials recovery by looking at other trades
+                    const allClosedTrades = this.trades.filter(t => t.status === 'closed' && t.token === trade.token);
+                    const earlierInitialsRecovery = allClosedTrades.some(t => 
+                        t.id !== trade.id && 
+                        t._cost_basis > 0 && 
+                        t.final_pnl >= t._cost_basis &&
+                        new Date(t.exit_date) < new Date(trade.exit_date)
+                    );
+                    
+                    if (!earlierInitialsRecovery) {
+                        return '<span class="initials-badge">Initials Raus</span>';
+                    } else {
+                        return '<span class="free-ride-badge">Free Ride</span>';
+                    }
                 }
                 
                 return '';
