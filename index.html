@@ -8073,7 +8073,7 @@
                 
                 // Get original investment amounts
                 const originalSolAmount = this.currentTradeToClose.sol_amount;
-                const originalCostBasis = this.currentTradeToClose._cost_basis || originalSolAmount; // Fallback for older trades
+                const originalCostBasis = this.currentTradeToClose._cost_basis !== undefined ? this.currentTradeToClose._cost_basis : originalSolAmount; // Fallback for older trades
                 
                 if (percent === 'initials') {
                     // Initials button: Verkaufe originalCostBasis SOL aus der aktuellen Position
@@ -8237,7 +8237,7 @@
                 const exitMcap = `${mcapValue}${activeMultiplier}`;
                 const originalTrade = this.currentTradeToClose;
                 const originalAmount = originalTrade.sol_amount;
-                const originalCostBasis = originalTrade._cost_basis || originalAmount; // Fallback for older trades
+                const originalCostBasis = originalTrade._cost_basis !== undefined ? originalTrade._cost_basis : originalAmount; // Fallback for older trades
                 
                 // Calculate current position value based on mcap change
                 const entryMcap = originalTrade.entry_mcap;
