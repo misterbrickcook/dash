@@ -3291,7 +3291,6 @@
     <script src="cloud-storage.js"></script>
     <script src="simple-counters.js"></script>
     <script src="simple-routine-system.js"></script>
-    <script src="debug-routine-data.js"></script>
     <script>
         // Debug: Check if basic JavaScript works
         console.log('🔧 JavaScript loading started...');
@@ -9135,84 +9134,12 @@
             }
 
             async init() {
-                await this.ensureTablesExist();
                 await this.loadBalanceHistory();
                 await this.checkAndRecordDailyBalance();
                 this.setupPeriodButtons();
                 await this.setupChart();
                 await this.updateCurrentBalance();
                 await this.setupHeatmap();
-            }
-
-            async ensureTablesExist() {
-                if (!window.supabase?.isAuthenticated()) return;
-                
-                try {
-                    // Check if analytics_balance_history table exists
-                    await this.ensureBalanceHistoryTable();
-                    
-                    // Check if user_settings table exists  
-                    await this.ensureUserSettingsTable();
-                } catch (error) {
-                    console.error('Error ensuring tables exist:', error);
-                }
-            }
-
-            async ensureBalanceHistoryTable() {
-                try {
-                    // Try a simple query to test if table exists
-                    await window.supabase.query('analytics_balance_history?limit=1');
-                    console.log('📊 analytics_balance_history table exists');
-                } catch (error) {
-                    if (error.message.includes('Could not find the table')) {
-                        console.log('📊 analytics_balance_history table missing');
-                        console.log('🔧 Please create table manually in Supabase SQL Editor:');
-                        console.log(`
-CREATE TABLE public.analytics_balance_history (
-    id BIGSERIAL PRIMARY KEY,
-    user_id UUID NOT NULL,
-    date DATE NOT NULL,
-    balance DECIMAL(20, 9) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(user_id, date)
-);
-
-ALTER TABLE public.analytics_balance_history ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can manage their own balance history" ON public.analytics_balance_history
-    FOR ALL USING (auth.uid() = user_id);
-                        `);
-                    }
-                }
-            }
-
-            async ensureUserSettingsTable() {
-                try {
-                    // Try a simple query to test if table exists
-                    await window.supabase.query('user_settings?limit=1');
-                    console.log('📊 user_settings table exists');
-                } catch (error) {
-                    if (error.message.includes('Could not find the table')) {
-                        console.log('📊 user_settings table missing');
-                        console.log('🔧 Please create table manually in Supabase SQL Editor:');
-                        console.log(`
-CREATE TABLE public.user_settings (
-    id BIGSERIAL PRIMARY KEY,
-    user_id UUID NOT NULL,
-    setting_key VARCHAR(255) NOT NULL,
-    setting_value TEXT NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(user_id, setting_key)
-);
-
-ALTER TABLE public.user_settings ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can manage their own settings" ON public.user_settings
-    FOR ALL USING (auth.uid() = user_id);
-                        `);
-                    }
-                }
             }
 
             async loadBalanceHistory() {
@@ -9228,18 +9155,13 @@ CREATE POLICY "Users can manage their own settings" ON public.user_settings
                         return;
                     }
 
-                    // Try to query balance history from cloud
-                    try {
-                        const data = await window.supabase.query(
-                            `analytics_balance_history?user_id=eq.${user.id}&select=*&order=date.asc`
-                        );
+                    // Query balance history from cloud
+                    const data = await window.supabase.query(
+                        `analytics_balance_history?user_id=eq.${user.id}&select=*&order=date.asc`
+                    );
 
-                        this.balanceHistory = data || [];
-                        console.log(`📊 Loaded ${this.balanceHistory.length} balance history records from cloud`);
-                    } catch (tableError) {
-                        console.log('📊 analytics_balance_history table not found, starting fresh');
-                        this.balanceHistory = [];
-                    }
+                    this.balanceHistory = data || [];
+                    console.log(`📊 Loaded ${this.balanceHistory.length} balance history records from cloud`);
                 } catch (error) {
                     console.error('Error loading balance history:', error);
                     this.balanceHistory = [];
@@ -9253,17 +9175,12 @@ CREATE POLICY "Users can manage their own settings" ON public.user_settings
                     const user = window.supabase.getCurrentUser();
                     if (!user) return '06:00';
 
-                    // Try to query user settings from cloud
-                    try {
-                        const settings = await window.supabase.query(
-                            `user_settings?user_id=eq.${user.id}&setting_key=eq.balanceTrackingTime&select=setting_value`
-                        );
+                    // Query user settings from cloud
+                    const settings = await window.supabase.query(
+                        `user_settings?user_id=eq.${user.id}&setting_key=eq.balanceTrackingTime&select=setting_value`
+                    );
 
-                        return settings && settings.length > 0 ? settings[0].setting_value : '06:00';
-                    } catch (tableError) {
-                        console.log('📊 user_settings table not found, using default time 06:00');
-                        return '06:00';
-                    }
+                    return settings && settings.length > 0 ? settings[0].setting_value : '06:00';
                 } catch (error) {
                     console.error('Error getting tracking time:', error);
                     return '06:00';
@@ -9326,20 +9243,16 @@ CREATE POLICY "Users can manage their own settings" ON public.user_settings
                     
                     const today = new Date().toISOString().split('T')[0];
                     
-                    // Try to save to cloud database
-                    try {
-                        const balanceRecord = {
-                            user_id: user.id,
-                            date: today,
-                            balance: balance,
-                            created_at: new Date().toISOString()
-                        };
+                    // Save to cloud database
+                    const balanceRecord = {
+                        user_id: user.id,
+                        date: today,
+                        balance: balance,
+                        created_at: new Date().toISOString()
+                    };
 
-                        await window.supabase.create('analytics_balance_history', balanceRecord);
-                        console.log(`📊 Saved balance record to cloud: ${balance} SOL for ${today}`);
-                    } catch (tableError) {
-                        console.log('📊 analytics_balance_history table not found, balance not saved to cloud');
-                    }
+                    await window.supabase.create('analytics_balance_history', balanceRecord);
+                    console.log(`📊 Saved balance record to cloud: ${balance} SOL for ${today}`);
                     
                     // Add to local array
                     this.balanceHistory.push({
@@ -9658,21 +9571,16 @@ CREATE POLICY "Users can manage their own settings" ON public.user_settings
                         const user = window.supabase.getCurrentUser();
                         if (user) {
                             try {
-                                // Try to save to cloud
-                                try {
-                                    const setting = {
-                                        user_id: user.id,
-                                        setting_key: 'balanceTrackingTime',
-                                        setting_value: timeInput.value,
-                                        updated_at: new Date().toISOString()
-                                    };
-                                    
-                                    await window.supabase.upsert('user_settings', setting, ['user_id', 'setting_key']);
-                                    alert(`Analytics Einstellungen gespeichert! SOL Balance wird täglich um ${timeInput.value} Uhr aufgezeichnet.`);
-                                } catch (tableError) {
-                                    console.log('📊 user_settings table not found, setting not saved to cloud');
-                                    alert(`Analytics Einstellungen lokal gespeichert! SOL Balance wird täglich um ${timeInput.value} Uhr aufgezeichnet.`);
-                                }
+                                // Save to cloud
+                                const setting = {
+                                    user_id: user.id,
+                                    setting_key: 'balanceTrackingTime',
+                                    setting_value: timeInput.value,
+                                    updated_at: new Date().toISOString()
+                                };
+                                
+                                await window.supabase.upsert('user_settings', setting, ['user_id', 'setting_key']);
+                                alert(`Analytics Einstellungen gespeichert! SOL Balance wird täglich um ${timeInput.value} Uhr aufgezeichnet.`);
                             } catch (error) {
                                 console.error('Error saving analytics settings:', error);
                                 alert('Fehler beim Speichern der Einstellungen.');
