@@ -8176,6 +8176,10 @@
 
             showAddTradeModal() {
                 document.getElementById('add-trade-modal').style.display = 'flex';
+                
+                // Set K button as active by default
+                document.querySelectorAll('#add-trade-modal .mcap-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('#add-trade-modal .mcap-btn[data-multiplier="K"]').classList.add('active');
             }
 
             hideAddTradeModal() {
@@ -8188,8 +8192,9 @@
                 document.getElementById('modal-trade-mcap').value = '';
                 document.getElementById('modal-trade-notes').value = '';
                 
-                // Reset all market cap buttons (no default selection)
+                // Set K button as active by default
                 document.querySelectorAll('#add-trade-modal .mcap-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('#add-trade-modal .mcap-btn[data-multiplier="K"]').classList.add('active');
             }
 
             async saveTradeToCloud(trade) {
