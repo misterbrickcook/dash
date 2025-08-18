@@ -1999,6 +1999,26 @@
             border-radius: 2px;
         }
 
+        .legend-square.level-0 {
+            background-color: #ebedf0;
+        }
+
+        .legend-square.level-1 {
+            background-color: #9be9a8;
+        }
+
+        .legend-square.level-2 {
+            background-color: #40c463;
+        }
+
+        .legend-square.level-3 {
+            background-color: #30a14e;
+        }
+
+        .legend-square.level-4 {
+            background-color: #216e39;
+        }
+
         .heatmap-info {
             font-size: 0.9rem;
             color: #666666;
@@ -9118,7 +9138,7 @@
                 this.setupPeriodButtons();
                 await this.setupChart();
                 await this.updateCurrentBalance();
-                this.setupHeatmap();
+                await this.setupHeatmap();
             }
 
             async checkAndRecordDailyBalance() {
@@ -9328,13 +9348,17 @@
                 this.chart.update();
             }
 
-            setupHeatmap() {
-                this.generateHeatmapData();
+            async setupHeatmap() {
+                // Show loading state
+                const statsElement = document.getElementById('heatmap-stats');
+                if (statsElement) statsElement.textContent = 'Loading todo data...';
+                
+                await this.generateHeatmapData();
                 this.renderHeatmap();
                 this.updateHeatmapStats();
             }
 
-            generateHeatmapData() {
+            async generateHeatmapData() {
                 // Generate data for the last 365 days (like GitHub)
                 const today = new Date();
                 const startDate = new Date(today);
@@ -9350,8 +9374,8 @@
                     const date = new Date(startSunday);
                     date.setDate(startSunday.getDate() + i);
                     
-                    // Generate random todo count for demo (replace with real data later)
-                    const todoCount = this.getTodoCountForDate(date);
+                    // Get real todo count for this date
+                    const todoCount = await this.getTodoCountForDate(date);
                     
                     this.heatmapData.push({
                         date: date.toISOString().split('T')[0],
@@ -9361,13 +9385,29 @@
                 }
             }
 
-            getTodoCountForDate(date) {
-                // Demo data - replace with actual todo tracking later
-                const random = Math.random();
-                if (random < 0.3) return 0; // 30% no todos
-                if (random < 0.6) return Math.floor(Math.random() * 3) + 1; // 1-3 todos
-                if (random < 0.85) return Math.floor(Math.random() * 7) + 4; // 4-10 todos
-                return Math.floor(Math.random() * 10) + 11; // 11-20 todos
+            async getTodoCountForDate(date) {
+                try {
+                    if (!window.supabase?.isAuthenticated()) return 0;
+                    
+                    const user = window.supabase.getCurrentUser();
+                    if (!user) return 0;
+                    
+                    const nextDay = new Date(date);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    
+                    const dateStart = date.toISOString().split('T')[0];
+                    const dateEnd = nextDay.toISOString().split('T')[0];
+                    
+                    // Query completed todos for this specific date
+                    const completedTodos = await window.supabase.query(
+                        `todos?user_id=eq.${user.id}&completed=eq.true&created_at=gte.${dateStart}&created_at=lt.${dateEnd}&select=id`
+                    );
+                    
+                    return completedTodos ? completedTodos.length : 0;
+                } catch (error) {
+                    console.error('Error fetching todo count for date:', error);
+                    return 0;
+                }
             }
 
             getIntensityLevel(count) {
