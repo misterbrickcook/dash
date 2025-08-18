@@ -8837,6 +8837,22 @@
                         originalTrade.exit_date = new Date().toISOString();
 
                         console.log(`FULL CLOSE: PnL = ${originalTrade.final_pnl.toFixed(3)} SOL`);
+                        
+                        // Add badge logic for full close
+                        if (originalTrade._is_free_ride === true) {
+                            originalTrade._is_free_ride_trade = true;
+                            console.log(`FULL CLOSE: Setting _is_free_ride_trade = true (from free ride position)`);
+                        } else if (originalCostBasis > 0 && originalTrade.final_pnl >= 0 && !originalTrade._initials_taken) {
+                            originalTrade._initials_recovered = true;
+                            console.log(`FULL CLOSE: Setting _initials_recovered = true (first initials recovery)`);
+                        } else if (originalTrade._initials_taken === true) {
+                            originalTrade._is_free_ride_trade = true;
+                            console.log(`FULL CLOSE: Setting _is_free_ride_trade = true (subsequent after initials)`);
+                        } else if (originalCostBasis === 0) {
+                            originalTrade._is_free_ride_trade = true;
+                            console.log(`FULL CLOSE: Setting _is_free_ride_trade = true (cost basis is 0)`);
+                        }
+                        
                         await this.updateTradeInCloud(originalTrade);
                     } else {
                         // Partial close - FREE RIDE LOGIC
