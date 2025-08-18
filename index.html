@@ -8277,23 +8277,23 @@
                 const showingClosed = closedTradesView.style.display !== 'none';
                 
                 if (showingClosed) {
-                    // Switch to open trades
+                    // Switch to open trades (now showing open, next action is to go to closed)
                     openTradesView.style.display = 'block';
                     closedTradesView.style.display = 'none';
                     sectionTitle.textContent = 'Open Positions';
                     if (lockIcon) {
-                        lockIcon.setAttribute('data-lucide', 'lock');
+                        lockIcon.setAttribute('data-lucide', 'lock'); // Show lock because next action is to go to closed
                     }
-                    console.log('🔒 Switched to open positions');
+                    console.log('🔒 Switched to open positions, showing lock for next action');
                 } else {
-                    // Switch to closed trades
+                    // Switch to closed trades (now showing closed, next action is to go to open)
                     openTradesView.style.display = 'none';
                     closedTradesView.style.display = 'block';
                     sectionTitle.textContent = 'Closed Trades';
                     if (lockIcon) {
-                        lockIcon.setAttribute('data-lucide', 'unlock');
+                        lockIcon.setAttribute('data-lucide', 'unlock'); // Show unlock because next action is to go to open
                     }
-                    console.log('🔓 Switched to closed trades');
+                    console.log('🔓 Switched to closed trades, showing unlock for next action');
                 }
                 
                 // Recreate icons to update the changed icon
