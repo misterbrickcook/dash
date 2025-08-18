@@ -2854,14 +2854,19 @@
                             </div>
                             <div class="form-group">
                                 <label for="modal-trade-mcap">Market Cap</label>
-                                <div class="mcap-container">
-                                    <input type="number" id="modal-trade-mcap" placeholder="2.1" autocomplete="off" step="0.1">
-                                    <select id="modal-trade-mcap-unit" class="form-select mcap-select">
-                                        <option value="K" selected>K</option>
-                                        <option value="M">M</option>
-                                        <option value="B">B</option>
-                                    </select>
-                                </div>
+                                <select id="modal-trade-mcap" class="form-select">
+                                    <option value="">Select range</option>
+                                    <option value="100K">100K</option>
+                                    <option value="500K">500K</option>
+                                    <option value="1M" selected>1M</option>
+                                    <option value="5M">5M</option>
+                                    <option value="10M">10M</option>
+                                    <option value="50M">50M</option>
+                                    <option value="100M">100M</option>
+                                    <option value="500M">500M</option>
+                                    <option value="1B">1B</option>
+                                    <option value="5B">5B</option>
+                                </select>
                             </div>
                         </div>
                         
@@ -8135,17 +8140,13 @@
             async addTrade() {
                 const token = document.getElementById('modal-trade-token').value.trim().toUpperCase();
                 const solAmount = parseFloat(document.getElementById('modal-trade-sol-amount').value);
-                const mcapValue = parseFloat(document.getElementById('modal-trade-mcap').value);
-                const activeMultiplier = document.getElementById('modal-trade-mcap-unit').value;
+                const entryMcap = document.getElementById('modal-trade-mcap').value;
                 const notes = document.getElementById('modal-trade-notes').value.trim();
 
-                if (!token || !solAmount || !mcapValue || !activeMultiplier) {
+                if (!token || !solAmount || !entryMcap) {
                     alert('Please fill in all required fields');
                     return;
                 }
-
-                // Combine mcap value with multiplier (e.g., "2.1B")
-                const entryMcap = `${mcapValue}${activeMultiplier}`;
 
                 const trade = {
                     id: Date.now().toString(),
@@ -8191,8 +8192,8 @@
             showAddTradeModal() {
                 document.getElementById('add-trade-modal').style.display = 'flex';
                 
-                // Set K as default in dropdown
-                document.getElementById('modal-trade-mcap-unit').value = 'K';
+                // Set 1M as default in dropdown
+                document.getElementById('modal-trade-mcap').value = '1M';
             }
 
             hideAddTradeModal() {
@@ -8202,8 +8203,7 @@
             clearAddTradeForm() {
                 document.getElementById('modal-trade-token').value = '';
                 document.getElementById('modal-trade-sol-amount').selectedIndex = 0;
-                document.getElementById('modal-trade-mcap').value = '';
-                document.getElementById('modal-trade-mcap-unit').value = 'K';
+                document.getElementById('modal-trade-mcap').selectedIndex = 0;
                 document.getElementById('modal-trade-notes').value = '';
             }
 
