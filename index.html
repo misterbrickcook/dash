@@ -7932,6 +7932,13 @@
                     return;
                 }
 
+                // Sort trades by exit_date (most recent first)
+                const sortedTrades = [...trades].sort((a, b) => {
+                    const dateA = new Date(a.exit_date || a.entry_date);
+                    const dateB = new Date(b.exit_date || b.entry_date);
+                    return dateB - dateA; // Descending order (most recent first)
+                });
+
                 const html = `
                     <div class="trade-header">
                         <div>Token</div>
@@ -7942,7 +7949,7 @@
                         <div>Date</div>
                         <div>Actions</div>
                     </div>
-                    ${trades.map(trade => `
+                    ${sortedTrades.map(trade => `
                         <div class="trade-row">
                             <div class="trade-token" data-label="Token">
                                 <strong>${trade.token}</strong>
