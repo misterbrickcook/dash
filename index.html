@@ -9298,7 +9298,7 @@
                         created_at: new Date().toISOString()
                     };
 
-                    await window.supabase.create('analytics_balance_history', balanceRecord);
+                    await window.supabase.insert('analytics_balance_history', [balanceRecord]);
                     console.log(`📊 Saved balance record to cloud: ${balance} SOL for ${today}`);
                     
                     // Add to local array
@@ -9385,6 +9385,12 @@
             async setupChart() {
                 const canvas = document.getElementById('solBalanceChart');
                 if (!canvas || !window.Chart) return;
+
+                // Destroy existing chart if it exists
+                if (this.chart) {
+                    this.chart.destroy();
+                    this.chart = null;
+                }
 
                 const ctx = canvas.getContext('2d');
                 
@@ -9489,56 +9495,63 @@
             }
 
             async generateHeatmapData() {
-                // Generate data for the last 365 days (like GitHub)
-                const today = new Date();
-                const startDate = new Date(today);
-                startDate.setDate(today.getDate() - 364); // 365 days including today
-                
-                // Start from Sunday of the week containing startDate
-                const startSunday = new Date(startDate);
-                startSunday.setDate(startDate.getDate() - startDate.getDay());
-                
-                this.heatmapData = [];
-                
-                for (let i = 0; i < 371; i++) { // 53 weeks * 7 days = 371
-                    const date = new Date(startSunday);
-                    date.setDate(startSunday.getDate() + i);
+                try {
+                    // Generate data for the last 365 days (like GitHub)
+                    const today = new Date();
+                    const startDate = new Date(today);
+                    startDate.setDate(today.getDate() - 364); // 365 days including today
                     
-                    // Get real todo count for this date
-                    const todoCount = await this.getTodoCountForDate(date);
+                    // Start from Sunday of the week containing startDate
+                    const startSunday = new Date(startDate);
+                    startSunday.setDate(startDate.getDate() - startDate.getDay());
                     
-                    this.heatmapData.push({
-                        date: date.toISOString().split('T')[0],
-                        count: todoCount,
-                        level: this.getIntensityLevel(todoCount)
-                    });
+                    // Get all completed todos in one query
+                    const user = window.supabase.getCurrentUser();
+                    if (!user) {
+                        console.warn('No user logged in for heatmap');
+                        this.heatmapData = [];
+                        return;
+                    }
+                    
+                    const startDateStr = startSunday.toISOString().split('T')[0];
+                    const endDateStr = new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                    
+                    const completedTodos = await window.supabase.query(
+                        `todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${startDateStr}&updated_at=lt.${endDateStr}&select=updated_at`
+                    );
+                    
+                    // Group todos by date
+                    const todosByDate = {};
+                    if (completedTodos) {
+                        completedTodos.forEach(todo => {
+                            const date = todo.updated_at.split('T')[0];
+                            todosByDate[date] = (todosByDate[date] || 0) + 1;
+                        });
+                    }
+                    
+                    this.heatmapData = [];
+                    
+                    for (let i = 0; i < 371; i++) { // 53 weeks * 7 days = 371
+                        const date = new Date(startSunday);
+                        date.setDate(startSunday.getDate() + i);
+                        
+                        const dateStr = date.toISOString().split('T')[0];
+                        const todoCount = todosByDate[dateStr] || 0;
+                        
+                        this.heatmapData.push({
+                            date: dateStr,
+                            count: todoCount,
+                            level: this.getIntensityLevel(todoCount)
+                        });
+                    }
+                    
+                    console.log(`📊 Generated heatmap data for ${this.heatmapData.length} days with ${completedTodos?.length || 0} completed todos`);
+                } catch (error) {
+                    console.error('Error generating heatmap data:', error);
+                    this.heatmapData = [];
                 }
             }
 
-            async getTodoCountForDate(date) {
-                try {
-                    if (!window.supabase?.isAuthenticated()) return 0;
-                    
-                    const user = window.supabase.getCurrentUser();
-                    if (!user) return 0;
-                    
-                    const nextDay = new Date(date);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    
-                    const dateStart = date.toISOString().split('T')[0];
-                    const dateEnd = nextDay.toISOString().split('T')[0];
-                    
-                    // Query completed todos for this specific date using updated_at (when they were completed)
-                    const completedTodos = await window.supabase.query(
-                        `todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${dateStart}&updated_at=lt.${dateEnd}&select=id`
-                    );
-                    
-                    return completedTodos ? completedTodos.length : 0;
-                } catch (error) {
-                    console.error('Error fetching todo count for date:', error);
-                    return 0;
-                }
-            }
 
             getIntensityLevel(count) {
                 if (count === 0) return 0;
