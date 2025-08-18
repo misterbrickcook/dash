@@ -8383,14 +8383,25 @@
                             </div>
                             <div class="trade-notes" data-label="Notes" title="${trade.notes || ''}">${trade.notes ? (trade.notes.length > 20 ? trade.notes.substring(0, 20) + '...' : trade.notes) : '-'}</div>
                             <div class="trade-actions" data-label="Actions">
-                                <button class="btn secondary" onclick="window.TradingManager.editTrade('${trade.id}')">Edit</button>
-                                <button class="btn secondary" onclick="window.TradingManager.closeTrade('${trade.id}')">Close</button>
+                                <button class="trade-action-btn" onclick="window.TradingManager.editTrade('${trade.id}')" title="Edit Trade">
+                                    <i data-lucide="edit-3" style="width: 16px; height: 16px;"></i>
+                                </button>
+                                <button class="trade-action-btn" onclick="window.TradingManager.closeTrade('${trade.id}')" title="Close Trade">
+                                    <i data-lucide="x-circle" style="width: 16px; height: 16px;"></i>
+                                </button>
                             </div>
                         </div>
                     `).join('')}
                 `;
 
                 container.innerHTML = html;
+                
+                // Initialize lucide icons for action buttons
+                setTimeout(() => {
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                }, 50);
             }
 
             renderClosedTrades(trades) {
@@ -8433,13 +8444,22 @@
                             <div class="trade-notes" data-label="Notes" title="${trade.notes || ''}">${trade.notes ? (trade.notes.length > 15 ? trade.notes.substring(0, 15) + '...' : trade.notes) : '-'}</div>
                             <div data-label="Date">${new Date(trade.exit_date || trade.entry_date).toLocaleDateString()}</div>
                             <div class="trade-actions" data-label="Actions">
-                                <button class="btn secondary" onclick="window.TradingManager.deleteTrade('${trade.id}')">Delete</button>
+                                <button class="trade-action-btn" onclick="window.TradingManager.deleteTrade('${trade.id}')" title="Delete Trade">
+                                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                </button>
                             </div>
                         </div>
                     `).join('')}
                 `;
 
                 container.innerHTML = html;
+                
+                // Initialize lucide icons for action buttons
+                setTimeout(() => {
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                }, 50);
             }
 
             async updatePortfolioStats() {
