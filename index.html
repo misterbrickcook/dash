@@ -2596,7 +2596,7 @@
                                     <div class="mcap-buttons">
                                         <button type="button" class="mcap-btn" data-multiplier="K" tabindex="-1">K</button>
                                         <button type="button" class="mcap-btn" data-multiplier="M" tabindex="-1">M</button>
-                                        <button type="button" class="mcap-btn active" data-multiplier="B" tabindex="-1">B</button>
+                                        <button type="button" class="mcap-btn" data-multiplier="B" tabindex="-1">B</button>
                                     </div>
                                 </div>
                             </div>
@@ -7817,10 +7817,10 @@
                 const token = document.getElementById('modal-trade-token').value.trim().toUpperCase();
                 const solAmount = parseFloat(document.getElementById('modal-trade-sol-amount').value);
                 const mcapValue = parseFloat(document.getElementById('modal-trade-mcap').value);
-                const activeMultiplier = document.querySelector('#add-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
+                const activeMultiplier = document.querySelector('#add-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier');
 
-                if (!token || !solAmount || !mcapValue) {
-                    alert('Please fill in all fields');
+                if (!token || !solAmount || !mcapValue || !activeMultiplier) {
+                    alert('Please fill in all fields and select a market cap unit (K/M/B)');
                     return;
                 }
 
@@ -7876,9 +7876,8 @@
                 document.getElementById('modal-trade-sol-amount').value = '';
                 document.getElementById('modal-trade-mcap').value = '';
                 
-                // Reset market cap buttons to default (B)
+                // Reset market cap buttons (no default selection)
                 document.querySelectorAll('#add-trade-modal .mcap-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelector('#add-trade-modal .mcap-btn[data-multiplier="B"]').classList.add('active');
             }
 
             async saveTradeToCloud(trade) {
