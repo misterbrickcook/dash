@@ -1941,10 +1941,25 @@
             stroke: #16a34a;
         }
 
-        /* === INITIALS BADGE === */
+        /* === TRADE BADGES === */
         .initials-badge {
             display: inline-block;
             background: #16a34a;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.4rem;
+            border-radius: 12px;
+            margin-left: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .free-ride-badge {
+            display: inline-block;
+            background: #2563eb;
             color: white;
             font-size: 0.7rem;
             font-weight: 600;
@@ -8434,6 +8449,15 @@
                 }, 50);
             }
 
+            getBadgeForClosedTrade(trade) {
+                if (trade._is_free_ride_trade === true && (trade.final_pnl || 0) >= 0) {
+                    return '<span class="free-ride-badge">Free Ride</span>';
+                } else if (trade._initials_recovered === true && (trade.final_pnl || 0) >= 0) {
+                    return '<span class="initials-badge">Initials Raus</span>';
+                }
+                return '';
+            }
+
             renderClosedTrades(trades) {
                 const container = document.getElementById('closed-trades-list');
                 
@@ -8470,7 +8494,7 @@
                             <div class="trade-entry-price" data-label="Price">$${trade.entry_price.toFixed(0)} → $${(trade.exit_price || 0).toFixed(0)}</div>
                             <div class="trade-pnl ${(trade.final_pnl || 0) >= 0 ? 'positive' : 'negative'}" data-label="P&L">
                                 ${(trade.final_pnl || 0) >= 0 ? '+' : ''}${(trade.final_pnl || 0).toFixed(2)} SOL
-                                ${(trade.final_pnl || 0) >= 0 && (trade._cost_basis === 0 || trade.final_pnl >= trade._cost_basis) ? '<span class="initials-badge">Initials Raus</span>' : ''}
+                                ${this.getBadgeForClosedTrade(trade)}
                             </div>
                             <div class="trade-notes" data-label="Notes" title="${trade.notes || ''}">${trade.notes ? (trade.notes.length > 15 ? trade.notes.substring(0, 15) + '...' : trade.notes) : '-'}</div>
                             <div data-label="Date">${new Date(trade.exit_date || trade.entry_date).toLocaleDateString()}</div>
@@ -8836,6 +8860,20 @@
                         
                         // Store cost_basis locally
                         closedTrade._cost_basis = soldCostBasis;
+                        
+                        // Mark trade type based on original position
+                        if (originalTrade._is_free_ride === true) {
+                            // This trade is from a free ride position
+                            closedTrade._is_free_ride_trade = true;
+                        } else if (soldCostBasis > 0 && solToSell >= soldCostBasis) {
+                            // This is an "initials raus" trade (cost basis recovered or more)
+                            closedTrade._initials_recovered = true;
+                        }
+                        
+                        // Mark if remaining position becomes free ride
+                        if (remainingCostBasis === 0) {
+                            originalTrade._is_free_ride = true;
+                        }
 
                         console.log(`CLOSED TRADE: ${solToSell} SOL out, cost basis ${soldCostBasis} SOL, PnL = ${closedTrade.final_pnl.toFixed(3)} SOL`);
                         
