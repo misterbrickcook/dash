@@ -7866,8 +7866,20 @@
             }
 
             renderTrades() {
+                console.log(`RENDER TRADES: Total trades: ${this.trades.length}`);
                 const openTrades = this.trades.filter(t => t.status === 'open');
                 const closedTrades = this.trades.filter(t => t.status === 'closed');
+                
+                console.log(`RENDER TRADES: Open trades: ${openTrades.length}, Closed trades: ${closedTrades.length}`);
+                openTrades.forEach((trade, i) => {
+                    console.log(`OPEN TRADE ${i+1}:`, {
+                        id: trade.id,
+                        token: trade.token,
+                        sol_amount: trade.sol_amount,
+                        status: trade.status,
+                        cost_basis: trade._cost_basis
+                    });
+                });
 
                 this.renderOpenTrades(openTrades);
                 this.renderClosedTrades(closedTrades);
@@ -8282,13 +8294,27 @@
 
                         console.log(`CLOSED TRADE: ${solToSell} SOL out, cost basis ${soldCostBasis} SOL, PnL = ${closedTrade.final_pnl.toFixed(3)} SOL`);
                         
-                        // Update original trade for remaining position
-                        originalTrade.sol_amount = solRemaining;
-                        originalTrade._cost_basis = remainingCostBasis;
-                        originalTrade.entry_mcap = exitMcap; // New entry = current level
-                        originalTrade.entry_price = remainingCostBasis * this.solPrice; // USD value of remaining cost basis
+                        // Check if there's actually something remaining
+                        if (solRemaining <= 0) {
+                            console.log(`WARNING: solRemaining is ${solRemaining} - marking trade as closed`);
+                            originalTrade.status = 'closed';
+                            originalTrade.exit_mcap = exitMcap;
+                            originalTrade.exit_price = (originalAmount * this.solPrice);
+                            originalTrade.received_sol = originalAmount;
+                            originalTrade.final_pnl = originalAmount - originalCostBasis;
+                            originalTrade.exit_date = new Date().toISOString();
+                        } else {
+                            // Update original trade for remaining position
+                            originalTrade.sol_amount = solRemaining;
+                            originalTrade._cost_basis = remainingCostBasis;
+                            originalTrade.entry_mcap = exitMcap; // New entry = current level
+                            originalTrade.entry_price = remainingCostBasis * this.solPrice; // USD value of remaining cost basis
+                            // Keep status as 'open'
+                        }
 
                         console.log(`REMAINING TRADE: ${solRemaining} SOL with cost basis ${remainingCostBasis} SOL`);
+                        console.log(`REMAINING TRADE STATUS: ${originalTrade.status}`);
+                        console.log(`REMAINING TRADE OBJECT:`, originalTrade);
                         if (remainingCostBasis === 0) {
                             console.log(`🎉 FREE RIDE ACTIVATED!`);
                         }
