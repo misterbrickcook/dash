@@ -1941,35 +1941,22 @@
             stroke: #16a34a;
         }
 
-        /* === TRADE BADGES === */
-        .initials-badge {
-            display: inline-block;
-            background: #16a34a;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 0.2rem 0.4rem;
-            border-radius: 12px;
+        /* === TRADE BADGE ICONS === */
+        .trade-badge-icon {
+            width: 16px;
+            height: 16px;
             margin-left: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            pointer-events: none;
-            white-space: nowrap;
+            vertical-align: middle;
         }
 
-        .free-ride-badge {
-            display: inline-block;
-            background: #2563eb;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 0.2rem 0.4rem;
-            border-radius: 12px;
-            margin-left: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            pointer-events: none;
-            white-space: nowrap;
+        .initials-icon {
+            stroke: #16a34a;
+            stroke-width: 2;
+        }
+
+        .free-ride-icon {
+            stroke: #2563eb;
+            stroke-width: 2;
         }
 
         .trades-table {
@@ -8456,7 +8443,7 @@
                 }, 50);
             }
 
-            getBadgeForClosedTrade(trade) {
+            getBadgeIconForClosedTrade(trade) {
                 console.log(`🔍 Badge check for ${trade.token} (${trade.sol_amount} SOL):`, {
                     cost_basis: trade._cost_basis || trade.cost_basis,
                     final_pnl: trade.final_pnl,
@@ -8467,11 +8454,11 @@
                 
                 // Use the persisted flags from the database
                 if (trade._initials_recovered === true) {
-                    console.log(`→ Showing Initials Raus`);
-                    return '<span class="initials-badge">Initials Raus</span>';
+                    console.log(`→ Showing Initials Raus icon`);
+                    return '<i data-lucide="trophy" class="trade-badge-icon initials-icon" title="Initials Raus"></i>';
                 } else if (trade._is_free_ride_trade === true) {
-                    console.log(`→ Showing Free Ride`);
-                    return '<span class="free-ride-badge">Free Ride</span>';
+                    console.log(`→ Showing Free Ride icon`);
+                    return '<i data-lucide="rocket" class="trade-badge-icon free-ride-icon" title="Free Ride"></i>';
                 }
                 
                 console.log(`→ No badge (flags not set)`);
@@ -8508,13 +8495,13 @@
                         <div class="trade-row">
                             <div class="trade-token" data-label="Token">
                                 <strong>${trade.token}</strong>
+                                ${this.getBadgeIconForClosedTrade(trade)}
                             </div>
                             <div class="trade-amount" data-label="SOL Amount">${trade.sol_amount} SOL</div>
                             <div class="trade-entry-price" data-label="McAP">${trade.entry_mcap} → ${trade.exit_mcap || 'N/A'}</div>
                             <div class="trade-entry-price" data-label="Price">$${trade.entry_price.toFixed(0)} → $${(trade.exit_price || 0).toFixed(0)}</div>
                             <div class="trade-pnl ${(trade.final_pnl || 0) >= 0 ? 'positive' : 'negative'}" data-label="P&L">
                                 ${(trade.final_pnl || 0) >= 0 ? '+' : ''}${(trade.final_pnl || 0).toFixed(2)} SOL
-                                ${this.getBadgeForClosedTrade(trade)}
                             </div>
                             <div class="trade-notes" data-label="Notes" title="${trade.notes || ''}">${trade.notes ? (trade.notes.length > 15 ? trade.notes.substring(0, 15) + '...' : trade.notes) : '-'}</div>
                             <div data-label="Date">${new Date(trade.exit_date || trade.entry_date).toLocaleDateString()}</div>
