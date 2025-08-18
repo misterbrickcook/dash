@@ -8235,7 +8235,7 @@
                         // Full close - close the entire trade
                         originalTrade.status = 'closed';
                         originalTrade.exit_mcap = exitMcap;
-                        originalTrade.exit_price = this.solPrice;
+                        originalTrade.exit_price = solToSell * this.solPrice; // USD value of sold amount
                         originalTrade.received_sol = solToSell;
                         originalTrade.final_pnl = solToSell - originalCostBasis;
                         originalTrade.exit_date = new Date().toISOString();
@@ -8266,11 +8266,11 @@
                             token: originalTrade.token,
                             sol_amount: solToSell,
                             entry_mcap: originalTrade.entry_mcap,
-                            entry_price: this.solPrice,
+                            entry_price: soldCostBasis * this.solPrice, // USD value of invested amount
                             entry_date: originalTrade.entry_date,
                             status: 'closed',
                             exit_mcap: exitMcap,
-                            exit_price: this.solPrice,
+                            exit_price: solToSell * this.solPrice, // USD value of sold amount
                             received_sol: solToSell,
                             final_pnl: solToSell - soldCostBasis,
                             exit_date: new Date().toISOString(),
@@ -8286,7 +8286,7 @@
                         originalTrade.sol_amount = solRemaining;
                         originalTrade._cost_basis = remainingCostBasis;
                         originalTrade.entry_mcap = exitMcap; // New entry = current level
-                        originalTrade.entry_price = this.solPrice;
+                        originalTrade.entry_price = remainingCostBasis * this.solPrice; // USD value of remaining cost basis
 
                         console.log(`REMAINING TRADE: ${solRemaining} SOL with cost basis ${remainingCostBasis} SOL`);
                         if (remainingCostBasis === 0) {
@@ -8299,6 +8299,12 @@
 
                         // Add closed trade to local array
                         this.trades.push(closedTrade);
+                        
+                        // Update the original trade in local array too
+                        const tradeIndex = this.trades.findIndex(t => t.id === originalTrade.id);
+                        if (tradeIndex !== -1) {
+                            this.trades[tradeIndex] = originalTrade;
+                        }
                     }
 
                     this.renderTrades();
