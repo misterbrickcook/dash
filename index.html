@@ -7738,8 +7738,9 @@
                 // Percentage buttons for take profit (based on current value)
                 document.addEventListener('click', (e) => {
                     if (e.target.matches('#close-trade-modal .sol-percent-btn')) {
-                        const percent = parseFloat(e.target.getAttribute('data-percent'));
-                        if (this.currentTradeToClose && percent) {
+                        const percentAttr = e.target.getAttribute('data-percent');
+                        if (this.currentTradeToClose && percentAttr) {
+                            const percent = percentAttr === 'initials' ? 'initials' : parseFloat(percentAttr);
                             this.calculateTakeProfitFromPercent(percent);
                         }
                     }
