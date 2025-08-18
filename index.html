@@ -8452,8 +8452,8 @@
                             <div class="trade-amount" data-label="SOL Amount">${trade.sol_amount} SOL</div>
                             <div class="trade-entry-price" data-label="McAP">${trade.entry_mcap} → ${trade.exit_mcap || 'N/A'}</div>
                             <div class="trade-entry-price" data-label="Price">$${trade.entry_price.toFixed(0)} → $${(trade.exit_price || 0).toFixed(0)}</div>
-                            <div class="trade-pnl ${trade.final_pnl >= 0 ? 'positive' : 'negative'}" data-label="P&L">
-                                ${trade.final_pnl >= 0 ? '+' : ''}${trade.final_pnl.toFixed(2)} SOL
+                            <div class="trade-pnl ${(trade.final_pnl || 0) >= 0 ? 'positive' : 'negative'}" data-label="P&L">
+                                ${(trade.final_pnl || 0) >= 0 ? '+' : ''}${(trade.final_pnl || 0).toFixed(2)} SOL
                             </div>
                             <div class="trade-notes" data-label="Notes" title="${trade.notes || ''}">${trade.notes ? (trade.notes.length > 15 ? trade.notes.substring(0, 15) + '...' : trade.notes) : '-'}</div>
                             <div data-label="Date">${new Date(trade.exit_date || trade.entry_date).toLocaleDateString()}</div>
