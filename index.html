@@ -9181,6 +9181,12 @@
             }
 
             async init() {
+                // Check if supabase is available and user is authenticated
+                if (!window.supabase?.isAuthenticated()) {
+                    console.warn('Analytics init skipped - not authenticated');
+                    return;
+                }
+                
                 await this.loadBalanceHistory();
                 await this.checkAndRecordDailyBalance();
                 this.setupPeriodButtons();
@@ -9504,6 +9510,13 @@
                     // Start from Sunday of the week containing startDate
                     const startSunday = new Date(startDate);
                     startSunday.setDate(startDate.getDate() - startDate.getDay());
+                    
+                    // Check if supabase is available and user is authenticated
+                    if (!window.supabase?.isAuthenticated()) {
+                        console.warn('No supabase or user not authenticated for heatmap');
+                        this.heatmapData = [];
+                        return;
+                    }
                     
                     // Get all completed todos in one query
                     const user = window.supabase.getCurrentUser();
