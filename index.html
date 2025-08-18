@@ -8253,9 +8253,23 @@
                     throw new Error('Not authenticated');
                 }
 
-                // Create a copy without local-only fields for DB storage
-                const dbTrade = { ...trade };
-                delete dbTrade._cost_basis; // Remove local field before saving
+                // Create a copy with only fields that exist in the database
+                const dbTrade = {
+                    id: trade.id,
+                    token: trade.token,
+                    sol_amount: trade.sol_amount,
+                    entry_mcap: trade.entry_mcap,
+                    entry_price: trade.entry_price,
+                    entry_date: trade.entry_date,
+                    status: trade.status,
+                    pnl: trade.pnl,
+                    user_id: trade.user_id
+                };
+                
+                // TODO: Add these fields when database schema is updated
+                // stop_loss: trade.stop_loss,
+                // take_profit: trade.take_profit,
+                // notes: trade.notes
                 
                 await window.supabase.insert('trades', [dbTrade]);
             }
