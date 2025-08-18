@@ -8457,13 +8457,24 @@
             }
 
             getBadgeForClosedTrade(trade) {
+                console.log(`🔍 Badge check for ${trade.token} (${trade.sol_amount} SOL):`, {
+                    cost_basis: trade._cost_basis || trade.cost_basis,
+                    final_pnl: trade.final_pnl,
+                    _initials_recovered: trade._initials_recovered,
+                    _is_free_ride_trade: trade._is_free_ride_trade,
+                    exit_date: trade.exit_date
+                });
+                
                 // Use the persisted flags from the database
                 if (trade._initials_recovered === true) {
+                    console.log(`→ Showing Initials Raus`);
                     return '<span class="initials-badge">Initials Raus</span>';
                 } else if (trade._is_free_ride_trade === true) {
+                    console.log(`→ Showing Free Ride`);
                     return '<span class="free-ride-badge">Free Ride</span>';
                 }
                 
+                console.log(`→ No badge (flags not set)`);
                 return '';
             }
 
