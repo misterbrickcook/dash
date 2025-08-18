@@ -8461,13 +8461,13 @@
                 
                 if (trade._cost_basis === 0) {
                     return '<span class="free-ride-badge">Free Ride</span>';
-                } else if (trade._cost_basis > 0 && trade.final_pnl >= trade._cost_basis) {
+                } else if (trade._cost_basis > 0 && trade.final_pnl >= 0) {
                     // Check if this is likely the first initials recovery by looking at other trades
                     const allClosedTrades = this.trades.filter(t => t.status === 'closed' && t.token === trade.token);
                     const earlierInitialsRecovery = allClosedTrades.some(t => 
                         t.id !== trade.id && 
                         t._cost_basis > 0 && 
-                        t.final_pnl >= t._cost_basis &&
+                        t.final_pnl >= 0 &&
                         new Date(t.exit_date) < new Date(trade.exit_date)
                     );
                     
