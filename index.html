@@ -7791,12 +7791,14 @@
                     sol_amount: solAmount,
                     entry_mcap: entryMcap,
                     entry_price: this.solPrice * solAmount,
-                    cost_basis: solAmount, // Cost basis in SOL (what we invested)
                     entry_date: new Date().toISOString(),
                     status: 'open',
                     pnl: 0,
                     user_id: window.supabase?.getCurrentUser()?.id
                 };
+                
+                // Store cost_basis locally until DB schema is updated
+                trade._cost_basis = solAmount;
 
                 try {
                     // Save to cloud
@@ -7829,7 +7831,11 @@
                     throw new Error('Not authenticated');
                 }
 
-                await window.supabase.insert('trades', [trade]);
+                // Create a copy without local-only fields for DB storage
+                const dbTrade = { ...trade };
+                delete dbTrade._cost_basis; // Remove local field before saving
+                
+                await window.supabase.insert('trades', [dbTrade]);
             }
 
             async loadTrades() {
@@ -7842,7 +7848,13 @@
                     const data = await window.supabase.query(`trades?user_id=eq.${user.id}&select=*`);
                     
                     if (data) {
-                        this.trades = data;
+                        // Add cost_basis fallback for existing trades
+                        this.trades = data.map(trade => {
+                            if (!trade._cost_basis) {
+                                trade._cost_basis = trade.sol_amount; // Fallback: cost basis = original sol amount
+                            }
+                            return trade;
+                        });
                         this.renderTrades();
                         this.updatePortfolioStats();
                     }
@@ -8048,7 +8060,7 @@
                 
                 // Get original investment amounts
                 const originalSolAmount = this.currentTradeToClose.sol_amount;
-                const originalCostBasis = this.currentTradeToClose.cost_basis || originalSolAmount; // Fallback for older trades
+                const originalCostBasis = this.currentTradeToClose._cost_basis || originalSolAmount; // Fallback for older trades
                 
                 if (percent === 'initials') {
                     // Initials button: Verkaufe genau die ursprüngliche Kostenbasis
@@ -8179,7 +8191,7 @@
                 const exitMcap = `${mcapValue}${activeMultiplier}`;
                 const originalTrade = this.currentTradeToClose;
                 const originalAmount = originalTrade.sol_amount;
-                const originalCostBasis = originalTrade.cost_basis || originalAmount; // Fallback for older trades
+                const originalCostBasis = originalTrade._cost_basis || originalAmount; // Fallback for older trades
                 
                 console.log(`CLOSE TRADE: Selling ${solToSell} SOL, keeping ${solRemaining} SOL`);
                 console.log(`ORIGINAL: ${originalAmount} SOL with cost basis ${originalCostBasis} SOL`);
@@ -8219,7 +8231,6 @@
                             id: Date.now().toString(),
                             token: originalTrade.token,
                             sol_amount: solToSell,
-                            cost_basis: soldCostBasis,
                             entry_mcap: originalTrade.entry_mcap,
                             entry_price: this.solPrice,
                             entry_date: originalTrade.entry_date,
@@ -8231,12 +8242,15 @@
                             exit_date: new Date().toISOString(),
                             user_id: originalTrade.user_id
                         };
+                        
+                        // Store cost_basis locally
+                        closedTrade._cost_basis = soldCostBasis;
 
                         console.log(`CLOSED TRADE: ${solToSell} SOL out, cost basis ${soldCostBasis} SOL, PnL = ${closedTrade.final_pnl.toFixed(3)} SOL`);
                         
                         // Update original trade for remaining position
                         originalTrade.sol_amount = solRemaining;
-                        originalTrade.cost_basis = remainingCostBasis;
+                        originalTrade._cost_basis = remainingCostBasis;
                         originalTrade.entry_mcap = exitMcap; // New entry = current level
                         originalTrade.entry_price = this.solPrice;
 
@@ -8265,7 +8279,12 @@
 
             async updateTradeInCloud(trade) {
                 if (!window.supabase || !window.supabase.isAuthenticated()) return;
-                await window.supabase.update('trades', trade, trade.id);
+                
+                // Create a copy without local-only fields for DB storage
+                const dbTrade = { ...trade };
+                delete dbTrade._cost_basis; // Remove local field before saving
+                
+                await window.supabase.update('trades', dbTrade, trade.id);
             }
 
             async deleteTrade(tradeId) {
