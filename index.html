@@ -8064,15 +8064,48 @@
                 const originalCostBasis = this.currentTradeToClose._cost_basis || originalSolAmount; // Fallback for older trades
                 
                 if (percent === 'initials') {
-                    // Initials button: Verkaufe genau die ursprüngliche Kostenbasis
-                    const solToSell = originalCostBasis;
-                    const solRemaining = Math.max(0, originalSolAmount - solToSell);
+                    // Initials button: Verkaufe originalCostBasis SOL aus der aktuellen Position
+                    if (!exitMcapValue || isNaN(exitMcapValue)) {
+                        // Ohne Exit Mcap - verwende ursprüngliche Mengen
+                        const solToSell = originalCostBasis;
+                        const solRemaining = Math.max(0, originalSolAmount - solToSell);
+                        
+                        document.getElementById('close-take-profit').value = solToSell.toFixed(3);
+                        document.getElementById('close-keep-position').value = solRemaining.toFixed(3);
+                        return;
+                    }
                     
-                    document.getElementById('close-take-profit').value = solToSell.toFixed(3);
-                    document.getElementById('close-keep-position').value = solRemaining.toFixed(3);
-                    
-                    console.log(`INITIALS: Selling ${solToSell} SOL (cost basis), keeping ${solRemaining} SOL (free ride)`);
-                    return;
+                    // Mit Exit Mcap - berechne aktuelle Position und verkaufe originalCostBasis davon
+                    try {
+                        const entryMcap = this.currentTradeToClose.entry_mcap;
+                        const entryValue = parseFloat(entryMcap);
+                        const entryUnit = entryMcap.slice(-1).toUpperCase();
+                        
+                        const multipliers = { 'K': 1000, 'M': 1000000, 'B': 1000000000 };
+                        const entryActual = entryValue * (multipliers[entryUnit] || 1000000000);
+                        const exitActual = exitMcapValue * (multipliers[activeMultiplier] || 1000000000);
+                        
+                        const percentageChange = (exitActual - entryActual) / entryActual;
+                        const currentTotalValue = originalSolAmount * (1 + percentageChange);
+                        
+                        const solToSell = originalCostBasis;
+                        const solRemaining = Math.max(0, currentTotalValue - solToSell);
+                        
+                        console.log(`INITIALS: Current value ${currentTotalValue.toFixed(3)} SOL, selling ${solToSell} SOL (cost basis), keeping ${solRemaining.toFixed(3)} SOL (free ride)`);
+                        
+                        document.getElementById('close-take-profit').value = solToSell.toFixed(3);
+                        document.getElementById('close-keep-position').value = solRemaining.toFixed(3);
+                        return;
+                    } catch (error) {
+                        console.error('Error calculating initials:', error);
+                        // Fallback
+                        const solToSell = originalCostBasis;
+                        const solRemaining = Math.max(0, originalSolAmount - solToSell);
+                        
+                        document.getElementById('close-take-profit').value = solToSell.toFixed(3);
+                        document.getElementById('close-keep-position').value = solRemaining.toFixed(3);
+                        return;
+                    }
                 }
 
                 if (!exitMcapValue || isNaN(exitMcapValue)) {
