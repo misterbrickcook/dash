@@ -1913,6 +1913,29 @@
             border-color: #059669 !important;
         }
 
+        /* === TRADE ACTION BUTTONS === */
+        .trade-action-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+            color: #666666;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trade-action-btn:hover {
+            background: #f0f9ff;
+            color: #16a34a;
+        }
+
+        .trade-action-btn:hover i {
+            stroke: #16a34a;
+        }
+
         .trades-table {
             overflow-x: auto;
         }
@@ -2662,9 +2685,15 @@
                 <div class="section-header">
                     <h3>Open Positions</h3>
                     <div class="section-actions">
-                        <button id="add-trade-btn" class="btn">+</button>
-                        <button id="refresh-prices-btn" class="btn secondary">🔄</button>
-                        <button id="lock-btn" class="btn secondary">🔒</button>
+                        <button id="add-trade-btn" class="trade-action-btn">
+                            <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                        </button>
+                        <button id="refresh-prices-btn" class="trade-action-btn">
+                            <i data-lucide="refresh-cw" style="width: 18px; height: 18px;"></i>
+                        </button>
+                        <button id="lock-btn" class="trade-action-btn">
+                            <i data-lucide="lock" style="width: 18px; height: 18px;"></i>
+                        </button>
                     </div>
                 </div>
                 
@@ -8806,6 +8835,14 @@
 
         // Initialize Trading Manager
         window.TradingManager = new TradingManager();
+        
+        // Initialize lucide icons for trade action buttons
+        setTimeout(() => {
+            if (window.lucide) {
+                lucide.createIcons();
+                console.log('🎨 Lucide icons initialized for trade action buttons');
+            }
+        }, 100);
     </script>
     
     <!-- ========================================= -->
