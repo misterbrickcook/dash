@@ -1864,6 +1864,55 @@
             }
         }
 
+        /* === ENHANCED TRADE FORM STYLES === */
+        .form-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .form-section-title {
+            margin: 0 0 1rem 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #444444;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        .form-group textarea::placeholder {
+            color: #999999;
+            font-style: italic;
+        }
+
+        .stoploss-btn.active {
+            background: #fecaca !important;
+            color: #dc2626 !important;
+            border-color: #dc2626 !important;
+        }
+
+        .takeprofit-btn.active {
+            background: #bbf7d0 !important;
+            color: #059669 !important;
+            border-color: #059669 !important;
+        }
+
         .trades-table {
             overflow-x: auto;
         }
@@ -2725,6 +2774,44 @@
                                         <button type="button" class="mcap-btn" data-multiplier="B" tabindex="-1">B</button>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Optional Risk Management -->
+                        <div class="form-section">
+                            <h4 class="form-section-title">Risk Management (Optional)</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="modal-trade-stoploss">Stop Loss</label>
+                                    <div class="mcap-input-group">
+                                        <input type="number" id="modal-trade-stoploss" placeholder="0.8" autocomplete="off" step="0.1">
+                                        <div class="mcap-buttons">
+                                            <button type="button" class="mcap-btn stoploss-btn" data-multiplier="K" tabindex="-1">K</button>
+                                            <button type="button" class="mcap-btn stoploss-btn" data-multiplier="M" tabindex="-1">M</button>
+                                            <button type="button" class="mcap-btn stoploss-btn" data-multiplier="B" tabindex="-1">B</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="modal-trade-takeprofit">Take Profit</label>
+                                    <div class="mcap-input-group">
+                                        <input type="number" id="modal-trade-takeprofit" placeholder="5.0" autocomplete="off" step="0.1">
+                                        <div class="mcap-buttons">
+                                            <button type="button" class="mcap-btn takeprofit-btn" data-multiplier="K" tabindex="-1">K</button>
+                                            <button type="button" class="mcap-btn takeprofit-btn" data-multiplier="M" tabindex="-1">M</button>
+                                            <button type="button" class="mcap-btn takeprofit-btn" data-multiplier="B" tabindex="-1">B</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Trade Reasoning -->
+                        <div class="form-section">
+                            <h4 class="form-section-title">Trade Reasoning (Optional)</h4>
+                            <div class="form-group">
+                                <label for="modal-trade-notes">Why are you entering this trade?</label>
+                                <textarea id="modal-trade-notes" placeholder="e.g., Strong community, upcoming catalyst, technical breakout..." rows="3" autocomplete="off"></textarea>
                             </div>
                         </div>
                     </div>
@@ -7892,11 +7979,33 @@
                 });
 
                 // Market cap buttons (for modal)
-                const mcapButtons = document.querySelectorAll('#add-trade-modal .mcap-btn');
+                const mcapButtons = document.querySelectorAll('#add-trade-modal .mcap-btn:not(.stoploss-btn):not(.takeprofit-btn)');
                 mcapButtons.forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        // Remove active from all modal buttons
+                        // Remove active from all modal buttons (same type)
                         mcapButtons.forEach(b => b.classList.remove('active'));
+                        // Add active to clicked button
+                        e.target.classList.add('active');
+                    });
+                });
+
+                // StopLoss market cap buttons
+                const stoplossButtons = document.querySelectorAll('#add-trade-modal .stoploss-btn');
+                stoplossButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Remove active from all stoploss buttons
+                        stoplossButtons.forEach(b => b.classList.remove('active'));
+                        // Add active to clicked button
+                        e.target.classList.add('active');
+                    });
+                });
+
+                // TakeProfit market cap buttons
+                const takeprofitButtons = document.querySelectorAll('#add-trade-modal .takeprofit-btn');
+                takeprofitButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Remove active from all takeprofit buttons
+                        takeprofitButtons.forEach(b => b.classList.remove('active'));
                         // Add active to clicked button
                         e.target.classList.add('active');
                     });
@@ -8007,6 +8116,13 @@
                 const mcapValue = parseFloat(document.getElementById('modal-trade-mcap').value);
                 const activeMultiplier = document.querySelector('#add-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier');
 
+                // Get optional fields
+                const stopLossValue = parseFloat(document.getElementById('modal-trade-stoploss').value);
+                const stopLossMultiplier = document.querySelector('.stoploss-btn.active')?.getAttribute('data-multiplier');
+                const takeProfitValue = parseFloat(document.getElementById('modal-trade-takeprofit').value);
+                const takeProfitMultiplier = document.querySelector('.takeprofit-btn.active')?.getAttribute('data-multiplier');
+                const notes = document.getElementById('modal-trade-notes').value.trim();
+
                 if (!token || !solAmount || !mcapValue || !activeMultiplier) {
                     alert('Please fill in all fields and select a market cap unit (K/M/B)');
                     return;
@@ -8026,6 +8142,17 @@
                     pnl: 0,
                     user_id: window.supabase?.getCurrentUser()?.id
                 };
+
+                // Add optional risk management fields
+                if (stopLossValue && stopLossMultiplier) {
+                    trade.stop_loss = `${stopLossValue}${stopLossMultiplier}`;
+                }
+                if (takeProfitValue && takeProfitMultiplier) {
+                    trade.take_profit = `${takeProfitValue}${takeProfitMultiplier}`;
+                }
+                if (notes) {
+                    trade.notes = notes;
+                }
                 
                 // Store cost_basis locally until DB schema is updated
                 trade._cost_basis = solAmount;
@@ -8063,9 +8190,14 @@
                 document.getElementById('modal-trade-token').value = '';
                 document.getElementById('modal-trade-sol-amount').value = '';
                 document.getElementById('modal-trade-mcap').value = '';
+                document.getElementById('modal-trade-stoploss').value = '';
+                document.getElementById('modal-trade-takeprofit').value = '';
+                document.getElementById('modal-trade-notes').value = '';
                 
-                // Reset market cap buttons (no default selection)
+                // Reset all market cap buttons (no default selection)
                 document.querySelectorAll('#add-trade-modal .mcap-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.stoploss-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.takeprofit-btn').forEach(btn => btn.classList.remove('active'));
             }
 
             async saveTradeToCloud(trade) {
@@ -8140,7 +8272,10 @@
                         <div>SOL Amount</div>
                         <div>Entry McAP</div>
                         <div>Entry Price</div>
+                        <div>Stop Loss</div>
+                        <div>Take Profit</div>
                         <div>P&L</div>
+                        <div>Notes</div>
                         <div>Actions</div>
                     </div>
                     ${trades.map(trade => `
@@ -8151,9 +8286,12 @@
                             <div class="trade-amount" data-label="SOL Amount">${trade.sol_amount} SOL</div>
                             <div class="trade-entry-price" data-label="Entry McAP">${trade.entry_mcap}</div>
                             <div class="trade-entry-price" data-label="Entry Price">$${trade.entry_price.toFixed(0)}</div>
+                            <div class="trade-risk" data-label="Stop Loss">${trade.stop_loss || '-'}</div>
+                            <div class="trade-risk" data-label="Take Profit">${trade.take_profit || '-'}</div>
                             <div class="trade-pnl ${trade.pnl >= 0 ? 'positive' : 'negative'}" data-label="P&L">
                                 ${trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)} SOL
                             </div>
+                            <div class="trade-notes" data-label="Notes" title="${trade.notes || ''}">${trade.notes ? (trade.notes.length > 20 ? trade.notes.substring(0, 20) + '...' : trade.notes) : '-'}</div>
                             <div class="trade-actions" data-label="Actions">
                                 <button class="btn secondary" onclick="window.TradingManager.editTrade('${trade.id}')">Edit</button>
                                 <button class="btn secondary" onclick="window.TradingManager.closeTrade('${trade.id}')">Close</button>
@@ -8187,6 +8325,7 @@
                         <div>Entry → Exit</div>
                         <div>Entry → Exit Price</div>
                         <div>Final P&L</div>
+                        <div>Notes</div>
                         <div>Date</div>
                         <div>Actions</div>
                     </div>
@@ -8201,6 +8340,7 @@
                             <div class="trade-pnl ${trade.final_pnl >= 0 ? 'positive' : 'negative'}" data-label="P&L">
                                 ${trade.final_pnl >= 0 ? '+' : ''}${trade.final_pnl.toFixed(2)} SOL
                             </div>
+                            <div class="trade-notes" data-label="Notes" title="${trade.notes || ''}">${trade.notes ? (trade.notes.length > 15 ? trade.notes.substring(0, 15) + '...' : trade.notes) : '-'}</div>
                             <div data-label="Date">${new Date(trade.exit_date || trade.entry_date).toLocaleDateString()}</div>
                             <div class="trade-actions" data-label="Actions">
                                 <button class="btn secondary" onclick="window.TradingManager.deleteTrade('${trade.id}')">Delete</button>
