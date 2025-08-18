@@ -2697,7 +2697,7 @@
                             <i data-lucide="refresh-cw" style="width: 18px; height: 18px;"></i>
                         </button>
                         <button id="lock-btn" class="trade-action-btn">
-                            <i data-lucide="unlock" style="width: 18px; height: 18px;"></i>
+                            <i data-lucide="lock" style="width: 18px; height: 18px;"></i>
                         </button>
                     </div>
                 </div>
@@ -8282,18 +8282,18 @@
                     closedTradesView.style.display = 'none';
                     sectionTitle.textContent = 'Open Positions';
                     if (lockIcon) {
-                        lockIcon.setAttribute('data-lucide', 'unlock');
+                        lockIcon.setAttribute('data-lucide', 'lock');
                     }
-                    console.log('🔓 Switched to open positions');
+                    console.log('🔒 Switched to open positions');
                 } else {
                     // Switch to closed trades
                     openTradesView.style.display = 'none';
                     closedTradesView.style.display = 'block';
                     sectionTitle.textContent = 'Closed Trades';
                     if (lockIcon) {
-                        lockIcon.setAttribute('data-lucide', 'lock');
+                        lockIcon.setAttribute('data-lucide', 'unlock');
                     }
-                    console.log('🔒 Switched to closed trades');
+                    console.log('🔓 Switched to closed trades');
                 }
                 
                 // Recreate icons to update the changed icon
