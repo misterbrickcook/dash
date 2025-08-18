@@ -2680,10 +2680,10 @@
                 </div>
             </div>
 
-            <!-- Open Trades -->
-            <div class="open-trades">
+            <!-- Trading Container -->
+            <div class="trading-container">
                 <div class="section-header">
-                    <h3>Open Positions</h3>
+                    <h3 id="trading-section-title">Open Positions</h3>
                     <div class="section-actions">
                         <button id="add-trade-btn" class="trade-action-btn">
                             <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
@@ -2697,19 +2697,18 @@
                     </div>
                 </div>
                 
-                
-                <div class="trades-table" id="open-trades-list">
-                    <div class="empty-trades">No open trades yet</div>
+                <!-- Open Trades View -->
+                <div id="open-trades-view" class="trades-view">
+                    <div class="trades-table" id="open-trades-list">
+                        <div class="empty-trades">No open trades yet</div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Closed Trades -->
-            <div id="closed-trades-section" class="closed-trades" style="display: none;">
-                <div class="section-header">
-                    <h3>Closed Trades</h3>
-                </div>
-                <div class="trades-table" id="closed-trades-list">
-                    <div class="empty-trades">No closed trades yet</div>
+                <!-- Closed Trades View -->
+                <div id="closed-trades-view" class="trades-view" style="display: none;">
+                    <div class="trades-table" id="closed-trades-list">
+                        <div class="empty-trades">No closed trades yet</div>
+                    </div>
                 </div>
             </div>
 
@@ -8257,30 +8256,39 @@
             }
 
             handleLockButton() {
-                const closedTradesSection = document.getElementById('closed-trades-section');
+                const openTradesView = document.getElementById('open-trades-view');
+                const closedTradesView = document.getElementById('closed-trades-view');
+                const sectionTitle = document.getElementById('trading-section-title');
                 const lockBtn = document.getElementById('lock-btn');
                 
-                if (!closedTradesSection || !lockBtn) {
+                if (!openTradesView || !closedTradesView || !sectionTitle || !lockBtn) {
                     console.error('Cannot find required elements for lock button');
                     return;
                 }
                 
                 const lockIcon = lockBtn.querySelector('i[data-lucide]');
                 
-                if (closedTradesSection.style.display === 'none') {
-                    // Show closed trades
-                    closedTradesSection.style.display = 'block';
-                    if (lockIcon) {
-                        lockIcon.setAttribute('data-lucide', 'unlock');
-                    }
-                    console.log('🔓 Closed trades shown');
-                } else {
-                    // Hide closed trades
-                    closedTradesSection.style.display = 'none';
+                // Check current state based on which view is visible
+                const showingClosed = closedTradesView.style.display !== 'none';
+                
+                if (showingClosed) {
+                    // Switch to open trades
+                    openTradesView.style.display = 'block';
+                    closedTradesView.style.display = 'none';
+                    sectionTitle.textContent = 'Open Positions';
                     if (lockIcon) {
                         lockIcon.setAttribute('data-lucide', 'lock');
                     }
-                    console.log('🔒 Closed trades hidden');
+                    console.log('🔒 Switched to open positions');
+                } else {
+                    // Switch to closed trades
+                    openTradesView.style.display = 'none';
+                    closedTradesView.style.display = 'block';
+                    sectionTitle.textContent = 'Closed Trades';
+                    if (lockIcon) {
+                        lockIcon.setAttribute('data-lucide', 'unlock');
+                    }
+                    console.log('🔓 Switched to closed trades');
                 }
                 
                 // Recreate icons to update the changed icon
