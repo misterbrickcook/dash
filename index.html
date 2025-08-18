@@ -1854,12 +1854,30 @@
             font-size: 1rem;
         }
 
+        .analytics-charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
         .chart-section {
             background: #ffffff;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             padding: 1.5rem;
-            margin-bottom: 1rem;
+            height: fit-content;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        .chart-container canvas {
+            max-height: 100%;
+            width: 100% !important;
+            height: 100% !important;
         }
 
         .chart-header {
@@ -1920,14 +1938,18 @@
         /* Heatmap Styles */
         .heatmap-container {
             padding: 1rem 0;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
         }
 
         .heatmap-months {
             display: flex;
             margin-bottom: 0.5rem;
-            padding-left: 20px;
-            font-size: 0.75rem;
+            padding-left: 15px;
+            font-size: 0.7rem;
             color: #666666;
+            flex-shrink: 0;
         }
 
         .heatmap-month {
@@ -1940,17 +1962,36 @@
             display: grid;
             grid-template-columns: repeat(53, 1fr);
             grid-template-rows: repeat(7, 1fr);
-            gap: 2px;
+            gap: 1px;
             padding: 0;
             margin: 0;
+            flex: 1;
+            max-width: 100%;
+            overflow: hidden;
         }
 
         .heatmap-square {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
+            width: 100%;
+            height: 100%;
+            min-width: 8px;
+            min-height: 8px;
+            border-radius: 1px;
             cursor: pointer;
             transition: all 0.2s ease;
+        }
+
+        @media (max-width: 768px) {
+            .analytics-charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+            
+            .heatmap-container {
+                height: 200px;
+            }
         }
 
         .heatmap-square:hover {
@@ -3039,48 +3080,51 @@
         <section id="tab-analytics" class="tab-section">
             <div class="analytics-container">
                 
-                <!-- SOL Balance Chart -->
-                <div class="chart-section">
-                    <div class="chart-header">
-                        <h3>SOL Balance History</h3>
-                        <div class="chart-controls">
-                            <div class="time-period-buttons">
-                                <button class="period-btn active" data-period="week">Woche</button>
-                                <button class="period-btn" data-period="month">Monat</button>
-                                <button class="period-btn" data-period="quarter">Quartal</button>
-                                <button class="period-btn" data-period="year">Jahr</button>
-                            </div>
-                            <div class="chart-info">
-                                <span id="current-sol-balance">Loading...</span>
+                <!-- Analytics Charts Grid -->
+                <div class="analytics-charts-grid">
+                    <!-- SOL Balance Chart -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h3>SOL Balance History</h3>
+                            <div class="chart-controls">
+                                <div class="time-period-buttons">
+                                    <button class="period-btn active" data-period="week">Woche</button>
+                                    <button class="period-btn" data-period="month">Monat</button>
+                                    <button class="period-btn" data-period="quarter">Quartal</button>
+                                    <button class="period-btn" data-period="year">Jahr</button>
+                                </div>
+                                <div class="chart-info">
+                                    <span id="current-sol-balance">Loading...</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="solBalanceChart" width="400" height="200"></canvas>
-                    </div>
-                </div>
-                
-                <!-- Todo Heatmap -->
-                <div class="chart-section">
-                    <div class="chart-header">
-                        <h3>Todo Activity</h3>
-                        <div class="heatmap-info">
-                            <span id="heatmap-stats">Loading...</span>
+                        <div class="chart-container">
+                            <canvas id="solBalanceChart"></canvas>
                         </div>
                     </div>
-                    <div class="heatmap-container">
-                        <div class="heatmap-months" id="heatmap-months"></div>
-                        <div class="heatmap-grid" id="heatmap-grid"></div>
-                        <div class="heatmap-legend">
-                            <span>Less</span>
-                            <div class="legend-colors">
-                                <div class="legend-square level-0"></div>
-                                <div class="legend-square level-1"></div>
-                                <div class="legend-square level-2"></div>
-                                <div class="legend-square level-3"></div>
-                                <div class="legend-square level-4"></div>
+                    
+                    <!-- Todo Heatmap -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h3>Todo Activity</h3>
+                            <div class="heatmap-info">
+                                <span id="heatmap-stats">Loading...</span>
                             </div>
-                            <span>More</span>
+                        </div>
+                        <div class="heatmap-container">
+                            <div class="heatmap-months" id="heatmap-months"></div>
+                            <div class="heatmap-grid" id="heatmap-grid"></div>
+                            <div class="heatmap-legend">
+                                <span>Less</span>
+                                <div class="legend-colors">
+                                    <div class="legend-square level-0"></div>
+                                    <div class="legend-square level-1"></div>
+                                    <div class="legend-square level-2"></div>
+                                    <div class="legend-square level-3"></div>
+                                    <div class="legend-square level-4"></div>
+                                </div>
+                                <span>More</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -9372,13 +9416,30 @@
                                 beginAtZero: true,
                                 title: {
                                     display: true,
-                                    text: 'SOL Balance'
+                                    text: 'SOL Balance',
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 10
+                                    }
                                 }
                             },
                             x: {
                                 title: {
                                     display: true,
-                                    text: 'Date'
+                                    text: 'Date',
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 10
+                                    },
+                                    maxTicksLimit: 8
                                 }
                             }
                         },
@@ -9389,6 +9450,10 @@
                             title: {
                                 display: false
                             }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
                         }
                     }
                 });
