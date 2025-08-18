@@ -8886,16 +8886,29 @@
                         closedTrade._cost_basis = soldCostBasis;
                         
                         // Mark trade type based on original position and what happens
+                        console.log(`TRADE MARKING DEBUG:`, {
+                            is_free_ride: originalTrade._is_free_ride,
+                            soldCostBasis,
+                            solToSell,
+                            initials_taken: originalTrade._initials_taken,
+                            condition1: originalTrade._is_free_ride === true,
+                            condition2: soldCostBasis > 0 && solToSell >= soldCostBasis && !originalTrade._initials_taken,
+                            condition3: originalTrade._initials_taken === true
+                        });
+                        
                         if (originalTrade._is_free_ride === true) {
                             // This trade is from a free ride position
                             closedTrade._is_free_ride_trade = true;
+                            console.log(`Setting _is_free_ride_trade = true (from free ride position)`);
                         } else if (soldCostBasis > 0 && solToSell >= soldCostBasis && !originalTrade._initials_taken) {
                             // This is the FIRST "initials raus" trade (cost basis recovered or more)
                             closedTrade._initials_recovered = true;
                             originalTrade._initials_taken = true; // Mark that initials have been taken from this position
+                            console.log(`Setting _initials_recovered = true (first initials recovery)`);
                         } else if (originalTrade._initials_taken === true) {
                             // Any subsequent trade after initials have been taken is a free ride
                             closedTrade._is_free_ride_trade = true;
+                            console.log(`Setting _is_free_ride_trade = true (subsequent after initials)`);
                         }
                         
                         // Mark if remaining position becomes free ride
