@@ -8281,8 +8281,8 @@
                     openTradesView.style.display = 'block';
                     closedTradesView.style.display = 'none';
                     sectionTitle.textContent = 'Open Positions';
-                    if (lockIcon) {
-                        lockIcon.setAttribute('data-lucide', 'lock'); // Show lock because next action is to go to closed
+                    if (lockBtn) {
+                        lockBtn.innerHTML = '<i data-lucide="lock" style="width: 18px; height: 18px;"></i>';
                     }
                     console.log('🔒 Switched to open positions, showing lock for next action');
                 } else {
@@ -8290,14 +8290,14 @@
                     openTradesView.style.display = 'none';
                     closedTradesView.style.display = 'block';
                     sectionTitle.textContent = 'Closed Trades';
-                    if (lockIcon) {
-                        lockIcon.setAttribute('data-lucide', 'unlock'); // Show unlock because next action is to go to open
+                    if (lockBtn) {
+                        lockBtn.innerHTML = '<i data-lucide="unlock" style="width: 18px; height: 18px;"></i>';
                     }
                     console.log('🔓 Switched to closed trades, showing unlock for next action');
                 }
                 
                 // Recreate icons to update the changed icon
-                if (window.lucide && lockIcon) {
+                if (window.lucide) {
                     lucide.createIcons();
                 }
             }
