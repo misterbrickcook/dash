@@ -8297,6 +8297,13 @@
                     user_id: trade.user_id
                 };
                 
+                // Add badge-related flags if they exist
+                if (trade._initials_recovered !== undefined) dbTrade._initials_recovered = trade._initials_recovered;
+                if (trade._is_free_ride_trade !== undefined) dbTrade._is_free_ride_trade = trade._is_free_ride_trade;
+                if (trade._is_free_ride !== undefined) dbTrade._is_free_ride = trade._is_free_ride;
+                if (trade._initials_taken !== undefined) dbTrade._initials_taken = trade._initials_taken;
+                if (trade._cost_basis !== undefined) dbTrade._cost_basis = trade._cost_basis;
+                
                 // TODO: Add these fields when database schema is updated
                 // stop_loss: trade.stop_loss,
                 // take_profit: trade.take_profit,
@@ -8450,34 +8457,29 @@
             }
 
             getBadgeForClosedTrade(trade) {
+                console.log(`🔍 Badge check for ${trade.token}:`, {
+                    _initials_recovered: trade._initials_recovered,
+                    _is_free_ride_trade: trade._is_free_ride_trade,
+                    cost_basis: trade._cost_basis,
+                    final_pnl: trade.final_pnl
+                });
+                
                 // Check if this trade has positive P&L first
-                if ((trade.final_pnl || 0) <= 0) {
+                if ((trade.final_pnl || 0) < 0) {
+                    console.log(`❌ Negative P&L, no badge`);
                     return '';
                 }
                 
-                // Simple logic based on available data:
-                // If cost basis is 0 → Free Ride
-                // If cost basis > 0 AND final_pnl >= cost_basis → Initials Raus
-                
-                if (trade._cost_basis === 0) {
+                // Use the flags that were set during trade processing
+                if (trade._initials_recovered === true) {
+                    console.log(`🟢 Initials recovered flag is set → Initials Raus`);
+                    return '<span class="initials-badge">Initials Raus</span>';
+                } else if (trade._is_free_ride_trade === true) {
+                    console.log(`🔵 Free ride trade flag is set → Free Ride`);
                     return '<span class="free-ride-badge">Free Ride</span>';
-                } else if (trade._cost_basis > 0 && trade.final_pnl >= 0) {
-                    // Check if this is likely the first initials recovery by looking at other trades
-                    const allClosedTrades = this.trades.filter(t => t.status === 'closed' && t.token === trade.token);
-                    const earlierInitialsRecovery = allClosedTrades.some(t => 
-                        t.id !== trade.id && 
-                        t._cost_basis > 0 && 
-                        t.final_pnl >= 0 &&
-                        new Date(t.exit_date) < new Date(trade.exit_date)
-                    );
-                    
-                    if (!earlierInitialsRecovery) {
-                        return '<span class="initials-badge">Initials Raus</span>';
-                    } else {
-                        return '<span class="free-ride-badge">Free Ride</span>';
-                    }
                 }
                 
+                console.log(`❌ No badge flags set, no badge`);
                 return '';
             }
 
@@ -8990,6 +8992,13 @@
                 if (trade.received_sol !== undefined) dbTrade.received_sol = trade.received_sol;
                 if (trade.current_mcap !== undefined) dbTrade.current_mcap = trade.current_mcap;
                 if (trade.current_sol !== undefined) dbTrade.current_sol = trade.current_sol;
+                
+                // Add badge-related flags if they exist
+                if (trade._initials_recovered !== undefined) dbTrade._initials_recovered = trade._initials_recovered;
+                if (trade._is_free_ride_trade !== undefined) dbTrade._is_free_ride_trade = trade._is_free_ride_trade;
+                if (trade._is_free_ride !== undefined) dbTrade._is_free_ride = trade._is_free_ride;
+                if (trade._initials_taken !== undefined) dbTrade._initials_taken = trade._initials_taken;
+                if (trade._cost_basis !== undefined) dbTrade._cost_basis = trade._cost_basis;
                 
                 // TODO: Add these fields when database schema is updated
                 // if (trade.stop_loss !== undefined) dbTrade.stop_loss = trade.stop_loss;
