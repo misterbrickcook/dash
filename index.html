@@ -10751,26 +10751,20 @@
 
             async generatePerformanceHeatmapData() {
                 try {
-                    // Generate data for the last 365 days
+                    // Generate data for the last 365 days (like GitHub)
                     const today = new Date();
                     const startDate = new Date(today);
-                    startDate.setDate(today.getDate() - 364);
+                    startDate.setDate(today.getDate() - 364); // 365 days including today
+                    
+                    // Start from Sunday of the week containing startDate
+                    const startSunday = new Date(startDate);
+                    startSunday.setDate(startDate.getDate() - startDate.getDay());
                     
                     this.performanceHeatmapData = [];
                     
-                    // Create array of all dates
-                    for (let i = 0; i < 365; i++) {
-                        const date = new Date(startDate);
-                        date.setDate(startDate.getDate() + i);
-                        const dateStr = date.toISOString().split('T')[0];
-                        
-                        this.performanceHeatmapData.push({
-                            date: dateStr,
-                            performance: 'neutral' // default to neutral
-                        });
-                    }
+                    // Only include data where we have actual balance history
+                    const performanceByDate = {};
                     
-                    // Get balance history and calculate daily performance
                     if (this.balanceHistory && this.balanceHistory.length > 1) {
                         // Sort by date
                         const sortedHistory = [...this.balanceHistory].sort((a, b) => 
@@ -10783,20 +10777,44 @@
                             const previous = sortedHistory[i - 1];
                             const dateStr = current.date;
                             
-                            const dayData = this.performanceHeatmapData.find(d => d.date === dateStr);
-                            if (dayData) {
-                                if (current.balance > previous.balance) {
-                                    dayData.performance = 'gain';
-                                } else if (current.balance < previous.balance) {
-                                    dayData.performance = 'loss';
-                                } else {
-                                    dayData.performance = 'neutral';
-                                }
-                                dayData.currentBalance = current.balance;
-                                dayData.previousBalance = previous.balance;
-                                dayData.change = current.balance - previous.balance;
+                            let performance = 'neutral';
+                            if (current.balance > previous.balance) {
+                                performance = 'gain';
+                            } else if (current.balance < previous.balance) {
+                                performance = 'loss';
                             }
+                            
+                            performanceByDate[dateStr] = {
+                                performance: performance,
+                                currentBalance: current.balance,
+                                previousBalance: previous.balance,
+                                change: current.balance - previous.balance
+                            };
                         }
+                    }
+                    
+                    // Generate grid data from startSunday to create proper 7x53 grid
+                    const endDate = new Date(today);
+                    endDate.setDate(today.getDate() + (6 - today.getDay())); // End on Saturday of current week
+                    
+                    let currentDate = new Date(startSunday);
+                    while (currentDate <= endDate) {
+                        const dateStr = currentDate.toISOString().split('T')[0];
+                        
+                        if (performanceByDate[dateStr]) {
+                            this.performanceHeatmapData.push({
+                                date: dateStr,
+                                ...performanceByDate[dateStr]
+                            });
+                        } else {
+                            // No data for this day - just add empty slot
+                            this.performanceHeatmapData.push({
+                                date: dateStr,
+                                performance: null
+                            });
+                        }
+                        
+                        currentDate.setDate(currentDate.getDate() + 1);
                     }
                 } catch (error) {
                     console.error('❌ Error generating performance heatmap data:', error);
@@ -10814,28 +10832,39 @@
                 // Create squares for each day
                 this.performanceHeatmapData.forEach(dayData => {
                     const square = document.createElement('div');
-                    square.className = `heatmap-square performance-${dayData.performance}`;
                     
-                    // Add tooltip
-                    const date = new Date(dayData.date);
-                    const formattedDate = date.toLocaleDateString('de-DE', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
-                    });
-                    
-                    let tooltip = `${formattedDate}`;
-                    if (dayData.change !== undefined) {
-                        const changeText = dayData.change > 0 ? 
-                            `+${dayData.change.toFixed(3)} SOL` : 
-                            `${dayData.change.toFixed(3)} SOL`;
-                        tooltip += `\\n${changeText}`;
-                        tooltip += `\\n${dayData.currentBalance.toFixed(3)} SOL total`;
+                    if (dayData.performance === null) {
+                        // No data - use empty styling like Todo heatmap
+                        square.className = 'heatmap-square level-0';
+                        square.title = new Date(dayData.date).toLocaleDateString('de-DE', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric' 
+                        }) + '\\nNo data';
                     } else {
-                        tooltip += '\\nNo data';
+                        // Has performance data
+                        square.className = `heatmap-square performance-${dayData.performance}`;
+                        
+                        // Add tooltip
+                        const date = new Date(dayData.date);
+                        const formattedDate = date.toLocaleDateString('de-DE', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric' 
+                        });
+                        
+                        let tooltip = `${formattedDate}`;
+                        if (dayData.change !== undefined) {
+                            const changeText = dayData.change > 0 ? 
+                                `+${dayData.change.toFixed(3)} SOL` : 
+                                `${dayData.change.toFixed(3)} SOL`;
+                            tooltip += `\\n${changeText}`;
+                            tooltip += `\\n${dayData.currentBalance.toFixed(3)} SOL total`;
+                        }
+                        
+                        square.title = tooltip;
                     }
                     
-                    square.title = tooltip;
                     container.appendChild(square);
                 });
                 
@@ -10845,37 +10874,47 @@
 
             generatePerformanceMonthLabels() {
                 const monthsContainer = document.getElementById('performance-heatmap-months');
-                if (!monthsContainer) return;
+                if (!monthsContainer || !this.performanceHeatmapData) return;
                 
                 monthsContainer.innerHTML = '';
                 
-                // Create month labels for the last 12 months
-                const months = [];
-                for (let i = 11; i >= 0; i--) {
-                    const date = new Date();
-                    date.setMonth(date.getMonth() - i);
-                    months.push(date.toLocaleDateString('de-DE', { month: 'short' }));
-                }
+                // Render month labels same as Todo heatmap
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                let currentMonth = -1;
                 
-                months.forEach(month => {
-                    const monthElement = document.createElement('div');
-                    monthElement.className = 'heatmap-month';
-                    monthElement.textContent = month;
-                    monthsContainer.appendChild(monthElement);
-                });
+                for (let week = 0; week < 53; week++) {
+                    const weekStart = week * 7;
+                    if (weekStart < this.performanceHeatmapData.length) {
+                        const date = new Date(this.performanceHeatmapData[weekStart].date);
+                        const month = date.getMonth();
+                        
+                        if (month !== currentMonth && week % 4 === 0) {
+                            const monthDiv = document.createElement('div');
+                            monthDiv.className = 'heatmap-month';
+                            monthDiv.textContent = months[month];
+                            monthDiv.style.gridColumn = `${week + 1} / span 4`;
+                            monthsContainer.appendChild(monthDiv);
+                            currentMonth = month;
+                        }
+                    }
+                }
             }
 
             updatePerformanceHeatmapStats() {
                 const statsElement = document.getElementById('performance-heatmap-stats');
                 if (!statsElement || !this.performanceHeatmapData) return;
                 
-                const totalDays = this.performanceHeatmapData.filter(d => d.change !== undefined).length;
-                const gainDays = this.performanceHeatmapData.filter(d => d.performance === 'gain').length;
-                const lossDays = this.performanceHeatmapData.filter(d => d.performance === 'loss').length;
+                // Only count days with actual performance data (not null)
+                const daysWithData = this.performanceHeatmapData.filter(d => d.performance !== null);
+                const totalDays = daysWithData.length;
+                const gainDays = daysWithData.filter(d => d.performance === 'gain').length;
+                const lossDays = daysWithData.filter(d => d.performance === 'loss').length;
+                const neutralDays = daysWithData.filter(d => d.performance === 'neutral').length;
                 
                 if (totalDays > 0) {
                     const winRate = ((gainDays / totalDays) * 100).toFixed(1);
-                    statsElement.textContent = `${gainDays} gain days, ${lossDays} loss days (${winRate}% win rate)`;
+                    statsElement.textContent = `${gainDays} gain, ${lossDays} loss, ${neutralDays} neutral (${winRate}% win rate)`;
                 } else {
                     statsElement.textContent = 'No performance data available';
                 }
