@@ -10751,18 +10751,18 @@
 
             async generatePerformanceHeatmapData() {
                 try {
-                    // Generate data for the last 365 days (like GitHub)
+                    // EXACTLY the same date logic as Todo heatmap
                     const today = new Date();
                     const startDate = new Date(today);
                     startDate.setDate(today.getDate() - 364); // 365 days including today
                     
-                    // Start from Sunday of the week containing startDate
+                    // Start from Sunday of the week containing startDate (SAME AS TODO)
                     const startSunday = new Date(startDate);
                     startSunday.setDate(startDate.getDate() - startDate.getDay());
                     
                     this.performanceHeatmapData = [];
                     
-                    // Only include data where we have actual balance history
+                    // Process balance history data
                     const performanceByDate = {};
                     
                     if (this.balanceHistory && this.balanceHistory.length > 1) {
@@ -10775,7 +10775,11 @@
                         for (let i = 1; i < sortedHistory.length; i++) {
                             const current = sortedHistory[i];
                             const previous = sortedHistory[i - 1];
-                            const dateStr = current.date;
+                            
+                            // Use local date conversion SAME AS TODO HEATMAP
+                            const utcDate = new Date(current.date + 'T00:00:00Z');
+                            const localDate = new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
+                            const dateStr = localDate.toISOString().split('T')[0];
                             
                             let performance = 'neutral';
                             if (current.balance > previous.balance) {
@@ -10793,11 +10797,14 @@
                         }
                     }
                     
-                    // Generate exactly 371 days like Todo heatmap (53 weeks * 7 days)
+                    // Generate EXACTLY 371 days like Todo heatmap (53 weeks * 7 days = 371)
                     for (let i = 0; i < 371; i++) {
                         const date = new Date(startSunday);
                         date.setDate(startSunday.getDate() + i);
-                        const dateStr = date.toISOString().split('T')[0];
+                        
+                        // Use local date string to match with converted dates (SAME AS TODO)
+                        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                        const dateStr = localDate.toISOString().split('T')[0];
                         
                         if (performanceByDate[dateStr]) {
                             this.performanceHeatmapData.push({
@@ -10812,6 +10819,8 @@
                             });
                         }
                     }
+                    
+                    console.log(`📊 Generated performance heatmap data for ${this.performanceHeatmapData.length} days`);
                 } catch (error) {
                     console.error('❌ Error generating performance heatmap data:', error);
                     this.performanceHeatmapData = [];
