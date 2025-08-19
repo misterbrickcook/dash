@@ -1799,6 +1799,92 @@
             font-style: italic;
         }
 
+        /* === MOTIVATIONAL QUOTE WIDGET === */
+        .quote-widget {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .quote-widget:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .quote-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem;
+            color: white;
+        }
+
+        .quote-icon {
+            font-size: 2.5rem;
+            opacity: 0.9;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .quote-content {
+            flex: 1;
+        }
+
+        .quote-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+            font-style: italic;
+        }
+
+        .quote-author {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        .quote-refresh-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .quote-refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 768px) {
+            .quote-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .quote-text {
+                font-size: 1rem;
+            }
+        }
+
         .close-trade-form .form-group {
             margin-bottom: 1.5rem;
         }
@@ -3053,6 +3139,22 @@
                 </div>
                 <div class="grid-3" id="termine-container">
                     <!-- Termine will be loaded from TerminManager -->
+                </div>
+            </section>
+
+            <!-- Motivational Quote Widget -->
+            <section class="quote-widget" style="margin-bottom: 4rem;">
+                <div class="quote-container">
+                    <div class="quote-icon">💡</div>
+                    <div class="quote-content">
+                        <div class="quote-text" id="daily-quote">
+                            "The way to get started is to quit talking and begin doing."
+                        </div>
+                        <div class="quote-author" id="quote-author">— Walt Disney</div>
+                    </div>
+                    <button class="quote-refresh-btn" id="refresh-quote-btn" title="New Quote">
+                        <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                    </button>
                 </div>
             </section>
         </section>
@@ -10110,6 +10212,88 @@
                     }
                 });
             }
+        });
+
+        // === MOTIVATIONAL QUOTES SYSTEM ===
+        class MotivationalQuotes {
+            constructor() {
+                this.quotes = [
+                    { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+                    { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+                    { text: "Don't be afraid to give up the good to go for the great.", author: "John D. Rockefeller" },
+                    { text: "The only impossible journey is the one you never begin.", author: "Tony Robbins" },
+                    { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
+                    { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+                    { text: "Everything you've ever wanted is on the other side of fear.", author: "George Addair" },
+                    { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+                    { text: "The only person you are destined to become is the person you decide to be.", author: "Ralph Waldo Emerson" },
+                    { text: "I have not failed. I've just found 10,000 ways that won't work.", author: "Thomas Edison" },
+                    { text: "A successful man is one who can lay a firm foundation with the bricks others have thrown at him.", author: "David Brinkley" },
+                    { text: "The stock market is filled with individuals who know the price of everything, but the value of nothing.", author: "Philip Fisher" },
+                    { text: "Risk comes from not knowing what you're doing.", author: "Warren Buffett" },
+                    { text: "The four most dangerous words in investing are: 'this time it's different.'", author: "Sir John Templeton" },
+                    { text: "Time in the market beats timing the market.", author: "Ken Fisher" },
+                    { text: "An investment in knowledge pays the best interest.", author: "Benjamin Franklin" },
+                    { text: "The best investment you can make is in yourself.", author: "Warren Buffett" },
+                    { text: "Don't put all your eggs in one basket.", author: "Andrew Carnegie" },
+                    { text: "It's not how much money you make, but how much money you keep.", author: "Robert Kiyosaki" },
+                    { text: "The real measure of your wealth is how much you'd be worth if you lost all your money.", author: "Anonymous" }
+                ];
+                this.currentQuoteIndex = this.getTodaysQuoteIndex();
+            }
+
+            getTodaysQuoteIndex() {
+                // Use today's date to generate a consistent quote for the day
+                const today = new Date();
+                const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+                return dayOfYear % this.quotes.length;
+            }
+
+            getCurrentQuote() {
+                return this.quotes[this.currentQuoteIndex];
+            }
+
+            getRandomQuote() {
+                this.currentQuoteIndex = Math.floor(Math.random() * this.quotes.length);
+                return this.getCurrentQuote();
+            }
+
+            displayQuote(quote = null) {
+                const quoteToDisplay = quote || this.getCurrentQuote();
+                const quoteTextEl = document.getElementById('daily-quote');
+                const quoteAuthorEl = document.getElementById('quote-author');
+
+                if (quoteTextEl && quoteAuthorEl) {
+                    quoteTextEl.textContent = `"${quoteToDisplay.text}"`;
+                    quoteAuthorEl.textContent = `— ${quoteToDisplay.author}`;
+                }
+            }
+
+            init() {
+                // Display today's quote
+                this.displayQuote();
+
+                // Add refresh button functionality
+                const refreshBtn = document.getElementById('refresh-quote-btn');
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', () => {
+                        const newQuote = this.getRandomQuote();
+                        this.displayQuote(newQuote);
+                        
+                        // Animate the button
+                        refreshBtn.style.transform = 'rotate(360deg)';
+                        setTimeout(() => {
+                            refreshBtn.style.transform = 'rotate(0deg)';
+                        }, 300);
+                    });
+                }
+            }
+        }
+
+        // Initialize Motivational Quotes
+        document.addEventListener('DOMContentLoaded', () => {
+            window.motivationalQuotes = new MotivationalQuotes();
+            window.motivationalQuotes.init();
         });
     </script>
     
