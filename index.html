@@ -2182,13 +2182,19 @@
             color: #666666;
             cursor: pointer;
             padding: 0.25rem 0.5rem;
-            transition: all 0.2s ease;
-            border-radius: 2px;
+            transition: all 0.3s ease;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
         
         .sticky-minimize:hover {
             color: #000000;
-            background: #f0f0f0;
+            transform: rotate(180deg) scale(1.1);
         }
         
         .sticky-content {
