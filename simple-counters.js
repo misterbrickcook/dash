@@ -23,16 +23,22 @@ class SimpleCounters {
         const now = new Date();
         const user = window.supabase.getCurrentUser();
         
-        // Calculate date ranges for last 30 days vs previous 30 days
+        // Calculate date ranges for last 30 days vs previous 30 days (use local timezone)
         const last30End = new Date();
         const last30Start = new Date(last30End.getTime() - 30 * 24 * 60 * 60 * 1000);
         const prev30End = new Date(last30Start.getTime() - 1); // Day before last30Start
         const prev30Start = new Date(prev30End.getTime() - 30 * 24 * 60 * 60 * 1000);
         
-        const last30StartStr = last30Start.toISOString().split('T')[0];
-        const last30EndStr = last30End.toISOString().split('T')[0];
-        const prev30StartStr = prev30Start.toISOString().split('T')[0];
-        const prev30EndStr = prev30End.toISOString().split('T')[0];
+        // Convert to local date strings (like heatmap does)
+        const last30StartLocal = new Date(last30Start.getTime() - last30Start.getTimezoneOffset() * 60000);
+        const last30EndLocal = new Date(last30End.getTime() - last30End.getTimezoneOffset() * 60000);
+        const prev30StartLocal = new Date(prev30Start.getTime() - prev30Start.getTimezoneOffset() * 60000);
+        const prev30EndLocal = new Date(prev30End.getTime() - prev30End.getTimezoneOffset() * 60000);
+        
+        const last30StartStr = last30StartLocal.toISOString().split('T')[0];
+        const last30EndStr = last30EndLocal.toISOString().split('T')[0];
+        const prev30StartStr = prev30StartLocal.toISOString().split('T')[0];
+        const prev30EndStr = prev30EndLocal.toISOString().split('T')[0];
         
         try {
             // Get todos for both periods using updated_at (when completed)
@@ -46,6 +52,9 @@ class SimpleCounters {
             const last30TodoCount = last30TodoData ? last30TodoData.length : 0;
             const prev30TodoCount = prev30TodoData ? prev30TodoData.length : 0;
             const todoPercentChange = this.calculatePercentChange(prev30TodoCount, last30TodoCount);
+            
+            console.log(`🔍 Counter Debug: Found ${last30TodoCount} todos in last 30 days (${last30StartStr} to ${last30EndStr})`);
+            console.log(`🔍 Counter Debug: Found ${prev30TodoCount} todos in previous 30 days (${prev30StartStr} to ${prev30EndStr})`);
 
             // Count routine completions for last 30 days and previous 30 days
             let last30MorningCount = 0;
