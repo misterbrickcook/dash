@@ -10793,13 +10793,11 @@
                         }
                     }
                     
-                    // Generate grid data from startSunday to create proper 7x53 grid
-                    const endDate = new Date(today);
-                    endDate.setDate(today.getDate() + (6 - today.getDay())); // End on Saturday of current week
-                    
-                    let currentDate = new Date(startSunday);
-                    while (currentDate <= endDate) {
-                        const dateStr = currentDate.toISOString().split('T')[0];
+                    // Generate exactly 371 days like Todo heatmap (53 weeks * 7 days)
+                    for (let i = 0; i < 371; i++) {
+                        const date = new Date(startSunday);
+                        date.setDate(startSunday.getDate() + i);
+                        const dateStr = date.toISOString().split('T')[0];
                         
                         if (performanceByDate[dateStr]) {
                             this.performanceHeatmapData.push({
@@ -10813,8 +10811,6 @@
                                 performance: null
                             });
                         }
-                        
-                        currentDate.setDate(currentDate.getDate() + 1);
                     }
                 } catch (error) {
                     console.error('❌ Error generating performance heatmap data:', error);
@@ -10829,44 +10825,54 @@
                 // Clear existing content
                 container.innerHTML = '';
                 
-                // Create squares for each day
-                this.performanceHeatmapData.forEach(dayData => {
-                    const square = document.createElement('div');
-                    
-                    if (dayData.performance === null) {
-                        // No data - use empty styling like Todo heatmap
-                        square.className = 'heatmap-square level-0';
-                        square.title = new Date(dayData.date).toLocaleDateString('de-DE', { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric' 
-                        }) + '\\nNo data';
-                    } else {
-                        // Has performance data
-                        square.className = `heatmap-square performance-${dayData.performance}`;
-                        
-                        // Add tooltip
-                        const date = new Date(dayData.date);
-                        const formattedDate = date.toLocaleDateString('de-DE', { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric' 
-                        });
-                        
-                        let tooltip = `${formattedDate}`;
-                        if (dayData.change !== undefined) {
-                            const changeText = dayData.change > 0 ? 
-                                `+${dayData.change.toFixed(3)} SOL` : 
-                                `${dayData.change.toFixed(3)} SOL`;
-                            tooltip += `\\n${changeText}`;
-                            tooltip += `\\n${dayData.currentBalance.toFixed(3)} SOL total`;
+                // Create squares with explicit grid positioning (same as Todo heatmap)
+                for (let week = 0; week < 53; week++) {
+                    for (let day = 0; day < 7; day++) {
+                        const index = week * 7 + day;
+                        if (index < this.performanceHeatmapData.length) {
+                            const dayData = this.performanceHeatmapData[index];
+                            const square = document.createElement('div');
+                            
+                            if (dayData.performance === null) {
+                                // No data - use empty styling like Todo heatmap
+                                square.className = 'heatmap-square level-0';
+                                square.title = new Date(dayData.date).toLocaleDateString('de-DE', { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                }) + '\\nNo data';
+                            } else {
+                                // Has performance data
+                                square.className = `heatmap-square performance-${dayData.performance}`;
+                                
+                                // Add tooltip
+                                const date = new Date(dayData.date);
+                                const formattedDate = date.toLocaleDateString('de-DE', { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                });
+                                
+                                let tooltip = `${formattedDate}`;
+                                if (dayData.change !== undefined) {
+                                    const changeText = dayData.change > 0 ? 
+                                        `+${dayData.change.toFixed(3)} SOL` : 
+                                        `${dayData.change.toFixed(3)} SOL`;
+                                    tooltip += `\\n${changeText}`;
+                                    tooltip += `\\n${dayData.currentBalance.toFixed(3)} SOL total`;
+                                }
+                                
+                                square.title = tooltip;
+                            }
+                            
+                            // Set explicit grid position: column = week + 1, row = day + 1
+                            square.style.gridColumn = week + 1;
+                            square.style.gridRow = day + 1;
+                            
+                            container.appendChild(square);
                         }
-                        
-                        square.title = tooltip;
                     }
-                    
-                    container.appendChild(square);
-                });
+                }
                 
                 // Generate month labels
                 this.generatePerformanceMonthLabels();
