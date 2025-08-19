@@ -162,8 +162,8 @@ class SimpleCounters {
                 labelEl.innerHTML = `${baseLabel}<br><span style="font-size: 0.7rem; color: ${color};">(${sign}${percentChange}% vs. vorherige 30T)</span>`;
             }
             
-            // Trigger success animation if value increased
-            if (hasIncreased && this.isInitialized) {
+            // Trigger success animation if value increased (unless manually disabled)
+            if (hasIncreased && this.isInitialized && !this.disableInternalAnimation) {
                 this.triggerSuccessAnimation(index);
             }
             
@@ -248,20 +248,26 @@ class SimpleCounters {
     }
 
     async onMorningRoutineChanged() {
-        // First update counter, then animate with new value
+        // Disable internal animation, update counter, then manually animate
+        this.disableInternalAnimation = true;
         await this.updateAllCounters();
+        this.disableInternalAnimation = false;
         setTimeout(() => this.triggerSuccessAnimation(0), 100); // Morning only
     }
 
     async onEveningRoutineChanged() {
-        // First update counter, then animate with new value
+        // Disable internal animation, update counter, then manually animate
+        this.disableInternalAnimation = true;
         await this.updateAllCounters();
+        this.disableInternalAnimation = false;
         setTimeout(() => this.triggerSuccessAnimation(1), 100); // Evening only
     }
 
     async onTodoChanged() {
-        // First update counter, then animate with new value
+        // Disable internal animation, update counter, then manually animate
+        this.disableInternalAnimation = true;
         await this.updateAllCounters();
+        this.disableInternalAnimation = false;
         setTimeout(() => this.triggerSuccessAnimation(2), 100);
     }
 
