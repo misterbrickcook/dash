@@ -6608,10 +6608,6 @@
             showAddJournalModal() {
                 const modal = document.getElementById('add-journal-modal');
                 modal.classList.remove('hide');
-                
-                // Set today's date as default
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('journal-date').value = today;
             },
             
             hideAddJournalModal() {
@@ -6619,9 +6615,6 @@
                 modal.classList.add('hide');
                 // Reset form
                 document.getElementById('add-journal-form').reset();
-                // Reset date back to today
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('journal-date').value = today;
             },
             
             async addEntry(entryData) {
@@ -6666,53 +6659,87 @@
                 this.refreshCurrentView();
             },
             
-            refreshCurrentView() {
-                // Get current active category
-                const activeTab = document.querySelector('.journal-tab.active');
-                const activeCategory = activeTab ? activeTab.getAttribute('data-journal-category') : 'alle';
-                
-                this.displayEntriesForCategory(activeCategory);
-            },
-            
-            displayEntriesForCategory(category) {
-                const container = document.getElementById(`journal-${category}`);
+            renderEntries() {
+                const container = document.getElementById('journal-entries');
                 if (!container) return;
                 
-                let filteredEntries = [];
-                
-                switch(category) {
-                    case 'alle':
-                        filteredEntries = this.entries;
-                        break;
-                    default:
-                        // Filter entries that have the selected tag
-                        filteredEntries = this.entries.filter(entry => 
-                            entry.tags && entry.tags.includes(category)
-                        );
-                }
-                
-                // Sort by date (newest first)
-                filteredEntries.sort((a, b) => new Date(b.entry_date || b.date) - new Date(a.entry_date || a.date));
-                
-                // Clear container
-                container.innerHTML = '';
-                
-                if (filteredEntries.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Keine Journal-Einträge vorhanden</p>';
+                if (this.entries.length === 0) {
+                    container.innerHTML = '<div class="empty-journal">Keine Journal-Einträge vorhanden. Erstelle deinen ersten Eintrag!</div>';
                     return;
                 }
                 
-                // Create grid for entries
-                const grid = document.createElement('div');
-                grid.className = 'grid-2'; // 2-spaltig für Journal-Einträge
+                // Sort entries by date (newest first)
+                const sortedEntries = [...this.entries].sort((a, b) => 
+                    new Date(b.created_at) - new Date(a.created_at)
+                );
                 
-                // Display entries
-                filteredEntries.forEach(entry => {
-                    const entryElement = this.createEntryElement(entry);
-                    grid.appendChild(entryElement);
+                let html = '';
+                sortedEntries.forEach(entry => {
+                    const date = new Date(entry.created_at).toLocaleDateString('de-DE');
+                    const time = new Date(entry.created_at).toLocaleTimeString('de-DE', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                    
+                    // Parse tags (handle both old category and new tags)
+                    let tags = [];
+                    if (entry.tags) {
+                        tags = entry.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+                    } else if (entry.category) {
+                        // Migration: use old category as a tag
+                        tags = [entry.category];
+                    }
+                    
+                    const tagsHtml = tags.map(tag => `<span class="journal-tag">${tag}</span>`).join('');
+                    
+                    html += `
+                        <div class="journal-entry" data-entry-id="${entry.id}">
+                            <div class="journal-entry-header">
+                                <h3 class="journal-entry-title">${entry.title}</h3>
+                                <div class="journal-entry-actions">
+                                    <button class="delete-entry-btn" data-entry-id="${entry.id}" title="Eintrag löschen">
+                                        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="journal-entry-content">${entry.content}</div>
+                            <div class="journal-entry-meta">
+                                <div class="journal-entry-tags">
+                                    ${tagsHtml}
+                                </div>
+                                <span class="journal-entry-date">${date} • ${time}</span>
+                            </div>
+                        </div>
+                    `;
                 });
                 
-                container.appendChild(grid);
+                container.innerHTML = html;
+                
+                // Initialize Lucide icons
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            },
+
+            filterEntries() {
+                const searchTerm = document.getElementById('journal-search').value.toLowerCase();
+                
+                const entries = document.querySelectorAll('.journal-entry');
+                entries.forEach(entry => {
+                    const title = entry.querySelector('.journal-entry-title').textContent.toLowerCase();
+                    const content = entry.querySelector('.journal-entry-content').textContent.toLowerCase();
+                    const tags = Array.from(entry.querySelectorAll('.journal-tag')).map(tag => tag.textContent.toLowerCase());
+                    
+                    const matchesSearch = title.includes(searchTerm) || 
+                                        content.includes(searchTerm) || 
+                                        tags.some(tag => tag.includes(searchTerm));
+                    
+                    if (matchesSearch) {
+                        entry.style.display = 'block';
+                    } else {
+                        entry.style.display = 'none';
+                    }
+                });
             },
             
             createEntryElement(entry) {
@@ -7338,8 +7365,7 @@
                     const entryData = {
                         title: document.getElementById('journal-title').value,
                         content: document.getElementById('journal-content').value,
-                        tags: [...selectedTags], // Copy array
-                        date: document.getElementById('journal-date').value
+                        tags: [...selectedTags] // Copy array
                     };
                     
                     await JournalManager.addEntry(entryData);
