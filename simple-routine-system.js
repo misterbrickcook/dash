@@ -279,15 +279,20 @@ class SimpleRoutineManager {
         // Update UI
         this.updateUI();
 
-        // Refresh simple counters ONLY after routine completion (not on uncheck)
-        if (window.SimpleCounters && isChecked) {
-            if (routineType === 'morning') {
-                window.SimpleCounters.onMorningRoutineChanged();
-            } else if (routineType === 'evening') {
-                window.SimpleCounters.onEveningRoutineChanged();
+        // Always update counters (for correct count), but animate only on completion
+        if (window.SimpleCounters) {
+            if (isChecked) {
+                // Completion: Update + Animate
+                if (routineType === 'morning') {
+                    window.SimpleCounters.onMorningRoutineChanged();
+                } else if (routineType === 'evening') {
+                    window.SimpleCounters.onEveningRoutineChanged();
+                } else {
+                    window.SimpleCounters.onRoutineChanged();
+                }
             } else {
-                // Fallback for unknown types
-                window.SimpleCounters.onRoutineChanged();
+                // Uncheck: Update only, no animation
+                window.SimpleCounters.updateAllCounters();
             }
         }
 
