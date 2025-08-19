@@ -2249,7 +2249,7 @@
         }
         
         .trading-rules-sticky.minimized .sticky-minimize {
-            transform: rotate(180deg);
+            /* Remove rotation since we now change the text content */
         }
         
         .trading-rules-sticky.minimized .sticky-header {
@@ -3144,7 +3144,7 @@
             <div class="trading-rules-sticky">
                 <div class="sticky-header">
                     <span class="sticky-title">📝 Trading Grundregeln</span>
-                    <button class="sticky-minimize" onclick="this.parentElement.parentElement.classList.toggle('minimized')" title="Minimieren">−</button>
+                    <button class="sticky-minimize" onclick="this.parentElement.parentElement.classList.toggle('minimized'); this.textContent = this.parentElement.parentElement.classList.contains('minimized') ? '+' : '−'" title="Ein-/Ausklappen">−</button>
                 </div>
                 <div class="sticky-content">
                     <ul class="rules-list">
