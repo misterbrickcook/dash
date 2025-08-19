@@ -4853,7 +4853,6 @@
                                 priority: priorityString // Convert integer to string
                             };
                         });
-                        console.log(`☁️ TodoManager: Loaded ${this.todos.length} todos from cloud`);
                         this.refreshCurrentView();
                         this.updateHomeTodos();
                     } else {
@@ -5371,7 +5370,6 @@
                                 unit: goal.unit
                             };
                         });
-                        console.log(`☁️ GoalManager: Loaded ${this.goals.length} goals from cloud`);
                         this.refreshCurrentView();
                     } else {
                         console.log('☁️ GoalManager: No goals found in cloud');
@@ -5653,7 +5651,6 @@
                 
                 // Prepare progress display  
                 const hasProgressData = goal.hasOwnProperty('startValue') && goal.hasOwnProperty('targetValue');
-                console.log('🔍 Goal progress check for:', goal.name);
                 console.log('🔍 hasProgressData:', hasProgressData);
                 console.log('🔍 startValue:', goal.startValue, typeof goal.startValue);
                 console.log('🔍 targetValue:', goal.targetValue, typeof goal.targetValue);
@@ -6136,7 +6133,6 @@
                                 tags: tags
                             };
                         });
-                        console.log(`☁️ JournalManager: Loaded ${this.entries.length} entries from cloud`);
                         this.refreshCurrentView();
                     } else {
                         console.log('☁️ JournalManager: No entries found in cloud');
@@ -6346,7 +6342,6 @@
                     
                     if (data && Array.isArray(data)) {
                         this.termine = data;
-                        console.log(`☁️ TerminManager: Loaded ${this.termine.length} termine from cloud`);
                         this.displayTermine();
                     } else {
                         console.log('☁️ TerminManager: No termine found in cloud');
@@ -6460,7 +6455,6 @@
             displayTermine() {
                 console.log('📅 TerminManager.displayTermine() called');
                 console.log('📊 Current termine in memory:', this.termine);
-                console.log('📈 Termine count:', this.termine.length);
                 
                 const container = document.getElementById('termine-container');
                 if (!container) {
@@ -6479,7 +6473,6 @@
                     return;
                 }
                 
-                console.log(`📊 Rendering ${this.termine.length} termine to DOM...`);
                 
                 // Sort by date/time (earliest first)
                 const sortedTermine = this.termine.sort((a, b) => {
@@ -6989,7 +6982,6 @@
                     try {
                         console.log('☁️ ResourceManager: Loading resources from cloud...');
                         this.resources = await cloudStorage.getResources() || [];
-                        console.log(`☁️ ResourceManager: Loaded ${this.resources.length} resources from cloud`);
                         
                         // Migrate old emoji icons to lucide icons (one-time migration)
                         this.migrateEmojiIcons();
@@ -7665,7 +7657,6 @@
                     return { all: allTodos, completed: completedTodos };
                 };
                 
-                console.log('🔧 Debug function available: debugTodoCount()');
             }, 2000);
             
             // Mobile debug removed for cleaner console output
@@ -7946,7 +7937,6 @@
                     
                     if (data && Array.isArray(data)) {
                         this.entries = data;
-                        console.log(`☁️ Wiki: Loaded ${this.entries.length} entries from cloud`);
                         this.render();
                     } else {
                         console.log('☁️ Wiki: No entries found in cloud');

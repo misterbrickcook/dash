@@ -203,8 +203,8 @@ class SimpleCounters {
 
     async getSolBalance() {
         try {
-            // Use public Solana RPC endpoint instead of API key
-            const response = await fetch('https://api.mainnet-beta.solana.com', {
+            // Use alternative public Solana RPC endpoint
+            const response = await fetch('https://solana-api.projectserum.com', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
