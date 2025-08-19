@@ -279,8 +279,8 @@ class SimpleRoutineManager {
         // Update UI
         this.updateUI();
 
-        // Refresh simple counters after routine completion - specific to routine type
-        if (window.SimpleCounters) {
+        // Refresh simple counters ONLY after routine completion (not on uncheck)
+        if (window.SimpleCounters && isChecked) {
             if (routineType === 'morning') {
                 window.SimpleCounters.onMorningRoutineChanged();
             } else if (routineType === 'evening') {
