@@ -920,9 +920,13 @@
             cursor: pointer;
             padding: 0.25rem;
             border-radius: 0;
+            display: none;
         }
         .delete-entry-btn:hover {
             background: #fee2e2;
+        }
+        .journal-entry.show-delete .delete-entry-btn {
+            display: block;
         }
         .wiki-entry-source {
             background: #e0f2fe;
@@ -6810,6 +6814,9 @@
                 if (window.lucide) {
                     lucide.createIcons();
                 }
+                
+                // Add right-click handlers for delete buttons
+                this.addDeleteHandlers();
             },
 
             
@@ -6877,6 +6884,32 @@
                     console.error('❌ Error deleting journal entry:', error);
                     alert('Fehler beim Löschen des Eintrags: ' + error.message);
                 }
+            },
+
+            addDeleteHandlers() {
+                document.querySelectorAll('.journal-entry').forEach(entry => {
+                    entry.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        
+                        // Hide all other delete buttons first
+                        document.querySelectorAll('.journal-entry').forEach(el => {
+                            el.classList.remove('show-delete');
+                        });
+                        
+                        // Show delete button for this entry
+                        entry.classList.add('show-delete');
+                        
+                        // Hide delete button after 3 seconds
+                        setTimeout(() => {
+                            entry.classList.remove('show-delete');
+                        }, 3000);
+                    });
+                    
+                    // Hide delete button on regular click
+                    entry.addEventListener('click', () => {
+                        entry.classList.remove('show-delete');
+                    });
+                });
             },
 
             search() {
@@ -8505,6 +8538,8 @@
                     if (window.lucide) {
                         lucide.createIcons();
                     }
+                    // Add right-click handlers for delete buttons
+                    this.addDeleteHandlers();
                 }, 100);
             },
             
@@ -8591,6 +8626,32 @@
                     console.error('❌ Wiki: Error loading from cloud:', error);
                     throw error; // Don't hide errors in pure cloud mode
                 }
+            },
+
+            addDeleteHandlers() {
+                document.querySelectorAll('.journal-entry').forEach(entry => {
+                    entry.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        
+                        // Hide all other delete buttons first
+                        document.querySelectorAll('.journal-entry').forEach(el => {
+                            el.classList.remove('show-delete');
+                        });
+                        
+                        // Show delete button for this entry
+                        entry.classList.add('show-delete');
+                        
+                        // Hide delete button after 3 seconds
+                        setTimeout(() => {
+                            entry.classList.remove('show-delete');
+                        }, 3000);
+                    });
+                    
+                    // Hide delete button on regular click
+                    entry.addEventListener('click', () => {
+                        entry.classList.remove('show-delete');
+                    });
+                });
             },
             
             async saveToCloud() {
