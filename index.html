@@ -1974,14 +1974,8 @@
 
         .delete-overlay {
             position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            background: rgba(255, 255, 255, 0.95);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: 0.5rem;
+            right: 0.5rem;
             animation: fadeIn 0.2s ease;
             z-index: 10;
         }
@@ -1989,21 +1983,21 @@
         .delete-icon {
             background: #dc2626;
             color: white;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+            box-shadow: 0 1px 4px rgba(220, 38, 38, 0.3);
         }
 
         .delete-icon:hover {
             background: #b91c1c;
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+            transform: scale(1.05);
+            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
         }
 
         @keyframes fadeIn {
@@ -7582,7 +7576,7 @@
                     deleteOverlay.className = 'delete-overlay';
                     deleteOverlay.innerHTML = `
                         <div class="delete-icon" onclick="ResourceManager.confirmDelete('${resourceId}')">
-                            <i data-lucide="trash-2" style="width: 20px; height: 20px;"></i>
+                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                         </div>
                     `;
                     
