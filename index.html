@@ -856,6 +856,65 @@
             margin-bottom: 1.5rem;
             gap: 1rem;
         }
+        .journal-entry-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #000000;
+            margin: 0;
+        }
+        .journal-entry-content {
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            white-space: pre-wrap;
+        }
+        .journal-entry-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        .journal-entry-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .journal-tag {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .journal-entry-date {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+        .journal-entry-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .delete-entry-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0;
+        }
+        .delete-entry-btn:hover {
+            background: #fee2e2;
+        }
+        .wiki-entry-source {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
         .journal-date {
             font-size: 1rem;
             font-weight: 500;
@@ -8474,29 +8533,31 @@
             },
             
             renderEntry(entry) {
-                const tagsHtml = entry.tags.map(tag => `<span class="wiki-tag">${tag}</span>`).join('');
+                const tagsHtml = entry.tags.map(tag => `<span class="journal-tag">${tag}</span>`).join('');
                 const sourceHtml = entry.source ? `<span class="wiki-entry-source">Source: ${entry.source}</span>` : '';
-                const dateHtml = new Date(entry.created_at).toLocaleDateString('de-DE');
+                const date = new Date(entry.created_at).toLocaleDateString('de-DE');
+                const time = new Date(entry.created_at).toLocaleTimeString('de-DE', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
                 
                 return `
-                    <div class="wiki-entry">
-                        <div class="wiki-entry-header">
-                            <h3 class="wiki-entry-title">${entry.title}</h3>
+                    <div class="journal-entry" data-entry-id="${entry.id}">
+                        <div class="journal-entry-header">
+                            <h3 class="journal-entry-title">${entry.title}</h3>
+                            <div class="journal-entry-actions">
+                                <button class="delete-entry-btn" onclick="Wiki.deleteEntry('${entry.id}')" title="Delete">
+                                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="wiki-entry-content">${entry.content}</div>
-                        <div class="wiki-entry-meta">
-                            <div class="wiki-entry-left">
-                                <div class="wiki-entry-tags">${tagsHtml}</div>
+                        <div class="journal-entry-content">${entry.content}</div>
+                        <div class="journal-entry-meta">
+                            <div class="journal-entry-tags">
+                                ${tagsHtml}
                                 ${sourceHtml}
                             </div>
-                            <div class="wiki-entry-right">
-                                <span>${dateHtml}</span>
-                                <div class="wiki-entry-actions">
-                                    <button onclick="Wiki.deleteEntry('${entry.id}')" title="Delete">
-                                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-                                    </button>
-                                </div>
-                            </div>
+                            <span class="journal-entry-date">${date} • ${time}</span>
                         </div>
                     </div>
                 `;
