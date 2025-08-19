@@ -107,7 +107,6 @@ class SimpleCounters {
 
         } catch (error) {
             console.error('❌ SimpleCounters: Update failed:', error);
-            console.log('🔍 Counter Debug: Error details:', error);
         }
     }
 
@@ -235,8 +234,6 @@ class SimpleCounters {
             return 0;
         } catch (error) {
             console.error('SOL Balance fetch error:', error);
-            console.log('🔍 SOL Debug: Full error:', error);
-            console.log('🔍 SOL Debug: Response status was:', error.message);
             return 0; // Return 0 on error
         }
     }
@@ -262,7 +259,6 @@ class SimpleCounters {
 
     // Manual debug trigger
     async debugCounters() {
-        console.log('🔧 Manual counter debug triggered');
         await this.updateAllCounters();
     }
 
