@@ -3209,7 +3209,7 @@
             <button class="nav-tab" data-tab="tab-journal">Journal</button>
             <button class="nav-tab" data-tab="tab-trading">Trading</button>
             <button class="nav-tab" data-tab="tab-analytics">Analytics</button>
-            <button class="nav-tab" data-tab="tab-ressourcen">Ressourcen</button>
+            <button class="nav-tab" data-tab="tab-ressourcen"></button>
             <button class="nav-tab" data-tab="tab-wiki">Wiki</button>
             <button class="nav-tab" data-tab="tab-settings" style="display: none;">Settings</button>
             <div class="nav-actions">
@@ -3789,7 +3789,6 @@
         <!-- === RESSOURCEN TAB === -->
         <section id="tab-ressourcen" class="tab-section">
             <div class="resources-header">
-                <h2 style="font-size: 1.2rem; font-weight: 500; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.1em;">Ressourcen</h2>
                 <button id="add-resource-btn" class="btn">+ Add Resource</button>
             </div>
 
@@ -7560,7 +7559,7 @@
                     const deleteOverlay = document.createElement('div');
                     deleteOverlay.className = 'delete-overlay';
                     deleteOverlay.innerHTML = `
-                        <div class="delete-icon" onclick="ResourceManager.confirmDelete('${resourceId}')">
+                        <div class="delete-icon" onclick="event.stopPropagation(); ResourceManager.confirmDelete('${resourceId}')">
                             <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                         </div>
                     `;
