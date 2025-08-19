@@ -7402,73 +7402,23 @@
                     JournalManager.hideAddJournalModal();
                 });
             }
-            
-            // Tag selection functionality
-            let selectedTags = [];
-            
-            function updateTagsDisplay() {
-                const hiddenInput = document.getElementById('journal-category');
-                
-                // Update hidden input (use first tag or 'allgemein' as fallback for compatibility)
-                hiddenInput.value = selectedTags.length > 0 ? selectedTags[0] : 'allgemein';
-                
-                // Update tag option buttons
-                document.querySelectorAll('.tag-option').forEach(btn => {
-                    const tag = btn.getAttribute('data-tag');
-                    btn.classList.toggle('selected', selectedTags.includes(tag));
-                });
-            }
-            
-            // Tag option click handlers
-            document.querySelectorAll('.tag-option').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    
-                    // If clicking on the X, remove the tag
-                    if (e.target.classList.contains('remove-tag')) {
-                        const tag = btn.getAttribute('data-tag');
-                        selectedTags = selectedTags.filter(t => t !== tag);
-                        updateTagsDisplay();
-                        return;
-                    }
-                    
-                    const tag = btn.getAttribute('data-tag');
-                    
-                    if (selectedTags.includes(tag)) {
-                        // Already selected, remove it
-                        selectedTags = selectedTags.filter(t => t !== tag);
-                    } else {
-                        // Not selected, add it
-                        selectedTags.push(tag);
-                    }
-                    
-                    updateTagsDisplay();
-                });
-            });
-            
             // Add Journal Form Submission
             const addJournalForm = document.getElementById('add-journal-form');
             if (addJournalForm) {
                 addJournalForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     
-                    if (selectedTags.length === 0) {
-                        alert('Bitte wähle mindestens einen Tag aus.');
-                        return;
-                    }
+                    const tagsInput = document.getElementById('journal-tags').value.trim();
+                    const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag) : ['allgemein'];
                     
                     const entryData = {
                         title: document.getElementById('journal-title').value,
                         content: document.getElementById('journal-content').value,
-                        tags: [...selectedTags] // Copy array
+                        tags: tags
                     };
                     
                     await JournalManager.addEntry(entryData);
                     JournalManager.hideAddJournalModal();
-                    
-                    // Reset tags
-                    selectedTags = [];
-                    updateTagsDisplay();
                 });
             }
             
