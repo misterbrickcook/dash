@@ -364,60 +364,35 @@
             border-color: #000000;
         }
         
-        /* Success Animation */
+        /* Success Animation - Smooth and Unified */
         .streak-tile.success-animation {
-            animation: successPulse 0.6s ease-out;
-            border-color: #059669;
-            box-shadow: 0 0 20px rgba(5, 150, 105, 0.3);
+            animation: smoothSuccess 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        @keyframes successPulse {
+        @keyframes smoothSuccess {
             0% {
                 transform: scale(1);
                 border-color: #e0e0e0;
                 box-shadow: 0 0 0 rgba(5, 150, 105, 0);
+                background: #ffffff;
             }
-            50% {
-                transform: scale(1.05);
+            30% {
+                transform: scale(1.02);
                 border-color: #059669;
-                box-shadow: 0 0 20px rgba(5, 150, 105, 0.5);
+                box-shadow: 0 0 15px rgba(5, 150, 105, 0.4);
+                background: rgba(5, 150, 105, 0.05);
+            }
+            70% {
+                transform: scale(1.01);
+                border-color: #059669;
+                box-shadow: 0 0 25px rgba(5, 150, 105, 0.6);
+                background: rgba(5, 150, 105, 0.08);
             }
             100% {
                 transform: scale(1);
                 border-color: #059669;
-                box-shadow: 0 0 20px rgba(5, 150, 105, 0.3);
-            }
-        }
-        
-        /* Success particle effect */
-        .streak-tile::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: radial-gradient(circle, rgba(5, 150, 105, 0.3) 0%, transparent 70%);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            opacity: 0;
-        }
-        
-        .streak-tile.success-animation::before {
-            animation: successRipple 0.6s ease-out;
-        }
-        
-        @keyframes successRipple {
-            0% {
-                width: 0;
-                height: 0;
-                opacity: 1;
-            }
-            100% {
-                width: 200px;
-                height: 200px;
-                opacity: 0;
+                box-shadow: 0 0 15px rgba(5, 150, 105, 0.3);
+                background: #ffffff;
             }
         }
         
@@ -431,15 +406,26 @@
         }
         
         .streak-tile.success-animation .streak-number {
-            animation: numberBounce 0.6s ease-out;
+            animation: smoothNumberGlow 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             color: #059669;
         }
         
-        @keyframes numberBounce {
-            0% { transform: scale(1); }
-            30% { transform: scale(1.2); }
-            60% { transform: scale(0.95); }
-            100% { transform: scale(1); }
+        @keyframes smoothNumberGlow {
+            0% { 
+                transform: scale(1); 
+                color: #000000;
+                text-shadow: none;
+            }
+            40% { 
+                transform: scale(1.08); 
+                color: #059669;
+                text-shadow: 0 0 10px rgba(5, 150, 105, 0.5);
+            }
+            100% { 
+                transform: scale(1); 
+                color: #059669;
+                text-shadow: 0 0 5px rgba(5, 150, 105, 0.3);
+            }
         }
         .streak-label {
             font-size: 0.9rem;
