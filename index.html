@@ -1529,6 +1529,53 @@
             padding: 3rem;
         }
 
+        /* === QUICK NOTES STYLES === */
+        .quicknotes-section {
+            margin-top: 2rem;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+        }
+
+        .quicknotes-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1rem 1.5rem;
+        }
+
+        .quicknotes-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .quicknotes-content {
+            padding: 1.5rem;
+        }
+
+        #quicknotes-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-family: inherit;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        #quicknotes-textarea:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        #quicknotes-textarea::placeholder {
+            color: #999999;
+        }
+
         /* === TRADING TAB STYLES === */
         .add-trade-section {
             background: #ffffff;
@@ -7742,6 +7789,69 @@
             // Initialize ResourceManager now that it's properly defined
             console.log('🔄 Initializing ResourceManager after definition...');
             ResourceManager.loadResources();
+
+            // === QUICK NOTES FUNCTIONALITY ===
+            const QuickNotes = {
+                textarea: null,
+                saveTimeout: null,
+
+                init() {
+                    this.textarea = document.getElementById('quicknotes-textarea');
+                    if (!this.textarea) return;
+
+                    // Load existing notes
+                    this.loadNotes();
+
+                    // Auto-save on input with debounce
+                    this.textarea.addEventListener('input', () => {
+                        clearTimeout(this.saveTimeout);
+                        this.saveTimeout = setTimeout(() => {
+                            this.saveNotes();
+                        }, 1000); // Save 1 second after user stops typing
+                    });
+
+                    // Save on blur (when user clicks away)
+                    this.textarea.addEventListener('blur', () => {
+                        clearTimeout(this.saveTimeout);
+                        this.saveNotes();
+                    });
+                },
+
+                async loadNotes() {
+                    try {
+                        if (!window.cloudStorage) return;
+                        
+                        const notes = await window.cloudStorage.getNotes('quicknotes');
+                        if (notes && this.textarea) {
+                            this.textarea.value = notes;
+                        }
+                    } catch (error) {
+                        console.error('Error loading quick notes:', error);
+                    }
+                },
+
+                async saveNotes() {
+                    try {
+                        if (!window.cloudStorage || !this.textarea) return;
+                        
+                        const content = this.textarea.value;
+                        await window.cloudStorage.saveNotes('quicknotes', content);
+                        console.log('☁️ Quick notes saved to cloud');
+                    } catch (error) {
+                        console.error('Error saving quick notes:', error);
+                    }
+                }
+            };
+
+            // Initialize Quick Notes when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => QuickNotes.init());
+            } else {
+                QuickNotes.init();
+            }
+
+            // Make QuickNotes global for debugging
+            window.QuickNotes = QuickNotes;
             
             
             // === JOURNAL DELETE BUTTONS ===
