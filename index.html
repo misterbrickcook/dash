@@ -4087,16 +4087,15 @@
     </div>
 
     <!-- Add Wiki Entry Modal -->
-    <div id="add-wiki-modal" class="modal hide">
-        <div class="modal-content">
-            <span class="close" onclick="Wiki.hideAddModal()">
-                <i data-lucide="x" style="width: 20px; height: 20px;"></i>
-            </span>
-            <h2>Add Wiki Entry</h2>
-            <form id="add-wiki-form">
+    <div id="add-wiki-modal" class="add-todo-modal hide">
+        <div class="add-todo-container">
+            <div class="add-todo-header">
+                <h2>Wiki Entry hinzufügen</h2>
+            </div>
+            <form id="add-wiki-form" autocomplete="off">
                 <div class="form-group">
-                    <label for="wiki-title">Title *</label>
-                    <input type="text" id="wiki-title" required autocomplete="off" placeholder="e.g. CME Gap Trading Strategy">
+                    <label for="wiki-title">Titel</label>
+                    <input type="text" id="wiki-title" placeholder="Titel für den Eintrag..." required autocomplete="off">
                 </div>
                 
                 <div class="form-group">
@@ -7394,6 +7393,26 @@
             if (clearGoalArchiveBtn) {
                 clearGoalArchiveBtn.addEventListener('click', () => {
                     GoalManager.clearGoalArchive();
+                });
+            }
+            
+            // === WIKI EVENT LISTENERS ===
+            
+            // Cancel Wiki Button
+            const cancelWikiBtn = document.getElementById('cancel-wiki-btn');
+            if (cancelWikiBtn) {
+                cancelWikiBtn.addEventListener('click', () => {
+                    Wiki.hideAddModal();
+                });
+            }
+            
+            // Close wiki modal when clicking outside
+            const addWikiModal = document.getElementById('add-wiki-modal');
+            if (addWikiModal) {
+                addWikiModal.addEventListener('click', (e) => {
+                    if (e.target === addWikiModal) {
+                        Wiki.hideAddModal();
+                    }
                 });
             }
             
