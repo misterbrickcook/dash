@@ -2584,6 +2584,32 @@
             background-color: #216e39;
         }
 
+        /* Performance Heatmap Colors */
+        .heatmap-square.performance-loss {
+            background-color: #ef4444; /* Red for loss */
+        }
+
+        .heatmap-square.performance-neutral {
+            background-color: #f97316; /* Orange for same */
+        }
+
+        .heatmap-square.performance-gain {
+            background-color: #22c55e; /* Green for gain */
+        }
+
+        /* Performance Legend Colors */
+        .legend-square.performance-loss {
+            background-color: #ef4444;
+        }
+
+        .legend-square.performance-neutral {
+            background-color: #f97316;
+        }
+
+        .legend-square.performance-gain {
+            background-color: #22c55e;
+        }
+
         .heatmap-legend {
             display: flex;
             align-items: center;
@@ -3893,6 +3919,29 @@
                                     <div class="legend-square level-4" title="11+ todos"></div>
                                 </div>
                                 <span>More</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Performance Heatmap -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h3>Daily Performance</h3>
+                            <div class="heatmap-info">
+                                <span id="performance-heatmap-stats">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="heatmap-container">
+                            <div class="heatmap-months" id="performance-heatmap-months"></div>
+                            <div class="heatmap-grid" id="performance-heatmap-grid"></div>
+                            <div class="heatmap-legend">
+                                <span>Loss</span>
+                                <div class="legend-colors">
+                                    <div class="legend-square performance-loss" title="Loss vs previous day"></div>
+                                    <div class="legend-square performance-neutral" title="Same as previous day"></div>
+                                    <div class="legend-square performance-gain" title="Gain vs previous day"></div>
+                                </div>
+                                <span>Gain</span>
                             </div>
                         </div>
                     </div>
@@ -10239,6 +10288,7 @@
                 await this.setupChart();
                 await this.updateCurrentBalance();
                 await this.setupHeatmap();
+                await this.setupPerformanceHeatmap();
             }
 
             async loadBalanceHistory() {
@@ -10687,6 +10737,148 @@
                 
                 // Remove the stats text - user finds it not nice
                 statsElement.textContent = '';
+            }
+
+            async setupPerformanceHeatmap() {
+                // Show loading state
+                const statsElement = document.getElementById('performance-heatmap-stats');
+                if (statsElement) statsElement.textContent = 'Loading performance data...';
+                
+                await this.generatePerformanceHeatmapData();
+                this.renderPerformanceHeatmap();
+                this.updatePerformanceHeatmapStats();
+            }
+
+            async generatePerformanceHeatmapData() {
+                try {
+                    // Generate data for the last 365 days
+                    const today = new Date();
+                    const startDate = new Date(today);
+                    startDate.setDate(today.getDate() - 364);
+                    
+                    this.performanceHeatmapData = [];
+                    
+                    // Create array of all dates
+                    for (let i = 0; i < 365; i++) {
+                        const date = new Date(startDate);
+                        date.setDate(startDate.getDate() + i);
+                        const dateStr = date.toISOString().split('T')[0];
+                        
+                        this.performanceHeatmapData.push({
+                            date: dateStr,
+                            performance: 'neutral' // default to neutral
+                        });
+                    }
+                    
+                    // Get balance history and calculate daily performance
+                    if (this.balanceHistory && this.balanceHistory.length > 1) {
+                        // Sort by date
+                        const sortedHistory = [...this.balanceHistory].sort((a, b) => 
+                            new Date(a.date) - new Date(b.date)
+                        );
+                        
+                        // Calculate daily performance compared to previous day
+                        for (let i = 1; i < sortedHistory.length; i++) {
+                            const current = sortedHistory[i];
+                            const previous = sortedHistory[i - 1];
+                            const dateStr = current.date;
+                            
+                            const dayData = this.performanceHeatmapData.find(d => d.date === dateStr);
+                            if (dayData) {
+                                if (current.balance > previous.balance) {
+                                    dayData.performance = 'gain';
+                                } else if (current.balance < previous.balance) {
+                                    dayData.performance = 'loss';
+                                } else {
+                                    dayData.performance = 'neutral';
+                                }
+                                dayData.currentBalance = current.balance;
+                                dayData.previousBalance = previous.balance;
+                                dayData.change = current.balance - previous.balance;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error generating performance heatmap data:', error);
+                    this.performanceHeatmapData = [];
+                }
+            }
+
+            renderPerformanceHeatmap() {
+                const container = document.getElementById('performance-heatmap-grid');
+                if (!container || !this.performanceHeatmapData) return;
+                
+                // Clear existing content
+                container.innerHTML = '';
+                
+                // Create squares for each day
+                this.performanceHeatmapData.forEach(dayData => {
+                    const square = document.createElement('div');
+                    square.className = `heatmap-square performance-${dayData.performance}`;
+                    
+                    // Add tooltip
+                    const date = new Date(dayData.date);
+                    const formattedDate = date.toLocaleDateString('de-DE', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                    
+                    let tooltip = `${formattedDate}`;
+                    if (dayData.change !== undefined) {
+                        const changeText = dayData.change > 0 ? 
+                            `+${dayData.change.toFixed(3)} SOL` : 
+                            `${dayData.change.toFixed(3)} SOL`;
+                        tooltip += `\\n${changeText}`;
+                        tooltip += `\\n${dayData.currentBalance.toFixed(3)} SOL total`;
+                    } else {
+                        tooltip += '\\nNo data';
+                    }
+                    
+                    square.title = tooltip;
+                    container.appendChild(square);
+                });
+                
+                // Generate month labels
+                this.generatePerformanceMonthLabels();
+            }
+
+            generatePerformanceMonthLabels() {
+                const monthsContainer = document.getElementById('performance-heatmap-months');
+                if (!monthsContainer) return;
+                
+                monthsContainer.innerHTML = '';
+                
+                // Create month labels for the last 12 months
+                const months = [];
+                for (let i = 11; i >= 0; i--) {
+                    const date = new Date();
+                    date.setMonth(date.getMonth() - i);
+                    months.push(date.toLocaleDateString('de-DE', { month: 'short' }));
+                }
+                
+                months.forEach(month => {
+                    const monthElement = document.createElement('div');
+                    monthElement.className = 'heatmap-month';
+                    monthElement.textContent = month;
+                    monthsContainer.appendChild(monthElement);
+                });
+            }
+
+            updatePerformanceHeatmapStats() {
+                const statsElement = document.getElementById('performance-heatmap-stats');
+                if (!statsElement || !this.performanceHeatmapData) return;
+                
+                const totalDays = this.performanceHeatmapData.filter(d => d.change !== undefined).length;
+                const gainDays = this.performanceHeatmapData.filter(d => d.performance === 'gain').length;
+                const lossDays = this.performanceHeatmapData.filter(d => d.performance === 'loss').length;
+                
+                if (totalDays > 0) {
+                    const winRate = ((gainDays / totalDays) * 100).toFixed(1);
+                    statsElement.textContent = `${gainDays} gain days, ${lossDays} loss days (${winRate}% win rate)`;
+                } else {
+                    statsElement.textContent = 'No performance data available';
+                }
             }
         }
 
