@@ -4099,25 +4099,20 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="wiki-tags">Tags *</label>
-                    <input type="text" id="wiki-tags" required placeholder="e.g. crypto, trading, analysis, finance" autocomplete="off">
-                    <small>Separate tags with commas for better filtering.</small>
+                    <label for="wiki-content">Inhalt</label>
+                    <textarea id="wiki-content" placeholder="Beschreibung, Regeln oder Learnings..." rows="6" required autocomplete="off" style="width: 100%; padding: 1rem; border: 1px solid #d0d0d0; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
                 </div>
                 
                 <div class="form-group">
-                    <label for="wiki-content">Content *</label>
-                    <textarea id="wiki-content" rows="15" required autocomplete="off" placeholder="Enter detailed explanation, rules, or learnings..." style="resize: vertical; min-height: 300px; width: 100%;"></textarea>
+                    <label for="wiki-tags">Tags (kommagetrennt):</label>
+                    <input type="text" id="wiki-tags" placeholder="z.B. crypto, trading, analyse">
                 </div>
                 
                 
-                <div class="form-group">
-                    <label for="wiki-source">Source (optional)</label>
-                    <input type="text" id="wiki-source" placeholder="Video title, book, website..." autocomplete="off">
-                </div>
                 
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="Wiki.hideAddModal()">Cancel</button>
-                    <button type="submit" class="btn">Add Entry</button>
+                    <button type="button" id="cancel-wiki-btn" class="btn secondary">Abbrechen</button>
+                    <button type="submit" class="btn">Wiki Eintrag erstellen</button>
                 </div>
             </form>
         </div>
@@ -8382,14 +8377,13 @@
                 const title = document.getElementById('wiki-title').value;
                 const content = document.getElementById('wiki-content').value;
                 const tagsText = document.getElementById('wiki-tags').value;
-                const source = document.getElementById('wiki-source').value;
                 
-                if (!title || !tagsText || !content) {
-                    alert('Please fill in all required fields');
+                if (!title || !content) {
+                    alert('Bitte fülle alle Pflichtfelder aus');
                     return;
                 }
                 
-                const tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag);
+                const tags = tagsText ? tagsText.split(',').map(tag => tag.trim()).filter(tag => tag) : ['allgemein'];
                 
                 // Generate a unique ID for the wiki entry
                 const entryId = Date.now(); // Use timestamp as ID
@@ -8399,7 +8393,6 @@
                     title,
                     content,
                     tags,
-                    source,
                     user_id: supabase.getCurrentUser().id,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
@@ -8517,7 +8510,6 @@
             
             renderEntry(entry) {
                 const tagsHtml = entry.tags.map(tag => `<span class="journal-tag">${tag}</span>`).join('');
-                const sourceHtml = entry.source ? `<span class="wiki-entry-source">Source: ${entry.source}</span>` : '';
                 const date = new Date(entry.created_at).toLocaleDateString('de-DE');
                 const time = new Date(entry.created_at).toLocaleTimeString('de-DE', { 
                     hour: '2-digit', 
@@ -8538,7 +8530,6 @@
                         <div class="journal-entry-meta">
                             <div class="journal-entry-tags">
                                 ${tagsHtml}
-                                ${sourceHtml}
                             </div>
                             <span class="journal-entry-date">${date} • ${time}</span>
                         </div>
