@@ -2123,6 +2123,124 @@
             background-color: #ebedf0;
         }
 
+        /* === TRADING STICKY NOTE === */
+        .trading-rules-sticky {
+            background: linear-gradient(135deg, #fffbf0 0%, #fff8e7 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .trading-rules-sticky::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #f59e0b, #d97706, #f59e0b);
+            animation: shimmer 3s linear infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .sticky-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: rgba(245, 158, 11, 0.1);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        .sticky-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #92400e;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .sticky-minimize {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #92400e;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .sticky-minimize:hover {
+            background: rgba(245, 158, 11, 0.2);
+        }
+        
+        .sticky-content {
+            padding: 1.5rem;
+        }
+        
+        .rules-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 0.75rem;
+        }
+        
+        .rules-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #451a03;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .rules-list li:hover {
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .rules-list strong {
+            color: #92400e;
+        }
+        
+        .trading-rules-sticky.minimized .sticky-content {
+            display: none;
+        }
+        
+        .trading-rules-sticky.minimized .sticky-minimize {
+            transform: rotate(180deg);
+        }
+        
+        @media (max-width: 768px) {
+            .rules-list {
+                gap: 0.5rem;
+            }
+            
+            .rules-list li {
+                font-size: 0.85rem;
+                padding: 0.4rem;
+            }
+            
+            .sticky-content {
+                padding: 1rem;
+            }
+        }
+
         .legend-square.level-1 {
             background-color: #9be9a8;
         }
@@ -2987,6 +3105,23 @@
         <!-- === TRADING TAB === -->
         <section id="tab-trading" class="tab-section">
             
+            <!-- Trading Rules Sticky Note -->
+            <div class="trading-rules-sticky">
+                <div class="sticky-header">
+                    <span class="sticky-title">📝 Trading Grundregeln</span>
+                    <button class="sticky-minimize" onclick="this.parentElement.parentElement.classList.toggle('minimized')" title="Minimieren">−</button>
+                </div>
+                <div class="sticky-content">
+                    <ul class="rules-list">
+                        <li>💰 <strong>Risk Management:</strong> Nie mehr als 2-5% pro Trade riskieren</li>
+                        <li>🎯 <strong>Take Profit:</strong> Initials raus bei 2x, Rest laufen lassen</li>
+                        <li>🛑 <strong>Stop Loss:</strong> Bei -20% aussteigen, keine Emotionen</li>
+                        <li>📊 <strong>Research:</strong> Nur Coins traden, die du verstehst</li>
+                        <li>⏰ <strong>Timing:</strong> Nicht FOMO - warten auf Setup</li>
+                        <li>📝 <strong>Journal:</strong> Jeden Trade dokumentieren und lernen</li>
+                    </ul>
+                </div>
+            </div>
 
             <!-- Portfolio Overview -->
             <div class="portfolio-overview">
