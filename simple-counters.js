@@ -103,14 +103,15 @@ class SimpleCounters {
             const morningPercentChange = this.calculatePercentChange(prev30MorningCount, last30MorningCount);
             const eveningPercentChange = this.calculatePercentChange(prev30EveningCount, last30EveningCount);
 
-            // Get SOL balance
+            // Get SOL balance and calculate daily change
             const solBalance = await this.getSolBalance();
+            const solPercentChange = await this.getSolDailyChange(solBalance);
 
             // Update display with 30-day counts and percentage changes
             this.setCounterDisplayWithPercent(0, last30MorningCount, morningPercentChange); // Morning
             this.setCounterDisplayWithPercent(1, last30EveningCount, eveningPercentChange); // Evening  
             this.setCounterDisplayWithPercent(2, last30TodoCount, todoPercentChange);    // Todos
-            this.setCounterDisplay(3, solBalance);   // SOL Balance (no percentage for now)
+            this.setSOLCounterDisplayWithPercent(3, solBalance, solPercentChange);   // SOL Balance with daily change
 
 
         } catch (error) {
@@ -270,6 +271,59 @@ class SimpleCounters {
     async debugCounters() {
         console.log('🔧 Manual counter debug triggered');
         await this.updateAllCounters();
+    }
+
+    async getSolDailyChange(currentBalance) {
+        try {
+            if (!window.supabase?.isAuthenticated()) {
+                return 0;
+            }
+
+            const user = window.supabase.getCurrentUser();
+            if (!user) return 0;
+
+            // Get yesterday's date
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            // Query balance from yesterday
+            const yesterdayBalance = await window.supabase.query(
+                `analytics_balance_history?user_id=eq.${user.id}&date=eq.${yesterdayStr}&select=balance&limit=1`
+            );
+
+            if (yesterdayBalance && yesterdayBalance.length > 0) {
+                const prevBalance = yesterdayBalance[0].balance;
+                return this.calculatePercentChange(prevBalance, currentBalance);
+            }
+
+            return 0; // No previous data
+        } catch (error) {
+            console.error('Error getting SOL daily change:', error);
+            return 0;
+        }
+    }
+
+    setSOLCounterDisplayWithPercent(index, value, percentChange) {
+        const tiles = document.querySelectorAll('.streak-tile');
+        if (tiles[index]) {
+            const numberEl = tiles[index].querySelector('.streak-number');
+            const labelEl = tiles[index].querySelector('.streak-label');
+            
+            if (numberEl) {
+                numberEl.textContent = value.toFixed(2);
+            }
+            
+            if (labelEl) {
+                const sign = percentChange > 0 ? '+' : '';
+                const color = percentChange > 0 ? '#059669' : percentChange < 0 ? '#dc2626' : '#666666';
+                
+                labelEl.innerHTML = `SOL Balance<br><span style="font-size: 0.7rem; color: ${color};">(${sign}${percentChange}% vs. gestern)</span>`;
+            }
+            
+            // Store current value for next comparison (but don't trigger animation for SOL)
+            this.previousValues[index] = value;
+        }
     }
 }
 
