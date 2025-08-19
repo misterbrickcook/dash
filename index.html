@@ -3490,17 +3490,14 @@
             <!-- Search and Filter Bar -->
             <div class="wiki-controls">
                 <div class="search-container">
-                    <input type="text" id="journal-search" placeholder="Search journal entries..." class="search-input">
+                    <input type="text" id="journal-search" placeholder="Search entries and tags..." class="search-input">
                     <button class="search-btn" onclick="JournalManager.search()">
                         <i data-lucide="search" style="width: 16px; height: 16px;"></i>
                     </button>
                 </div>
-                <div class="filter-container">
-                    <input type="text" id="journal-tag-filter" placeholder="Filter by tags..." class="filter-input" oninput="JournalManager.filterByTags()">
-                    <button class="nav-tab quick-add-btn" onclick="JournalManager.showAddJournalModal()" title="Add Journal Entry">
-                        <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
-                    </button>
-                </div>
+                <button class="nav-tab quick-add-btn" onclick="JournalManager.showAddJournalModal()" title="Add Journal Entry">
+                    <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                </button>
             </div>
 
             <!-- Journal Content -->
@@ -3929,17 +3926,14 @@
             <!-- Search and Filter Bar -->
             <div class="wiki-controls">
                 <div class="search-container">
-                    <input type="text" id="wiki-search" placeholder="Search wiki entries..." class="search-input">
+                    <input type="text" id="wiki-search" placeholder="Search entries and tags..." class="search-input">
                     <button class="search-btn" onclick="Wiki.search()">
                         <i data-lucide="search" style="width: 16px; height: 16px;"></i>
                     </button>
                 </div>
-                <div class="filter-container">
-                    <input type="text" id="wiki-tag-filter" placeholder="Filter by tags..." class="filter-input" oninput="Wiki.filterByTags()">
-                    <button class="nav-tab quick-add-btn" onclick="Wiki.showAddModal()" title="Add Wiki Entry">
-                        <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
-                    </button>
-                </div>
+                <button class="nav-tab quick-add-btn" onclick="Wiki.showAddModal()" title="Add Wiki Entry">
+                    <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                </button>
             </div>
 
             <!-- Wiki Content -->
@@ -6680,7 +6674,7 @@
                 if (!container) return;
                 
                 // Use filteredEntries if available, otherwise use all entries
-                const entriesToShow = this.filteredEntries.length > 0 || document.getElementById('journal-search').value || document.getElementById('journal-tag-filter').value 
+                const entriesToShow = this.filteredEntries.length > 0 || document.getElementById('journal-search').value 
                     ? this.filteredEntries 
                     : this.entries;
                 
@@ -6820,37 +6814,13 @@
 
             search() {
                 const query = document.getElementById('journal-search').value.toLowerCase();
-                const tagFilter = document.getElementById('journal-tag-filter').value.toLowerCase();
                 
                 this.filteredEntries = this.entries.filter(entry => {
-                    const matchesSearch = !query || 
-                        entry.title.toLowerCase().includes(query) ||
-                        entry.content.toLowerCase().includes(query) ||
-                        this.getEntryTags(entry).some(tag => tag.toLowerCase().includes(query));
+                    if (!query) return true;
                     
-                    const matchesTags = !tagFilter || 
-                        this.getEntryTags(entry).some(tag => tag.toLowerCase().includes(tagFilter));
-                    
-                    return matchesSearch && matchesTags;
-                });
-                
-                this.renderEntries();
-            },
-
-            filterByTags() {
-                const tagFilter = document.getElementById('journal-tag-filter').value.toLowerCase();
-                const query = document.getElementById('journal-search').value.toLowerCase();
-                
-                this.filteredEntries = this.entries.filter(entry => {
-                    const matchesTags = !tagFilter || 
-                        this.getEntryTags(entry).some(tag => tag.toLowerCase().includes(tagFilter));
-                    
-                    const matchesSearch = !query || 
-                        entry.title.toLowerCase().includes(query) ||
-                        entry.content.toLowerCase().includes(query) ||
-                        this.getEntryTags(entry).some(tag => tag.toLowerCase().includes(query));
-                    
-                    return matchesTags && matchesSearch;
+                    return entry.title.toLowerCase().includes(query) ||
+                           entry.content.toLowerCase().includes(query) ||
+                           this.getEntryTags(entry).some(tag => tag.toLowerCase().includes(query));
                 });
                 
                 this.renderEntries();
@@ -8474,17 +8444,6 @@
                 this.render();
             },
             
-            filterByTags() {
-                const tagFilter = document.getElementById('wiki-tag-filter').value.toLowerCase();
-                
-                this.filteredEntries = this.entries.filter(entry => {
-                    if (!tagFilter) return true;
-                    
-                    return entry.tags.some(tag => tag.toLowerCase().includes(tagFilter));
-                });
-                
-                this.render();
-            },
             
             render() {
                 const container = document.getElementById('wiki-entries');
