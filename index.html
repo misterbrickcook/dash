@@ -843,11 +843,29 @@
             font-size: 0.95rem;
         }
         .journal-input:focus { outline: none; border-color: #000000; }
+        .journal-entries, .wiki-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 1200px) {
+            .journal-entries, .wiki-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .journal-entries, .wiki-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
         .journal-entry {
             background: #ffffff;
             border: 1px solid #e0e0e0;
             padding: 2rem;
-            margin-bottom: 2rem;
+            margin-bottom: 0;
         }
         .journal-entry-header {
             display: flex;
@@ -1538,10 +1556,6 @@
             background: #ffffff;
         }
         
-        .wiki-content {
-            display: grid;
-            gap: 1.5rem;
-        }
         
         .wiki-entry {
             background: #f8f9fa;
