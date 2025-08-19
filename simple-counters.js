@@ -41,12 +41,21 @@ class SimpleCounters {
         const prev30EndStr = prev30EndLocal.toISOString().split('T')[0];
         
         try {
+            console.log(`🔍 Counter: Querying todos from ${last30StartStr} to ${last30EndStr}`);
+            
             // Get todos for both periods using updated_at (when completed)
             const [last30TodoData, prev30TodoData, routineData] = await Promise.all([
-                window.supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${last30StartStr}&updated_at=lte.${last30EndStr}&select=id`),
-                window.supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${prev30StartStr}&updated_at=lte.${prev30EndStr}&select=id`),
+                window.supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${last30StartStr}&updated_at=lte.${last30EndStr}&select=id,updated_at`),
+                window.supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${prev30StartStr}&updated_at=lte.${prev30EndStr}&select=id,updated_at`),
                 window.supabase.query(`simple_routines?user_id=eq.${user.id}&select=date,routine_data`)
             ]);
+            
+            console.log(`🔍 Counter: Raw query results:`, {
+                last30TodoData: last30TodoData?.length || 0,
+                prev30TodoData: prev30TodoData?.length || 0,
+                last30Todos: last30TodoData,
+                prev30Todos: prev30TodoData
+            });
 
             // Count todos
             const last30TodoCount = last30TodoData ? last30TodoData.length : 0;
@@ -260,6 +269,12 @@ class SimpleCounters {
         
         // Then update counters after a short delay
         setTimeout(() => this.updateAllCounters(), 300);
+    }
+
+    // Manual debug trigger
+    async debugCounters() {
+        console.log('🔧 Manual counter debug triggered');
+        await this.updateAllCounters();
     }
 }
 
