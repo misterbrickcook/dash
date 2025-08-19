@@ -10120,20 +10120,37 @@
                     const fromDate = today.toISOString().split('T')[0];
                     const toDate = nextWeek.toISOString().split('T')[0];
                     
-                    const url = `${this.baseUrl}?token=${this.apiKey}&from=${fromDate}&to=${toDate}`;
+                    // Try different endpoint format
+                    const url = `https://finnhub.io/api/v1/calendar/economic?from=${fromDate}&to=${toDate}&token=${this.apiKey}`;
                     
-                    const response = await fetch(url);
+                    console.log('🔍 Economic Calendar API URL:', url);
+                    console.log('🔍 Date range:', fromDate, 'to', toDate);
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'X-Finnhub-Token': this.apiKey
+                        }
+                    });
+                    
+                    console.log('🔍 API Response status:', response.status);
+                    
                     if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        const errorText = await response.text();
+                        console.error('🔍 API Error response:', errorText);
+                        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
                     }
                     
                     const data = await response.json();
-                    this.events = data.economicCalendar || [];
+                    console.log('🔍 API Response data:', data);
+                    
+                    this.events = data.economicCalendar || data || [];
+                    console.log('🔍 Parsed events:', this.events.length);
                     
                     this.renderEvents();
                 } catch (error) {
                     console.error('❌ Economic Calendar fetch error:', error);
-                    this.showError();
+                    this.showError(error.message);
                 }
             }
 
@@ -10193,10 +10210,21 @@
                 return flags[country] || '🌍';
             }
 
-            showError() {
+            showError(message = '') {
                 const container = document.getElementById('economic-events-container');
                 if (container) {
-                    container.innerHTML = '<div class="loading-state">❌ Failed to load economic events</div>';
+                    container.innerHTML = `
+                        <div class="loading-state">
+                            ❌ Failed to load economic events<br>
+                            <small style="color: #999; margin-top: 0.5rem; display: block;">
+                                ${message || 'Check console for details'}
+                            </small>
+                            <button onclick="window.economicCalendar.fetchEvents()" 
+                                    style="margin-top: 1rem; padding: 0.5rem 1rem; background: #f0f0f0; border: none; cursor: pointer;">
+                                🔄 Retry
+                            </button>
+                        </div>
+                    `;
                 }
             }
 
