@@ -107,6 +107,7 @@ class SimpleCounters {
 
         } catch (error) {
             console.error('❌ SimpleCounters: Update failed:', error);
+            console.log('🔍 Counter Debug: Error details:', error);
         }
     }
 
@@ -203,8 +204,9 @@ class SimpleCounters {
 
     async getSolBalance() {
         try {
-            // Use alternative public Solana RPC endpoint
-            const response = await fetch('https://solana-api.projectserum.com', {
+            // Helius RPC endpoint (free tier) - better CORS support
+            const HELIUS_API_KEY = '35ffdb6a-2061-4573-a66b-ea263c5eaa34';
+            const response = await fetch(`https://rpc.helius.xyz/?api-key=${HELIUS_API_KEY}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -233,6 +235,8 @@ class SimpleCounters {
             return 0;
         } catch (error) {
             console.error('SOL Balance fetch error:', error);
+            console.log('🔍 SOL Debug: Full error:', error);
+            console.log('🔍 SOL Debug: Response status was:', error.message);
             return 0; // Return 0 on error
         }
     }
