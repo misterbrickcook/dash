@@ -23,22 +23,27 @@ class SimpleCounters {
         const now = new Date();
         const user = window.supabase.getCurrentUser();
         
-        // Calculate date ranges for last 30 days vs previous 30 days (use local timezone)
-        const last30End = new Date();
-        const last30Start = new Date(last30End.getTime() - 30 * 24 * 60 * 60 * 1000);
-        const prev30End = new Date(last30Start.getTime() - 1); // Day before last30Start
-        const prev30Start = new Date(prev30End.getTime() - 30 * 24 * 60 * 60 * 1000);
+        // Calculate date ranges for last 30 days vs previous 30 days (use proper local dates)
+        const today = new Date();
+        const last30Start = new Date(today);
+        last30Start.setDate(today.getDate() - 30);
+        const prev30Start = new Date(last30Start);
+        prev30Start.setDate(last30Start.getDate() - 30);
+        const prev30End = new Date(last30Start);
+        prev30End.setDate(last30Start.getDate() - 1);
         
-        // Convert to local date strings (like heatmap does)
-        const last30StartLocal = new Date(last30Start.getTime() - last30Start.getTimezoneOffset() * 60000);
-        const last30EndLocal = new Date(last30End.getTime() - last30End.getTimezoneOffset() * 60000);
-        const prev30StartLocal = new Date(prev30Start.getTime() - prev30Start.getTimezoneOffset() * 60000);
-        const prev30EndLocal = new Date(prev30End.getTime() - prev30End.getTimezoneOffset() * 60000);
+        // Format dates as YYYY-MM-DD (same way heatmap does it)
+        const formatLocalDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
         
-        const last30StartStr = last30StartLocal.toISOString().split('T')[0];
-        const last30EndStr = last30EndLocal.toISOString().split('T')[0];
-        const prev30StartStr = prev30StartLocal.toISOString().split('T')[0];
-        const prev30EndStr = prev30EndLocal.toISOString().split('T')[0];
+        const last30StartStr = formatLocalDate(last30Start);
+        const last30EndStr = formatLocalDate(today);
+        const prev30StartStr = formatLocalDate(prev30Start);
+        const prev30EndStr = formatLocalDate(prev30End);
         
         try {
             console.log(`🔍 Counter: Querying todos from ${last30StartStr} to ${last30EndStr}`);
