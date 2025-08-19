@@ -6906,9 +6906,22 @@
                     });
                     
                     // Hide delete button on regular click
-                    entry.addEventListener('click', () => {
-                        entry.classList.remove('show-delete');
+                    entry.addEventListener('click', (e) => {
+                        // Don't hide if clicking the delete button
+                        if (!e.target.closest('.delete-entry-btn')) {
+                            entry.classList.remove('show-delete');
+                        }
                     });
+                    
+                    // Add delete button click handler
+                    const deleteBtn = entry.querySelector('.delete-entry-btn');
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const entryId = deleteBtn.getAttribute('data-entry-id');
+                            this.deleteEntry(entryId);
+                        });
+                    }
                 });
             },
 
@@ -8648,9 +8661,20 @@
                     });
                     
                     // Hide delete button on regular click
-                    entry.addEventListener('click', () => {
-                        entry.classList.remove('show-delete');
+                    entry.addEventListener('click', (e) => {
+                        // Don't hide if clicking the delete button
+                        if (!e.target.closest('.delete-entry-btn')) {
+                            entry.classList.remove('show-delete');
+                        }
                     });
+                    
+                    // Add delete button click handler (in addition to onclick in HTML)
+                    const deleteBtn = entry.querySelector('.delete-entry-btn');
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                        });
+                    }
                 });
             },
             
