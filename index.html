@@ -9614,18 +9614,28 @@
                     }
                 }
                 
-                // Render squares
-                this.heatmapData.forEach((day, index) => {
-                    const square = document.createElement('div');
-                    square.className = `heatmap-square level-${day.level}`;
-                    square.title = `${day.date}: ${day.count} todos completed`;
-                    
-                    square.addEventListener('click', () => {
-                        alert(`${day.date}: ${day.count} todos completed`);
-                    });
-                    
-                    gridContainer.appendChild(square);
-                });
+                // Render squares in correct grid position (column-first order for GitHub-style layout)
+                for (let week = 0; week < 53; week++) {
+                    for (let day = 0; day < 7; day++) {
+                        const index = week * 7 + day;
+                        if (index < this.heatmapData.length) {
+                            const dayData = this.heatmapData[index];
+                            const square = document.createElement('div');
+                            square.className = `heatmap-square level-${dayData.level}`;
+                            square.title = `${dayData.date}: ${dayData.count} todos completed`;
+                            
+                            // Set explicit grid position: column = week + 1, row = day + 1
+                            square.style.gridColumn = week + 1;
+                            square.style.gridRow = day + 1;
+                            
+                            square.addEventListener('click', () => {
+                                alert(`${dayData.date}: ${dayData.count} todos completed`);
+                            });
+                            
+                            gridContainer.appendChild(square);
+                        }
+                    }
+                }
             }
 
             updateHeatmapStats() {
