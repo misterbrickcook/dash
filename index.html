@@ -2125,45 +2125,50 @@
 
         /* === TRADING STICKY NOTE === */
         .trading-rules-sticky {
-            background: linear-gradient(135deg, #fffbf0 0%, #fff8e7 100%);
-            border: 2px solid #f59e0b;
-            border-radius: 12px;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+        }
+        
+        .trading-rules-sticky:hover {
+            border-color: #000000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
         .trading-rules-sticky::before {
             content: '';
             position: absolute;
             top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #f59e0b, #d97706, #f59e0b);
-            animation: shimmer 3s linear infinite;
+            left: -100%;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #000000, transparent);
+            animation: slideRule 4s ease-in-out infinite;
         }
         
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+        @keyframes slideRule {
+            0%, 100% { left: -100%; opacity: 0; }
+            50% { left: 100%; opacity: 1; }
         }
         
         .sticky-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 1.5rem;
-            background: rgba(245, 158, 11, 0.1);
-            border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            background: #fafafa;
         }
         
         .sticky-title {
-            font-weight: 600;
-            font-size: 1rem;
-            color: #92400e;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #000000;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -2172,17 +2177,18 @@
         .sticky-minimize {
             background: none;
             border: none;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #92400e;
+            font-size: 1rem;
+            font-weight: 300;
+            color: #666666;
             cursor: pointer;
             padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
+            border-radius: 2px;
         }
         
         .sticky-minimize:hover {
-            background: rgba(245, 158, 11, 0.2);
+            color: #000000;
+            background: #f0f0f0;
         }
         
         .sticky-content {
@@ -2194,28 +2200,48 @@
             margin: 0;
             padding: 0;
             display: grid;
-            gap: 0.75rem;
+            gap: 1rem;
         }
         
         .rules-list li {
             display: flex;
             align-items: flex-start;
-            gap: 0.75rem;
+            gap: 1rem;
             font-size: 0.9rem;
-            line-height: 1.5;
-            color: #451a03;
-            padding: 0.5rem;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 6px;
-            transition: background-color 0.2s ease;
+            line-height: 1.6;
+            color: #000000;
+            padding: 0.75rem;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            position: relative;
         }
         
         .rules-list li:hover {
-            background: rgba(245, 158, 11, 0.1);
+            border-color: #e0e0e0;
+            background: #fafafa;
+            transform: translateX(2px);
+        }
+        
+        .rules-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #000000;
+            transform: scaleY(0);
+            transition: transform 0.2s ease;
+            transform-origin: bottom;
+        }
+        
+        .rules-list li:hover::before {
+            transform: scaleY(1);
         }
         
         .rules-list strong {
-            color: #92400e;
+            color: #000000;
+            font-weight: 500;
         }
         
         .trading-rules-sticky.minimized .sticky-content {
@@ -2226,18 +2252,27 @@
             transform: rotate(180deg);
         }
         
+        .trading-rules-sticky.minimized .sticky-header {
+            border-bottom: none;
+        }
+        
         @media (max-width: 768px) {
             .rules-list {
-                gap: 0.5rem;
+                gap: 0.75rem;
             }
             
             .rules-list li {
                 font-size: 0.85rem;
-                padding: 0.4rem;
+                padding: 0.6rem;
+                gap: 0.75rem;
             }
             
             .sticky-content {
                 padding: 1rem;
+            }
+            
+            .sticky-header {
+                padding: 1rem 1.25rem;
             }
         }
 
