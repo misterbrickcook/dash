@@ -237,10 +237,19 @@ class SimpleCounters {
 
     // Simple trigger methods
     async onRoutineChanged() {
+        // Trigger immediate animation for both routine counters (index 0 and 1)
+        this.triggerSuccessAnimation(0); // Morning
+        this.triggerSuccessAnimation(1); // Evening
+        
+        // Then update counters after a short delay
         setTimeout(() => this.updateAllCounters(), 300);
     }
 
     async onTodoChanged() {
+        // Trigger immediate animation for todo counter (index 2)
+        this.triggerSuccessAnimation(2);
+        
+        // Then update counters after a short delay
         setTimeout(() => this.updateAllCounters(), 300);
     }
 }
