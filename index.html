@@ -3488,10 +3488,16 @@
         <section id="tab-journal" class="tab-section">
             <div class="journal-header">
                 <div class="journal-controls">
-                    <div class="filter-container">
-                        <input type="text" id="journal-search" class="filter-input" placeholder="Suche nach Titel, Inhalt oder Tags...">
+                    <div class="search-container">
+                        <input type="text" id="journal-search" class="search-input" placeholder="Search journal entries...">
+                        <button class="search-btn" onclick="JournalManager.search()">
+                            <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                        </button>
                     </div>
-                    <button id="add-journal-btn" class="btn">+ Neuer Eintrag</button>
+                    <div class="filter-container">
+                        <input type="text" id="journal-tag-filter" placeholder="Filter by tags..." class="filter-input" oninput="JournalManager.filterByTags()">
+                        <button id="add-journal-btn" class="btn">+ Neuer Eintrag</button>
+                    </div>
                 </div>
             </div>
 
@@ -6555,6 +6561,8 @@
         // === JOURNAL MANAGEMENT ===
         const JournalManager = {
             entries: [], // In-memory storage for demo
+            filteredEntries: [], // Filtered entries for display
+            searchTimeout: null,
             
             async loadEntries() {
                 if (!supabase?.isAuthenticated()) {
@@ -6593,10 +6601,12 @@
                                 tags: tags
                             };
                         });
+                        this.filteredEntries = [...this.entries]; // Initialize filtered entries
                         this.renderEntries();
                     } else {
                         console.log('☁️ JournalManager: No entries found in cloud');
                         this.entries = [];
+                        this.filteredEntries = [];
                     }
                 } catch (error) {
                     console.error('❌ JournalManager: Error loading from cloud:', error);
@@ -6654,7 +6664,8 @@
                 
                 console.log('☁️ JournalManager: Entry added:', entry);
                 
-                // Refresh current view
+                // Update filtered entries and refresh view
+                this.filteredEntries = [...this.entries];
                 this.renderEntries();
             },
             
@@ -6662,13 +6673,23 @@
                 const container = document.getElementById('journal-entries');
                 if (!container) return;
                 
+                // Use filteredEntries if available, otherwise use all entries
+                const entriesToShow = this.filteredEntries.length > 0 || document.getElementById('journal-search').value || document.getElementById('journal-tag-filter').value 
+                    ? this.filteredEntries 
+                    : this.entries;
+                
                 if (this.entries.length === 0) {
                     container.innerHTML = '<div class="empty-journal">Keine Journal-Einträge vorhanden. Erstelle deinen ersten Eintrag!</div>';
                     return;
                 }
                 
+                if (entriesToShow.length === 0) {
+                    container.innerHTML = '<div class="empty-journal">Keine Einträge gefunden. Versuche andere Suchbegriffe oder Tags.</div>';
+                    return;
+                }
+                
                 // Sort entries by date (newest first)
-                const sortedEntries = [...this.entries].sort((a, b) => 
+                const sortedEntries = [...entriesToShow].sort((a, b) => 
                     new Date(b.created_at) - new Date(a.created_at)
                 );
                 
@@ -6724,26 +6745,6 @@
                 }
             },
 
-            filterEntries() {
-                const searchTerm = document.getElementById('journal-search').value.toLowerCase();
-                
-                const entries = document.querySelectorAll('.journal-entry');
-                entries.forEach(entry => {
-                    const title = entry.querySelector('.journal-entry-title').textContent.toLowerCase();
-                    const content = entry.querySelector('.journal-entry-content').textContent.toLowerCase();
-                    const tags = Array.from(entry.querySelectorAll('.journal-tag')).map(tag => tag.textContent.toLowerCase());
-                    
-                    const matchesSearch = title.includes(searchTerm) || 
-                                        content.includes(searchTerm) || 
-                                        tags.some(tag => tag.includes(searchTerm));
-                    
-                    if (matchesSearch) {
-                        entry.style.display = 'block';
-                    } else {
-                        entry.style.display = 'none';
-                    }
-                });
-            },
             
             createEntryElement(entry) {
                 const entryCard = document.createElement('div');
@@ -6799,6 +6800,7 @@
                     
                     // Remove from local entries array
                     this.entries = this.entries.filter(entry => entry.id != entryId);
+                    this.filteredEntries = this.filteredEntries.filter(entry => entry.id != entryId);
                     
                     // Refresh current view
                     this.renderEntries();
@@ -6808,6 +6810,59 @@
                     console.error('❌ Error deleting journal entry:', error);
                     alert('Fehler beim Löschen des Eintrags: ' + error.message);
                 }
+            },
+
+            search() {
+                const query = document.getElementById('journal-search').value.toLowerCase();
+                const tagFilter = document.getElementById('journal-tag-filter').value.toLowerCase();
+                
+                this.filteredEntries = this.entries.filter(entry => {
+                    const matchesSearch = !query || 
+                        entry.title.toLowerCase().includes(query) ||
+                        entry.content.toLowerCase().includes(query) ||
+                        this.getEntryTags(entry).some(tag => tag.toLowerCase().includes(query));
+                    
+                    const matchesTags = !tagFilter || 
+                        this.getEntryTags(entry).some(tag => tag.toLowerCase().includes(tagFilter));
+                    
+                    return matchesSearch && matchesTags;
+                });
+                
+                this.renderEntries();
+            },
+
+            filterByTags() {
+                const tagFilter = document.getElementById('journal-tag-filter').value.toLowerCase();
+                const query = document.getElementById('journal-search').value.toLowerCase();
+                
+                this.filteredEntries = this.entries.filter(entry => {
+                    const matchesTags = !tagFilter || 
+                        this.getEntryTags(entry).some(tag => tag.toLowerCase().includes(tagFilter));
+                    
+                    const matchesSearch = !query || 
+                        entry.title.toLowerCase().includes(query) ||
+                        entry.content.toLowerCase().includes(query) ||
+                        this.getEntryTags(entry).some(tag => tag.toLowerCase().includes(query));
+                    
+                    return matchesTags && matchesSearch;
+                });
+                
+                this.renderEntries();
+            },
+
+            getEntryTags(entry) {
+                let tags = [];
+                if (entry.tags) {
+                    if (typeof entry.tags === 'string') {
+                        tags = entry.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+                    } else if (Array.isArray(entry.tags)) {
+                        tags = entry.tags;
+                    }
+                } else if (entry.category) {
+                    // Migration: use old category as a tag
+                    tags = [entry.category];
+                }
+                return tags;
             }
         };
 
@@ -7300,6 +7355,15 @@
             if (addJournalBtn) {
                 addJournalBtn.addEventListener('click', () => {
                     JournalManager.showAddJournalModal();
+                });
+            }
+
+            // Journal Search Input
+            const journalSearchInput = document.getElementById('journal-search');
+            if (journalSearchInput) {
+                journalSearchInput.addEventListener('input', () => {
+                    clearTimeout(JournalManager.searchTimeout);
+                    JournalManager.searchTimeout = setTimeout(() => JournalManager.search(), 300);
                 });
             }
             
