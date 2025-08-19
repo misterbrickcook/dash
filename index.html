@@ -1878,6 +1878,172 @@
             }
         }
 
+        /* === RESOURCES BLOCKS DESIGN === */
+        .resources-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .resource-block {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 0;
+            transition: all 0.2s ease;
+            min-height: 300px;
+        }
+
+        .resource-block:hover {
+            border-color: #000000;
+        }
+
+        .resource-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+
+        .resource-block-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #000000;
+        }
+
+        .resource-block-header i {
+            color: #666666;
+        }
+
+        .add-to-category-btn {
+            background: none;
+            border: 1px solid #e0e0e0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #666666;
+        }
+
+        .add-to-category-btn:hover {
+            border-color: #000000;
+            color: #000000;
+        }
+
+        .resource-links {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            min-height: 200px;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            border: 1px solid #f0f0f0;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .resource-item:hover {
+            border-color: #e0e0e0;
+            background: #fafafa;
+        }
+
+        .resource-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .resource-icon {
+            color: #666666;
+            min-width: 16px;
+        }
+
+        .resource-details {
+            flex: 1;
+        }
+
+        .resource-title {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #000000;
+            margin-bottom: 0.25rem;
+        }
+
+        .resource-description {
+            font-size: 0.8rem;
+            color: #666666;
+            line-height: 1.4;
+        }
+
+        .resource-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .resource-action-btn {
+            background: none;
+            border: none;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #666666;
+            transition: all 0.2s ease;
+        }
+
+        .resource-action-btn:hover {
+            color: #000000;
+        }
+
+        .empty-resources {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #999999;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .resources-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .resources-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+                text-align: center;
+            }
+        }
+
         .close-trade-form .form-group {
             margin-bottom: 1.5rem;
         }
@@ -3592,41 +3758,76 @@
 
         <!-- === RESSOURCEN TAB === -->
         <section id="tab-ressourcen" class="tab-section">
-            
-            <div class="category-tabs">
-                <button class="resource-tab active" data-resource-category="alle">Alle</button>
-                <button class="resource-tab" data-resource-category="privat">Privat</button>
-                <button class="resource-tab" data-resource-category="arbeit">Arbeit</button>
-                <button class="resource-tab" data-resource-category="uni">Uni</button>
-                <button class="resource-tab" data-resource-category="crypto">Crypto</button>
-                <button id="add-resource-btn" class="btn" style="margin-left: 2rem;">+ Add Resource</button>
+            <div class="resources-header">
+                <h2 style="font-size: 1.2rem; font-weight: 500; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.1em;">Ressourcen</h2>
+                <button id="add-resource-btn" class="btn">+ Add Resource</button>
             </div>
 
-            <!-- ALLE KATEGORIE -->
-            <div class="resource-content active" id="resource-alle">
-                <!-- All resources will be loaded from database -->
-            </div>
+            <div class="resources-grid">
+                <!-- PRIVAT BLOCK -->
+                <div class="resource-block">
+                    <div class="resource-block-header">
+                        <h3>
+                            <i data-lucide="home" style="width: 18px; height: 18px;"></i>
+                            Privat
+                        </h3>
+                        <button class="add-to-category-btn" data-category="privat" title="Add to Privat">
+                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                    <div class="resource-links" id="resource-privat">
+                        <!-- Private resources will be loaded here -->
+                    </div>
+                </div>
 
-            <!-- PRIVAT KATEGORIE -->
-            <div class="resource-content" id="resource-privat">
-                <!-- Private resources will be loaded from database -->
-            </div>
+                <!-- CRYPTO BLOCK -->
+                <div class="resource-block">
+                    <div class="resource-block-header">
+                        <h3>
+                            <i data-lucide="trending-up" style="width: 18px; height: 18px;"></i>
+                            Crypto
+                        </h3>
+                        <button class="add-to-category-btn" data-category="crypto" title="Add to Crypto">
+                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                    <div class="resource-links" id="resource-crypto">
+                        <!-- Crypto resources will be loaded here -->
+                    </div>
+                </div>
 
-            <!-- ARBEIT KATEGORIE -->
-            <div class="resource-content" id="resource-arbeit">
-                <!-- Work resources will be loaded from database -->
-            </div>
+                <!-- ARBEIT BLOCK -->
+                <div class="resource-block">
+                    <div class="resource-block-header">
+                        <h3>
+                            <i data-lucide="briefcase" style="width: 18px; height: 18px;"></i>
+                            Arbeit
+                        </h3>
+                        <button class="add-to-category-btn" data-category="arbeit" title="Add to Arbeit">
+                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                    <div class="resource-links" id="resource-arbeit">
+                        <!-- Work resources will be loaded here -->
+                    </div>
+                </div>
 
-            <!-- UNI KATEGORIE -->
-            <div class="resource-content" id="resource-uni">
-                <!-- Uni resources will be loaded from database -->
+                <!-- STUDIUM BLOCK -->
+                <div class="resource-block">
+                    <div class="resource-block-header">
+                        <h3>
+                            <i data-lucide="book-open" style="width: 18px; height: 18px;"></i>
+                            Studium
+                        </h3>
+                        <button class="add-to-category-btn" data-category="uni" title="Add to Studium">
+                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                    <div class="resource-links" id="resource-uni">
+                        <!-- University resources will be loaded here -->
+                    </div>
+                </div>
             </div>
-
-            <!-- CRYPTO KATEGORIE -->
-            <div class="resource-content" id="resource-crypto">
-                <!-- Crypto resources will be loaded from database -->
-            </div>
-            
         </section>
 
 
@@ -7199,17 +7400,11 @@
                 
                 renderResources() {
                     console.log('🎨 ResourceManager.renderResources() called with', this.resources.length, 'resources');
-                    // Refresh current view
-                    this.refreshCurrentView();
-                },
-                
-                refreshCurrentView() {
-                    // Get current active category
-                    const activeTab = document.querySelector('.resource-tab.active');
-                    const activeCategory = activeTab ? activeTab.getAttribute('data-resource-category') : 'alle';
-                    
-                    console.log('🔄 Refreshing view for category:', activeCategory);
-                    this.displayResourcesForCategory(activeCategory);
+                    // Render all categories at once in block layout
+                    this.displayResourcesForCategory('privat');
+                    this.displayResourcesForCategory('crypto'); 
+                    this.displayResourcesForCategory('arbeit');
+                    this.displayResourcesForCategory('uni');
                 },
                 
                 displayResourcesForCategory(category) {
@@ -7239,42 +7434,35 @@
                                 resource.category === 'Crypto'
                             );
                             break;
-                        case 'alle':
-                        default:
-                            filteredResources = this.resources;
-                            break;
                     }
                     
                     let html = '';
                     
                     if (filteredResources.length === 0) {
-                        html = '<p style="text-align: center; color: #666; padding: 3rem;">Keine Resources vorhanden</p>';
+                        html = '<div class="empty-resources">Keine Resources vorhanden</div>';
                     } else {
-                        // Todo-style grid layout for all categories
-                        html += '<div class="resource-grid">';
-                        
                         filteredResources.forEach(resource => {
                             const icon = resource.icon || 'link';
                             const description = resource.description || '';
-                            const truncatedTitle = resource.title.length > 25 ? resource.title.substring(0, 25) + '...' : resource.title;
-                            const fullTitle = `${resource.title}${description ? ` - ${description}` : ''}`;
                             html += `
-                                <div class="resource-card" 
-                                     onclick="window.open('${resource.url}', '_blank')" 
-                                     oncontextmenu="event.preventDefault(); ResourceManager.showDeleteButton(this, '${resource.id}'); return false;"
-                                     title="${fullTitle}">
-                                    <span class="resource-icon"><i data-lucide="${icon}" style="width: 16px; height: 16px;"></i></span>
-                                    <span class="resource-title">${truncatedTitle}</span>
-                                    <div class="resource-actions" style="opacity: 0;">
-                                        <button class="resource-delete-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Rechtsklick zum Löschen">
-                                            <i data-lucide="x" style="width: 12px; height: 12px;"></i>
+                                <div class="resource-item" onclick="window.open('${resource.url}', '_blank')">
+                                    <div class="resource-info">
+                                        <div class="resource-icon">
+                                            <i data-lucide="${icon}" style="width: 16px; height: 16px;"></i>
+                                        </div>
+                                        <div class="resource-details">
+                                            <div class="resource-title">${resource.title}</div>
+                                            ${description ? `<div class="resource-description">${description}</div>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="resource-actions">
+                                        <button class="resource-action-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">
+                                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                         </button>
                                     </div>
                                 </div>
                             `;
                         });
-                        
-                        html += '</div>';
                     }
                     
                     container.innerHTML = html;
@@ -7304,9 +7492,25 @@
                     }, 150);
                 },
                 
-                showAddResourceModal() {
+                showAddResourceModal(preselectedCategory = null) {
                     const modal = document.getElementById('add-resource-modal');
                     modal.classList.remove('hide');
+                    
+                    // Preselect category if provided
+                    if (preselectedCategory) {
+                        const categorySelect = document.getElementById('resource-category');
+                        const categoryMapping = {
+                            'privat': 'Privat',
+                            'crypto': 'Crypto', 
+                            'arbeit': 'Arbeit',
+                            'uni': 'Uni'
+                        };
+                        const mappedCategory = categoryMapping[preselectedCategory];
+                        if (mappedCategory && categorySelect) {
+                            categorySelect.value = mappedCategory;
+                        }
+                    }
+                    
                     document.getElementById('resource-title').focus();
                 },
                 
@@ -7525,6 +7729,15 @@
                     ResourceManager.showAddResourceModal();
                 });
             }
+
+            // Add to Category Buttons
+            const addToCategoryBtns = document.querySelectorAll('.add-to-category-btn');
+            addToCategoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const category = btn.getAttribute('data-category');
+                    ResourceManager.showAddResourceModal(category);
+                });
+            });
             
             // Add Resource Form Submission
             const addResourceForm = document.getElementById('add-resource-form');
