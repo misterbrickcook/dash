@@ -3486,22 +3486,23 @@
 
         <!-- === JOURNAL TAB === -->
         <section id="tab-journal" class="tab-section">
-            <div class="journal-header">
-                <div class="journal-controls">
-                    <div class="search-container">
-                        <input type="text" id="journal-search" class="search-input" placeholder="Search journal entries...">
-                        <button class="search-btn" onclick="JournalManager.search()">
-                            <i data-lucide="search" style="width: 16px; height: 16px;"></i>
-                        </button>
-                    </div>
-                    <div class="filter-container">
-                        <input type="text" id="journal-tag-filter" placeholder="Filter by tags..." class="filter-input" oninput="JournalManager.filterByTags()">
-                        <button id="add-journal-btn" class="btn">+ Neuer Eintrag</button>
-                    </div>
+            <!-- Search and Filter Bar -->
+            <div class="wiki-controls">
+                <div class="search-container">
+                    <input type="text" id="journal-search" placeholder="Search journal entries..." class="search-input">
+                    <button class="search-btn" onclick="JournalManager.search()">
+                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                    </button>
+                </div>
+                <div class="filter-container">
+                    <input type="text" id="journal-tag-filter" placeholder="Filter by tags..." class="filter-input" oninput="JournalManager.filterByTags()">
+                    <button class="btn" onclick="JournalManager.showAddJournalModal()">+ Add Entry</button>
                 </div>
             </div>
 
-            <div id="journal-entries" class="journal-entries"></div>
+            <!-- Journal Content -->
+            <div class="wiki-content" id="journal-entries">
+                <!-- Journal entries will be loaded here --></div>
 
         </section>
 
@@ -7350,13 +7351,6 @@
             
             // === JOURNAL EVENT LISTENERS ===
             
-            // Add Journal Button
-            const addJournalBtn = document.getElementById('add-journal-btn');
-            if (addJournalBtn) {
-                addJournalBtn.addEventListener('click', () => {
-                    JournalManager.showAddJournalModal();
-                });
-            }
 
             // Journal Search Input
             const journalSearchInput = document.getElementById('journal-search');
