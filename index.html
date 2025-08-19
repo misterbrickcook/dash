@@ -1964,11 +1964,51 @@
             transition: all 0.2s ease;
             text-decoration: none;
             color: inherit;
+            position: relative;
         }
 
         .resource-item:hover {
             border-color: #e0e0e0;
             background: #fafafa;
+        }
+
+        .delete-overlay {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+            z-index: 10;
+        }
+
+        .delete-icon {
+            background: #dc2626;
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .delete-icon:hover {
+            background: #b91c1c;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .resource-info {
@@ -7530,10 +7570,47 @@
                 },
 
                 showDeleteConfirm(resourceId, resourceTitle) {
-                    const confirmDelete = confirm(`Resource "${resourceTitle}" löschen?\n\nDieser Vorgang kann nicht rückgängig gemacht werden.`);
-                    if (confirmDelete) {
-                        this.deleteResource(resourceId);
+                    // Hide any existing delete icons first
+                    document.querySelectorAll('.delete-overlay').forEach(overlay => overlay.remove());
+                    
+                    // Find the resource item
+                    const resourceItem = event.target.closest('.resource-item');
+                    if (!resourceItem) return;
+                    
+                    // Create delete overlay
+                    const deleteOverlay = document.createElement('div');
+                    deleteOverlay.className = 'delete-overlay';
+                    deleteOverlay.innerHTML = `
+                        <div class="delete-icon" onclick="ResourceManager.confirmDelete('${resourceId}')">
+                            <i data-lucide="trash-2" style="width: 20px; height: 20px;"></i>
+                        </div>
+                    `;
+                    
+                    resourceItem.appendChild(deleteOverlay);
+                    
+                    // Initialize lucide icons for the new delete icon
+                    if (window.lucide) {
+                        lucide.createIcons();
                     }
+                    
+                    // Auto-hide after 3 seconds or when clicking elsewhere
+                    setTimeout(() => deleteOverlay.remove(), 3000);
+                    
+                    // Hide when clicking elsewhere
+                    const hideOnClick = (e) => {
+                        if (!deleteOverlay.contains(e.target)) {
+                            deleteOverlay.remove();
+                            document.removeEventListener('click', hideOnClick);
+                        }
+                    };
+                    setTimeout(() => document.addEventListener('click', hideOnClick), 100);
+                },
+
+                confirmDelete(resourceId) {
+                    // Remove the overlay
+                    document.querySelectorAll('.delete-overlay').forEach(overlay => overlay.remove());
+                    // Delete the resource
+                    this.deleteResource(resourceId);
                 },
                 
                 async addResource(resourceData) {
