@@ -1801,18 +1801,15 @@
 
         /* === MOTIVATIONAL QUOTE WIDGET === */
         .quote-widget {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
             padding: 0;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            margin-bottom: 4rem;
+            transition: all 0.2s ease;
         }
 
         .quote-widget:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #000000;
         }
 
         .quote-container {
@@ -1820,19 +1817,14 @@
             display: flex;
             align-items: center;
             gap: 1.5rem;
-            padding: 2rem;
-            color: white;
+            padding: 1.5rem;
+            color: #000000;
         }
 
         .quote-icon {
-            font-size: 2.5rem;
-            opacity: 0.9;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            font-size: 1.5rem;
+            color: #666666;
+            min-width: 24px;
         }
 
         .quote-content {
@@ -1840,36 +1832,37 @@
         }
 
         .quote-text {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 500;
-            line-height: 1.5;
+            line-height: 1.6;
             margin-bottom: 0.5rem;
-            font-style: italic;
+            color: #000000;
         }
 
         .quote-author {
-            font-size: 0.9rem;
-            opacity: 0.8;
+            font-size: 0.8rem;
+            color: #666666;
             font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
         .quote-refresh-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            background: none;
+            border: 1px solid #e0e0e0;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            color: white;
+            transition: all 0.2s ease;
+            color: #666666;
         }
 
         .quote-refresh-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: rotate(180deg);
+            border-color: #000000;
+            color: #000000;
         }
 
         @media (max-width: 768px) {
@@ -1877,11 +1870,11 @@
                 flex-direction: column;
                 text-align: center;
                 gap: 1rem;
-                padding: 1.5rem;
+                padding: 1.25rem;
             }
             
             .quote-text {
-                font-size: 1rem;
+                font-size: 0.9rem;
             }
         }
 
@@ -3143,17 +3136,19 @@
             </section>
 
             <!-- Motivational Quote Widget -->
-            <section class="quote-widget" style="margin-bottom: 4rem;">
+            <section class="quote-widget">
                 <div class="quote-container">
-                    <div class="quote-icon">💡</div>
+                    <div class="quote-icon">
+                        <i data-lucide="quote" style="width: 20px; height: 20px;"></i>
+                    </div>
                     <div class="quote-content">
                         <div class="quote-text" id="daily-quote">
                             "The way to get started is to quit talking and begin doing."
                         </div>
-                        <div class="quote-author" id="quote-author">— Walt Disney</div>
+                        <div class="quote-author" id="quote-author">Walt Disney</div>
                     </div>
                     <button class="quote-refresh-btn" id="refresh-quote-btn" title="New Quote">
-                        <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                        <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i>
                     </button>
                 </div>
             </section>
@@ -10264,8 +10259,8 @@
                 const quoteAuthorEl = document.getElementById('quote-author');
 
                 if (quoteTextEl && quoteAuthorEl) {
-                    quoteTextEl.textContent = `"${quoteToDisplay.text}"`;
-                    quoteAuthorEl.textContent = `— ${quoteToDisplay.author}`;
+                    quoteTextEl.textContent = quoteToDisplay.text;
+                    quoteAuthorEl.textContent = quoteToDisplay.author;
                 }
             }
 
@@ -10280,11 +10275,7 @@
                         const newQuote = this.getRandomQuote();
                         this.displayQuote(newQuote);
                         
-                        // Animate the button
-                        refreshBtn.style.transform = 'rotate(360deg)';
-                        setTimeout(() => {
-                            refreshBtn.style.transform = 'rotate(0deg)';
-                        }, 300);
+                        // Simple feedback without excessive animation
                     });
                 }
             }
