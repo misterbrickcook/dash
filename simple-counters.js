@@ -23,30 +23,25 @@ class SimpleCounters {
         const now = new Date();
         const user = window.supabase.getCurrentUser();
         
-        // Calculate date ranges for last 30 days vs previous 30 days (2025 is correct!)
+        // Use EXACT same date calculation as heatmap for consistency
         const today = new Date();
         const last30Start = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
         const prev30End = new Date(last30Start.getTime() - 1);
         const prev30Start = new Date(prev30End.getTime() - 30 * 24 * 60 * 60 * 1000);
         
-        // Convert to local date strings to match what heatmap expects
-        const formatLocalDate = (date) => {
-            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-            return localDate.toISOString().split('T')[0];
-        };
-        
-        const last30StartStr = formatLocalDate(last30Start);
-        const last30EndStr = formatLocalDate(today);
-        const prev30StartStr = formatLocalDate(prev30Start);
-        const prev30EndStr = formatLocalDate(prev30End);
+        // Use same format as heatmap: toISOString().split('T')[0] (UTC)
+        const last30StartStr = last30Start.toISOString().split('T')[0];
+        const last30EndStr = new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const prev30StartStr = prev30Start.toISOString().split('T')[0];
+        const prev30EndStr = new Date(prev30End.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         
         try {
             console.log(`🔍 Counter: Querying todos from ${last30StartStr} to ${last30EndStr}`);
             
-            // Get todos for both periods using updated_at (when completed)
+            // Use EXACT same query as heatmap (with lt instead of lte)
             const [last30TodoData, prev30TodoData, routineData] = await Promise.all([
-                window.supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${last30StartStr}&updated_at=lte.${last30EndStr}&select=id,updated_at`),
-                window.supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${prev30StartStr}&updated_at=lte.${prev30EndStr}&select=id,updated_at`),
+                window.supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${last30StartStr}&updated_at=lt.${last30EndStr}&select=updated_at`),
+                window.supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${prev30StartStr}&updated_at=lt.${prev30EndStr}&select=updated_at`),
                 window.supabase.query(`simple_routines?user_id=eq.${user.id}&select=date,routine_data`)
             ]);
             
