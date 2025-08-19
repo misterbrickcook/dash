@@ -248,23 +248,21 @@ class SimpleCounters {
     }
 
     async onMorningRoutineChanged() {
-        // Trigger only morning counter animation
-        this.triggerSuccessAnimation(0); // Morning only
-        setTimeout(() => this.updateAllCounters(), 300);
+        // First update counter, then animate with new value
+        await this.updateAllCounters();
+        setTimeout(() => this.triggerSuccessAnimation(0), 100); // Morning only
     }
 
     async onEveningRoutineChanged() {
-        // Trigger only evening counter animation  
-        this.triggerSuccessAnimation(1); // Evening only
-        setTimeout(() => this.updateAllCounters(), 300);
+        // First update counter, then animate with new value
+        await this.updateAllCounters();
+        setTimeout(() => this.triggerSuccessAnimation(1), 100); // Evening only
     }
 
     async onTodoChanged() {
-        // Trigger immediate animation for todo counter (index 2)
-        this.triggerSuccessAnimation(2);
-        
-        // Then update counters after a short delay
-        setTimeout(() => this.updateAllCounters(), 300);
+        // First update counter, then animate with new value
+        await this.updateAllCounters();
+        setTimeout(() => this.triggerSuccessAnimation(2), 100);
     }
 
     // Manual debug trigger
