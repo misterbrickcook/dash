@@ -2003,6 +2003,12 @@
         .resource-actions {
             display: flex;
             gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .resource-item:hover .resource-actions {
+            opacity: 1;
         }
 
         .resource-action-btn {
@@ -2019,7 +2025,7 @@
         }
 
         .resource-action-btn:hover {
-            color: #000000;
+            color: #dc2626;
         }
 
         .empty-resources {
@@ -7445,7 +7451,10 @@
                             const icon = resource.icon || 'link';
                             const description = resource.description || '';
                             html += `
-                                <div class="resource-item" onclick="window.open('${resource.url}', '_blank')">
+                                <div class="resource-item" 
+                                     onclick="window.open('${resource.url}', '_blank')"
+                                     oncontextmenu="event.preventDefault(); ResourceManager.showDeleteConfirm('${resource.id}', '${resource.title.replace(/'/g, '\\\'')}')"
+                                     title="Rechtsklick zum Löschen">
                                     <div class="resource-info">
                                         <div class="resource-icon">
                                             <i data-lucide="${icon}" style="width: 16px; height: 16px;"></i>
@@ -7456,7 +7465,7 @@
                                         </div>
                                     </div>
                                     <div class="resource-actions">
-                                        <button class="resource-action-btn" onclick="event.stopPropagation(); ResourceManager.deleteResource('${resource.id}')" title="Delete">
+                                        <button class="resource-action-btn" onclick="event.stopPropagation(); ResourceManager.showDeleteConfirm('${resource.id}', '${resource.title.replace(/'/g, '\\\'')}')" title="Delete">
                                             <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                         </button>
                                     </div>
@@ -7518,6 +7527,13 @@
                     const modal = document.getElementById('add-resource-modal');
                     modal.classList.add('hide');
                     document.getElementById('add-resource-form').reset();
+                },
+
+                showDeleteConfirm(resourceId, resourceTitle) {
+                    const confirmDelete = confirm(`Resource "${resourceTitle}" löschen?\n\nDieser Vorgang kann nicht rückgängig gemacht werden.`);
+                    if (confirmDelete) {
+                        this.deleteResource(resourceId);
+                    }
                 },
                 
                 async addResource(resourceData) {
