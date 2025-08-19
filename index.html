@@ -8450,8 +8450,7 @@
                 if (!container) return;
                 
                 const entriesToShow = this.filteredEntries.length > 0 || 
-                    document.getElementById('wiki-search').value || 
-                    document.getElementById('wiki-tag-filter').value 
+                    document.getElementById('wiki-search').value 
                     ? this.filteredEntries : this.entries;
                 
                 if (entriesToShow.length === 0) {
