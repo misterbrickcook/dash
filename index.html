@@ -1742,6 +1742,63 @@
             color: #000000;
         }
 
+        /* === TRADE DETAILS MODAL === */
+        .trade-details-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .details-section {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+        }
+
+        .details-section h4 {
+            margin: 0 0 1rem 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #000000;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .notes-content, .learnings-content {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 1rem;
+            min-height: 80px;
+            white-space: pre-wrap;
+            font-family: inherit;
+            line-height: 1.5;
+            color: #000000;
+        }
+
+        .learnings-content {
+            border-left: 4px solid #059669;
+        }
+
+        .notes-content:empty::before {
+            content: 'Keine Entry Notes verfügbar';
+            color: #999999;
+            font-style: italic;
+        }
+
+        .learnings-content:empty::before {
+            content: 'Keine Learnings verfügbar';
+            color: #999999;
+            font-style: italic;
+        }
+
         .close-trade-form .form-group {
             margin-bottom: 1.5rem;
         }
@@ -3316,6 +3373,66 @@
                 <div class="modal-footer">
                     <button class="btn secondary" id="add-trade-cancel">Cancel</button>
                     <button class="btn" id="add-trade-confirm">Add Trade</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- === VIEW TRADE DETAILS MODAL === -->
+        <div id="view-trade-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Trade Details</h3>
+                    <button class="modal-close" id="view-trade-modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="trade-details-info">
+                        <div class="details-section">
+                            <h4>Trade Information</h4>
+                            <div class="info-grid">
+                                <div class="info-row">
+                                    <span class="info-label">Token:</span>
+                                    <span class="info-value" id="detail-token">-</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">SOL Amount:</span>
+                                    <span class="info-value" id="detail-sol-amount">-</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Entry McAP:</span>
+                                    <span class="info-value" id="detail-entry-mcap">-</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Exit McAP:</span>
+                                    <span class="info-value" id="detail-exit-mcap">-</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Final P&L:</span>
+                                    <span class="info-value" id="detail-pnl">-</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Entry Date:</span>
+                                    <span class="info-value" id="detail-entry-date">-</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Exit Date:</span>
+                                    <span class="info-value" id="detail-exit-date">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="details-section">
+                            <h4>Entry Notes</h4>
+                            <div class="notes-content" id="detail-entry-notes">-</div>
+                        </div>
+                        
+                        <div class="details-section">
+                            <h4>Close Learnings</h4>
+                            <div class="learnings-content" id="detail-close-learnings">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn secondary" id="close-details-modal">Close</button>
                 </div>
             </div>
         </div>
@@ -8461,6 +8578,26 @@
                     closeTradeConfirm.addEventListener('click', () => this.confirmCloseTrade());
                 }
 
+                // View trade details modal
+                const viewTradeModalClose = document.getElementById('view-trade-modal-close');
+                const closeDetailsModal = document.getElementById('close-details-modal');
+                const viewTradeModal = document.getElementById('view-trade-modal');
+
+                [viewTradeModalClose, closeDetailsModal].forEach(btn => {
+                    if (btn) {
+                        btn.addEventListener('click', () => this.hideViewTradeModal());
+                    }
+                });
+
+                // Close view trade modal on overlay click
+                if (viewTradeModal) {
+                    viewTradeModal.addEventListener('click', (e) => {
+                        if (e.target === viewTradeModal) {
+                            this.hideViewTradeModal();
+                        }
+                    });
+                }
+
                 // Modal SOL amount buttons
                 document.addEventListener('click', (e) => {
                     if (e.target.matches('#close-trade-modal .sol-btn')) {
@@ -8840,6 +8977,9 @@
                             </div>
                             <div data-label="Date">${new Date(trade.exit_date || trade.entry_date).toLocaleDateString()}</div>
                             <div class="trade-actions" data-label="Actions">
+                                <button class="trade-action-btn" onclick="window.TradingManager.viewTradeDetails('${trade.id}')" title="View Details">
+                                    <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+                                </button>
                                 <button class="trade-action-btn" onclick="window.TradingManager.deleteTrade('${trade.id}')" title="Delete Trade">
                                     <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                                 </button>
@@ -9392,6 +9532,42 @@
                 await this.updateSolPrice();
                 // Would update all current market caps here
                 alert(`SOL Price updated: $${this.solPrice.toFixed(2)}`);
+            }
+
+            viewTradeDetails(tradeId) {
+                const trade = this.trades.find(t => t.id === tradeId);
+                if (!trade) {
+                    console.error('Trade not found:', tradeId);
+                    return;
+                }
+
+                // Populate modal with trade data
+                document.getElementById('detail-token').textContent = trade.token;
+                document.getElementById('detail-sol-amount').textContent = `${trade.sol_amount} SOL`;
+                document.getElementById('detail-entry-mcap').textContent = trade.entry_mcap;
+                document.getElementById('detail-exit-mcap').textContent = trade.exit_mcap || '-';
+                
+                const pnlValue = trade.final_pnl || 0;
+                const pnlElement = document.getElementById('detail-pnl');
+                pnlElement.textContent = `${pnlValue >= 0 ? '+' : ''}${pnlValue.toFixed(3)} SOL`;
+                pnlElement.style.color = pnlValue >= 0 ? '#059669' : '#dc2626';
+                
+                document.getElementById('detail-entry-date').textContent = new Date(trade.entry_date).toLocaleDateString('de-DE');
+                document.getElementById('detail-exit-date').textContent = trade.exit_date ? new Date(trade.exit_date).toLocaleDateString('de-DE') : '-';
+                
+                // Show notes and learnings
+                const notesElement = document.getElementById('detail-entry-notes');
+                notesElement.textContent = trade.notes || '';
+                
+                const learningsElement = document.getElementById('detail-close-learnings');
+                learningsElement.textContent = trade.close_learnings || '';
+
+                // Show modal
+                document.getElementById('view-trade-modal').style.display = 'flex';
+            }
+
+            hideViewTradeModal() {
+                document.getElementById('view-trade-modal').style.display = 'none';
             }
         }
 
