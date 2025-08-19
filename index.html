@@ -3514,46 +3514,17 @@
 
         <!-- === JOURNAL TAB === -->
         <section id="tab-journal" class="tab-section">
-            
-            <div class="category-tabs">
-                <button class="journal-tab active" data-journal-category="alle">Alle</button>
-                <button class="journal-tab" data-journal-category="allgemein">Allgemein</button>
-                <button class="journal-tab" data-journal-category="fitness">Fitness</button>
-                <button class="journal-tab" data-journal-category="uni">Uni</button>
-                <button class="journal-tab" data-journal-category="crypto">Crypto</button>
-                <button class="journal-tab" data-journal-category="lesen">Lesen</button>
-                <button id="add-journal-btn" class="btn" style="margin-left: 2rem;">+ Add Journal</button>
+            <div class="journal-header">
+                <h2>Journal</h2>
+                <div class="journal-controls">
+                    <div class="filter-container">
+                        <input type="text" id="journal-search" class="filter-input" placeholder="Suche nach Titel, Inhalt oder Tags...">
+                    </div>
+                    <button id="add-journal-btn" class="btn">+ Neuer Eintrag</button>
+                </div>
             </div>
 
-            <!-- ALLE KATEGORIE -->
-            <div class="journal-content active" id="journal-alle">
-                <!-- All journal entries will be loaded from database -->
-            </div>
-
-            <!-- ALLGEMEIN KATEGORIE -->
-            <div class="journal-content" id="journal-allgemein">
-                <!-- Allgemein entries will be loaded from database -->
-            </div>
-
-            <!-- FITNESS KATEGORIE -->
-            <div class="journal-content" id="journal-fitness">
-                <!-- Fitness entries will be loaded from database -->
-            </div>
-
-            <!-- UNI KATEGORIE -->
-            <div class="journal-content" id="journal-uni">
-                <!-- Uni entries will be loaded from database -->
-            </div>
-
-            <!-- CRYPTO KATEGORIE -->
-            <div class="journal-content" id="journal-crypto">
-                <!-- Crypto entries will be loaded from database -->
-            </div>
-
-            <!-- LESEN KATEGORIE -->
-            <div class="journal-content" id="journal-lesen">
-                <!-- Lesen entries will be loaded from database -->
-            </div>
+            <div id="journal-entries" class="journal-entries"></div>
 
         </section>
 
