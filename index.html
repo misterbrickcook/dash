@@ -6861,10 +6861,6 @@
             },
             
             async deleteEntry(entryId) {
-                if (!confirm('Diesen Journal-Eintrag wirklich löschen?')) {
-                    return;
-                }
-                
                 try {
                     // Delete from database if authenticated
                     if (supabase?.isAuthenticated()) {
@@ -8488,25 +8484,23 @@
                 const entry = this.entries.find(e => e.id === id);
                 if (!entry) return;
                 
-                if (confirm(`Delete wiki entry "${entry.title}"?`)) {
-                    try {
-                        console.log('☁️ Wiki: Deleting entry from cloud:', id);
-                        await supabase.delete('crypto_wiki_entries', `id=eq.${id}`);
-                        console.log('☁️ Wiki: Entry deleted from cloud');
-                    } catch (error) {
-                        console.error('❌ Wiki: Error deleting from cloud:', error);
-                        alert('Fehler beim Löschen des Wiki-Eintrags: ' + error.message);
-                        throw error; // Don't hide errors in pure cloud mode
-                    }
-                    
-                    // Remove from local array
-                    this.entries = this.entries.filter(e => e.id !== id);
-                    
-                    // Pure cloud mode - no localStorage
-                    
-                    this.render();
-                    console.log('☁️ Wiki: Entry deleted:', entry.title);
+                try {
+                    console.log('☁️ Wiki: Deleting entry from cloud:', id);
+                    await supabase.delete('crypto_wiki_entries', `id=eq.${id}`);
+                    console.log('☁️ Wiki: Entry deleted from cloud');
+                } catch (error) {
+                    console.error('❌ Wiki: Error deleting from cloud:', error);
+                    alert('Fehler beim Löschen des Wiki-Eintrags: ' + error.message);
+                    throw error; // Don't hide errors in pure cloud mode
                 }
+                
+                // Remove from local array
+                this.entries = this.entries.filter(e => e.id !== id);
+                
+                // Pure cloud mode - no localStorage
+                
+                this.render();
+                console.log('☁️ Wiki: Entry deleted:', entry.title);
             },
             
             search() {
