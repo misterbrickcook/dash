@@ -5652,10 +5652,7 @@
                 // Prepare progress display  
                 const hasProgressData = goal.hasOwnProperty('startValue') && goal.hasOwnProperty('targetValue');
                 console.log('🔍 hasProgressData:', hasProgressData);
-                console.log('🔍 startValue:', goal.startValue, typeof goal.startValue);
-                console.log('🔍 targetValue:', goal.targetValue, typeof goal.targetValue);
                 console.log('🔍 currentValue:', goal.currentValue, typeof goal.currentValue);
-                console.log('🔍 progress:', goal.progress);
                 const progressSection = hasProgressData ? `
                     <div class="goal-progress-section" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0;">
                         <div class="goal-values" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
@@ -7085,12 +7082,10 @@
                             // Verify icons are actually rendered
                             setTimeout(() => {
                                 const actionBtns = container.querySelectorAll('.resource-actions');
-                                console.log(`🔍 Found ${actionBtns.length} action button containers in ${category}`);
                                 
                                 actionBtns.forEach((actions, index) => {
                                     const buttons = actions.querySelectorAll('button');
                                     const icons = actions.querySelectorAll('svg');
-                                    console.log(`  Container ${index}: ${buttons.length} buttons, ${icons.length} SVG icons, opacity: ${getComputedStyle(actions).opacity}`);
                                     
                                     // Force re-render if icons missing
                                     if (buttons.length > 0 && icons.length === 0) {
@@ -9961,7 +9956,6 @@
                     }
                 });
                 
-                console.log('🎉 Cloud-First Policy validation complete');
                 console.log('📋 All future implementations must follow CLOUD_POLICY.js guidelines');
                 
             }, 2000);
