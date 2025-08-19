@@ -6684,7 +6684,11 @@
                     // Parse tags (handle both old category and new tags)
                     let tags = [];
                     if (entry.tags) {
-                        tags = entry.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+                        if (typeof entry.tags === 'string') {
+                            tags = entry.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+                        } else if (Array.isArray(entry.tags)) {
+                            tags = entry.tags;
+                        }
                     } else if (entry.category) {
                         // Migration: use old category as a tag
                         tags = [entry.category];
