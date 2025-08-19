@@ -4303,7 +4303,7 @@
             if (tabId === 'tab-journal') {
                 const activeTab = document.querySelector('.journal-tab.active');
                 const activeCategory = activeTab ? activeTab.getAttribute('data-journal-category') : 'alle';
-                JournalManager.displayEntriesForCategory(activeCategory);
+                JournalManager.renderEntries();
             }
             
             // If switching to resources tab, load the active category
