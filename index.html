@@ -10918,21 +10918,10 @@
 
             updatePerformanceHeatmapStats() {
                 const statsElement = document.getElementById('performance-heatmap-stats');
-                if (!statsElement || !this.performanceHeatmapData) return;
+                if (!statsElement) return;
                 
-                // Only count days with actual performance data (not null)
-                const daysWithData = this.performanceHeatmapData.filter(d => d.performance !== null);
-                const totalDays = daysWithData.length;
-                const gainDays = daysWithData.filter(d => d.performance === 'gain').length;
-                const lossDays = daysWithData.filter(d => d.performance === 'loss').length;
-                const neutralDays = daysWithData.filter(d => d.performance === 'neutral').length;
-                
-                if (totalDays > 0) {
-                    const winRate = ((gainDays / totalDays) * 100).toFixed(1);
-                    statsElement.textContent = `${gainDays} gain, ${lossDays} loss, ${neutralDays} neutral (${winRate}% win rate)`;
-                } else {
-                    statsElement.textContent = 'No performance data available';
-                }
+                // Remove the stats text - user doesn't want it
+                statsElement.textContent = '';
             }
         }
 
