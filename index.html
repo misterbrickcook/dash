@@ -3612,7 +3612,7 @@
                 
                 this.currentUser = supabase.getCurrentUser();
                 if (supabase.isAuthenticated()) {
-                    console.log('✅ User authenticated:', this.currentUser.email);
+                    console.log('✅ User authenticated successfully');
                     this.isAuthenticated = true;
                     await this.showDashboard();
                 } else {
@@ -4338,7 +4338,7 @@
                     return false;
                 }
                 
-                console.log(`👤 Migrating data for user: ${currentUser.email}`);
+                console.log('👤 Starting data migration...');
                 
                 // Collect all local data
                 const localCompletions = [];
@@ -4898,7 +4898,6 @@
                     case 'dringend': priorityInt = 4; break;
                     default: priorityInt = 2;
                 }
-                console.log('🎯 Priority conversion:', todoData.priority, '→', priorityInt);
                 
                 const todo = {
                     text: todoData.title,
@@ -4940,7 +4939,6 @@
                     throw error; // Don't hide errors in pure cloud mode
                 }
                 
-                console.log('Todo added:', todo);
                 
                 // Refresh current view
                 this.refreshCurrentView();
@@ -4952,7 +4950,6 @@
                 const activeCategory = activeTab ? activeTab.getAttribute('data-category') : 'heute';
                 
                 console.log('🔄 Refreshing view for category:', activeCategory);
-                console.log('🔄 All todos (completed status):', this.todos.map(t => ({title: t.title, completed: t.completed})));
                 
                 this.displayTodosForCategory(activeCategory);
                 
@@ -5191,15 +5188,11 @@
             },
             
             async toggleTodo(todoId) {
-                console.log('🔍 Looking for todo with ID:', todoId, 'Type:', typeof todoId);
-                console.log('🔍 Available todos:', this.todos.map(t => ({id: t.id, type: typeof t.id, title: t.title})));
                 
                 const todo = this.todos.find(t => String(t.id) === String(todoId));
                 if (todo) {
                     const wasCompleted = todo.completed;
                     todo.completed = !todo.completed;
-                    console.log(`✅ Todo "${todo.title}" ${todo.completed ? 'completed' : 'uncompleted'}`);
-                    console.log(`🔍 DEBUG: wasCompleted = ${wasCompleted}, todo.completed = ${todo.completed}`);
                     
                     // Update counter display when todo status changes (now cloud-based)
                     if (todo.completed !== wasCompleted) {

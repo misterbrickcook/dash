@@ -36,7 +36,6 @@ class SimpleCounters {
         const prev30EndStr = new Date(prev30End.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         
         try {
-            console.log(`🔍 Counter: Querying todos from ${last30StartStr} to ${last30EndStr}`);
             
             // Use EXACT same query as heatmap (with lt instead of lte)
             const [last30TodoData, prev30TodoData, routineData] = await Promise.all([
@@ -45,20 +44,12 @@ class SimpleCounters {
                 window.supabase.query(`simple_routines?user_id=eq.${user.id}&select=date,routine_data`)
             ]);
             
-            console.log(`🔍 Counter: Raw query results:`, {
-                last30TodoData: last30TodoData?.length || 0,
-                prev30TodoData: prev30TodoData?.length || 0,
-                last30Todos: last30TodoData,
-                prev30Todos: prev30TodoData
-            });
 
             // Count todos
             const last30TodoCount = last30TodoData ? last30TodoData.length : 0;
             const prev30TodoCount = prev30TodoData ? prev30TodoData.length : 0;
             const todoPercentChange = this.calculatePercentChange(prev30TodoCount, last30TodoCount);
             
-            console.log(`🔍 Counter Debug: Found ${last30TodoCount} todos in last 30 days (${last30StartStr} to ${last30EndStr})`);
-            console.log(`🔍 Counter Debug: Found ${prev30TodoCount} todos in previous 30 days (${prev30StartStr} to ${prev30EndStr})`);
 
             // Count routine completions for last 30 days and previous 30 days
             let last30MorningCount = 0;
@@ -207,15 +198,13 @@ class SimpleCounters {
                 tile.classList.remove('success-animation');
             }, 600);
             
-            console.log(`🎉 Success animation triggered for counter ${index}`);
         }
     }
 
     async getSolBalance() {
         try {
-            // Helius RPC endpoint (free tier) - better CORS support
-            const HELIUS_API_KEY = '35ffdb6a-2061-4573-a66b-ea263c5eaa34';
-            const response = await fetch(`https://rpc.helius.xyz/?api-key=${HELIUS_API_KEY}`, {
+            // Use public Solana RPC endpoint instead of API key
+            const response = await fetch('https://api.mainnet-beta.solana.com', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
