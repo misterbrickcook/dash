@@ -3269,6 +3269,11 @@
                             <label for="close-keep-position">SOL verbleibend</label>
                             <input type="number" id="close-keep-position" placeholder="2.0" step="0.001" autocomplete="off" readonly style="background: #f8f9fa;">
                         </div>
+                        
+                        <div class="form-group">
+                            <label for="close-trade-learnings">Learnings & Notes</label>
+                            <textarea id="close-trade-learnings" placeholder="Was hast du gelernt? Warum hast du geschlossen? Fehler, Erfolge, Strategien..." rows="4" autocomplete="off" style="width: 100%; padding: 0.75rem; border: 1px solid #e0e0e0; border-radius: 4px; font-family: inherit; resize: vertical; min-height: 100px;"></textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -8829,7 +8834,10 @@
                             <div class="trade-pnl ${(trade.final_pnl || 0) >= 0 ? 'positive' : 'negative'}" data-label="P&L">
                                 ${(trade.final_pnl || 0) >= 0 ? '+' : ''}${(trade.final_pnl || 0).toFixed(2)} SOL
                             </div>
-                            <div class="trade-notes" data-label="Notes" title="${trade.notes || ''}">${trade.notes ? (trade.notes.length > 15 ? trade.notes.substring(0, 15) + '...' : trade.notes) : '-'}</div>
+                            <div class="trade-notes" data-label="Notes" title="${(trade.notes || '') + (trade.close_learnings ? '\n\nLearnings: ' + trade.close_learnings : '')}">
+                                ${trade.notes ? (trade.notes.length > 15 ? trade.notes.substring(0, 15) + '...' : trade.notes) : '-'}
+                                ${trade.close_learnings ? '<br><small style="color: #059669; font-style: italic;">📝 Learnings</small>' : ''}
+                            </div>
                             <div data-label="Date">${new Date(trade.exit_date || trade.entry_date).toLocaleDateString()}</div>
                             <div class="trade-actions" data-label="Actions">
                                 <button class="trade-action-btn" onclick="window.TradingManager.deleteTrade('${trade.id}')" title="Delete Trade">
@@ -8951,6 +8959,12 @@
             hideCloseTradeModal() {
                 document.getElementById('close-trade-modal').style.display = 'none';
                 this.currentTradeToClose = null;
+                
+                // Clear form fields
+                document.getElementById('close-exit-mcap').value = '';
+                document.getElementById('close-take-profit').value = '';
+                document.getElementById('close-keep-position').value = '';
+                document.getElementById('close-trade-learnings').value = '';
             }
 
             calculateTakeProfitFromPercent(percent) {
@@ -9116,6 +9130,7 @@
                 const activeMultiplier = document.querySelector('#close-trade-modal .mcap-btn.active')?.getAttribute('data-multiplier') || 'B';
                 const solToSell = parseFloat(document.getElementById('close-take-profit').value);
                 const solRemaining = parseFloat(document.getElementById('close-keep-position').value);
+                const learnings = document.getElementById('close-trade-learnings').value.trim();
 
                 if (!mcapValue || !solToSell) {
                     alert('Please fill in all fields');
@@ -9150,6 +9165,11 @@
                         originalTrade.received_sol = solToSell;
                         originalTrade.final_pnl = solToSell - originalCostBasis;
                         originalTrade.exit_date = new Date().toISOString();
+                        
+                        // Add learnings if provided
+                        if (learnings) {
+                            originalTrade.close_learnings = learnings;
+                        }
 
                         console.log(`FULL CLOSE: PnL = ${originalTrade.final_pnl.toFixed(3)} SOL`);
                         
@@ -9208,6 +9228,11 @@
                             stop_loss: originalTrade.stop_loss,
                             take_profit: originalTrade.take_profit
                         };
+                        
+                        // Add learnings if provided
+                        if (learnings) {
+                            closedTrade.close_learnings = learnings;
+                        }
                         
                         // Store cost_basis locally
                         closedTrade._cost_basis = soldCostBasis;
