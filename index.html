@@ -6594,7 +6594,7 @@
                                 tags: tags
                             };
                         });
-                        this.refreshCurrentView();
+                        this.renderEntries();
                     } else {
                         console.log('☁️ JournalManager: No entries found in cloud');
                         this.entries = [];
@@ -6656,7 +6656,7 @@
                 console.log('☁️ JournalManager: Entry added:', entry);
                 
                 // Refresh current view
-                this.refreshCurrentView();
+                this.renderEntries();
             },
             
             renderEntries() {
@@ -6798,7 +6798,7 @@
                     this.entries = this.entries.filter(entry => entry.id != entryId);
                     
                     // Refresh current view
-                    this.refreshCurrentView();
+                    this.renderEntries();
                     
                     console.log('✅ Journal entry deleted:', entryId);
                 } catch (error) {
