@@ -3497,7 +3497,9 @@
                 </div>
                 <div class="filter-container">
                     <input type="text" id="journal-tag-filter" placeholder="Filter by tags..." class="filter-input" oninput="JournalManager.filterByTags()">
-                    <button class="btn" onclick="JournalManager.showAddJournalModal()">+ Add Entry</button>
+                    <button class="nav-tab quick-add-btn" onclick="JournalManager.showAddJournalModal()" title="Add Journal Entry">
+                        <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                    </button>
                 </div>
             </div>
 
@@ -3934,7 +3936,9 @@
                 </div>
                 <div class="filter-container">
                     <input type="text" id="wiki-tag-filter" placeholder="Filter by tags..." class="filter-input" oninput="Wiki.filterByTags()">
-                    <button class="btn" onclick="Wiki.showAddModal()">+ Add Entry</button>
+                    <button class="nav-tab quick-add-btn" onclick="Wiki.showAddModal()" title="Add Wiki Entry">
+                        <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                    </button>
                 </div>
             </div>
 
