@@ -279,9 +279,16 @@ class SimpleRoutineManager {
         // Update UI
         this.updateUI();
 
-        // Refresh simple counters after routine completion
+        // Refresh simple counters after routine completion - specific to routine type
         if (window.SimpleCounters) {
-            window.SimpleCounters.onRoutineChanged();
+            if (routineType === 'morning') {
+                window.SimpleCounters.onMorningRoutineChanged();
+            } else if (routineType === 'evening') {
+                window.SimpleCounters.onEveningRoutineChanged();
+            } else {
+                // Fallback for unknown types
+                window.SimpleCounters.onRoutineChanged();
+            }
         }
 
     }

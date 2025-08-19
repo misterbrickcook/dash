@@ -241,11 +241,21 @@ class SimpleCounters {
 
     // Simple trigger methods
     async onRoutineChanged() {
-        // Trigger immediate animation for both routine counters (index 0 and 1)
+        // Legacy method - triggers both (for backward compatibility)
         this.triggerSuccessAnimation(0); // Morning
         this.triggerSuccessAnimation(1); // Evening
-        
-        // Then update counters after a short delay
+        setTimeout(() => this.updateAllCounters(), 300);
+    }
+
+    async onMorningRoutineChanged() {
+        // Trigger only morning counter animation
+        this.triggerSuccessAnimation(0); // Morning only
+        setTimeout(() => this.updateAllCounters(), 300);
+    }
+
+    async onEveningRoutineChanged() {
+        // Trigger only evening counter animation  
+        this.triggerSuccessAnimation(1); // Evening only
         setTimeout(() => this.updateAllCounters(), 300);
     }
 
