@@ -23,21 +23,16 @@ class SimpleCounters {
         const now = new Date();
         const user = window.supabase.getCurrentUser();
         
-        // Calculate date ranges for last 30 days vs previous 30 days (use proper local dates)
+        // Calculate date ranges for last 30 days vs previous 30 days (2025 is correct!)
         const today = new Date();
-        const last30Start = new Date(today);
-        last30Start.setDate(today.getDate() - 30);
-        const prev30Start = new Date(last30Start);
-        prev30Start.setDate(last30Start.getDate() - 30);
-        const prev30End = new Date(last30Start);
-        prev30End.setDate(last30Start.getDate() - 1);
+        const last30Start = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const prev30End = new Date(last30Start.getTime() - 1);
+        const prev30Start = new Date(prev30End.getTime() - 30 * 24 * 60 * 60 * 1000);
         
-        // Format dates as YYYY-MM-DD (same way heatmap does it)
+        // Convert to local date strings to match what heatmap expects
         const formatLocalDate = (date) => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            return localDate.toISOString().split('T')[0];
         };
         
         const last30StartStr = formatLocalDate(last30Start);
