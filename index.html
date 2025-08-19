@@ -1877,20 +1877,6 @@
             margin-bottom: 0.5rem;
         }
 
-        .event-date-header.today {
-            background: rgba(5, 150, 105, 0.1);
-            color: #059669;
-            border-left: 4px solid #059669;
-        }
-
-        .no-day-events {
-            text-align: center;
-            padding: 1rem;
-            color: #999999;
-            font-style: italic;
-            font-size: 0.8rem;
-        }
-
         .no-events {
             text-align: center;
             padding: 3rem 1rem;
@@ -3553,16 +3539,6 @@
                         <span class="setting-description">Zeit, zu der täglich die SOL Balance für den Chart aufgezeichnet wird</span>
                     </div>
                     <button id="save-analytics-settings" class="btn">Speichern</button>
-                </div>
-                
-                <div class="setting-group">
-                    <h3>Google Calendar</h3>
-                    <div class="setting-item">
-                        <label for="google-calendar-url">Calendar URL (Public/iCal):</label>
-                        <input type="url" id="google-calendar-url" placeholder="https://calendar.google.com/calendar/ical/...">
-                        <span class="setting-description">Öffentliche Google Calendar URL für Integration im Dashboard</span>
-                    </div>
-                    <button id="save-calendar-settings" class="btn">Speichern</button>
                 </div>
             </div>
         </section>
@@ -10146,62 +10122,30 @@
         class CalendarWidget {
             constructor() {
                 this.events = [];
-                this.calendarUrl = null;
+                this.calendarUrl = null; // Will be set when user provides Google Calendar URL
             }
 
-            // Get Monday of current week
-            getWeekStart() {
-                const today = new Date();
-                const day = today.getDay();
-                const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Adjust if Sunday
-                return new Date(today.setDate(diff));
-            }
-
-            // Generate week dates (Mo-So)
-            getWeekDates() {
-                const weekStart = this.getWeekStart();
-                const weekDates = [];
-                for (let i = 0; i < 7; i++) {
-                    const date = new Date(weekStart);
-                    date.setDate(weekStart.getDate() + i);
-                    weekDates.push(date);
-                }
-                return weekDates;
-            }
-
-            // Mock events for demonstration - distributed across the week
+            // Mock events for demonstration - replace with real Google Calendar data
             getMockEvents() {
-                const weekDates = this.getWeekDates();
+                const today = new Date();
                 const events = [
                     {
-                        title: "Team Meeting",
-                        date: weekDates[0], // Monday
-                        time: "09:00",
-                        description: "Weekly Standup"
-                    },
-                    {
                         title: "Meeting mit Prof. Schmidt",
-                        date: weekDates[1], // Tuesday  
+                        date: new Date(today.getTime() + 1 * 24 * 60 * 60 * 1000),
                         time: "10:00",
                         description: "Besprechung Masterarbeit"
                     },
                     {
                         title: "Zahnarzttermin",
-                        date: weekDates[2], // Wednesday
-                        time: "14:30", 
+                        date: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000),
+                        time: "14:30",
                         description: "Kontrolltermin"
                     },
                     {
                         title: "Gym Session",
-                        date: weekDates[3], // Thursday
+                        date: new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000),
                         time: "18:00",
                         description: "Push-Tag"
-                    },
-                    {
-                        title: "Lunch mit Sarah",
-                        date: weekDates[4], // Friday
-                        time: "12:30",
-                        description: "Restaurant am Hafen"
                     }
                 ];
                 return events;
@@ -10213,55 +10157,46 @@
 
                 // Use mock events for now
                 this.events = this.getMockEvents();
-                const weekDates = this.getWeekDates();
-                const today = new Date();
 
-                // Group events by date for the entire week (Mo-So)
+                if (this.events.length === 0) {
+                    container.innerHTML = '<div class="no-events">📅 Keine Termine diese Woche</div>';
+                    return;
+                }
+
+                // Group events by date
                 const eventsByDate = {};
-                
-                // Initialize all week days
-                weekDates.forEach(date => {
-                    const dateKey = date.toDateString();
-                    eventsByDate[dateKey] = [];
-                });
-
-                // Add events to their respective days
                 this.events.forEach(event => {
                     const dateKey = event.date.toDateString();
-                    if (eventsByDate[dateKey]) {
-                        eventsByDate[dateKey].push(event);
+                    if (!eventsByDate[dateKey]) {
+                        eventsByDate[dateKey] = [];
                     }
+                    eventsByDate[dateKey].push(event);
                 });
 
                 let eventsHtml = '';
-                const dayNames = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
-                
-                weekDates.forEach((date, index) => {
-                    const dateKey = date.toDateString();
-                    const isToday = date.toDateString() === today.toDateString();
-                    const dayEvents = eventsByDate[dateKey] || [];
+                Object.keys(eventsByDate).forEach(dateKey => {
+                    const date = new Date(dateKey);
+                    const isToday = date.toDateString() === new Date().toDateString();
+                    const dateStr = date.toLocaleDateString('de-DE', { 
+                        weekday: 'long',
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+
+                    eventsHtml += `<div class="event-date-header">${dateStr}</div>`;
                     
-                    const dateStr = `${dayNames[index]}, ${date.getDate()}.${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-                    const headerClass = isToday ? 'today' : '';
-                    
-                    eventsHtml += `<div class="event-date-header ${headerClass}">${dateStr}</div>`;
-                    
-                    if (dayEvents.length === 0) {
-                        eventsHtml += '<div class="no-day-events">Keine Termine</div>';
-                    } else {
-                        dayEvents.forEach(event => {
-                            const eventClass = isToday ? 'today' : '';
-                            eventsHtml += `
-                                <div class="calendar-event ${eventClass}">
-                                    <div class="event-time">${event.time}</div>
-                                    <div class="event-content">
-                                        <div class="event-title">${event.title}</div>
-                                        ${event.description ? `<div class="event-details"><span>${event.description}</span></div>` : ''}
-                                    </div>
+                    eventsByDate[dateKey].forEach(event => {
+                        const eventClass = isToday ? 'today' : '';
+                        eventsHtml += `
+                            <div class="calendar-event ${eventClass}">
+                                <div class="event-time">${event.time}</div>
+                                <div class="event-content">
+                                    <div class="event-title">${event.title}</div>
+                                    ${event.description ? `<div class="event-details"><span>${event.description}</span></div>` : ''}
                                 </div>
-                            `;
-                        });
-                    }
+                            </div>
+                        `;
+                    });
                 });
 
                 container.innerHTML = eventsHtml;
@@ -10308,52 +10243,7 @@
                 window.calendarWidget = new CalendarWidget();
                 window.calendarWidget.init();
             }, 1000);
-
-            // Settings event listeners
-            const saveCalendarSettingsBtn = document.getElementById('save-calendar-settings');
-            if (saveCalendarSettingsBtn) {
-                saveCalendarSettingsBtn.addEventListener('click', () => {
-                    const calendarUrl = document.getElementById('google-calendar-url').value;
-                    
-                    if (calendarUrl && !isValidUrl(calendarUrl)) {
-                        alert('Bitte geben Sie eine gültige URL ein');
-                        return;
-                    }
-                    
-                    // Save to localStorage for now (can be moved to cloud later)
-                    localStorage.setItem('googleCalendarUrl', calendarUrl);
-                    
-                    // Update calendar widget with new URL
-                    if (window.calendarWidget) {
-                        window.calendarWidget.calendarUrl = calendarUrl;
-                    }
-                    
-                    alert('Calendar Einstellungen gespeichert!');
-                });
-            }
-
-            // Load calendar settings on page load
-            const savedCalendarUrl = localStorage.getItem('googleCalendarUrl');
-            if (savedCalendarUrl) {
-                const calendarUrlInput = document.getElementById('google-calendar-url');
-                if (calendarUrlInput) {
-                    calendarUrlInput.value = savedCalendarUrl;
-                }
-                if (window.calendarWidget) {
-                    window.calendarWidget.calendarUrl = savedCalendarUrl;
-                }
-            }
         });
-
-        // URL validation helper
-        function isValidUrl(string) {
-            try {
-                new URL(string);
-                return true;
-            } catch (_) {
-                return false;
-            }
-        }
 
     </script>
 </body>
