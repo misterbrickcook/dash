@@ -4,6 +4,7 @@
 class SimpleCounters {
     constructor() {
         this.isInitialized = false;
+        this.previousValues = [0, 0, 0, 0]; // Store previous values to detect increases
     }
 
     async init() {
@@ -108,6 +109,11 @@ class SimpleCounters {
         const tiles = document.querySelectorAll('.streak-tile');
         if (tiles[index]) {
             const numberEl = tiles[index].querySelector('.streak-number');
+            
+            // Check if value increased from previous value (only for non-SOL counters)
+            const previousValue = this.previousValues[index];
+            const hasIncreased = value > previousValue;
+            
             if (numberEl) {
                 // Format SOL balance (index 3) to 2 decimal places
                 if (index === 3 && typeof value === 'number') {
@@ -116,6 +122,14 @@ class SimpleCounters {
                     numberEl.textContent = value;
                 }
             }
+            
+            // Don't trigger animation for SOL balance (index 3) as it changes frequently
+            if (hasIncreased && this.isInitialized && index !== 3) {
+                this.triggerSuccessAnimation(index);
+            }
+            
+            // Store current value for next comparison
+            this.previousValues[index] = value;
         }
     }
 
@@ -124,6 +138,10 @@ class SimpleCounters {
         if (tiles[index]) {
             const numberEl = tiles[index].querySelector('.streak-number');
             const labelEl = tiles[index].querySelector('.streak-label');
+            
+            // Check if value increased from previous value
+            const previousValue = this.previousValues[index];
+            const hasIncreased = value > previousValue;
             
             if (numberEl) {
                 numberEl.textContent = value;
@@ -138,6 +156,14 @@ class SimpleCounters {
                 
                 labelEl.innerHTML = `${baseLabel}<br><span style="font-size: 0.7rem; color: ${color};">(${sign}${percentChange}% vs. vorherige 30T)</span>`;
             }
+            
+            // Trigger success animation if value increased
+            if (hasIncreased && this.isInitialized) {
+                this.triggerSuccessAnimation(index);
+            }
+            
+            // Store current value for next comparison
+            this.previousValues[index] = value;
         }
     }
 
@@ -146,6 +172,29 @@ class SimpleCounters {
             return newValue > 0 ? 100 : 0;
         }
         return Math.round(((newValue - oldValue) / oldValue) * 100);
+    }
+
+    triggerSuccessAnimation(index) {
+        const tiles = document.querySelectorAll('.streak-tile');
+        const tile = tiles[index];
+        
+        if (tile) {
+            // Remove any existing animation
+            tile.classList.remove('success-animation');
+            
+            // Force reflow to ensure the class is removed
+            tile.offsetHeight;
+            
+            // Add success animation
+            tile.classList.add('success-animation');
+            
+            // Remove animation class after animation completes
+            setTimeout(() => {
+                tile.classList.remove('success-animation');
+            }, 600);
+            
+            console.log(`🎉 Success animation triggered for counter ${index}`);
+        }
     }
 
     async getSolBalance() {
