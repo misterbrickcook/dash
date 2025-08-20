@@ -3162,6 +3162,11 @@
             border-radius: 8px 8px 0 0;
         }
 
+        .crypto-header-buttons {
+            display: flex;
+            gap: 0.25rem;
+        }
+
         .crypto-overlay-title {
             font-weight: 600;
             font-size: 0.7rem;
@@ -3170,7 +3175,7 @@
             color: var(--text-secondary);
         }
 
-        .crypto-toggle-btn {
+        .crypto-toggle-btn, .crypto-settings-btn, .crypto-chart-btn {
             background: none;
             border: none;
             cursor: pointer;
@@ -3180,8 +3185,13 @@
             color: var(--text-secondary);
         }
 
-        .crypto-toggle-btn:hover {
+        .crypto-toggle-btn:hover, .crypto-settings-btn:hover, .crypto-chart-btn:hover {
             background: rgba(0, 0, 0, 0.05);
+        }
+
+        .crypto-chart-btn.active {
+            color: #059669;
+            background: rgba(5, 150, 105, 0.1);
         }
 
         .crypto-overlay-content {
@@ -3281,6 +3291,93 @@
                 font-size: 0.65rem;
             }
         }
+
+        /* Chart Styles */
+        .crypto-chart-container {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 0.5rem;
+        }
+
+        .crypto-chart-controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        .crypto-chart-select {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            padding: 0.2rem 0.4rem;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+        }
+
+        /* Settings Panel */
+        .crypto-settings-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .crypto-settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .crypto-settings-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .crypto-settings-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .crypto-available-coins {
+            padding: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .crypto-coin-option {
+            display: flex;
+            align-items: center;
+            padding: 0.3rem 0;
+            gap: 0.5rem;
+        }
+
+        .crypto-coin-option input[type="checkbox"] {
+            width: 12px;
+            height: 12px;
+        }
+
+        .crypto-coin-option label {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -3288,30 +3385,70 @@
     <div id="crypto-overlay" class="crypto-overlay">
         <div class="crypto-overlay-header">
             <span class="crypto-overlay-title">Crypto</span>
-            <button class="crypto-toggle-btn" title="Toggle crypto prices">
-                <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
-            </button>
+            <div class="crypto-header-buttons">
+                <button class="crypto-chart-btn" title="Toggle chart">
+                    <i data-lucide="trending-up" style="width: 12px; height: 12px;"></i>
+                </button>
+                <button class="crypto-settings-btn" title="Manage coins">
+                    <i data-lucide="settings" style="width: 12px; height: 12px;"></i>
+                </button>
+                <button class="crypto-toggle-btn" title="Toggle crypto prices">
+                    <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+                </button>
+            </div>
         </div>
         <div class="crypto-overlay-content">
-            <div class="crypto-overlay-item" data-symbol="BTC">
-                <span class="crypto-overlay-symbol">BTC</span>
-                <div class="crypto-overlay-data">
-                    <span class="crypto-overlay-price">$--</span>
-                    <span class="crypto-overlay-change">--</span>
+            <div class="crypto-chart-container" style="display: none;">
+                <canvas id="crypto-mini-chart" width="180" height="80"></canvas>
+                <div class="crypto-chart-controls">
+                    <select class="crypto-chart-select">
+                        <option value="BTC">BTC</option>
+                        <option value="ETH">ETH</option>
+                        <option value="SOL">SOL</option>
+                    </select>
                 </div>
             </div>
-            <div class="crypto-overlay-item" data-symbol="ETH">
-                <span class="crypto-overlay-symbol">ETH</span>
-                <div class="crypto-overlay-data">
-                    <span class="crypto-overlay-price">$--</span>
-                    <span class="crypto-overlay-change">--</span>
-                </div>
+            <div class="crypto-overlay-items" id="crypto-overlay-items">
+                <!-- Coins will be dynamically inserted here -->
             </div>
-            <div class="crypto-overlay-item" data-symbol="SOL">
-                <span class="crypto-overlay-symbol">SOL</span>
-                <div class="crypto-overlay-data">
-                    <span class="crypto-overlay-price">$--</span>
-                    <span class="crypto-overlay-change">--</span>
+        </div>
+        
+        <!-- Settings Panel -->
+        <div class="crypto-settings-panel" style="display: none;">
+            <div class="crypto-settings-header">
+                <span>Manage Coins</span>
+                <button class="crypto-settings-close">
+                    <i data-lucide="x" style="width: 12px; height: 12px;"></i>
+                </button>
+            </div>
+            <div class="crypto-available-coins">
+                <div class="crypto-coin-option" data-symbol="BTC">
+                    <input type="checkbox" id="coin-btc" checked>
+                    <label for="coin-btc">BTC - Bitcoin</label>
+                </div>
+                <div class="crypto-coin-option" data-symbol="ETH">
+                    <input type="checkbox" id="coin-eth" checked>
+                    <label for="coin-eth">ETH - Ethereum</label>
+                </div>
+                <div class="crypto-coin-option" data-symbol="SOL">
+                    <input type="checkbox" id="coin-sol" checked>
+                    <label for="coin-sol">SOL - Solana</label>
+                </div>
+                <div class="crypto-coin-option" data-symbol="ENA">
+                    <input type="checkbox" id="coin-ena">
+                    <label for="coin-ena">ENA - Ethena</label>
+                </div>
+                <div class="crypto-coin-option" data-symbol="PENGU">
+                    <input type="checkbox" id="coin-pengu">
+                    <label for="coin-pengu">PENGU - Pengu</label>
+                </div>
+                <div class="crypto-coin-option" data-symbol="kBONK">
+                    <input type="checkbox" id="coin-bonk">
+                    <label for="coin-bonk">BONK - Bonk</label>
+                </div>
+                <div class="crypto-coin-option" data-symbol="FARTCOIN">
+                    <input type="checkbox" id="coin-fartcoin">
+                    <label for="coin-fartcoin">FARTCOIN - Fartcoin</label>
                 </div>
             </div>
         </div>
@@ -11277,32 +11414,216 @@
         class CryptoPriceWidget {
             constructor() {
                 this.apiUrl = 'https://api.hyperliquid.xyz/info';
-                this.symbols = ['BTC', 'ETH', 'SOL', 'ENA', 'PENGU', 'kBONK', 'FARTCOIN'];
-                this.overlaySymbols = ['BTC', 'ETH', 'SOL']; // Smaller set for overlay
+                this.allSymbols = ['BTC', 'ETH', 'SOL', 'ENA', 'PENGU', 'kBONK', 'FARTCOIN'];
+                this.overlaySymbols = this.loadSavedCoins() || ['BTC', 'ETH', 'SOL'];
                 this.updateInterval = 30000; // 30 seconds
                 this.previousPrices = {};
+                this.priceHistory = {};
                 this.intervalId = null;
                 this.statusIndicator = document.querySelector('.status-indicator');
                 this.statusText = document.querySelector('.status-text');
                 this.overlay = document.querySelector('.crypto-overlay');
+                this.chartVisible = false;
+                this.chart = null;
                 
                 this.init();
             }
 
+            loadSavedCoins() {
+                try {
+                    const saved = localStorage.getItem('cryptoOverlayCoins');
+                    return saved ? JSON.parse(saved) : null;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            saveCoins() {
+                try {
+                    localStorage.setItem('cryptoOverlayCoins', JSON.stringify(this.overlaySymbols));
+                } catch (e) {
+                    console.warn('Could not save crypto coins to localStorage');
+                }
+            }
+
             init() {
                 console.log('🔗 Initializing Crypto Price Widget...');
-                this.setupOverlayToggle();
+                this.renderCoinItems();
+                this.setupEventListeners();
                 this.updatePrices();
                 this.startAutoUpdate();
             }
 
-            setupOverlayToggle() {
+            setupEventListeners() {
+                // Toggle overlay
                 const toggleBtn = document.querySelector('.crypto-toggle-btn');
                 if (toggleBtn && this.overlay) {
                     toggleBtn.addEventListener('click', () => {
                         this.overlay.classList.toggle('collapsed');
                     });
                 }
+
+                // Chart toggle
+                const chartBtn = document.querySelector('.crypto-chart-btn');
+                if (chartBtn) {
+                    chartBtn.addEventListener('click', () => {
+                        this.toggleChart();
+                    });
+                }
+
+                // Settings toggle
+                const settingsBtn = document.querySelector('.crypto-settings-btn');
+                const settingsPanel = document.querySelector('.crypto-settings-panel');
+                const settingsClose = document.querySelector('.crypto-settings-close');
+                
+                if (settingsBtn && settingsPanel) {
+                    settingsBtn.addEventListener('click', () => {
+                        settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
+                    });
+                }
+
+                if (settingsClose && settingsPanel) {
+                    settingsClose.addEventListener('click', () => {
+                        settingsPanel.style.display = 'none';
+                    });
+                }
+
+                // Coin selection checkboxes
+                this.allSymbols.forEach(symbol => {
+                    const checkbox = document.getElementById(`coin-${symbol.toLowerCase().replace('k', '')}`);
+                    if (checkbox) {
+                        checkbox.checked = this.overlaySymbols.includes(symbol);
+                        checkbox.addEventListener('change', () => {
+                            this.toggleCoin(symbol, checkbox.checked);
+                        });
+                    }
+                });
+
+                // Chart selector
+                const chartSelect = document.querySelector('.crypto-chart-select');
+                if (chartSelect) {
+                    chartSelect.addEventListener('change', () => {
+                        if (this.chartVisible) {
+                            this.updateChart(chartSelect.value);
+                        }
+                    });
+                }
+            }
+
+            toggleCoin(symbol, enabled) {
+                if (enabled && !this.overlaySymbols.includes(symbol)) {
+                    this.overlaySymbols.push(symbol);
+                } else if (!enabled) {
+                    this.overlaySymbols = this.overlaySymbols.filter(s => s !== symbol);
+                }
+                
+                this.saveCoins();
+                this.renderCoinItems();
+                this.updateChartSelector();
+            }
+
+            renderCoinItems() {
+                const container = document.getElementById('crypto-overlay-items');
+                if (!container) return;
+
+                container.innerHTML = '';
+                this.overlaySymbols.forEach(symbol => {
+                    const item = document.createElement('div');
+                    item.className = 'crypto-overlay-item';
+                    item.setAttribute('data-symbol', symbol);
+                    
+                    const displaySymbol = symbol === 'kBONK' ? 'BONK' : symbol;
+                    
+                    item.innerHTML = `
+                        <span class="crypto-overlay-symbol">${displaySymbol}</span>
+                        <div class="crypto-overlay-data">
+                            <span class="crypto-overlay-price">$--</span>
+                            <span class="crypto-overlay-change">--</span>
+                        </div>
+                    `;
+                    
+                    container.appendChild(item);
+                });
+            }
+
+            updateChartSelector() {
+                const chartSelect = document.querySelector('.crypto-chart-select');
+                if (!chartSelect) return;
+
+                chartSelect.innerHTML = '';
+                this.overlaySymbols.forEach(symbol => {
+                    const option = document.createElement('option');
+                    option.value = symbol;
+                    option.textContent = symbol === 'kBONK' ? 'BONK' : symbol;
+                    chartSelect.appendChild(option);
+                });
+            }
+
+            toggleChart() {
+                const chartContainer = document.querySelector('.crypto-chart-container');
+                const chartBtn = document.querySelector('.crypto-chart-btn');
+                
+                if (!chartContainer || !chartBtn) return;
+
+                this.chartVisible = !this.chartVisible;
+                chartContainer.style.display = this.chartVisible ? 'block' : 'none';
+                chartBtn.classList.toggle('active', this.chartVisible);
+
+                if (this.chartVisible) {
+                    this.updateChartSelector();
+                    setTimeout(() => this.initChart(), 100);
+                }
+            }
+
+            initChart() {
+                const canvas = document.getElementById('crypto-mini-chart');
+                const select = document.querySelector('.crypto-chart-select');
+                
+                if (!canvas || !select) return;
+
+                const ctx = canvas.getContext('2d');
+                const symbol = select.value || this.overlaySymbols[0];
+                
+                this.updateChart(symbol);
+            }
+
+            updateChart(symbol) {
+                const canvas = document.getElementById('crypto-mini-chart');
+                if (!canvas || !this.priceHistory[symbol]) return;
+
+                const ctx = canvas.getContext('2d');
+                const width = canvas.width;
+                const height = canvas.height;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, width, height);
+                
+                const prices = this.priceHistory[symbol];
+                if (prices.length < 2) return;
+
+                const maxPrice = Math.max(...prices);
+                const minPrice = Math.min(...prices);
+                const priceRange = maxPrice - minPrice;
+                
+                if (priceRange === 0) return;
+
+                // Draw line
+                ctx.strokeStyle = '#059669';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                
+                prices.forEach((price, index) => {
+                    const x = (index / (prices.length - 1)) * (width - 20) + 10;
+                    const y = height - 10 - ((price - minPrice) / priceRange) * (height - 20);
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                
+                ctx.stroke();
             }
 
             async fetchPrices() {
@@ -11412,16 +11733,35 @@
                 this.updateStatus('connected', 'Live');
 
                 // Update each symbol
-                this.symbols.forEach(symbol => {
+                this.allSymbols.forEach(symbol => {
                     const price = parseFloat(data[symbol]);
                     if (!isNaN(price)) {
                         const previousPrice = this.previousPrices[symbol];
                         const change = this.calculateChange(price, previousPrice);
                         
+                        // Store price history for charts
+                        if (!this.priceHistory[symbol]) {
+                            this.priceHistory[symbol] = [];
+                        }
+                        this.priceHistory[symbol].push(price);
+                        
+                        // Keep only last 20 prices for mini chart
+                        if (this.priceHistory[symbol].length > 20) {
+                            this.priceHistory[symbol].shift();
+                        }
+                        
                         this.updateTile(symbol, price, change);
                         this.previousPrices[symbol] = price;
                     }
                 });
+
+                // Update chart if visible
+                if (this.chartVisible) {
+                    const chartSelect = document.querySelector('.crypto-chart-select');
+                    if (chartSelect && chartSelect.value) {
+                        this.updateChart(chartSelect.value);
+                    }
+                }
 
                 console.log('✅ Crypto prices updated successfully');
             }
