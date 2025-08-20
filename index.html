@@ -197,7 +197,7 @@
             align-items: center;
         }
         
-        .logout-btn, .settings-btn, .timer-btn, .quick-add-btn {
+        .logout-btn, .settings-btn {
             color: var(--text-secondary) !important;
             font-weight: 400 !important;
             background: transparent !important;
@@ -215,25 +215,21 @@
         }
         
         /* Mobile-safe hover states - override nav-tab hover */
-        .logout-btn:hover, .settings-btn:hover, .timer-btn:hover, .quick-add-btn:hover,
-        .logout-btn:active, .settings-btn:active, .timer-btn:active, .quick-add-btn:active,
-        .logout-btn:focus, .settings-btn:focus, .timer-btn:focus, .quick-add-btn:focus {
+        .logout-btn:hover, .settings-btn:hover,
+        .logout-btn:active, .settings-btn:active,
+        .logout-btn:focus, .settings-btn:focus {
             background: transparent !important;
             border: none !important;
             border-color: transparent !important;
         }
         
         /* Specific override for nav-tab hover border */
-        .nav-tab.logout-btn:hover, .nav-tab.settings-btn:hover, .nav-tab.timer-btn:hover, .nav-tab.quick-add-btn:hover {
+        .nav-tab.logout-btn:hover, .nav-tab.settings-btn:hover {
             border: none !important;
             border-color: transparent !important;
             background: transparent !important;
         }
         
-        /* Override conflicting nav-tab hover rules for quick-add */
-        .nav-tab.quick-add-btn:hover {
-            border-color: transparent !important;
-        }
         
         .logout-btn:hover span, .logout-btn:active span, .logout-btn:focus span,
         .logout-btn:hover svg, .logout-btn:active svg, .logout-btn:focus svg {
@@ -241,38 +237,7 @@
             stroke: #dc2626 !important;
         }
         
-        /* Timer button specific styles */
-        .timer-btn.timer-running {
-            color: #059669 !important;
-        }
-        .timer-btn.timer-running i {
-            stroke: #059669 !important;
-            animation: pulse 2s infinite;
-        }
-        .timer-btn.timer-paused {
-            color: #d97706 !important;
-        }
-        .timer-btn.timer-paused i {
-            stroke: #d97706 !important;
-        }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        /* Quick-add button - JavaScript only approach */
-        .nav-tab.quick-add-btn i {
-            transition: transform 0.3s ease !important;
-            will-change: transform !important;
-        }
-        
-        /* Hover effects for Wiki and Journal add buttons - match main quick-add style */
-        .wiki-controls .nav-tab.quick-add-btn i,
-        .journal-controls .nav-tab.quick-add-btn i {
-            transition: transform 0.3s ease, stroke 0.3s ease !important;
-            will-change: transform !important;
-        }
         
         .settings-btn:hover span, .settings-btn:active span, .settings-btn:focus span,
         .settings-btn:hover i, .settings-btn:active i, .settings-btn:focus i {
@@ -280,10 +245,6 @@
             stroke: #059669 !important;
         }
         
-        .timer-btn:hover i, .timer-btn:active i, .timer-btn:focus i {
-            stroke: #059669 !important;
-            color: #059669 !important;
-        }
         
         /* Force reset any stuck hover states on mobile */
         @media (max-width: 768px) {
@@ -303,7 +264,7 @@
         /* === SMART QUICK ACTIONS BAR === */
         .quick-actions-bar {
             position: fixed;
-            right: 20px;
+            left: 20px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 1000;
@@ -344,7 +305,7 @@
         .quick-action-btn::before {
             content: attr(data-tooltip);
             position: absolute;
-            right: 70px;
+            left: 70px;
             top: 50%;
             transform: translateY(-50%);
             background: var(--accent-primary);
@@ -363,12 +324,12 @@
         .quick-action-btn::after {
             content: '';
             position: absolute;
-            right: 62px;
+            left: 62px;
             top: 50%;
             transform: translateY(-50%);
             width: 0;
             height: 0;
-            border-left: 6px solid var(--accent-primary);
+            border-right: 6px solid var(--accent-primary);
             border-top: 6px solid transparent;
             border-bottom: 6px solid transparent;
             opacity: 0;
@@ -392,7 +353,7 @@
         }
         
         .quick-action-btn.primary::after {
-            border-left-color: var(--text-primary);
+            border-right-color: var(--text-primary);
         }
         
         /* Responsive - hide on mobile */
@@ -3344,6 +3305,7 @@
             min-width: 200px;
             font-size: var(--font-size-xs);
             transition: all 0.3s ease;
+            display: none; /* Hidden by default, shown only after authentication */
         }
 
         .crypto-overlay-header {
@@ -3931,12 +3893,6 @@
             <button class="nav-tab" data-tab="tab-wiki">Wiki</button>
             <button class="nav-tab" data-tab="tab-settings" style="display: none;">Settings</button>
             <div class="nav-actions">
-                <button id="quick-add-btn" class="nav-tab quick-add-btn" title="Quick Add Todo">
-                    <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
-                </button>
-                <button id="timer-btn" class="nav-tab timer-btn" title="Pomodoro Timer (25 min) | Right-click to reset">
-                    <i data-lucide="timer" style="width: 18px; height: 18px;"></i>
-                </button>
                 <button id="settings-btn" class="nav-tab settings-btn">
                     <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
                 </button>
@@ -4163,9 +4119,6 @@
                         <i data-lucide="search" style="width: 16px; height: 16px;"></i>
                     </button>
                 </div>
-                <button class="nav-tab quick-add-btn" onclick="JournalManager.showAddJournalModal()" title="Add Journal Entry">
-                    <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
-                </button>
             </div>
 
             <!-- Journal Content -->
@@ -4644,9 +4597,6 @@
                         <i data-lucide="search" style="width: 16px; height: 16px;"></i>
                     </button>
                 </div>
-                <button class="nav-tab quick-add-btn" onclick="Wiki.showAddModal()" title="Add Wiki Entry">
-                    <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
-                </button>
             </div>
 
             <!-- Wiki Content -->
@@ -4873,6 +4823,7 @@
             
             showAuthScreen() {
                 document.getElementById('auth-screen').classList.remove('hide');
+                document.getElementById('crypto-overlay').style.display = 'none';
             },
             
             async refreshRoutineUI() {
@@ -4899,6 +4850,7 @@
             
             async showDashboard() {
                 document.getElementById('auth-screen').classList.add('hide');
+                document.getElementById('crypto-overlay').style.display = 'block';
                 
                 // Load all data after successful login
                 if (supabase?.isAuthenticated()) {
@@ -5779,7 +5731,7 @@
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 // Skip action buttons - they have their own handlers
-                if (tab.id === 'logout-btn' || tab.id === 'settings-btn' || tab.id === 'timer-btn' || tab.id === 'quick-add-btn') return;
+                if (tab.id === 'logout-btn' || tab.id === 'settings-btn') return;
                 
                 const tabId = tab.getAttribute('data-tab');
                 if (tabId) switchTab(tabId);
@@ -5795,179 +5747,31 @@
             });
         }
 
-        // Quick-add button event listener
-        const quickAddBtn = document.getElementById('quick-add-btn');
-        if (quickAddBtn) {
-            quickAddBtn.addEventListener('click', () => {
-                console.log('Quick-add clicked');
-                if (window.QuickAdd) {
-                    window.QuickAdd.show();
-                }
-            });
+        // Setup Settings hover animations
+        function setupActionButtonHovers() {
+            const settingsBtn = document.getElementById('settings-btn');
             
-            // Setup Quick-Add animation after Lucide processes icons
-            function setupQuickAddAnimation() {
-                let quickAddIcon = quickAddBtn.querySelector('svg');
-                
-                if (quickAddIcon) {
-                    quickAddIcon.style.cssText = `
-                        transition: all 0.3s ease !important;
-                        transform-origin: center !important;
-                        display: inline-block !important;
-                    `;
-                    
-                    quickAddBtn.onmouseenter = function() {
-                        const svg = quickAddBtn.querySelector('svg');
-                        if (svg) {
-                            svg.style.transform = 'rotate(90deg)';
-                            svg.style.stroke = '#059669';
-                        }
-                    };
-                    
-                    quickAddBtn.onmouseleave = function() {
-                        const svg = quickAddBtn.querySelector('svg');
-                        if (svg) {
-                            svg.style.transform = 'rotate(0deg)';
-                            svg.style.stroke = '';
-                        }
-                    };
-                    
-                    return true;
-                }
-                return false;
-            }
-            
-            // Retry setup with delays for Lucide
-            if (!setupQuickAddAnimation()) {
-                setTimeout(() => {
-                    if (!setupQuickAddAnimation()) {
-                        setTimeout(setupQuickAddAnimation, 1000);
+            if (settingsBtn?.querySelector('svg')) {
+                settingsBtn.onmouseenter = function() {
+                    const svg = settingsBtn.querySelector('svg');
+                    if (svg) {
+                        svg.style.stroke = '#059669';
+                        svg.style.color = '#059669';
                     }
-                }, 500);
+                };
+                settingsBtn.onmouseleave = function() {
+                    const svg = settingsBtn.querySelector('svg');
+                    if (svg) {
+                        svg.style.stroke = '';
+                        svg.style.color = '';
+                    }
+                };
             }
-            
-            // Setup Wiki and Journal add button hover animations  
-            function setupWikiJournalAddButtonHovers() {
-                // Find journal add button (in tab-journal section)
-                const journalAddBtn = document.querySelector('#tab-journal .wiki-controls .quick-add-btn');
-                if (journalAddBtn?.querySelector('svg')) {
-                    const svg = journalAddBtn.querySelector('svg');
-                    svg.style.cssText = `
-                        transition: transform 0.3s ease, stroke 0.3s ease !important;
-                        transform-origin: center !important;
-                        display: inline-block !important;
-                    `;
-                    
-                    journalAddBtn.onmouseenter = function() {
-                        const svg = journalAddBtn.querySelector('svg');
-                        if (svg) {
-                            svg.style.transform = 'rotate(90deg)';
-                            svg.style.stroke = '#059669';
-                        }
-                    };
-                    
-                    journalAddBtn.onmouseleave = function() {
-                        const svg = journalAddBtn.querySelector('svg');
-                        if (svg) {
-                            svg.style.transform = 'rotate(0deg)';
-                            svg.style.stroke = '';
-                        }
-                    };
-                }
-                
-                // Find wiki add button (in tab-wiki section)
-                const wikiAddBtn = document.querySelector('#tab-wiki .wiki-controls .quick-add-btn');
-                if (wikiAddBtn?.querySelector('svg')) {
-                    const svg = wikiAddBtn.querySelector('svg');
-                    svg.style.cssText = `
-                        transition: transform 0.3s ease, stroke 0.3s ease !important;
-                        transform-origin: center !important;
-                        display: inline-block !important;
-                    `;
-                    
-                    wikiAddBtn.onmouseenter = function() {
-                        const svg = wikiAddBtn.querySelector('svg');
-                        if (svg) {
-                            svg.style.transform = 'rotate(90deg)';
-                            svg.style.stroke = '#059669';
-                        }
-                    };
-                    
-                    wikiAddBtn.onmouseleave = function() {
-                        const svg = wikiAddBtn.querySelector('svg');
-                        if (svg) {
-                            svg.style.transform = 'rotate(0deg)';
-                            svg.style.stroke = '';
-                        }
-                    };
-                }
-            }
-
-            // Setup Timer and Settings hover animations
-            function setupActionButtonHovers() {
-                const timerBtn = document.getElementById('timer-btn');
-                const settingsBtn = document.getElementById('settings-btn');
-                
-                if (timerBtn?.querySelector('svg')) {
-                    timerBtn.onmouseenter = function() {
-                        const svg = timerBtn.querySelector('svg');
-                        if (svg && !timerBtn.classList.contains('timer-running') && !timerBtn.classList.contains('timer-paused')) {
-                            svg.style.stroke = '#059669';
-                            svg.style.color = '#059669';
-                        }
-                    };
-                    timerBtn.onmouseleave = function() {
-                        const svg = timerBtn.querySelector('svg');
-                        if (svg && !timerBtn.classList.contains('timer-running') && !timerBtn.classList.contains('timer-paused')) {
-                            svg.style.stroke = '';
-                            svg.style.color = '';
-                        }
-                    };
-                }
-                
-                if (settingsBtn?.querySelector('svg')) {
-                    settingsBtn.onmouseenter = function() {
-                        const svg = settingsBtn.querySelector('svg');
-                        if (svg) {
-                            svg.style.stroke = '#059669';
-                            svg.style.color = '#059669';
-                        }
-                    };
-                    settingsBtn.onmouseleave = function() {
-                        const svg = settingsBtn.querySelector('svg');
-                        if (svg) {
-                            svg.style.stroke = '';
-                            svg.style.color = '';
-                        }
-                    };
-                }
-            }
-            
-            // Setup action button hovers after Lucide
-            setTimeout(setupActionButtonHovers, 1000);
-            setTimeout(setupWikiJournalAddButtonHovers, 1000);
         }
+        
+        // Setup action button hovers after Lucide
+        setTimeout(setupActionButtonHovers, 1000);
 
-        // Timer button event listener
-        const timerBtn = document.getElementById('timer-btn');
-        if (timerBtn) {
-            // Left click: start/stop
-            timerBtn.addEventListener('click', () => {
-                console.log('Timer clicked');
-                if (window.PomodoroTimer) {
-                    window.PomodoroTimer.toggle();
-                }
-            });
-            
-            // Right click: reset to 25:00
-            timerBtn.addEventListener('contextmenu', (e) => {
-                e.preventDefault(); // Prevent context menu
-                console.log('Timer right-clicked - reset');
-                if (window.PomodoroTimer) {
-                    window.PomodoroTimer.reset();
-                }
-            });
-        }
 
         // Todo category tabs
         document.querySelectorAll('.category-tab').forEach(tab => {
@@ -9438,12 +9242,6 @@
                 this.isPaused = false;
                 this.interval = null;
                 this.originalTitle = document.title;
-                this.timerBtn = document.getElementById('timer-btn');
-                
-                // Set initial tooltip
-                if (this.timerBtn) {
-                    this.timerBtn.title = 'Pomodoro Timer (25 min) | Right-click to reset';
-                }
                 
                 console.log('🍅 PomodoroTimer initialized (25 min) - Left click: start/stop, Right click: reset');
             }
@@ -9461,10 +9259,6 @@
                 this.isRunning = true;
                 this.isPaused = false;
                 
-                // Update button appearance
-                this.timerBtn.classList.add('timer-running');
-                this.timerBtn.classList.remove('timer-paused');
-                this.timerBtn.title = 'Running - Click to pause';
                 
                 this.interval = setInterval(() => {
                     this.timeLeft--;
@@ -9481,10 +9275,6 @@
                 this.isRunning = false;
                 this.isPaused = true;
                 
-                // Update button appearance
-                this.timerBtn.classList.remove('timer-running');
-                this.timerBtn.classList.add('timer-paused');
-                this.timerBtn.title = 'Paused - Click to resume';
                 
                 if (this.interval) {
                     clearInterval(this.interval);
@@ -9509,9 +9299,6 @@
                 this.isPaused = false;
                 this.timeLeft = this.duration;
                 
-                // Reset button appearance
-                this.timerBtn.classList.remove('timer-running', 'timer-paused');
-                this.timerBtn.title = 'Pomodoro Timer (25 min) | Right-click to reset';
                 
                 if (this.interval) {
                     clearInterval(this.interval);
@@ -12639,16 +12426,10 @@
             }
             
             static startTimer() {
-                // Check if timer is already running
-                const timerBtn = document.querySelector('.timer-btn');
-                if (timerBtn) {
-                    timerBtn.click();
-                } else {
-                    // Create simple 25min Pomodoro timer
-                    const minutes = prompt('⏰ Timer starten (Minuten):', '25');
-                    if (minutes && !isNaN(minutes) && minutes > 0) {
-                        this.createTimer(parseInt(minutes));
-                    }
+                // Create simple 25min Pomodoro timer
+                const minutes = prompt('⏰ Timer starten (Minuten):', '25');
+                if (minutes && !isNaN(minutes) && minutes > 0) {
+                    this.createTimer(parseInt(minutes));
                 }
             }
             
@@ -12746,7 +12527,7 @@
                 Object.assign(notification.style, {
                     position: 'fixed',
                     top: '20px',
-                    right: '20px',
+                    left: '20px',
                     background: type === 'success' ? '#059669' : type === 'error' ? '#dc2626' : '#3b82f6',
                     color: 'white',
                     padding: '12px 18px',
