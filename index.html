@@ -4538,8 +4538,8 @@
                 <i data-lucide="plus"></i>
             </button>
             
-            <button class="quick-action-btn" data-tooltip="Pomodoro Timer" onclick="QuickActions.startTimer()">
-                <i data-lucide="timer"></i>
+            <button id="timer-quick-btn" class="quick-action-btn" data-tooltip="Start Timer (25 min) | Right-click to reset" onclick="QuickActions.toggleTimer()" oncontextmenu="QuickActions.resetTimer(); return false;">
+                <i data-lucide="play"></i>
             </button>
             
             <button class="quick-action-btn" data-tooltip="Add Journal Entry" onclick="QuickActions.addJournalEntry()">
@@ -9272,6 +9272,10 @@
                 this.isRunning = true;
                 this.isPaused = false;
                 
+                // Update Quick Actions button
+                if (window.QuickActions) {
+                    window.QuickActions.updateTimerButton('square', 'Stop Timer');
+                }
                 
                 this.interval = setInterval(() => {
                     this.timeLeft--;
@@ -9288,6 +9292,10 @@
                 this.isRunning = false;
                 this.isPaused = true;
                 
+                // Update Quick Actions button
+                if (window.QuickActions) {
+                    window.QuickActions.updateTimerButton('play', 'Start Timer');
+                }
                 
                 if (this.interval) {
                     clearInterval(this.interval);
@@ -9298,6 +9306,11 @@
             complete() {
                 console.log('🍅 Timer completed!');
                 this.reset();
+                
+                // Show completion notification via QuickActions
+                if (window.QuickActions) {
+                    window.QuickActions.showNotification('🍅 Pomodoro beendet! Zeit für eine Pause.', 'success');
+                }
                 
                 // Show notification
                 this.showNotification();
@@ -9312,6 +9325,10 @@
                 this.isPaused = false;
                 this.timeLeft = this.duration;
                 
+                // Update Quick Actions button
+                if (window.QuickActions) {
+                    window.QuickActions.updateTimerButton('play', 'Start Timer (25 min)');
+                }
                 
                 if (this.interval) {
                     clearInterval(this.interval);
@@ -12421,9 +12438,49 @@
                 this.showNotification('📝 Todo hinzufügen', 'info');
             }
             
-            static startTimer() {
-                // Start 25min Pomodoro timer directly
-                this.createTimer(25);
+            static toggleTimer() {
+                // Check if PomodoroTimer exists and toggle it
+                if (window.PomodoroTimer) {
+                    if (window.PomodoroTimer.isRunning) {
+                        window.PomodoroTimer.pause();
+                        this.updateTimerButton('play', 'Start Timer');
+                        this.showNotification('⏸️ Timer pausiert', 'info');
+                    } else {
+                        window.PomodoroTimer.start();
+                        this.updateTimerButton('square', 'Stop Timer');
+                        this.showNotification('▶️ Timer gestartet', 'success');
+                    }
+                } else {
+                    // Create new timer and start it
+                    this.createTimer(25);
+                    this.updateTimerButton('square', 'Stop Timer');
+                    this.showNotification('🍅 25 Min Timer gestartet', 'success');
+                }
+            }
+            
+            static resetTimer() {
+                // Reset timer to 25 minutes
+                if (window.PomodoroTimer) {
+                    window.PomodoroTimer.reset();
+                }
+                this.updateTimerButton('play', 'Start Timer (25 min)');
+                this.showNotification('🔄 Timer zurückgesetzt', 'info');
+            }
+            
+            static updateTimerButton(iconName, tooltip) {
+                const button = document.getElementById('timer-quick-btn');
+                if (button) {
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        // Update lucide icon
+                        icon.setAttribute('data-lucide', iconName);
+                        if (window.lucide) {
+                            window.lucide.createIcons();
+                        }
+                    }
+                    // Update tooltip
+                    button.setAttribute('data-tooltip', tooltip + ' | Right-click to reset');
+                }
             }
             
             static addJournalEntry() {
@@ -12609,6 +12666,9 @@
                 }, 3000);
             }
         }
+        
+        // Make QuickActions globally available
+        window.QuickActions = QuickActions;
         
         // Initialize quick actions (request notification permission)
         document.addEventListener('DOMContentLoaded', () => {
