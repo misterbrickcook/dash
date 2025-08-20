@@ -3134,6 +3134,147 @@
                 font-size: 0.9rem;
             }
         }
+
+        /* === CRYPTO PRICE WIDGET === */
+        .crypto-widget {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 2rem;
+        }
+
+        .crypto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 1rem;
+        }
+
+        .crypto-header h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .crypto-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.connected {
+            background: #10b981;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .crypto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .crypto-tile {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .crypto-tile:hover {
+            border-color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .crypto-symbol {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .crypto-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .crypto-change {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .crypto-change.positive {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .crypto-change.negative {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .crypto-change.neutral {
+            background: #f3f4f6;
+            color: var(--text-secondary);
+        }
+
+        .crypto-tile.loading .crypto-price,
+        .crypto-tile.loading .crypto-change {
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .crypto-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+            
+            .crypto-tile {
+                padding: 1rem;
+            }
+            
+            .crypto-price {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .crypto-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .crypto-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 <body>
@@ -3416,6 +3557,54 @@
                         <div class="streak-number">0.00</div>
                         <div class="streak-label">SOL Balance</div>
                         <div class="streak-date">Live</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Crypto Price Widget -->
+            <section class="crypto-widget" style="margin-bottom: 4rem;">
+                <div class="crypto-header">
+                    <h2>Live Crypto Prices</h2>
+                    <div class="crypto-status">
+                        <div class="status-indicator"></div>
+                        <span class="status-text">Connecting...</span>
+                    </div>
+                </div>
+                <div class="crypto-grid">
+                    <div class="crypto-tile" data-symbol="BTC">
+                        <div class="crypto-symbol">BTC</div>
+                        <div class="crypto-price">$--</div>
+                        <div class="crypto-change">--</div>
+                    </div>
+                    <div class="crypto-tile" data-symbol="ETH">
+                        <div class="crypto-symbol">ETH</div>
+                        <div class="crypto-price">$--</div>
+                        <div class="crypto-change">--</div>
+                    </div>
+                    <div class="crypto-tile" data-symbol="SOL">
+                        <div class="crypto-symbol">SOL</div>
+                        <div class="crypto-price">$--</div>
+                        <div class="crypto-change">--</div>
+                    </div>
+                    <div class="crypto-tile" data-symbol="ENA">
+                        <div class="crypto-symbol">ENA</div>
+                        <div class="crypto-price">$--</div>
+                        <div class="crypto-change">--</div>
+                    </div>
+                    <div class="crypto-tile" data-symbol="PENGU">
+                        <div class="crypto-symbol">PENGU</div>
+                        <div class="crypto-price">$--</div>
+                        <div class="crypto-change">--</div>
+                    </div>
+                    <div class="crypto-tile" data-symbol="kBONK">
+                        <div class="crypto-symbol">BONK</div>
+                        <div class="crypto-price">$--</div>
+                        <div class="crypto-change">--</div>
+                    </div>
+                    <div class="crypto-tile" data-symbol="FARTCOIN">
+                        <div class="crypto-symbol">FARTCOIN</div>
+                        <div class="crypto-price">$--</div>
+                        <div class="crypto-change">--</div>
                     </div>
                 </div>
             </section>
@@ -11091,6 +11280,156 @@
                 console.log('📋 All future implementations must follow CLOUD_POLICY.js guidelines');
                 
             }, 2000);
+        });
+
+        // === CRYPTO PRICE WIDGET ===
+        class CryptoPriceWidget {
+            constructor() {
+                this.apiUrl = 'https://api.hyperliquid.xyz/info';
+                this.symbols = ['BTC', 'ETH', 'SOL', 'ENA', 'PENGU', 'kBONK', 'FARTCOIN'];
+                this.updateInterval = 30000; // 30 seconds
+                this.previousPrices = {};
+                this.intervalId = null;
+                this.statusIndicator = document.querySelector('.status-indicator');
+                this.statusText = document.querySelector('.status-text');
+                
+                this.init();
+            }
+
+            init() {
+                console.log('🔗 Initializing Crypto Price Widget...');
+                this.updatePrices();
+                this.startAutoUpdate();
+            }
+
+            async fetchPrices() {
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ type: 'allMids' })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error fetching crypto prices:', error);
+                    this.updateStatus('error', 'Connection failed');
+                    return null;
+                }
+            }
+
+            formatPrice(price) {
+                const num = parseFloat(price);
+                if (num >= 1000) {
+                    return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                } else if (num >= 1) {
+                    return `$${num.toFixed(3)}`;
+                } else if (num >= 0.01) {
+                    return `$${num.toFixed(4)}`;
+                } else {
+                    return `$${num.toFixed(6)}`;
+                }
+            }
+
+            calculateChange(currentPrice, previousPrice) {
+                if (!previousPrice) return null;
+                const change = ((currentPrice - previousPrice) / previousPrice) * 100;
+                return change;
+            }
+
+            formatChange(change) {
+                if (change === null) return { text: 'New', class: 'neutral' };
+                
+                const absChange = Math.abs(change);
+                const sign = change >= 0 ? '+' : '';
+                const text = `${sign}${change.toFixed(2)}%`;
+                const className = change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral';
+                
+                return { text, class: className };
+            }
+
+            updateTile(symbol, price, change) {
+                const tile = document.querySelector(`[data-symbol="${symbol}"]`);
+                if (!tile) return;
+
+                const priceElement = tile.querySelector('.crypto-price');
+                const changeElement = tile.querySelector('.crypto-change');
+
+                if (priceElement && changeElement) {
+                    priceElement.textContent = this.formatPrice(price);
+                    
+                    const changeData = this.formatChange(change);
+                    changeElement.textContent = changeData.text;
+                    changeElement.className = `crypto-change ${changeData.class}`;
+                    
+                    tile.classList.remove('loading');
+                }
+            }
+
+            updateStatus(status, message) {
+                if (!this.statusIndicator || !this.statusText) return;
+                
+                this.statusIndicator.className = 'status-indicator';
+                if (status === 'connected') {
+                    this.statusIndicator.classList.add('connected');
+                }
+                
+                this.statusText.textContent = message;
+            }
+
+            async updatePrices() {
+                console.log('🔄 Updating crypto prices...');
+                
+                const data = await this.fetchPrices();
+                if (!data) return;
+
+                this.updateStatus('connected', 'Live');
+
+                // Update each symbol
+                this.symbols.forEach(symbol => {
+                    const price = parseFloat(data[symbol]);
+                    if (!isNaN(price)) {
+                        const previousPrice = this.previousPrices[symbol];
+                        const change = this.calculateChange(price, previousPrice);
+                        
+                        this.updateTile(symbol, price, change);
+                        this.previousPrices[symbol] = price;
+                    }
+                });
+
+                console.log('✅ Crypto prices updated successfully');
+            }
+
+            startAutoUpdate() {
+                this.intervalId = setInterval(() => {
+                    this.updatePrices();
+                }, this.updateInterval);
+                
+                console.log(`⏰ Auto-update started (${this.updateInterval / 1000}s interval)`);
+            }
+
+            stopAutoUpdate() {
+                if (this.intervalId) {
+                    clearInterval(this.intervalId);
+                    this.intervalId = null;
+                    console.log('⏸️ Auto-update stopped');
+                }
+            }
+        }
+
+        // Initialize crypto widget when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit for other components to load
+            setTimeout(() => {
+                window.cryptoPriceWidget = new CryptoPriceWidget();
+            }, 1000);
         });
         
         // === GLOBAL GOAL EDIT MODAL EVENT LISTENERS SETUP ===
