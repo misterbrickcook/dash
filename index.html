@@ -3363,22 +3363,6 @@
             padding: 0 20px;
         }
         
-        .ticker-label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            color: var(--text-secondary);
-            min-width: 60px;
-            margin-right: 16px;
-        }
-        
-        .ticker-label i {
-            width: 14px;
-            height: 14px;
-        }
-        
         .ticker-content {
             flex: 1;
             display: flex;
@@ -3395,19 +3379,19 @@
             width: 28px;
             height: 28px;
             background: transparent;
-            border: 1px solid var(--border-primary);
+            border: none;
             border-radius: 4px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
+            opacity: 0.6;
         }
         
         .ticker-btn:hover {
-            background: var(--accent-primary);
-            color: white;
-            border-color: var(--accent-primary);
+            background: var(--bg-primary);
+            opacity: 1;
         }
         
         .ticker-btn i {
@@ -3446,19 +3430,15 @@
         .crypto-overlay-change {
             font-size: 11px;
             font-weight: 500;
-            padding: 2px 6px;
-            border-radius: 3px;
             min-width: 50px;
             text-align: center;
         }
         
         .crypto-overlay-change.positive {
-            background: #dcfce7;
             color: #15803d;
         }
         
         .crypto-overlay-change.negative {
-            background: #fee2e2;
             color: #dc2626;
         }
         
@@ -3779,10 +3759,6 @@
     <!-- === CRYPTO TICKER BAR === -->
     <div id="crypto-overlay" class="crypto-ticker-bar">
         <div class="ticker-container">
-            <div class="ticker-label">
-                <i data-lucide="trending-up"></i>
-                <span>Crypto</span>
-            </div>
             <div class="ticker-content" id="crypto-overlay-items">
                 <!-- Coins will be dynamically inserted here by JavaScript -->
             </div>
