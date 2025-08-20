@@ -11490,12 +11490,15 @@
 
                 // Coin selection checkboxes
                 this.allSymbols.forEach(symbol => {
-                    const checkbox = document.getElementById(`coin-${symbol.toLowerCase().replace('k', '')}`);
+                    const checkboxId = symbol === 'kBONK' ? 'coin-bonk' : `coin-${symbol.toLowerCase()}`;
+                    const checkbox = document.getElementById(checkboxId);
                     if (checkbox) {
                         checkbox.checked = this.overlaySymbols.includes(symbol);
                         checkbox.addEventListener('change', () => {
                             this.toggleCoin(symbol, checkbox.checked);
                         });
+                    } else {
+                        console.warn(`Checkbox not found for ${symbol} (ID: ${checkboxId})`);
                     }
                 });
 
@@ -11524,9 +11527,14 @@
 
             renderCoinItems() {
                 const container = document.getElementById('crypto-overlay-items');
-                if (!container) return;
+                if (!container) {
+                    console.error('crypto-overlay-items container not found');
+                    return;
+                }
 
+                console.log('🔄 Rendering coins:', this.overlaySymbols);
                 container.innerHTML = '';
+                
                 this.overlaySymbols.forEach(symbol => {
                     const item = document.createElement('div');
                     item.className = 'crypto-overlay-item';
@@ -11544,6 +11552,8 @@
                     
                     container.appendChild(item);
                 });
+                
+                console.log(`✅ Rendered ${this.overlaySymbols.length} coin items`);
             }
 
             updateChartSelector() {
@@ -11680,35 +11690,23 @@
             }
 
             updateTile(symbol, price, change) {
-                // Update main widget tile
-                const tile = document.querySelector(`.crypto-tile[data-symbol="${symbol}"]`);
-                if (tile) {
-                    const priceElement = tile.querySelector('.crypto-price');
-                    const changeElement = tile.querySelector('.crypto-change');
+                // Update overlay widget item (only for selected coins)
+                if (this.overlaySymbols.includes(symbol)) {
+                    const overlayItem = document.querySelector(`.crypto-overlay-item[data-symbol="${symbol}"]`);
+                    if (overlayItem) {
+                        const priceElement = overlayItem.querySelector('.crypto-overlay-price');
+                        const changeElement = overlayItem.querySelector('.crypto-overlay-change');
 
-                    if (priceElement && changeElement) {
-                        priceElement.textContent = this.formatPrice(price);
-                        
-                        const changeData = this.formatChange(change);
-                        changeElement.textContent = changeData.text;
-                        changeElement.className = `crypto-change ${changeData.class}`;
-                        
-                        tile.classList.remove('loading');
-                    }
-                }
-
-                // Update overlay widget item
-                const overlayItem = document.querySelector(`.crypto-overlay-item[data-symbol="${symbol}"]`);
-                if (overlayItem && this.overlaySymbols.includes(symbol)) {
-                    const priceElement = overlayItem.querySelector('.crypto-overlay-price');
-                    const changeElement = overlayItem.querySelector('.crypto-overlay-change');
-
-                    if (priceElement && changeElement) {
-                        priceElement.textContent = this.formatPrice(price);
-                        
-                        const changeData = this.formatChange(change);
-                        changeElement.textContent = changeData.text;
-                        changeElement.className = `crypto-overlay-change ${changeData.class}`;
+                        if (priceElement && changeElement) {
+                            priceElement.textContent = this.formatPrice(price);
+                            
+                            const changeData = this.formatChange(change);
+                            changeElement.textContent = changeData.text;
+                            changeElement.className = `crypto-overlay-change ${changeData.class}`;
+                        }
+                    } else {
+                        console.warn(`Overlay item not found for ${symbol}, re-rendering...`);
+                        this.renderCoinItems();
                     }
                 }
             }
@@ -11785,10 +11783,11 @@
 
         // Initialize crypto widget when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // Wait a bit for other components to load
+            // Wait a bit for other components to load, especially for Lucide icons
             setTimeout(() => {
+                console.log('🚀 Initializing Crypto Widget...');
                 window.cryptoPriceWidget = new CryptoPriceWidget();
-            }, 1000);
+            }, 1500);
         });
         
         // === GLOBAL GOAL EDIT MODAL EVENT LISTENERS SETUP ===
