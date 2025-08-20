@@ -11441,10 +11441,7 @@
                 this.apiUrl = 'https://api.hyperliquid.xyz/info';
                 this.allSymbols = []; // Will be populated from API
                 this.allCoinsData = {}; // Full coin data from Hyperliquid
-                const savedCoins = this.loadSavedCoins();
-                this.overlaySymbols = savedCoins || ['BTC', 'ETH', 'SOL'];
-                console.log('🏗️ Constructor - savedCoins:', savedCoins);
-                console.log('🏗️ Constructor - final overlaySymbols:', this.overlaySymbols);
+                this.overlaySymbols = ['BTC', 'ETH', 'SOL']; // Default, will be overridden by cloud data
                 this.updateInterval = 60000; // 60 seconds
                 this.currentPrices = {};
                 this.price24hAgo = {};
@@ -11454,40 +11451,81 @@
                 this.init();
             }
 
-            loadSavedCoins() {
+            async loadSavedCoins() {
                 try {
-                    const saved = localStorage.getItem('cryptoOverlayCoins');
-                    console.log('💾 Loading saved coins from localStorage:', saved);
-                    const result = saved ? JSON.parse(saved) : null;
-                    console.log('💾 Parsed result:', result);
-                    return result;
+                    if (!window.supabase || !window.supabase.isAuthenticated()) {
+                        console.warn('⚠️ Not authenticated, using default coins');
+                        return null;
+                    }
+
+                    const user = window.supabase.getCurrentUser();
+                    const result = await window.supabase.query(`crypto_watchlist?user_id=eq.${user.id}&select=coins`);
+                    
+                    if (result && result.length > 0) {
+                        const coins = JSON.parse(result[0].coins);
+                        console.log('☁️ Loaded coins from cloud:', coins);
+                        return coins;
+                    }
+                    
+                    console.log('☁️ No saved coins found in cloud');
+                    return null;
                 } catch (e) {
-                    console.error('❌ Error loading saved coins:', e);
+                    console.error('❌ Error loading saved coins from cloud:', e);
                     return null;
                 }
             }
 
-            saveCoins() {
+            async saveCoins() {
                 try {
-                    console.log('💾 Saving coins to localStorage:', this.overlaySymbols);
-                    localStorage.setItem('cryptoOverlayCoins', JSON.stringify(this.overlaySymbols));
-                    console.log('💾 Successfully saved coins to localStorage');
+                    if (!window.supabase || !window.supabase.isAuthenticated()) {
+                        console.warn('⚠️ Not authenticated, cannot save coins to cloud');
+                        return;
+                    }
+
+                    console.log('☁️ Saving coins to cloud:', this.overlaySymbols);
                     
-                    // Verify the save
-                    const verify = localStorage.getItem('cryptoOverlayCoins');
-                    console.log('💾 Verification read:', verify);
+                    const user = window.supabase.getCurrentUser();
+                    const dataToSave = {
+                        user_id: user.id,
+                        coins: JSON.stringify(this.overlaySymbols),
+                        updated_at: new Date().toISOString()
+                    };
+
+                    // Check if watchlist exists
+                    const existing = await window.supabase.query(`crypto_watchlist?user_id=eq.${user.id}&select=*`);
+                    
+                    if (existing && existing.length > 0) {
+                        // Update existing
+                        await window.supabase.update('crypto_watchlist', dataToSave, existing[0].id);
+                        console.log('☁️ Updated existing watchlist in cloud');
+                    } else {
+                        // Create new
+                        await window.supabase.insert('crypto_watchlist', [dataToSave]);
+                        console.log('☁️ Created new watchlist in cloud');
+                    }
+                    
+                    console.log('☁️ Successfully saved coins to cloud');
                 } catch (e) {
-                    console.error('❌ Could not save crypto coins to localStorage:', e);
+                    console.error('❌ Could not save crypto coins to cloud:', e);
                 }
             }
 
             async init() {
                 console.log('🔗 Initializing New Crypto Price Widget...');
-                console.log('📋 Current overlay symbols:', this.overlaySymbols);
+                console.log('📋 Default overlay symbols:', this.overlaySymbols);
                 
                 // Force render after a short delay to ensure DOM is ready
                 setTimeout(async () => {
                     try {
+                        // Load saved coins from cloud first
+                        const savedCoins = await this.loadSavedCoins();
+                        if (savedCoins && savedCoins.length > 0) {
+                            this.overlaySymbols = savedCoins;
+                            console.log('☁️ Loaded watchlist from cloud:', this.overlaySymbols);
+                        } else {
+                            console.log('📋 Using default coins:', this.overlaySymbols);
+                        }
+                        
                         await this.loadAllCoinsFromHyperliquid();
                         this.clearAllStaticItems();
                         this.renderCoinItems();
@@ -11677,8 +11715,8 @@
                     const checkbox = document.getElementById(checkboxId);
                     if (checkbox) {
                         checkbox.checked = this.overlaySymbols.includes(symbol);
-                        checkbox.addEventListener('change', () => {
-                            this.toggleCoin(symbol, checkbox.checked);
+                        checkbox.addEventListener('change', async () => {
+                            await this.toggleCoin(symbol, checkbox.checked);
                         });
                     } else {
                         console.warn(`Checkbox not found for ${symbol} (ID: ${checkboxId})`);
@@ -11687,14 +11725,14 @@
 
             }
 
-            toggleCoin(symbol, enabled) {
+            async toggleCoin(symbol, enabled) {
                 if (enabled && !this.overlaySymbols.includes(symbol)) {
                     this.overlaySymbols.push(symbol);
                 } else if (!enabled) {
                     this.overlaySymbols = this.overlaySymbols.filter(s => s !== symbol);
                 }
                 
-                this.saveCoins();
+                await this.saveCoins();
                 this.renderCoinItems();
             }
 
@@ -11932,9 +11970,9 @@
                     `;
 
                     const addBtn = option.querySelector('.crypto-add-btn');
-                    addBtn.addEventListener('click', (e) => {
+                    addBtn.addEventListener('click', async (e) => {
                         e.stopPropagation();
-                        this.toggleCoinInOverlay(symbol);
+                        await this.toggleCoinInOverlay(symbol);
                     });
 
                     container.appendChild(option);
@@ -11947,7 +11985,7 @@
                 this.renderAvailableCoins(query);
             }
 
-            toggleCoinInOverlay(symbol) {
+            async toggleCoinInOverlay(symbol) {
                 if (this.overlaySymbols.includes(symbol)) {
                     // Remove coin
                     this.overlaySymbols = this.overlaySymbols.filter(s => s !== symbol);
@@ -11958,7 +11996,7 @@
                     console.log(`➕ Added ${symbol} to overlay`);
                 }
 
-                this.saveCoins();
+                await this.saveCoins();
                 this.renderCoinItems();
                 this.renderAvailableCoins(document.getElementById('crypto-search-input')?.value || '');
             }
