@@ -3351,13 +3351,19 @@
             border: 1px solid var(--border-primary);
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            z-index: 5000;
-            min-width: 280px;
-            max-width: 320px;
+            z-index: 4500; /* Lower than modals but high enough for content */
+            width: 280px;
             font-size: var(--font-size-xs);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: none; /* Hidden by default, shown only after authentication */
-            overflow: hidden;
+            overflow: visible; /* Allow content to expand naturally */
+        }
+        
+        /* Ensure main content has proper spacing for watchlist */
+        @media (min-width: 1400px) {
+            .main-content {
+                margin-right: 320px; /* Space for watchlist */
+            }
         }
         
         /* Toggle Header - Always visible */
@@ -3369,12 +3375,37 @@
             cursor: pointer;
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border-primary);
-            transition: background 0.2s ease;
+            border-radius: 12px 12px 0 0;
         }
         
-        .watchlist-toggle:hover {
+        .watchlist-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .add-coin-btn {
+            width: 24px;
+            height: 24px;
+            background: transparent;
+            border: 1px solid var(--border-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .add-coin-btn:hover {
             background: var(--accent-primary);
             color: white;
+            border-color: var(--accent-primary);
+        }
+        
+        .add-coin-btn i {
+            width: 12px;
+            height: 12px;
         }
         
         .watchlist-toggle-content {
@@ -3426,7 +3457,7 @@
         }
         
         .crypto-watchlist.expanded .watchlist-content {
-            max-height: 500px;
+            max-height: none; /* Allow unlimited height */
             opacity: 1;
             transform: translateY(0);
         }
@@ -3434,8 +3465,7 @@
         /* Coins Container */
         .watchlist-coins {
             padding: 8px;
-            max-height: 400px;
-            overflow-y: auto;
+            /* No max-height, no overflow - show all coins naturally */
         }
         
         /* Modern Coin Cards */
@@ -3509,41 +3539,6 @@
             color: #dc2626;
         }
         
-        /* Footer Actions */
-        .watchlist-footer {
-            display: flex;
-            gap: 8px;
-            padding: 12px;
-            border-top: 1px solid var(--border-primary);
-            background: var(--bg-secondary);
-        }
-        
-        .watchlist-action-btn {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 12px;
-            background: transparent;
-            border: 1px solid var(--border-primary);
-            border-radius: 6px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--text-secondary);
-        }
-        
-        .watchlist-action-btn:hover {
-            background: var(--accent-primary);
-            color: white;
-            border-color: var(--accent-primary);
-        }
-        
-        .watchlist-action-btn i {
-            width: 14px;
-            height: 14px;
-        }
 
         .crypto-overlay-header {
             display: flex;
@@ -3860,27 +3855,19 @@
             <div class="watchlist-toggle-content">
                 <i data-lucide="trending-up" class="watchlist-icon"></i>
                 <span class="watchlist-title">Watchlist</span>
-                <span class="watchlist-summary" id="watchlist-summary">3 coins</span>
             </div>
-            <i data-lucide="chevron-down" class="toggle-arrow" id="watchlist-arrow"></i>
+            <div class="watchlist-header-actions">
+                <button class="add-coin-btn" onclick="CryptoWatchlist.openSettings(); event.stopPropagation();" title="Add Coin">
+                    <i data-lucide="plus"></i>
+                </button>
+                <i data-lucide="chevron-down" class="toggle-arrow" id="watchlist-arrow"></i>
+            </div>
         </div>
         
         <!-- Expandable Content -->
         <div class="watchlist-content" id="watchlist-content">
             <div class="watchlist-coins" id="crypto-overlay-items">
                 <!-- Coins will be dynamically inserted here by JavaScript -->
-            </div>
-            
-            <!-- Footer Actions -->
-            <div class="watchlist-footer">
-                <button class="watchlist-action-btn" onclick="CryptoWatchlist.openSettings()" title="Manage Coins">
-                    <i data-lucide="plus-circle"></i>
-                    <span>Add Coin</span>
-                </button>
-                <button class="watchlist-action-btn" onclick="CryptoWatchlist.refresh()" title="Refresh Prices">
-                    <i data-lucide="refresh-cw"></i>
-                    <span>Refresh</span>
-                </button>
             </div>
         </div>
         
@@ -12167,11 +12154,6 @@
                 console.log('🔄 Rendering coins:', this.overlaySymbols);
                 container.innerHTML = '';
                 
-                // Update watchlist summary
-                if (window.CryptoWatchlist) {
-                    window.CryptoWatchlist.updateSummary(this.overlaySymbols.length);
-                }
-                
                 // Render all coins immediately without waiting for data
                 for (const symbol of this.overlaySymbols) {
                     const item = document.createElement('div');
@@ -12987,7 +12969,6 @@
         class CryptoWatchlist {
             static toggle() {
                 const watchlist = document.getElementById('crypto-overlay');
-                const arrow = document.getElementById('watchlist-arrow');
                 
                 if (watchlist.classList.contains('collapsed')) {
                     // Expand
@@ -13005,20 +12986,6 @@
                 const settingsPanel = document.querySelector('.crypto-settings-panel');
                 if (settingsPanel) {
                     settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
-                }
-            }
-            
-            static refresh() {
-                // Trigger crypto price widget refresh
-                if (window.cryptoPriceWidget) {
-                    window.cryptoPriceWidget.updateAllPrices();
-                }
-            }
-            
-            static updateSummary(coinCount) {
-                const summary = document.getElementById('watchlist-summary');
-                if (summary) {
-                    summary.textContent = `${coinCount} coin${coinCount !== 1 ? 's' : ''}`;
                 }
             }
         }
