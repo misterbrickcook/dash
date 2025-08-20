@@ -5950,8 +5950,8 @@
                     text: todoData.title,
                     category: todoData.category,
                     priority: priorityInt,
-                    date: todoData.deadline,
-                    time: todoData.time,
+                    date: todoData.deadline || null,
+                    time: todoData.time || null,
                     // Remove due_date field to avoid timezone issues
                     completed: false,
                     user_id: supabase?.user?.id || 'anonymous'
@@ -12419,7 +12419,8 @@
                         description: '',
                         category: 'privat',
                         priority: 'normal',
-                        deadline: '',
+                        deadline: null,
+                        time: null,
                         tags: []
                     };
                     
