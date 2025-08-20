@@ -3355,17 +3355,18 @@
             display: flex;
             align-items: center;
             height: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 15px;
         }
         
         .ticker-content {
             flex: 1;
             display: flex;
             align-items: center;
-            gap: 24px;
-            overflow: hidden;
+            gap: 20px;
+            overflow: visible;
+            width: 100%;
         }
         
         .ticker-actions {
@@ -3403,22 +3404,25 @@
         .crypto-overlay-symbol {
             font-weight: 700;
             color: var(--text-primary);
-            min-width: 50px;
+            min-width: 45px;
             font-size: 14px;
+            flex-shrink: 0;
         }
         
         .crypto-overlay-price {
             font-weight: 500;
             color: var(--text-primary);
-            min-width: 65px;
+            min-width: 60px;
             font-size: 11px;
+            flex-shrink: 0;
         }
         
         .crypto-overlay-change {
             font-size: 10px;
             font-weight: 500;
-            min-width: 45px;
+            min-width: 40px;
             text-align: center;
+            flex-shrink: 0;
         }
         
         .crypto-overlay-change.positive {
