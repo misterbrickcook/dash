@@ -3354,18 +3354,36 @@
         .ticker-container {
             display: flex;
             align-items: center;
+            justify-content: center;
             height: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 15px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
         }
         
         .ticker-content {
-            flex: 1;
             display: flex;
             align-items: center;
             gap: 20px;
-            overflow: visible;
+            white-space: nowrap;
+            animation: scroll-ticker 40s linear infinite;
+        }
+        
+        @keyframes scroll-ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        /* Pause animation on hover */
+        .ticker-content:hover {
+            animation-play-state: paused;
+        }
+        
+        /* When few coins, center without animation */
+        .ticker-content.center-static {
+            animation: none;
+            transform: none;
+            justify-content: center;
             width: 100%;
         }
         
@@ -12170,8 +12188,45 @@
                 
                 console.log(`✅ Rendered ${this.overlaySymbols.length} coin items instantly`);
                 
+                // Check if we need scrolling or centering
+                this.updateTickerDisplay(container);
+                
                 // Load charts and price changes in background (non-blocking)
                 this.loadChartsAndPriceChangesAsync();
+            }
+
+            updateTickerDisplay(container) {
+                // Wait for DOM to update
+                setTimeout(() => {
+                    const tickerContainer = container.closest('.ticker-container');
+                    const tickerContent = container;
+                    
+                    // Calculate total width needed vs available width
+                    const containerWidth = tickerContainer.clientWidth;
+                    let totalItemsWidth = 0;
+                    
+                    // Sum up width of all coin items
+                    const items = container.querySelectorAll('.crypto-overlay-item');
+                    items.forEach(item => {
+                        totalItemsWidth += item.offsetWidth;
+                    });
+                    
+                    // Add gap spacing (20px between items)
+                    const totalGapsWidth = (items.length - 1) * 20;
+                    const totalContentWidth = totalItemsWidth + totalGapsWidth;
+                    
+                    console.log(`📏 Container width: ${containerWidth}px, Content width: ${totalContentWidth}px`);
+                    
+                    if (totalContentWidth <= containerWidth * 0.8) {
+                        // Few coins - center them statically
+                        tickerContent.classList.add('center-static');
+                        console.log('📍 Using centered static display');
+                    } else {
+                        // Many coins - use scrolling animation
+                        tickerContent.classList.remove('center-static');
+                        console.log('🔄 Using scrolling animation');
+                    }
+                }, 100);
             }
 
             async loadChartsAndPriceChangesAsync() {
