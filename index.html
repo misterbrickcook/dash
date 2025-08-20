@@ -12405,61 +12405,50 @@
         // === SMART QUICK ACTIONS ===
         class QuickActions {
             static addTodo() {
-                // Focus on existing quick add input if on todos page
-                if (document.getElementById('tab-todos').classList.contains('active')) {
-                    const quickInput = document.getElementById('quick-todo-input');
-                    if (quickInput) {
-                        quickInput.focus();
-                        return;
-                    }
-                }
+                // Switch to todos tab
+                switchTab('tab-todos');
                 
-                // Otherwise prompt for todo
-                const todoText = prompt('📝 Quick Add Todo:', '');
-                if (todoText && todoText.trim()) {
-                    const todo = {
-                        title: todoText.trim(),
-                        description: '',
-                        category: 'privat',
-                        priority: 'normal',
-                        deadline: null,
-                        time: null,
-                        tags: []
-                    };
-                    
-                    TodoManager.addTodo(todo);
-                    
-                    // Show success message
-                    this.showNotification('✅ Todo hinzugefügt!', 'success');
-                }
+                // Hide watchlist when modal opens
+                this.hideWatchlist();
+                
+                // Show todo add modal
+                setTimeout(() => {
+                    if (window.TodoManager && typeof window.TodoManager.showAddTodoModal === 'function') {
+                        window.TodoManager.showAddTodoModal();
+                    }
+                }, 300);
+                
+                this.showNotification('📝 Todo hinzufügen', 'info');
             }
             
             static startTimer() {
-                // Create simple 25min Pomodoro timer
-                const minutes = prompt('⏰ Timer starten (Minuten):', '25');
-                if (minutes && !isNaN(minutes) && minutes > 0) {
-                    this.createTimer(parseInt(minutes));
-                }
+                // Start 25min Pomodoro timer directly
+                this.createTimer(25);
             }
             
             static addJournalEntry() {
                 // Switch to journal tab
                 switchTab('tab-journal');
                 
-                // Focus on journal input
+                // Hide watchlist when modal opens
+                this.hideWatchlist();
+                
+                // Show journal add modal
                 setTimeout(() => {
-                    const journalInput = document.getElementById('journal-input');
-                    if (journalInput) {
-                        journalInput.focus();
+                    if (window.JournalManager && typeof window.JournalManager.showAddJournalModal === 'function') {
+                        window.JournalManager.showAddJournalModal();
                     }
                 }, 300);
                 
-                this.showNotification('📖 Journal geöffnet', 'info');
+                this.showNotification('📖 Journal Entry erstellen', 'info');
             }
             
             static addWikiEntry() {
                 // Switch to wiki tab  
                 switchTab('tab-wiki');
+                
+                // Hide watchlist when modal opens
+                this.hideWatchlist();
                 
                 // Show wiki add modal
                 setTimeout(() => {
@@ -12472,8 +12461,8 @@
             }
             
             static addTrade() {
-                // Switch to trades tab
-                switchTab('tab-trades');
+                // Switch to trading tab
+                switchTab('tab-trading');
                 
                 // Show trade add modal
                 setTimeout(() => {
@@ -12492,13 +12481,11 @@
             }
             
             static logout() {
-                // Confirm logout
-                if (confirm('Möchten Sie sich wirklich abmelden?')) {
-                    if (window.Auth && typeof window.Auth.handleLogout === 'function') {
-                        window.Auth.handleLogout();
-                    }
-                    this.showNotification('👋 Logout erfolgreich', 'success');
+                // Direct logout without confirmation popup
+                if (window.Auth && typeof window.Auth.handleLogout === 'function') {
+                    window.Auth.handleLogout();
                 }
+                this.showNotification('👋 Logout erfolgreich', 'success');
             }
             
             static toggleMorningRoutine() {
@@ -12568,6 +12555,20 @@
                 }, 1000);
                 
                 this.showNotification(`⏰ ${minutes} Min Timer gestartet`, 'info');
+            }
+            
+            static hideWatchlist() {
+                const watchlist = document.getElementById('crypto-overlay');
+                if (watchlist) {
+                    watchlist.style.zIndex = '100'; // Lower z-index than modals
+                }
+            }
+            
+            static showWatchlist() {
+                const watchlist = document.getElementById('crypto-overlay');
+                if (watchlist) {
+                    watchlist.style.zIndex = '5000'; // Original z-index
+                }
             }
             
             static showNotification(message, type = 'info') {
