@@ -4538,7 +4538,7 @@
                 <i data-lucide="plus"></i>
             </button>
             
-            <button id="timer-quick-btn" class="quick-action-btn" data-tooltip="Start Timer (25 min) | Right-click to reset" onclick="QuickActions.toggleTimer()" oncontextmenu="QuickActions.resetTimer(); return false;">
+            <button id="timer-quick-btn" class="quick-action-btn" data-tooltip="25 Min Timer | Right-click: Reset" onclick="QuickActions.toggleTimer()" oncontextmenu="QuickActions.resetTimer(); return false;">
                 <i data-lucide="play"></i>
             </button>
             
@@ -9274,7 +9274,7 @@
                 
                 // Update Quick Actions button
                 if (window.QuickActions) {
-                    window.QuickActions.updateTimerButton('square', 'Stop Timer');
+                    window.QuickActions.updateTimerButton('pause', 'Stop Timer');
                 }
                 
                 this.interval = setInterval(() => {
@@ -9307,10 +9307,7 @@
                 console.log('🍅 Timer completed!');
                 this.reset();
                 
-                // Show completion notification via QuickActions
-                if (window.QuickActions) {
-                    window.QuickActions.showNotification('🍅 Pomodoro beendet! Zeit für eine Pause.', 'success');
-                }
+                // Timer completed - button will reset to play state
                 
                 // Show notification
                 this.showNotification();
@@ -12435,7 +12432,7 @@
                     }
                 }, 300);
                 
-                this.showNotification('📝 Todo hinzufügen', 'info');
+                // Todo modal will be opened
             }
             
             static toggleTimer() {
@@ -12444,17 +12441,14 @@
                     if (window.PomodoroTimer.isRunning) {
                         window.PomodoroTimer.pause();
                         this.updateTimerButton('play', 'Start Timer');
-                        this.showNotification('⏸️ Timer pausiert', 'info');
                     } else {
                         window.PomodoroTimer.start();
-                        this.updateTimerButton('square', 'Stop Timer');
-                        this.showNotification('▶️ Timer gestartet', 'success');
+                        this.updateTimerButton('pause', 'Stop Timer');
                     }
                 } else {
                     // Create new timer and start it
                     this.createTimer(25);
-                    this.updateTimerButton('square', 'Stop Timer');
-                    this.showNotification('🍅 25 Min Timer gestartet', 'success');
+                    this.updateTimerButton('pause', 'Stop Timer');
                 }
             }
             
@@ -12464,7 +12458,6 @@
                     window.PomodoroTimer.reset();
                 }
                 this.updateTimerButton('play', 'Start Timer (25 min)');
-                this.showNotification('🔄 Timer zurückgesetzt', 'info');
             }
             
             static updateTimerButton(iconName, tooltip) {
@@ -12479,7 +12472,7 @@
                         }
                     }
                     // Update tooltip
-                    button.setAttribute('data-tooltip', tooltip + ' | Right-click to reset');
+                    button.setAttribute('data-tooltip', tooltip + ' | Right-click: Reset');
                 }
             }
             
@@ -12497,7 +12490,7 @@
                     }
                 }, 300);
                 
-                this.showNotification('📖 Journal Entry erstellen', 'info');
+                // Journal modal will be opened
             }
             
             static addWikiEntry() {
@@ -12514,7 +12507,7 @@
                     }
                 }, 300);
                 
-                this.showNotification('📄 Wiki Entry erstellen', 'info');
+                // Wiki modal will be opened
             }
             
             static addTrade() {
@@ -12528,13 +12521,13 @@
                     }
                 }, 300);
                 
-                this.showNotification('📈 Trade hinzufügen', 'info');
+                // Trade modal will be opened
             }
             
             static openSettings() {
                 // Switch to settings tab
                 switchTab('tab-settings');
-                this.showNotification('⚙️ Settings geöffnet', 'info');
+                // Settings tab will be opened
             }
             
             static logout() {
@@ -12542,7 +12535,7 @@
                 if (window.Auth && typeof window.Auth.handleLogout === 'function') {
                     window.Auth.handleLogout();
                 }
-                this.showNotification('👋 Logout erfolgreich', 'success');
+                // User will be logged out
             }
             
             static toggleMorningRoutine() {
@@ -12599,7 +12592,7 @@
                     if (remaining <= 0) {
                         clearInterval(timerInterval);
                         document.title = 'Dash v4.1';
-                        this.showNotification('⏰ Timer abgelaufen!', 'success');
+                        // Timer completed
                         
                         // Simple notification sound
                         if ('Notification' in window && Notification.permission === 'granted') {
@@ -12611,7 +12604,7 @@
                     }
                 }, 1000);
                 
-                this.showNotification(`⏰ ${minutes} Min Timer gestartet`, 'info');
+                // Timer started
             }
             
             static hideWatchlist() {
