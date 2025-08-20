@@ -147,7 +147,7 @@
         /* === STICKY NAVIGATION === */
         .sticky-nav {
             position: fixed;
-            top: 0;
+            top: 40px; /* Below crypto ticker */
             left: 0;
             right: 0;
             background: var(--bg-primary);
@@ -3350,7 +3350,7 @@
             height: 40px;
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border-primary);
-            z-index: 1001; /* Above navbar */
+            z-index: 999; /* Below navbar but above content */
             display: none; /* Hidden by default, shown only after authentication */
         }
         
