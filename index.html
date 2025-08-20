@@ -3893,12 +3893,7 @@
             <button class="nav-tab" data-tab="tab-wiki">Wiki</button>
             <button class="nav-tab" data-tab="tab-settings" style="display: none;">Settings</button>
             <div class="nav-actions">
-                <button id="settings-btn" class="nav-tab settings-btn">
-                    <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
-                </button>
-                <button id="logout-btn" class="nav-tab logout-btn" style="display:flex;align-items:center;justify-content:center;">
-                    <i data-lucide="log-out" style="width: 18px; height: 18px;"></i>
-                </button>
+                <!-- Settings and Logout moved to Quick Actions Bar -->
             </div>
         </div>
     </nav>
@@ -4557,6 +4552,14 @@
             
             <button class="quick-action-btn" data-tooltip="Add Trade" onclick="QuickActions.addTrade()">
                 <i data-lucide="trending-up"></i>
+            </button>
+            
+            <button class="quick-action-btn" data-tooltip="Settings" onclick="QuickActions.openSettings()">
+                <i data-lucide="settings"></i>
+            </button>
+            
+            <button class="quick-action-btn" data-tooltip="Logout" onclick="QuickActions.logout()">
+                <i data-lucide="log-out"></i>
             </button>
         </div>
 
@@ -12480,6 +12483,22 @@
                 }, 300);
                 
                 this.showNotification('📈 Trade hinzufügen', 'info');
+            }
+            
+            static openSettings() {
+                // Switch to settings tab
+                switchTab('tab-settings');
+                this.showNotification('⚙️ Settings geöffnet', 'info');
+            }
+            
+            static logout() {
+                // Confirm logout
+                if (confirm('Möchten Sie sich wirklich abmelden?')) {
+                    if (window.Auth && typeof window.Auth.handleLogout === 'function') {
+                        window.Auth.handleLogout();
+                    }
+                    this.showNotification('👋 Logout erfolgreich', 'success');
+                }
             }
             
             static toggleMorningRoutine() {
