@@ -3224,7 +3224,6 @@
             width: 40px;
             height: 20px;
             cursor: pointer;
-            border: 1px solid var(--border-secondary);
         }
 
         .crypto-overlay-symbol {
@@ -3253,24 +3252,18 @@
         .crypto-overlay-change {
             font-size: var(--font-size-xs);
             font-weight: 500;
-            padding: var(--spacing-xs);
-            border: 1px solid transparent;
-            background: none;
             font-family: inherit;
         }
 
         .crypto-overlay-change.positive {
-            border-color: #22c55e;
             color: #22c55e;
         }
 
         .crypto-overlay-change.negative {
-            border-color: #ef4444;
             color: #ef4444;
         }
 
         .crypto-overlay-change.neutral {
-            border-color: var(--border-secondary);
             color: var(--text-secondary);
         }
 
@@ -3467,7 +3460,7 @@
     <!-- === FLOATING CRYPTO OVERLAY === -->
     <div id="crypto-overlay" class="crypto-overlay">
         <div class="crypto-overlay-header">
-            <span class="crypto-overlay-title">Crypto</span>
+            <span class="crypto-overlay-title">Watchlist</span>
             <div class="crypto-header-buttons">
                 <button class="crypto-settings-btn" title="Manage coins">
                     <i data-lucide="settings" style="width: 12px; height: 12px;"></i>
@@ -3486,7 +3479,7 @@
         <!-- Settings Panel -->
         <div class="crypto-settings-panel" style="display: none;">
             <div class="crypto-settings-header">
-                <span>Add Crypto</span>
+            <span>Add to Watchlist</span>
                 <button class="crypto-settings-close">
                     <i data-lucide="x" style="width: 12px; height: 12px;"></i>
                 </button>
