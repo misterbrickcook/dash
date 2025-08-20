@@ -11533,17 +11533,21 @@
             renderCoinItems() {
                 const container = document.getElementById('crypto-overlay-items');
                 if (!container) {
-                    console.error('crypto-overlay-items container not found');
+                    console.error('❌ crypto-overlay-items container not found');
                     return;
                 }
 
                 console.log('🔄 Rendering coins:', this.overlaySymbols);
+                console.log('📦 Container found:', container);
+                console.log('📦 Container current innerHTML:', container.innerHTML);
+                
                 container.innerHTML = '';
                 
-                this.overlaySymbols.forEach(symbol => {
+                this.overlaySymbols.forEach((symbol, index) => {
                     const item = document.createElement('div');
                     item.className = 'crypto-overlay-item';
                     item.setAttribute('data-symbol', symbol);
+                    item.style.backgroundColor = index % 2 === 0 ? '#f0f0f0' : '#ffffff'; // Debug coloring
                     
                     const displaySymbol = symbol === 'kBONK' ? 'BONK' : symbol;
                     
@@ -11551,14 +11555,17 @@
                         <span class="crypto-overlay-symbol">${displaySymbol}</span>
                         <div class="crypto-overlay-data">
                             <span class="crypto-overlay-price">$--</span>
-                            <span class="crypto-overlay-change">--</span>
+                            <span class="crypto-overlay-change">Loading...</span>
                         </div>
                     `;
                     
                     container.appendChild(item);
+                    console.log(`➕ Added coin item for ${symbol}:`, item);
                 });
                 
+                console.log('📦 Container final innerHTML:', container.innerHTML);
                 console.log(`✅ Rendered ${this.overlaySymbols.length} coin items`);
+                console.log('🎯 All children in container:', container.children);
             }
 
             updateChartSelector() {
