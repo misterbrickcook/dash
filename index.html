@@ -12461,18 +12461,28 @@
             }
             
             static updateTimerButton(iconName, tooltip) {
+                console.log('🔄 Updating timer button:', iconName, tooltip);
                 const button = document.getElementById('timer-quick-btn');
                 if (button) {
                     const icon = button.querySelector('i');
                     if (icon) {
+                        console.log('📝 Current icon:', icon.getAttribute('data-lucide'), '-> New:', iconName);
                         // Update lucide icon
                         icon.setAttribute('data-lucide', iconName);
+                        // Force immediate re-render
                         if (window.lucide) {
+                            // Replace the icon completely to ensure update
+                            const newIcon = document.createElement('i');
+                            newIcon.setAttribute('data-lucide', iconName);
+                            icon.parentNode.replaceChild(newIcon, icon);
                             window.lucide.createIcons();
+                            console.log('✅ Icon updated and re-rendered');
                         }
                     }
                     // Update tooltip
                     button.setAttribute('data-tooltip', tooltip + ' | Right-click: Reset');
+                } else {
+                    console.error('❌ Timer button not found!');
                 }
             }
             
