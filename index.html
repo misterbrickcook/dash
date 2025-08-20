@@ -3135,149 +3135,188 @@
             }
         }
 
-        /* === CRYPTO PRICE WIDGET === */
-        .crypto-widget {
-            background: #ffffff;
-            border: 1px solid #e0e0e0;
-            padding: 2rem;
+
+        /* === FLOATING CRYPTO OVERLAY === */
+        .crypto-overlay {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            min-width: 200px;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
         }
 
-        .crypto-header {
+        .crypto-overlay-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 1rem;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 8px 8px 0 0;
         }
 
-        .crypto-header h2 {
-            font-size: 1.2rem;
-            font-weight: 500;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .crypto-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ef4444;
-            animation: pulse 2s infinite;
-        }
-
-        .status-indicator.connected {
-            background: #10b981;
-            animation: none;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .crypto-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-
-        .crypto-tile {
-            background: #ffffff;
-            border: 1px solid #e0e0e0;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .crypto-tile:hover {
-            border-color: #000000;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .crypto-symbol {
-            font-size: 0.875rem;
+        .crypto-overlay-title {
             font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            color: var(--text-secondary);
         }
 
-        .crypto-price {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .crypto-change {
-            font-size: 0.75rem;
-            font-weight: 500;
-            padding: 0.25rem 0.5rem;
+        .crypto-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
             border-radius: 4px;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
         }
 
-        .crypto-change.positive {
-            background: #dcfce7;
+        .crypto-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .crypto-overlay-content {
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .crypto-overlay.collapsed .crypto-overlay-content {
+            max-height: 0;
+            padding: 0 0.5rem;
+        }
+
+        .crypto-overlay.collapsed .crypto-toggle-btn i {
+            transform: rotate(-90deg);
+        }
+
+        .crypto-overlay-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        }
+
+        .crypto-overlay-item:last-child {
+            border-bottom: none;
+        }
+
+        .crypto-overlay-symbol {
+            font-weight: 600;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            min-width: 35px;
+        }
+
+        .crypto-overlay-data {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.1rem;
+        }
+
+        .crypto-overlay-price {
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: var(--text-primary);
+        }
+
+        .crypto-overlay-change {
+            font-size: 0.6rem;
+            font-weight: 500;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+        }
+
+        .crypto-overlay-change.positive {
+            background: rgba(22, 163, 74, 0.1);
             color: #16a34a;
         }
 
-        .crypto-change.negative {
-            background: #fef2f2;
+        .crypto-overlay-change.negative {
+            background: rgba(220, 38, 38, 0.1);
             color: #dc2626;
         }
 
-        .crypto-change.neutral {
-            background: #f3f4f6;
+        .crypto-overlay-change.neutral {
+            background: rgba(0, 0, 0, 0.05);
             color: var(--text-secondary);
         }
 
-        .crypto-tile.loading .crypto-price,
-        .crypto-tile.loading .crypto-change {
-            color: var(--text-muted);
-        }
-
+        /* Responsive adjustments */
         @media (max-width: 768px) {
-            .crypto-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.75rem;
+            .crypto-overlay {
+                top: 80px;
+                right: 10px;
+                min-width: 160px;
+                font-size: 0.7rem;
             }
-            
-            .crypto-tile {
-                padding: 1rem;
+
+            .crypto-overlay-header {
+                padding: 0.4rem 0.6rem;
             }
-            
-            .crypto-price {
-                font-size: 1.1rem;
+
+            .crypto-overlay-content {
+                padding: 0.4rem;
+            }
+
+            .crypto-overlay-item {
+                padding: 0.3rem 0;
             }
         }
 
         @media (max-width: 480px) {
-            .crypto-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .crypto-header {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
+            .crypto-overlay {
+                min-width: 140px;
+                font-size: 0.65rem;
             }
         }
     </style>
 </head>
 <body>
+    <!-- === FLOATING CRYPTO OVERLAY === -->
+    <div id="crypto-overlay" class="crypto-overlay">
+        <div class="crypto-overlay-header">
+            <span class="crypto-overlay-title">Crypto</span>
+            <button class="crypto-toggle-btn" title="Toggle crypto prices">
+                <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+            </button>
+        </div>
+        <div class="crypto-overlay-content">
+            <div class="crypto-overlay-item" data-symbol="BTC">
+                <span class="crypto-overlay-symbol">BTC</span>
+                <div class="crypto-overlay-data">
+                    <span class="crypto-overlay-price">$--</span>
+                    <span class="crypto-overlay-change">--</span>
+                </div>
+            </div>
+            <div class="crypto-overlay-item" data-symbol="ETH">
+                <span class="crypto-overlay-symbol">ETH</span>
+                <div class="crypto-overlay-data">
+                    <span class="crypto-overlay-price">$--</span>
+                    <span class="crypto-overlay-change">--</span>
+                </div>
+            </div>
+            <div class="crypto-overlay-item" data-symbol="SOL">
+                <span class="crypto-overlay-symbol">SOL</span>
+                <div class="crypto-overlay-data">
+                    <span class="crypto-overlay-price">$--</span>
+                    <span class="crypto-overlay-change">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- === ADD TODO MODAL === -->
     <div id="add-todo-modal" class="add-todo-modal hide">
         <div class="add-todo-container">
@@ -3557,54 +3596,6 @@
                         <div class="streak-number">0.00</div>
                         <div class="streak-label">SOL Balance</div>
                         <div class="streak-date">Live</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Crypto Price Widget -->
-            <section class="crypto-widget" style="margin-bottom: 4rem;">
-                <div class="crypto-header">
-                    <h2>Live Crypto Prices</h2>
-                    <div class="crypto-status">
-                        <div class="status-indicator"></div>
-                        <span class="status-text">Connecting...</span>
-                    </div>
-                </div>
-                <div class="crypto-grid">
-                    <div class="crypto-tile" data-symbol="BTC">
-                        <div class="crypto-symbol">BTC</div>
-                        <div class="crypto-price">$--</div>
-                        <div class="crypto-change">--</div>
-                    </div>
-                    <div class="crypto-tile" data-symbol="ETH">
-                        <div class="crypto-symbol">ETH</div>
-                        <div class="crypto-price">$--</div>
-                        <div class="crypto-change">--</div>
-                    </div>
-                    <div class="crypto-tile" data-symbol="SOL">
-                        <div class="crypto-symbol">SOL</div>
-                        <div class="crypto-price">$--</div>
-                        <div class="crypto-change">--</div>
-                    </div>
-                    <div class="crypto-tile" data-symbol="ENA">
-                        <div class="crypto-symbol">ENA</div>
-                        <div class="crypto-price">$--</div>
-                        <div class="crypto-change">--</div>
-                    </div>
-                    <div class="crypto-tile" data-symbol="PENGU">
-                        <div class="crypto-symbol">PENGU</div>
-                        <div class="crypto-price">$--</div>
-                        <div class="crypto-change">--</div>
-                    </div>
-                    <div class="crypto-tile" data-symbol="kBONK">
-                        <div class="crypto-symbol">BONK</div>
-                        <div class="crypto-price">$--</div>
-                        <div class="crypto-change">--</div>
-                    </div>
-                    <div class="crypto-tile" data-symbol="FARTCOIN">
-                        <div class="crypto-symbol">FARTCOIN</div>
-                        <div class="crypto-price">$--</div>
-                        <div class="crypto-change">--</div>
                     </div>
                 </div>
             </section>
@@ -11287,19 +11278,31 @@
             constructor() {
                 this.apiUrl = 'https://api.hyperliquid.xyz/info';
                 this.symbols = ['BTC', 'ETH', 'SOL', 'ENA', 'PENGU', 'kBONK', 'FARTCOIN'];
+                this.overlaySymbols = ['BTC', 'ETH', 'SOL']; // Smaller set for overlay
                 this.updateInterval = 30000; // 30 seconds
                 this.previousPrices = {};
                 this.intervalId = null;
                 this.statusIndicator = document.querySelector('.status-indicator');
                 this.statusText = document.querySelector('.status-text');
+                this.overlay = document.querySelector('.crypto-overlay');
                 
                 this.init();
             }
 
             init() {
                 console.log('🔗 Initializing Crypto Price Widget...');
+                this.setupOverlayToggle();
                 this.updatePrices();
                 this.startAutoUpdate();
+            }
+
+            setupOverlayToggle() {
+                const toggleBtn = document.querySelector('.crypto-toggle-btn');
+                if (toggleBtn && this.overlay) {
+                    toggleBtn.addEventListener('click', () => {
+                        this.overlay.classList.toggle('collapsed');
+                    });
+                }
             }
 
             async fetchPrices() {
@@ -11356,20 +11359,36 @@
             }
 
             updateTile(symbol, price, change) {
-                const tile = document.querySelector(`[data-symbol="${symbol}"]`);
-                if (!tile) return;
+                // Update main widget tile
+                const tile = document.querySelector(`.crypto-tile[data-symbol="${symbol}"]`);
+                if (tile) {
+                    const priceElement = tile.querySelector('.crypto-price');
+                    const changeElement = tile.querySelector('.crypto-change');
 
-                const priceElement = tile.querySelector('.crypto-price');
-                const changeElement = tile.querySelector('.crypto-change');
+                    if (priceElement && changeElement) {
+                        priceElement.textContent = this.formatPrice(price);
+                        
+                        const changeData = this.formatChange(change);
+                        changeElement.textContent = changeData.text;
+                        changeElement.className = `crypto-change ${changeData.class}`;
+                        
+                        tile.classList.remove('loading');
+                    }
+                }
 
-                if (priceElement && changeElement) {
-                    priceElement.textContent = this.formatPrice(price);
-                    
-                    const changeData = this.formatChange(change);
-                    changeElement.textContent = changeData.text;
-                    changeElement.className = `crypto-change ${changeData.class}`;
-                    
-                    tile.classList.remove('loading');
+                // Update overlay widget item
+                const overlayItem = document.querySelector(`.crypto-overlay-item[data-symbol="${symbol}"]`);
+                if (overlayItem && this.overlaySymbols.includes(symbol)) {
+                    const priceElement = overlayItem.querySelector('.crypto-overlay-price');
+                    const changeElement = overlayItem.querySelector('.crypto-overlay-change');
+
+                    if (priceElement && changeElement) {
+                        priceElement.textContent = this.formatPrice(price);
+                        
+                        const changeData = this.formatChange(change);
+                        changeElement.textContent = changeData.text;
+                        changeElement.className = `crypto-overlay-change ${changeData.class}`;
+                    }
                 }
             }
 
