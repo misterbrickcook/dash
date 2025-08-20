@@ -11514,58 +11514,111 @@
                 console.log('🔗 Initializing New Crypto Price Widget...');
                 console.log('📋 Default overlay symbols:', this.overlaySymbols);
                 
-                // Force render after a short delay to ensure DOM is ready
+                // Immediate render with defaults - no delay
+                try {
+                    // Show loading state immediately
+                    this.showLoadingState();
+                    
+                    // Run everything in parallel for speed
+                    const [savedCoins, hyperliquidData] = await Promise.all([
+                        this.loadSavedCoins(),
+                        this.loadAllCoinsFromHyperliquid()
+                    ]);
+                    
+                    // Update watchlist if we have saved coins
+                    if (savedCoins && savedCoins.length > 0) {
+                        this.overlaySymbols = savedCoins;
+                        console.log('☁️ Loaded watchlist from cloud:', this.overlaySymbols);
+                    } else {
+                        console.log('📋 Using default coins:', this.overlaySymbols);
+                    }
+                    
+                    // Render immediately with current prices (if available)
+                    this.clearAllStaticItems();
+                    this.renderCoinItems();
+                    this.setupEventListeners();
+                    this.setupSearchFunctionality();
+                    
+                    // Load price updates in background
+                    this.updatePricesInBackground();
+                    this.startAutoUpdate();
+                    
+                    this.hideLoadingState();
+                    
+                } catch (error) {
+                    console.error('❌ Error initializing crypto widget:', error);
+                    this.hideLoadingState();
+                }
+            }
+
+            showLoadingState() {
+                const container = document.getElementById('crypto-overlay-items');
+                if (container) {
+                    container.innerHTML = '<div style="text-align: center; padding: 1rem; color: #666; font-size: 0.8rem;">Loading crypto data...</div>';
+                }
+            }
+
+            hideLoadingState() {
+                // Loading state is automatically replaced when renderCoinItems() is called
+            }
+
+            async updatePricesInBackground() {
+                // Non-blocking price update - doesn't wait for completion
                 setTimeout(async () => {
                     try {
-                        // Load saved coins from cloud first
-                        const savedCoins = await this.loadSavedCoins();
-                        if (savedCoins && savedCoins.length > 0) {
-                            this.overlaySymbols = savedCoins;
-                            console.log('☁️ Loaded watchlist from cloud:', this.overlaySymbols);
-                        } else {
-                            console.log('📋 Using default coins:', this.overlaySymbols);
-                        }
-                        
-                        await this.loadAllCoinsFromHyperliquid();
-                        this.clearAllStaticItems();
-                        this.renderCoinItems();
-                        this.setupEventListeners();
-                        this.setupSearchFunctionality();
                         await this.updatePricesAndCharts();
-                        this.startAutoUpdate();
                     } catch (error) {
-                        console.error('❌ Error initializing crypto widget:', error);
+                        console.warn('Background price update failed:', error);
                     }
-                }, 500);
+                }, 100);
             }
 
             async loadAllCoinsFromHyperliquid() {
                 console.log('🔄 Loading all coins from Hyperliquid...');
                 
                 try {
-                    const response = await fetch(this.apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'meta' })
-                    });
+                    // Run meta and prices requests in parallel
+                    const [metaResponse, pricesResponse] = await Promise.all([
+                        fetch(this.apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ type: 'meta' })
+                        }),
+                        fetch(this.apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ type: 'allMids' })
+                        })
+                    ]);
 
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    if (!metaResponse.ok) throw new Error(`Meta API error: ${metaResponse.status}`);
+                    if (!pricesResponse.ok) throw new Error(`Prices API error: ${pricesResponse.status}`);
                     
-                    const data = await response.json();
-                    this.allSymbols = data.universe
+                    const [metaData, pricesData] = await Promise.all([
+                        metaResponse.json(),
+                        pricesResponse.json()
+                    ]);
+                    
+                    this.allSymbols = metaData.universe
                         .filter(coin => !coin.isDelisted)
                         .map(coin => coin.name)
                         .sort();
 
-                    console.log(`✅ Loaded ${this.allSymbols.length} coins from Hyperliquid`);
-                    
-                    // Get current prices for all coins
-                    await this.loadCurrentPrices();
+                    this.currentPrices = pricesData;
+
+                    console.log(`✅ Loaded ${this.allSymbols.length} coins and ${Object.keys(pricesData).length} prices from Hyperliquid`);
                     
                 } catch (error) {
                     console.error('❌ Error loading coins:', error);
                     // Fallback to basic coins if API fails
                     this.allSymbols = ['BTC', 'ETH', 'SOL', 'ENA', 'PENGU', 'kBONK', 'FARTCOIN'];
+                    
+                    // Try to load just prices as fallback
+                    try {
+                        await this.loadCurrentPrices();
+                    } catch (priceError) {
+                        console.warn('❌ Could not load fallback prices:', priceError);
+                    }
                 }
             }
 
@@ -11582,7 +11635,7 @@
                     const data = await response.json();
                     this.currentPrices = data;
                     
-                    console.log(`✅ Loaded current prices for ${Object.keys(data).length} coins`);
+                    console.log(`🔄 Updated current prices for ${Object.keys(data).length} coins`);
                 } catch (error) {
                     console.error('❌ Error loading current prices:', error);
                 }
@@ -11746,6 +11799,7 @@
                 console.log('🔄 Rendering coins:', this.overlaySymbols);
                 container.innerHTML = '';
                 
+                // Render all coins immediately without waiting for data
                 for (const symbol of this.overlaySymbols) {
                     const item = document.createElement('div');
                     item.className = 'crypto-overlay-item dynamic-coin-item';
@@ -11757,29 +11811,41 @@
                     
                     item.innerHTML = `
                         <div class="crypto-overlay-left">
-                            <canvas class="crypto-mini-chart" data-symbol="${symbol}" width="40" height="20"></canvas>
+                            <canvas class="crypto-mini-chart" data-symbol="${symbol}" width="40" height="20" style="background: #f0f0f0;"></canvas>
                             <span class="crypto-overlay-symbol">${displaySymbol}</span>
                         </div>
                         <div class="crypto-overlay-data">
                             <span class="crypto-overlay-price">${formattedPrice}</span>
-                            <span class="crypto-overlay-change">Loading...</span>
+                            <span class="crypto-overlay-change">...</span>
                         </div>
                     `;
                     
                     container.appendChild(item);
-                    
-                    // Load 7-day chart for this coin
-                    this.loadAndRenderMiniChart(symbol);
-                    
-                    // Load 24h price change
-                    this.load24hPriceChange(symbol).then(change => {
-                        if (change !== null) {
-                            this.updatePriceChange(symbol, change);
-                        }
-                    });
                 }
                 
-                console.log(`✅ Rendered ${this.overlaySymbols.length} coin items with mini charts`);
+                console.log(`✅ Rendered ${this.overlaySymbols.length} coin items instantly`);
+                
+                // Load charts and price changes in background (non-blocking)
+                this.loadChartsAndPriceChangesAsync();
+            }
+
+            async loadChartsAndPriceChangesAsync() {
+                // Load all charts and price changes in parallel
+                const promises = this.overlaySymbols.map(async (symbol) => {
+                    // Load chart and price change in parallel for each coin
+                    const [, change] = await Promise.all([
+                        this.loadAndRenderMiniChart(symbol),
+                        this.load24hPriceChange(symbol)
+                    ]);
+                    
+                    if (change !== null) {
+                        this.updatePriceChange(symbol, change);
+                    }
+                });
+                
+                // Wait for all to complete (but don't block the main render)
+                await Promise.all(promises);
+                console.log('📊 All charts and price changes loaded');
             }
 
             async loadAndRenderMiniChart(symbol) {
@@ -12074,7 +12140,7 @@
                 } catch (error) {
                     console.error('❌ Error initializing Crypto Widget:', error);
                 }
-            }, 2500);
+            }, 200);
         });
         
         // === GLOBAL GOAL EDIT MODAL EVENT LISTENERS SETUP ===
