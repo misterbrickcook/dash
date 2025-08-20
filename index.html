@@ -11441,7 +11441,10 @@
                 this.apiUrl = 'https://api.hyperliquid.xyz/info';
                 this.allSymbols = []; // Will be populated from API
                 this.allCoinsData = {}; // Full coin data from Hyperliquid
-                this.overlaySymbols = this.loadSavedCoins() || ['BTC', 'ETH', 'SOL'];
+                const savedCoins = this.loadSavedCoins();
+                this.overlaySymbols = savedCoins || ['BTC', 'ETH', 'SOL'];
+                console.log('🏗️ Constructor - savedCoins:', savedCoins);
+                console.log('🏗️ Constructor - final overlaySymbols:', this.overlaySymbols);
                 this.updateInterval = 60000; // 60 seconds
                 this.currentPrices = {};
                 this.price24hAgo = {};
@@ -11454,17 +11457,27 @@
             loadSavedCoins() {
                 try {
                     const saved = localStorage.getItem('cryptoOverlayCoins');
-                    return saved ? JSON.parse(saved) : null;
+                    console.log('💾 Loading saved coins from localStorage:', saved);
+                    const result = saved ? JSON.parse(saved) : null;
+                    console.log('💾 Parsed result:', result);
+                    return result;
                 } catch (e) {
+                    console.error('❌ Error loading saved coins:', e);
                     return null;
                 }
             }
 
             saveCoins() {
                 try {
+                    console.log('💾 Saving coins to localStorage:', this.overlaySymbols);
                     localStorage.setItem('cryptoOverlayCoins', JSON.stringify(this.overlaySymbols));
+                    console.log('💾 Successfully saved coins to localStorage');
+                    
+                    // Verify the save
+                    const verify = localStorage.getItem('cryptoOverlayCoins');
+                    console.log('💾 Verification read:', verify);
                 } catch (e) {
-                    console.warn('Could not save crypto coins to localStorage');
+                    console.error('❌ Could not save crypto coins to localStorage:', e);
                 }
             }
 
