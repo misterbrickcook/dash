@@ -11450,11 +11450,22 @@
                 
                 // Force render after a short delay to ensure DOM is ready
                 setTimeout(() => {
+                    this.clearAllStaticItems(); // NEW: Clear any static items first
                     this.renderCoinItems();
                     this.setupEventListeners();
                     this.updatePrices();
                     this.startAutoUpdate();
                 }, 500);
+            }
+
+            clearAllStaticItems() {
+                // Remove ANY crypto-overlay-item that doesn't have the dynamic-coin-item class
+                const allItems = document.querySelectorAll('.crypto-overlay-item:not(.dynamic-coin-item)');
+                console.log(`🧹 Clearing ${allItems.length} static coin items...`);
+                allItems.forEach((item, index) => {
+                    console.log(`🗑️ Removing static item ${index + 1}:`, item);
+                    item.remove();
+                });
             }
 
             setupEventListeners() {
@@ -11543,9 +11554,9 @@
                 
                 this.overlaySymbols.forEach((symbol, index) => {
                     const item = document.createElement('div');
-                    item.className = 'crypto-overlay-item';
+                    item.className = 'crypto-overlay-item dynamic-coin-item'; // Add marker class
                     item.setAttribute('data-symbol', symbol);
-                    item.style.backgroundColor = index % 2 === 0 ? '#f0f0f0' : '#ffffff'; // Debug coloring
+                    item.style.border = '2px solid red'; // Very visible debug border
                     
                     const displaySymbol = symbol === 'kBONK' ? 'BONK' : symbol;
                     
