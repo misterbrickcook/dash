@@ -273,6 +273,54 @@
             gap: 12px;
         }
         
+        /* Action buttons container */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top center;
+        }
+        
+        /* Collapsed state - hide action buttons */
+        .quick-actions-bar.collapsed .action-buttons {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.8);
+            pointer-events: none;
+        }
+        
+        /* Expanded state - show action buttons */
+        .quick-actions-bar.expanded .action-buttons {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        
+        /* Toggle button special styling */
+        .toggle-btn {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        /* When expanded, toggle button can have different styling */
+        .quick-actions-bar.expanded .toggle-btn {
+            background: var(--accent-primary);
+            color: white;
+        }
+        
+        /* Stagger animation for individual buttons */
+        .action-buttons .quick-action-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .quick-actions-bar.expanded .action-buttons .quick-action-btn:nth-child(1) { transition-delay: 0.05s; }
+        .quick-actions-bar.expanded .action-buttons .quick-action-btn:nth-child(2) { transition-delay: 0.1s; }
+        .quick-actions-bar.expanded .action-buttons .quick-action-btn:nth-child(3) { transition-delay: 0.15s; }
+        .quick-actions-bar.expanded .action-buttons .quick-action-btn:nth-child(4) { transition-delay: 0.2s; }
+        .quick-actions-bar.expanded .action-buttons .quick-action-btn:nth-child(5) { transition-delay: 0.25s; }
+        .quick-actions-bar.expanded .action-buttons .quick-action-btn:nth-child(6) { transition-delay: 0.3s; }
+        .quick-actions-bar.expanded .action-buttons .quick-action-btn:nth-child(7) { transition-delay: 0.35s; }
+        
         .quick-action-btn {
             width: 56px;
             height: 56px;
@@ -4533,34 +4581,42 @@
         </section>
 
         <!-- === SMART QUICK ACTIONS BAR === -->
-        <div class="quick-actions-bar">
-            <button class="quick-action-btn" data-tooltip="Quick Add Todo" onclick="QuickActions.addTodo()">
-                <i data-lucide="plus"></i>
+        <div class="quick-actions-bar collapsed" id="quick-actions-bar">
+            <!-- Toggle Button - Always visible -->
+            <button class="quick-action-btn toggle-btn" data-tooltip="Quick Actions" onclick="QuickActions.toggle()" id="quick-actions-toggle">
+                <i data-lucide="zap"></i>
             </button>
             
-            <button id="timer-quick-btn" class="quick-action-btn" data-tooltip="25 Min Timer | Right-click: Reset" onclick="QuickActions.toggleTimer()" oncontextmenu="QuickActions.resetTimer(); return false;">
-                <i data-lucide="play"></i>
-            </button>
-            
-            <button class="quick-action-btn" data-tooltip="Add Journal Entry" onclick="QuickActions.addJournalEntry()">
-                <i data-lucide="book-open"></i>
-            </button>
-            
-            <button class="quick-action-btn" data-tooltip="Add Wiki Entry" onclick="QuickActions.addWikiEntry()">
-                <i data-lucide="file-text"></i>
-            </button>
-            
-            <button class="quick-action-btn" data-tooltip="Add Trade" onclick="QuickActions.addTrade()">
-                <i data-lucide="trending-up"></i>
-            </button>
-            
-            <button class="quick-action-btn" data-tooltip="Settings" onclick="QuickActions.openSettings()">
-                <i data-lucide="settings"></i>
-            </button>
-            
-            <button class="quick-action-btn" data-tooltip="Logout" onclick="QuickActions.logout()">
-                <i data-lucide="log-out"></i>
-            </button>
+            <!-- Action Buttons - Hidden when collapsed -->
+            <div class="action-buttons" id="action-buttons">
+                <button class="quick-action-btn" data-tooltip="Quick Add Todo" onclick="QuickActions.addTodo()">
+                    <i data-lucide="plus"></i>
+                </button>
+                
+                <button id="timer-quick-btn" class="quick-action-btn" data-tooltip="25 Min Timer | Right-click: Reset" onclick="QuickActions.toggleTimer()" oncontextmenu="QuickActions.resetTimer(); return false;">
+                    <i data-lucide="play"></i>
+                </button>
+                
+                <button class="quick-action-btn" data-tooltip="Add Journal Entry" onclick="QuickActions.addJournalEntry()">
+                    <i data-lucide="book-open"></i>
+                </button>
+                
+                <button class="quick-action-btn" data-tooltip="Add Wiki Entry" onclick="QuickActions.addWikiEntry()">
+                    <i data-lucide="file-text"></i>
+                </button>
+                
+                <button class="quick-action-btn" data-tooltip="Add Trade" onclick="QuickActions.addTrade()">
+                    <i data-lucide="trending-up"></i>
+                </button>
+                
+                <button class="quick-action-btn" data-tooltip="Settings" onclick="QuickActions.openSettings()">
+                    <i data-lucide="settings"></i>
+                </button>
+                
+                <button class="quick-action-btn" data-tooltip="Logout" onclick="QuickActions.logout()">
+                    <i data-lucide="log-out"></i>
+                </button>
+            </div>
         </div>
 
         <!-- === SETTINGS TAB === -->
@@ -12553,6 +12609,47 @@
                     window.Auth.handleLogout();
                 }
                 // User will be logged out
+            }
+            
+            static toggle() {
+                const bar = document.getElementById('quick-actions-bar');
+                const toggleBtn = document.getElementById('quick-actions-toggle');
+                const toggleIcon = toggleBtn.querySelector('i');
+                
+                if (bar.classList.contains('collapsed')) {
+                    // Expand
+                    bar.classList.remove('collapsed');
+                    bar.classList.add('expanded');
+                    
+                    // Update toggle button icon and tooltip
+                    if (toggleIcon) {
+                        toggleIcon.setAttribute('data-lucide', 'x');
+                        if (window.lucide) {
+                            const newIcon = document.createElement('i');
+                            newIcon.setAttribute('data-lucide', 'x');
+                            toggleIcon.parentNode.replaceChild(newIcon, toggleIcon);
+                            window.lucide.createIcons();
+                        }
+                    }
+                    toggleBtn.setAttribute('data-tooltip', 'Close Quick Actions');
+                    
+                } else {
+                    // Collapse
+                    bar.classList.remove('expanded');
+                    bar.classList.add('collapsed');
+                    
+                    // Update toggle button icon and tooltip
+                    if (toggleIcon) {
+                        toggleIcon.setAttribute('data-lucide', 'zap');
+                        if (window.lucide) {
+                            const newIcon = document.createElement('i');
+                            newIcon.setAttribute('data-lucide', 'zap');
+                            toggleIcon.parentNode.replaceChild(newIcon, toggleIcon);
+                            window.lucide.createIcons();
+                        }
+                    }
+                    toggleBtn.setAttribute('data-tooltip', 'Quick Actions');
+                }
             }
             
             static toggleMorningRoutine() {
