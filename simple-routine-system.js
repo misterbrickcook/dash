@@ -279,16 +279,27 @@ class SimpleRoutineManager {
         // Update UI
         this.updateUI();
 
-        // Always update counters (for correct count), but animate only on completion
+        // Always update counters (for correct count), but animate only on full routine completion
         if (window.SimpleCounters) {
             if (isChecked) {
-                // Completion: Update + Animate
-                if (routineType === 'morning') {
-                    window.SimpleCounters.onMorningRoutineChanged();
-                } else if (routineType === 'evening') {
-                    window.SimpleCounters.onEveningRoutineChanged();
+                // Check if routine is now fully completed
+                const todayData = this.routineData[this.today];
+                const routineChecked = Object.values(todayData[routineType]).filter(Boolean).length;
+                const routineTotal = Object.keys(todayData[routineType]).length;
+                const isRoutineCompleted = routineChecked === routineTotal;
+                
+                if (isRoutineCompleted) {
+                    // Full routine completion: Update + Animate
+                    if (routineType === 'morning') {
+                        window.SimpleCounters.onMorningRoutineChanged();
+                    } else if (routineType === 'evening') {
+                        window.SimpleCounters.onEveningRoutineChanged();
+                    } else {
+                        window.SimpleCounters.onRoutineChanged();
+                    }
                 } else {
-                    window.SimpleCounters.onRoutineChanged();
+                    // Partial completion: Update only, no animation
+                    window.SimpleCounters.updateAllCounters();
                 }
             } else {
                 // Uncheck: Update only, no animation
