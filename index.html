@@ -11484,18 +11484,141 @@
                 }
             }
 
-            init() {
-                console.log('🔗 Initializing Crypto Price Widget...');
+            async init() {
+                console.log('🔗 Initializing New Crypto Price Widget...');
                 console.log('📋 Current overlay symbols:', this.overlaySymbols);
                 
                 // Force render after a short delay to ensure DOM is ready
-                setTimeout(() => {
-                    this.clearAllStaticItems(); // NEW: Clear any static items first
-                    this.renderCoinItems();
-                    this.setupEventListeners();
-                    this.updatePrices();
-                    this.startAutoUpdate();
+                setTimeout(async () => {
+                    try {
+                        await this.loadAllCoinsFromHyperliquid();
+                        this.clearAllStaticItems();
+                        this.renderCoinItems();
+                        this.setupEventListeners();
+                        this.setupSearchFunctionality();
+                        await this.updatePricesAndCharts();
+                        this.startAutoUpdate();
+                    } catch (error) {
+                        console.error('❌ Error initializing crypto widget:', error);
+                    }
                 }, 500);
+            }
+
+            async loadAllCoinsFromHyperliquid() {
+                console.log('🔄 Loading all coins from Hyperliquid...');
+                
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'meta' })
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    this.allSymbols = data.universe
+                        .filter(coin => !coin.isDelisted)
+                        .map(coin => coin.name)
+                        .sort();
+
+                    console.log(`✅ Loaded ${this.allSymbols.length} coins from Hyperliquid`);
+                    
+                    // Get current prices for all coins
+                    await this.loadCurrentPrices();
+                    
+                } catch (error) {
+                    console.error('❌ Error loading coins:', error);
+                    // Fallback to basic coins if API fails
+                    this.allSymbols = ['BTC', 'ETH', 'SOL', 'ENA', 'PENGU', 'kBONK', 'FARTCOIN'];
+                }
+            }
+
+            async loadCurrentPrices() {
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'allMids' })
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    this.currentPrices = data;
+                    
+                    console.log(`✅ Loaded current prices for ${Object.keys(data).length} coins`);
+                } catch (error) {
+                    console.error('❌ Error loading current prices:', error);
+                }
+            }
+
+            async load24hPriceChange(symbol) {
+                try {
+                    const now = Date.now();
+                    const yesterday = now - (24 * 60 * 60 * 1000);
+                    
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'candleSnapshot',
+                            req: {
+                                coin: symbol,
+                                interval: '1h',
+                                startTime: yesterday,
+                                endTime: now
+                            }
+                        })
+                    });
+
+                    if (!response.ok) return null;
+                    
+                    const data = await response.json();
+                    if (data && data.length > 0) {
+                        const oldPrice = parseFloat(data[0].o);
+                        const currentPrice = parseFloat(this.currentPrices[symbol] || 0);
+                        
+                        if (oldPrice && currentPrice) {
+                            return ((currentPrice - oldPrice) / oldPrice) * 100;
+                        }
+                    }
+                    
+                    return null;
+                } catch (error) {
+                    console.warn(`Could not load 24h data for ${symbol}:`, error);
+                    return null;
+                }
+            }
+
+            async load7DayChart(symbol) {
+                try {
+                    const now = Date.now();
+                    const weekAgo = now - (7 * 24 * 60 * 60 * 1000);
+                    
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'candleSnapshot',
+                            req: {
+                                coin: symbol,
+                                interval: '4h',
+                                startTime: weekAgo,
+                                endTime: now
+                            }
+                        })
+                    });
+
+                    if (!response.ok) return [];
+                    
+                    const data = await response.json();
+                    return data.map(candle => parseFloat(candle.c));
+                    
+                } catch (error) {
+                    console.warn(`Could not load 7d chart for ${symbol}:`, error);
+                    return [];
+                }
             }
 
             clearAllStaticItems() {
@@ -11542,7 +11665,12 @@
                     settingsBtn.style.border = '2px solid blue'; // Debug styling
                     settingsBtn.addEventListener('click', () => {
                         console.log('⚙️ Settings button clicked!');
-                        settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
+                        const isVisible = settingsPanel.style.display !== 'none';
+                        settingsPanel.style.display = isVisible ? 'none' : 'block';
+                        
+                        if (!isVisible) {
+                            this.renderAvailableCoins();
+                        }
                         console.log('📋 Settings panel display:', settingsPanel.style.display);
                     });
                 } else {
@@ -11593,7 +11721,7 @@
                 this.updateChartSelector();
             }
 
-            renderCoinItems() {
+            async renderCoinItems() {
                 const container = document.getElementById('crypto-overlay-items');
                 if (!container) {
                     console.error('❌ crypto-overlay-items container not found');
@@ -11601,34 +11729,104 @@
                 }
 
                 console.log('🔄 Rendering coins:', this.overlaySymbols);
-                console.log('📦 Container found:', container);
-                console.log('📦 Container current innerHTML:', container.innerHTML);
-                
                 container.innerHTML = '';
                 
-                this.overlaySymbols.forEach((symbol, index) => {
+                for (const symbol of this.overlaySymbols) {
                     const item = document.createElement('div');
-                    item.className = 'crypto-overlay-item dynamic-coin-item'; // Add marker class
+                    item.className = 'crypto-overlay-item dynamic-coin-item';
                     item.setAttribute('data-symbol', symbol);
-                    item.style.border = '2px solid red'; // Very visible debug border
                     
                     const displaySymbol = symbol === 'kBONK' ? 'BONK' : symbol;
+                    const currentPrice = this.currentPrices[symbol];
+                    const formattedPrice = currentPrice ? this.formatPrice(currentPrice) : '$--';
                     
                     item.innerHTML = `
-                        <span class="crypto-overlay-symbol">${displaySymbol}</span>
+                        <div class="crypto-overlay-left">
+                            <canvas class="crypto-mini-chart" data-symbol="${symbol}" width="40" height="20"></canvas>
+                            <span class="crypto-overlay-symbol">${displaySymbol}</span>
+                        </div>
                         <div class="crypto-overlay-data">
-                            <span class="crypto-overlay-price">$--</span>
+                            <span class="crypto-overlay-price">${formattedPrice}</span>
                             <span class="crypto-overlay-change">Loading...</span>
                         </div>
                     `;
                     
                     container.appendChild(item);
-                    console.log(`➕ Added coin item for ${symbol}:`, item);
+                    
+                    // Load 7-day chart for this coin
+                    this.loadAndRenderMiniChart(symbol);
+                    
+                    // Load 24h price change
+                    this.load24hPriceChange(symbol).then(change => {
+                        if (change !== null) {
+                            this.updatePriceChange(symbol, change);
+                        }
+                    });
+                }
+                
+                console.log(`✅ Rendered ${this.overlaySymbols.length} coin items with mini charts`);
+            }
+
+            async loadAndRenderMiniChart(symbol) {
+                const canvas = document.querySelector(`canvas[data-symbol="${symbol}"]`);
+                if (!canvas) return;
+
+                const chartData = await this.load7DayChart(symbol);
+                if (chartData.length > 0) {
+                    this.renderMiniChart(canvas, chartData);
+                }
+            }
+
+            renderMiniChart(canvas, priceData) {
+                const ctx = canvas.getContext('2d');
+                const width = canvas.width;
+                const height = canvas.height;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, width, height);
+                
+                if (priceData.length < 2) return;
+                
+                const maxPrice = Math.max(...priceData);
+                const minPrice = Math.min(...priceData);
+                const priceRange = maxPrice - minPrice;
+                
+                if (priceRange === 0) return;
+                
+                // Determine line color based on trend
+                const firstPrice = priceData[0];
+                const lastPrice = priceData[priceData.length - 1];
+                const isPositive = lastPrice >= firstPrice;
+                
+                ctx.strokeStyle = isPositive ? '#10b981' : '#ef4444';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                
+                priceData.forEach((price, index) => {
+                    const x = (index / (priceData.length - 1)) * (width - 4) + 2;
+                    const y = height - 2 - ((price - minPrice) / priceRange) * (height - 4);
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
                 });
                 
-                console.log('📦 Container final innerHTML:', container.innerHTML);
-                console.log(`✅ Rendered ${this.overlaySymbols.length} coin items`);
-                console.log('🎯 All children in container:', container.children);
+                ctx.stroke();
+            }
+
+            updatePriceChange(symbol, changePercent) {
+                const item = document.querySelector(`[data-symbol="${symbol}"]`);
+                if (!item) return;
+
+                const changeElement = item.querySelector('.crypto-overlay-change');
+                if (!changeElement) return;
+
+                const isPositive = changePercent >= 0;
+                const sign = isPositive ? '+' : '';
+                changeElement.textContent = `${sign}${changePercent.toFixed(2)}%`;
+                changeElement.className = `crypto-overlay-change ${isPositive ? 'positive' : 'negative'}`;
             }
 
             updateChartSelector() {
@@ -11797,51 +11995,114 @@
                 this.statusText.textContent = message;
             }
 
-            async updatePrices() {
-                console.log('🔄 Updating crypto prices...');
-                
-                const data = await this.fetchPrices();
-                if (!data) return;
+            setupSearchFunctionality() {
+                const searchInput = document.getElementById('crypto-search-input');
+                if (!searchInput) return;
 
-                this.updateStatus('connected', 'Live');
+                searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    this.filterAvailableCoins(query);
+                });
+            }
 
-                // Update each symbol
-                this.allSymbols.forEach(symbol => {
-                    const price = parseFloat(data[symbol]);
-                    if (!isNaN(price)) {
-                        const previousPrice = this.previousPrices[symbol];
-                        const change = this.calculateChange(price, previousPrice);
-                        
-                        // Store price history for charts
-                        if (!this.priceHistory[symbol]) {
-                            this.priceHistory[symbol] = [];
-                        }
-                        this.priceHistory[symbol].push(price);
-                        
-                        // Keep only last 20 prices for mini chart
-                        if (this.priceHistory[symbol].length > 20) {
-                            this.priceHistory[symbol].shift();
-                        }
-                        
-                        this.updateTile(symbol, price, change);
-                        this.previousPrices[symbol] = price;
-                    }
+            renderAvailableCoins(query = '') {
+                const container = document.getElementById('crypto-available-coins');
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                const filteredCoins = this.allSymbols
+                    .filter(symbol => symbol.toLowerCase().includes(query.toLowerCase()))
+                    .slice(0, 50); // Limit to 50 results for performance
+
+                filteredCoins.forEach(symbol => {
+                    const isAdded = this.overlaySymbols.includes(symbol);
+                    const currentPrice = this.currentPrices[symbol];
+                    const displaySymbol = symbol === 'kBONK' ? 'BONK' : symbol;
+                    
+                    const option = document.createElement('div');
+                    option.className = `crypto-coin-option ${isAdded ? 'added' : ''}`;
+                    option.innerHTML = `
+                        <div class="crypto-coin-info">
+                            <div class="crypto-coin-name">${displaySymbol}</div>
+                            <div class="crypto-coin-price">${currentPrice ? this.formatPrice(currentPrice) : 'No price'}</div>
+                        </div>
+                        <button class="crypto-add-btn ${isAdded ? 'added' : ''}" data-symbol="${symbol}">
+                            ${isAdded ? 'Remove' : 'Add'}
+                        </button>
+                    `;
+
+                    const addBtn = option.querySelector('.crypto-add-btn');
+                    addBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleCoinInOverlay(symbol);
+                    });
+
+                    container.appendChild(option);
                 });
 
-                // Update chart if visible
-                if (this.chartVisible) {
-                    const chartSelect = document.querySelector('.crypto-chart-select');
-                    if (chartSelect && chartSelect.value) {
-                        this.updateChart(chartSelect.value);
-                    }
+                console.log(`📋 Rendered ${filteredCoins.length} available coins`);
+            }
+
+            filterAvailableCoins(query) {
+                this.renderAvailableCoins(query);
+            }
+
+            toggleCoinInOverlay(symbol) {
+                if (this.overlaySymbols.includes(symbol)) {
+                    // Remove coin
+                    this.overlaySymbols = this.overlaySymbols.filter(s => s !== symbol);
+                    console.log(`➖ Removed ${symbol} from overlay`);
+                } else {
+                    // Add coin
+                    this.overlaySymbols.push(symbol);
+                    console.log(`➕ Added ${symbol} to overlay`);
                 }
 
-                console.log('✅ Crypto prices updated successfully');
+                this.saveCoins();
+                this.renderCoinItems();
+                this.renderAvailableCoins(document.getElementById('crypto-search-input')?.value || '');
+            }
+
+            async updatePricesAndCharts() {
+                console.log('🔄 Updating crypto prices and charts...');
+                
+                try {
+                    await this.loadCurrentPrices();
+                    
+                    // Update existing coin displays
+                    for (const symbol of this.overlaySymbols) {
+                        const currentPrice = this.currentPrices[symbol];
+                        if (currentPrice) {
+                            this.updateCoinPrice(symbol, currentPrice);
+                        }
+
+                        // Refresh 24h change
+                        const change24h = await this.load24hPriceChange(symbol);
+                        if (change24h !== null) {
+                            this.updatePriceChange(symbol, change24h);
+                        }
+                    }
+
+                    console.log('✅ Crypto prices and charts updated successfully');
+                } catch (error) {
+                    console.error('❌ Error updating prices:', error);
+                }
+            }
+
+            updateCoinPrice(symbol, price) {
+                const item = document.querySelector(`[data-symbol="${symbol}"]`);
+                if (!item) return;
+
+                const priceElement = item.querySelector('.crypto-overlay-price');
+                if (priceElement) {
+                    priceElement.textContent = this.formatPrice(price);
+                }
             }
 
             startAutoUpdate() {
                 this.intervalId = setInterval(() => {
-                    this.updatePrices();
+                    this.updatePricesAndCharts();
                 }, this.updateInterval);
                 
                 console.log(`⏰ Auto-update started (${this.updateInterval / 1000}s interval)`);
