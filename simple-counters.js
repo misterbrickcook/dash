@@ -193,11 +193,66 @@ class SimpleCounters {
             // Add success animation
             tile.classList.add('success-animation');
             
+            // Create confetti particles
+            this.createConfetti(tile);
+            
             // Remove animation class after animation completes
             setTimeout(() => {
                 tile.classList.remove('success-animation');
             }, 600);
+        }
+    }
+    
+    createConfetti(container) {
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3'];
+        const particles = 12;
+        
+        for (let i = 0; i < particles; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'confetti-particle';
             
+            // Random color
+            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Random size
+            const size = Math.random() * 6 + 4;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            
+            // Position at center of container
+            const rect = container.getBoundingClientRect();
+            particle.style.position = 'fixed';
+            particle.style.left = (rect.left + rect.width / 2) + 'px';
+            particle.style.top = (rect.top + rect.height / 2) + 'px';
+            particle.style.borderRadius = '50%';
+            particle.style.pointerEvents = 'none';
+            particle.style.zIndex = '9999';
+            
+            // Random velocity
+            const angle = (Math.PI * 2 * i) / particles;
+            const velocity = Math.random() * 50 + 30;
+            const vx = Math.cos(angle) * velocity;
+            const vy = Math.sin(angle) * velocity - Math.random() * 20;
+            
+            // Add to body for fixed positioning
+            document.body.appendChild(particle);
+            
+            // Animate
+            particle.animate([
+                { 
+                    transform: 'translate(0, 0) rotate(0deg)',
+                    opacity: 1 
+                },
+                { 
+                    transform: `translate(${vx}px, ${vy + 80}px) rotate(${360 + Math.random() * 720}deg)`,
+                    opacity: 0 
+                }
+            ], {
+                duration: 800 + Math.random() * 400,
+                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+            }).onfinish = () => {
+                particle.remove();
+            };
         }
     }
 
@@ -274,6 +329,16 @@ class SimpleCounters {
     // Manual debug trigger
     async debugCounters() {
         await this.updateAllCounters();
+    }
+    
+    // Test confetti animation
+    testConfetti() {
+        console.log('🎉 Testing confetti animations on all counters...');
+        for (let i = 0; i < 4; i++) {
+            setTimeout(() => {
+                this.triggerSuccessAnimation(i);
+            }, i * 500);
+        }
     }
 
     async getSolDailyChange(currentBalance) {
