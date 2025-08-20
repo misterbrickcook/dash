@@ -3167,6 +3167,13 @@
             gap: 0.25rem;
         }
 
+        /* DEBUG: Make buttons very visible */
+        .crypto-settings-btn, .crypto-chart-btn, .crypto-toggle-btn {
+            background: rgba(255, 0, 0, 0.1) !important;
+            min-width: 24px !important;
+            min-height: 24px !important;
+        }
+
         .crypto-overlay-title {
             font-weight: 600;
             font-size: 0.7rem;
@@ -11475,6 +11482,8 @@
                     toggleBtn.addEventListener('click', () => {
                         this.overlay.classList.toggle('collapsed');
                     });
+                } else {
+                    console.error('❌ Toggle button not found');
                 }
 
                 // Chart toggle
@@ -11483,6 +11492,8 @@
                     chartBtn.addEventListener('click', () => {
                         this.toggleChart();
                     });
+                } else {
+                    console.error('❌ Chart button not found');
                 }
 
                 // Settings toggle
@@ -11490,14 +11501,24 @@
                 const settingsPanel = document.querySelector('.crypto-settings-panel');
                 const settingsClose = document.querySelector('.crypto-settings-close');
                 
+                console.log('🔧 Settings button found:', settingsBtn);
+                console.log('🔧 Settings panel found:', settingsPanel);
+                console.log('🔧 Settings close found:', settingsClose);
+                
                 if (settingsBtn && settingsPanel) {
+                    settingsBtn.style.border = '2px solid blue'; // Debug styling
                     settingsBtn.addEventListener('click', () => {
+                        console.log('⚙️ Settings button clicked!');
                         settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
+                        console.log('📋 Settings panel display:', settingsPanel.style.display);
                     });
+                } else {
+                    console.error('❌ Settings button or panel not found');
                 }
 
                 if (settingsClose && settingsPanel) {
                     settingsClose.addEventListener('click', () => {
+                        console.log('❌ Settings close clicked!');
                         settingsPanel.style.display = 'none';
                     });
                 }
@@ -11807,13 +11828,22 @@
             // Wait a bit for other components to load, especially for Lucide icons
             setTimeout(() => {
                 console.log('🚀 Starting Crypto Widget Initialization...');
+                
+                // Initialize Lucide icons first
+                if (window.lucide) {
+                    console.log('🎨 Initializing Lucide icons...');
+                    lucide.createIcons();
+                } else {
+                    console.warn('⚠️ Lucide not loaded yet');
+                }
+                
                 try {
                     window.cryptoPriceWidget = new CryptoPriceWidget();
                     console.log('✅ Crypto Widget initialized successfully');
                 } catch (error) {
                     console.error('❌ Error initializing Crypto Widget:', error);
                 }
-            }, 2000);
+            }, 2500);
         });
         
         // === GLOBAL GOAL EDIT MODAL EVENT LISTENERS SETUP ===
