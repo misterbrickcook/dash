@@ -4868,6 +4868,16 @@
                         window.ResourceManager ? window.ResourceManager.loadResources() : Promise.resolve()
                     ]);
                     
+                    // Initialize crypto widget after authentication
+                    try {
+                        if (!window.cryptoPriceWidget) {
+                            window.cryptoPriceWidget = new CryptoPriceWidget();
+                            console.log('✅ Crypto Widget initialized after authentication');
+                        }
+                    } catch (error) {
+                        console.error('❌ Error initializing Crypto Widget:', error);
+                    }
+                    
                     // Initialize routine system FIRST, then counters to avoid race condition
                     if (window.simpleRoutineManager) {
                         console.log('🔄 Re-initializing routine manager after login...');
@@ -12320,12 +12330,7 @@
                     console.warn('⚠️ Lucide not loaded yet');
                 }
                 
-                try {
-                    window.cryptoPriceWidget = new CryptoPriceWidget();
-                    console.log('✅ Crypto Widget initialized successfully');
-                } catch (error) {
-                    console.error('❌ Error initializing Crypto Widget:', error);
-                }
+                // Crypto widget is now initialized after authentication in showDashboard()
             }, 200);
         });
         
