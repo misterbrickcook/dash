@@ -276,7 +276,7 @@
         .quick-action-btn {
             width: 56px;
             height: 56px;
-            background: var(--bg-primary);
+            background: white;
             border: 2px solid var(--border-primary);
             border-radius: 50%;
             display: flex;
@@ -341,19 +341,19 @@
             opacity: 1;
         }
         
-        /* Special styling for primary action */
+        /* All buttons have consistent white background */
         .quick-action-btn.primary {
-            background: var(--accent-primary);
-            color: white;
-            border-color: var(--accent-primary);
+            background: white;
+            color: var(--text-primary);
+            border-color: var(--border-primary);
         }
         
         .quick-action-btn.primary::before {
-            background: var(--text-primary);
+            background: var(--accent-primary);
         }
         
         .quick-action-btn.primary::after {
-            border-right-color: var(--text-primary);
+            border-right-color: var(--accent-primary);
         }
         
         /* Responsive - hide on mobile */
@@ -4539,24 +4539,24 @@
 
         <!-- === SMART QUICK ACTIONS BAR === -->
         <div class="quick-actions-bar">
-            <button class="quick-action-btn primary" data-tooltip="Quick Add Todo" onclick="QuickActions.addTodo()">
+            <button class="quick-action-btn" data-tooltip="Quick Add Todo" onclick="QuickActions.addTodo()">
                 <i data-lucide="plus"></i>
             </button>
             
-            <button class="quick-action-btn" data-tooltip="Start Timer" onclick="QuickActions.startTimer()">
-                <i data-lucide="play"></i>
+            <button class="quick-action-btn" data-tooltip="Pomodoro Timer" onclick="QuickActions.startTimer()">
+                <i data-lucide="timer"></i>
             </button>
             
-            <button class="quick-action-btn" data-tooltip="Journal Entry" onclick="QuickActions.addJournalEntry()">
+            <button class="quick-action-btn" data-tooltip="Add Journal Entry" onclick="QuickActions.addJournalEntry()">
                 <i data-lucide="book-open"></i>
             </button>
             
-            <button class="quick-action-btn" data-tooltip="Mark Morning Routine" onclick="QuickActions.toggleMorningRoutine()">
-                <i data-lucide="sunrise"></i>
+            <button class="quick-action-btn" data-tooltip="Add Wiki Entry" onclick="QuickActions.addWikiEntry()">
+                <i data-lucide="file-text"></i>
             </button>
             
-            <button class="quick-action-btn" data-tooltip="Mark Evening Routine" onclick="QuickActions.toggleEveningRoutine()">
-                <i data-lucide="sunset"></i>
+            <button class="quick-action-btn" data-tooltip="Add Trade" onclick="QuickActions.addTrade()">
+                <i data-lucide="trending-up"></i>
             </button>
         </div>
 
@@ -12451,6 +12451,34 @@
                 }, 300);
                 
                 this.showNotification('📖 Journal geöffnet', 'info');
+            }
+            
+            static addWikiEntry() {
+                // Switch to wiki tab  
+                switchTab('tab-wiki');
+                
+                // Show wiki add modal
+                setTimeout(() => {
+                    if (window.Wiki && typeof window.Wiki.showAddModal === 'function') {
+                        window.Wiki.showAddModal();
+                    }
+                }, 300);
+                
+                this.showNotification('📄 Wiki Entry erstellen', 'info');
+            }
+            
+            static addTrade() {
+                // Switch to trades tab
+                switchTab('tab-trades');
+                
+                // Show trade add modal
+                setTimeout(() => {
+                    if (window.TradeManager && typeof window.TradeManager.showAddTradeModal === 'function') {
+                        window.TradeManager.showAddTradeModal();
+                    }
+                }, 300);
+                
+                this.showNotification('📈 Trade hinzufügen', 'info');
             }
             
             static toggleMorningRoutine() {
