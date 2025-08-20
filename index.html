@@ -3167,11 +3167,13 @@
             gap: 0.25rem;
         }
 
-        /* DEBUG: Make buttons very visible */
-        .crypto-settings-btn, .crypto-chart-btn, .crypto-toggle-btn {
-            background: rgba(255, 0, 0, 0.1) !important;
-            min-width: 24px !important;
-            min-height: 24px !important;
+        .crypto-settings-btn, .crypto-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
         }
 
         .crypto-overlay-title {
@@ -3182,24 +3184,10 @@
             color: var(--text-secondary);
         }
 
-        .crypto-toggle-btn, .crypto-settings-btn, .crypto-chart-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-            color: var(--text-secondary);
-        }
-
-        .crypto-toggle-btn:hover, .crypto-settings-btn:hover, .crypto-chart-btn:hover {
+        .crypto-settings-btn:hover, .crypto-toggle-btn:hover {
             background: rgba(0, 0, 0, 0.05);
         }
 
-        .crypto-chart-btn.active {
-            color: #059669;
-            background: rgba(5, 150, 105, 0.1);
-        }
 
         .crypto-overlay-content {
             padding: 0.5rem;
@@ -3460,9 +3448,6 @@
         <div class="crypto-overlay-header">
             <span class="crypto-overlay-title">Crypto</span>
             <div class="crypto-header-buttons">
-                <button class="crypto-chart-btn" title="Toggle chart">
-                    <i data-lucide="trending-up" style="width: 12px; height: 12px;"></i>
-                </button>
                 <button class="crypto-settings-btn" title="Manage coins">
                     <i data-lucide="settings" style="width: 12px; height: 12px;"></i>
                 </button>
@@ -11460,7 +11445,6 @@
                 this.updateInterval = 60000; // 60 seconds
                 this.currentPrices = {};
                 this.price24hAgo = {};
-                this.charts = {}; // Mini charts for each coin
                 this.intervalId = null;
                 this.overlay = document.querySelector('.crypto-overlay');
                 
@@ -11642,15 +11626,6 @@
                     console.error('❌ Toggle button not found');
                 }
 
-                // Chart toggle
-                const chartBtn = document.querySelector('.crypto-chart-btn');
-                if (chartBtn) {
-                    chartBtn.addEventListener('click', () => {
-                        this.toggleChart();
-                    });
-                } else {
-                    console.error('❌ Chart button not found');
-                }
 
                 // Settings toggle
                 const settingsBtn = document.querySelector('.crypto-settings-btn');
@@ -11662,7 +11637,6 @@
                 console.log('🔧 Settings close found:', settingsClose);
                 
                 if (settingsBtn && settingsPanel) {
-                    settingsBtn.style.border = '2px solid blue'; // Debug styling
                     settingsBtn.addEventListener('click', () => {
                         console.log('⚙️ Settings button clicked!');
                         const isVisible = settingsPanel.style.display !== 'none';
@@ -11698,15 +11672,6 @@
                     }
                 });
 
-                // Chart selector
-                const chartSelect = document.querySelector('.crypto-chart-select');
-                if (chartSelect) {
-                    chartSelect.addEventListener('change', () => {
-                        if (this.chartVisible) {
-                            this.updateChart(chartSelect.value);
-                        }
-                    });
-                }
             }
 
             toggleCoin(symbol, enabled) {
@@ -11718,7 +11683,6 @@
                 
                 this.saveCoins();
                 this.renderCoinItems();
-                this.updateChartSelector();
             }
 
             async renderCoinItems() {
@@ -11829,85 +11793,7 @@
                 changeElement.className = `crypto-overlay-change ${isPositive ? 'positive' : 'negative'}`;
             }
 
-            updateChartSelector() {
-                const chartSelect = document.querySelector('.crypto-chart-select');
-                if (!chartSelect) return;
 
-                chartSelect.innerHTML = '';
-                this.overlaySymbols.forEach(symbol => {
-                    const option = document.createElement('option');
-                    option.value = symbol;
-                    option.textContent = symbol === 'kBONK' ? 'BONK' : symbol;
-                    chartSelect.appendChild(option);
-                });
-            }
-
-            toggleChart() {
-                const chartContainer = document.querySelector('.crypto-chart-container');
-                const chartBtn = document.querySelector('.crypto-chart-btn');
-                
-                if (!chartContainer || !chartBtn) return;
-
-                this.chartVisible = !this.chartVisible;
-                chartContainer.style.display = this.chartVisible ? 'block' : 'none';
-                chartBtn.classList.toggle('active', this.chartVisible);
-
-                if (this.chartVisible) {
-                    this.updateChartSelector();
-                    setTimeout(() => this.initChart(), 100);
-                }
-            }
-
-            initChart() {
-                const canvas = document.getElementById('crypto-mini-chart');
-                const select = document.querySelector('.crypto-chart-select');
-                
-                if (!canvas || !select) return;
-
-                const ctx = canvas.getContext('2d');
-                const symbol = select.value || this.overlaySymbols[0];
-                
-                this.updateChart(symbol);
-            }
-
-            updateChart(symbol) {
-                const canvas = document.getElementById('crypto-mini-chart');
-                if (!canvas || !this.priceHistory[symbol]) return;
-
-                const ctx = canvas.getContext('2d');
-                const width = canvas.width;
-                const height = canvas.height;
-                
-                // Clear canvas
-                ctx.clearRect(0, 0, width, height);
-                
-                const prices = this.priceHistory[symbol];
-                if (prices.length < 2) return;
-
-                const maxPrice = Math.max(...prices);
-                const minPrice = Math.min(...prices);
-                const priceRange = maxPrice - minPrice;
-                
-                if (priceRange === 0) return;
-
-                // Draw line
-                ctx.strokeStyle = '#059669';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                
-                prices.forEach((price, index) => {
-                    const x = (index / (prices.length - 1)) * (width - 20) + 10;
-                    const y = height - 10 - ((price - minPrice) / priceRange) * (height - 20);
-                    
-                    if (index === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                });
-                
-                ctx.stroke();
-            }
 
             async fetchPrices() {
                 try {
