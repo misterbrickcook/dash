@@ -11680,6 +11680,13 @@
                     // Show loading state immediately
                     this.showLoadingState();
                     
+                    // DEBUG: Add artificial delay to see skeleton loading
+                    const isDebugMode = window.location.hash.includes('debug') || localStorage.getItem('debug-loading') === 'true';
+                    if (isDebugMode) {
+                        console.log('🐛 DEBUG MODE: Showing loading skeleton for 3 seconds...');
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+                    }
+                    
                     // Run everything in parallel for speed
                     const [savedCoins, hyperliquidData] = await Promise.all([
                         this.loadSavedCoins(),
@@ -12349,6 +12356,37 @@
                 if (!container) return;
                 // Content will be replaced by actual data rendering
             }
+        };
+
+        // DEBUG: Add button to test loading states
+        window.testLoadingStates = function() {
+            console.log('🧪 Testing loading states...');
+            
+            // Test watchlist skeleton
+            if (window.SmartLoading) {
+                window.SmartLoading.showSkeleton('crypto-overlay-items', 'watchlist', 3);
+                setTimeout(() => {
+                    if (window.cryptoPriceWidget) {
+                        window.cryptoPriceWidget.renderCoinItems();
+                    }
+                }, 3000);
+            }
+            
+            // Test other skeletons in different containers
+            const testContainers = ['heute', 'privat', 'journal-entries', 'wiki-entries'];
+            testContainers.forEach((containerId, index) => {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    const types = ['todo', 'card', 'generic'];
+                    setTimeout(() => {
+                        window.SmartLoading.showSkeleton(containerId, types[index % 3], 4);
+                        setTimeout(() => {
+                            // Restore original content (simplified)
+                            container.innerHTML = '<p>Loading test completed ✅</p>';
+                        }, 3000);
+                    }, index * 500);
+                }
+            });
         };
 
         // Initialize crypto widget when DOM is loaded
