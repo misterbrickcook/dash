@@ -173,28 +173,10 @@
             will-change: transform !important;
         }
         
-        /* Hover effects for Wiki and Journal add buttons */
-        .wiki-controls .nav-tab.quick-add-btn:hover,
-        .journal-controls .nav-tab.quick-add-btn:hover {
-            background: #000000 !important;
-            color: #ffffff !important;
-        }
-        
-        .wiki-controls .nav-tab.quick-add-btn:hover i,
-        .journal-controls .nav-tab.quick-add-btn:hover i {
-            transform: rotate(90deg) !important;
-            color: #ffffff !important;
-            stroke: #ffffff !important;
-        }
-        
-        .wiki-controls .nav-tab.quick-add-btn,
-        .journal-controls .nav-tab.quick-add-btn {
-            transition: all 0.2s ease !important;
-        }
-        
+        /* Hover effects for Wiki and Journal add buttons - match main quick-add style */
         .wiki-controls .nav-tab.quick-add-btn i,
         .journal-controls .nav-tab.quick-add-btn i {
-            transition: transform 0.3s ease, color 0.2s ease, stroke 0.2s ease !important;
+            transition: transform 0.3s ease, stroke 0.3s ease !important;
             will-change: transform !important;
         }
         
@@ -5640,6 +5622,63 @@
                 }, 500);
             }
             
+            // Setup Wiki and Journal add button hover animations  
+            function setupWikiJournalAddButtonHovers() {
+                // Find journal add button (in tab-journal section)
+                const journalAddBtn = document.querySelector('#tab-journal .wiki-controls .quick-add-btn');
+                if (journalAddBtn?.querySelector('svg')) {
+                    const svg = journalAddBtn.querySelector('svg');
+                    svg.style.cssText = `
+                        transition: transform 0.3s ease, stroke 0.3s ease !important;
+                        transform-origin: center !important;
+                        display: inline-block !important;
+                    `;
+                    
+                    journalAddBtn.onmouseenter = function() {
+                        const svg = journalAddBtn.querySelector('svg');
+                        if (svg) {
+                            svg.style.transform = 'rotate(90deg)';
+                            svg.style.stroke = '#059669';
+                        }
+                    };
+                    
+                    journalAddBtn.onmouseleave = function() {
+                        const svg = journalAddBtn.querySelector('svg');
+                        if (svg) {
+                            svg.style.transform = 'rotate(0deg)';
+                            svg.style.stroke = '';
+                        }
+                    };
+                }
+                
+                // Find wiki add button (in tab-wiki section)
+                const wikiAddBtn = document.querySelector('#tab-wiki .wiki-controls .quick-add-btn');
+                if (wikiAddBtn?.querySelector('svg')) {
+                    const svg = wikiAddBtn.querySelector('svg');
+                    svg.style.cssText = `
+                        transition: transform 0.3s ease, stroke 0.3s ease !important;
+                        transform-origin: center !important;
+                        display: inline-block !important;
+                    `;
+                    
+                    wikiAddBtn.onmouseenter = function() {
+                        const svg = wikiAddBtn.querySelector('svg');
+                        if (svg) {
+                            svg.style.transform = 'rotate(90deg)';
+                            svg.style.stroke = '#059669';
+                        }
+                    };
+                    
+                    wikiAddBtn.onmouseleave = function() {
+                        const svg = wikiAddBtn.querySelector('svg');
+                        if (svg) {
+                            svg.style.transform = 'rotate(0deg)';
+                            svg.style.stroke = '';
+                        }
+                    };
+                }
+            }
+
             // Setup Timer and Settings hover animations
             function setupActionButtonHovers() {
                 const timerBtn = document.getElementById('timer-btn');
@@ -5682,6 +5721,7 @@
             
             // Setup action button hovers after Lucide
             setTimeout(setupActionButtonHovers, 1000);
+            setTimeout(setupWikiJournalAddButtonHovers, 1000);
         }
 
         // Timer button event listener
