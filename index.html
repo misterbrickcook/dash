@@ -174,14 +174,27 @@
         }
         
         /* Hover effects for Wiki and Journal add buttons */
+        .wiki-controls .nav-tab.quick-add-btn:hover,
+        .journal-controls .nav-tab.quick-add-btn:hover {
+            background: #000000 !important;
+            color: #ffffff !important;
+        }
+        
         .wiki-controls .nav-tab.quick-add-btn:hover i,
         .journal-controls .nav-tab.quick-add-btn:hover i {
             transform: rotate(90deg) !important;
+            color: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+        
+        .wiki-controls .nav-tab.quick-add-btn,
+        .journal-controls .nav-tab.quick-add-btn {
+            transition: all 0.2s ease !important;
         }
         
         .wiki-controls .nav-tab.quick-add-btn i,
         .journal-controls .nav-tab.quick-add-btn i {
-            transition: transform 0.3s ease !important;
+            transition: transform 0.3s ease, color 0.2s ease, stroke 0.2s ease !important;
             will-change: transform !important;
         }
         
