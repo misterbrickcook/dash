@@ -12526,10 +12526,15 @@
                 // Switch to trading tab
                 switchTab('tab-trading');
                 
+                // Hide watchlist when modal opens
+                this.hideWatchlist();
+                
                 // Show trade add modal
                 setTimeout(() => {
-                    if (window.TradeManager && typeof window.TradeManager.showAddTradeModal === 'function') {
-                        window.TradeManager.showAddTradeModal();
+                    if (window.TradingManager && typeof window.TradingManager.showAddTradeModal === 'function') {
+                        window.TradingManager.showAddTradeModal();
+                    } else {
+                        console.error('❌ TradingManager.showAddTradeModal not found');
                     }
                 }, 300);
                 
