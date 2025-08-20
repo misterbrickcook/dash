@@ -3409,7 +3409,7 @@
                 </div>
             </div>
             <div class="crypto-overlay-items" id="crypto-overlay-items">
-                <!-- Coins will be dynamically inserted here -->
+                <!-- Coins will be dynamically inserted here by JavaScript -->
             </div>
         </div>
         
@@ -11448,10 +11448,15 @@
 
             init() {
                 console.log('🔗 Initializing Crypto Price Widget...');
-                this.renderCoinItems();
-                this.setupEventListeners();
-                this.updatePrices();
-                this.startAutoUpdate();
+                console.log('📋 Current overlay symbols:', this.overlaySymbols);
+                
+                // Force render after a short delay to ensure DOM is ready
+                setTimeout(() => {
+                    this.renderCoinItems();
+                    this.setupEventListeners();
+                    this.updatePrices();
+                    this.startAutoUpdate();
+                }, 500);
             }
 
             setupEventListeners() {
@@ -11785,9 +11790,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Wait a bit for other components to load, especially for Lucide icons
             setTimeout(() => {
-                console.log('🚀 Initializing Crypto Widget...');
-                window.cryptoPriceWidget = new CryptoPriceWidget();
-            }, 1500);
+                console.log('🚀 Starting Crypto Widget Initialization...');
+                try {
+                    window.cryptoPriceWidget = new CryptoPriceWidget();
+                    console.log('✅ Crypto Widget initialized successfully');
+                } catch (error) {
+                    console.error('❌ Error initializing Crypto Widget:', error);
+                }
+            }, 2000);
         });
         
         // === GLOBAL GOAL EDIT MODAL EVENT LISTENERS SETUP ===
