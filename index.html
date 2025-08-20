@@ -3220,12 +3220,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.4rem 0;
+            padding: 0.5rem 0;
             border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+            position: relative;
         }
 
         .crypto-overlay-item:last-child {
             border-bottom: none;
+        }
+
+        .crypto-overlay-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .crypto-mini-chart {
+            width: 40px;
+            height: 20px;
+            cursor: pointer;
         }
 
         .crypto-overlay-symbol {
@@ -3361,6 +3374,25 @@
             background: rgba(0, 0, 0, 0.05);
         }
 
+        .crypto-search {
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .crypto-search input {
+            width: 100%;
+            padding: 0.4rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            font-size: 0.65rem;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .crypto-search input:focus {
+            outline: none;
+            border-color: #059669;
+        }
+
         .crypto-available-coins {
             padding: 0.5rem;
             max-height: 200px;
@@ -3370,20 +3402,55 @@
         .crypto-coin-option {
             display: flex;
             align-items: center;
-            padding: 0.3rem 0;
+            justify-content: space-between;
+            padding: 0.4rem;
             gap: 0.5rem;
-        }
-
-        .crypto-coin-option input[type="checkbox"] {
-            width: 12px;
-            height: 12px;
-        }
-
-        .crypto-coin-option label {
-            font-size: 0.65rem;
-            color: var(--text-secondary);
             cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .crypto-coin-option:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .crypto-coin-option.added {
+            background: rgba(5, 150, 105, 0.1);
+            color: #059669;
+        }
+
+        .crypto-coin-info {
             flex: 1;
+        }
+
+        .crypto-coin-name {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .crypto-coin-price {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+        }
+
+        .crypto-add-btn {
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 0.2rem 0.4rem;
+            font-size: 0.6rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .crypto-add-btn:hover {
+            background: #047857;
+        }
+
+        .crypto-add-btn.added {
+            background: #dc2626;
         }
     </style>
 </head>
@@ -3405,14 +3472,6 @@
             </div>
         </div>
         <div class="crypto-overlay-content">
-            <div class="crypto-chart-container" style="display: none;">
-                <canvas id="crypto-mini-chart" width="180" height="80"></canvas>
-                <div class="crypto-chart-controls">
-                    <select class="crypto-chart-select">
-                        <!-- Options will be populated dynamically -->
-                    </select>
-                </div>
-            </div>
             <div class="crypto-overlay-items" id="crypto-overlay-items">
                 <!-- Coins will be dynamically inserted here by JavaScript -->
             </div>
@@ -3421,40 +3480,16 @@
         <!-- Settings Panel -->
         <div class="crypto-settings-panel" style="display: none;">
             <div class="crypto-settings-header">
-                <span>Manage Coins</span>
+                <span>Add Crypto</span>
                 <button class="crypto-settings-close">
                     <i data-lucide="x" style="width: 12px; height: 12px;"></i>
                 </button>
             </div>
-            <div class="crypto-available-coins">
-                <div class="crypto-coin-option" data-symbol="BTC">
-                    <input type="checkbox" id="coin-btc" checked>
-                    <label for="coin-btc">BTC - Bitcoin</label>
-                </div>
-                <div class="crypto-coin-option" data-symbol="ETH">
-                    <input type="checkbox" id="coin-eth" checked>
-                    <label for="coin-eth">ETH - Ethereum</label>
-                </div>
-                <div class="crypto-coin-option" data-symbol="SOL">
-                    <input type="checkbox" id="coin-sol" checked>
-                    <label for="coin-sol">SOL - Solana</label>
-                </div>
-                <div class="crypto-coin-option" data-symbol="ENA">
-                    <input type="checkbox" id="coin-ena">
-                    <label for="coin-ena">ENA - Ethena</label>
-                </div>
-                <div class="crypto-coin-option" data-symbol="PENGU">
-                    <input type="checkbox" id="coin-pengu">
-                    <label for="coin-pengu">PENGU - Pengu</label>
-                </div>
-                <div class="crypto-coin-option" data-symbol="kBONK">
-                    <input type="checkbox" id="coin-bonk">
-                    <label for="coin-bonk">BONK - Bonk</label>
-                </div>
-                <div class="crypto-coin-option" data-symbol="FARTCOIN">
-                    <input type="checkbox" id="coin-fartcoin">
-                    <label for="coin-fartcoin">FARTCOIN - Fartcoin</label>
-                </div>
+            <div class="crypto-search">
+                <input type="text" id="crypto-search-input" placeholder="Search coins..." autocomplete="off">
+            </div>
+            <div class="crypto-available-coins" id="crypto-available-coins">
+                <!-- Will be populated with all Hyperliquid coins -->
             </div>
         </div>
     </div>
@@ -11419,17 +11454,15 @@
         class CryptoPriceWidget {
             constructor() {
                 this.apiUrl = 'https://api.hyperliquid.xyz/info';
-                this.allSymbols = ['BTC', 'ETH', 'SOL', 'ENA', 'PENGU', 'kBONK', 'FARTCOIN'];
+                this.allSymbols = []; // Will be populated from API
+                this.allCoinsData = {}; // Full coin data from Hyperliquid
                 this.overlaySymbols = this.loadSavedCoins() || ['BTC', 'ETH', 'SOL'];
-                this.updateInterval = 30000; // 30 seconds
-                this.previousPrices = {};
-                this.priceHistory = {};
+                this.updateInterval = 60000; // 60 seconds
+                this.currentPrices = {};
+                this.price24hAgo = {};
+                this.charts = {}; // Mini charts for each coin
                 this.intervalId = null;
-                this.statusIndicator = document.querySelector('.status-indicator');
-                this.statusText = document.querySelector('.status-text');
                 this.overlay = document.querySelector('.crypto-overlay');
-                this.chartVisible = false;
-                this.chart = null;
                 
                 this.init();
             }
