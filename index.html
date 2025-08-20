@@ -3372,38 +3372,26 @@
         }
         
         .ticker-actions {
-            margin-left: 16px;
+            display: none;
         }
         
         .ticker-btn {
-            width: 28px;
-            height: 28px;
-            background: transparent;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            opacity: 0.6;
+            display: none;
         }
         
         .ticker-btn:hover {
-            background: var(--bg-primary);
-            opacity: 1;
+            display: none;
         }
         
         .ticker-btn i {
-            width: 12px;
-            height: 12px;
+            display: none;
         }
         
         /* Ticker Item Styles */
         .crypto-overlay-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 2px;
             white-space: nowrap;
             font-size: 12px;
             padding: 4px 8px;
@@ -3416,21 +3404,23 @@
         }
         
         .crypto-overlay-symbol {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-primary);
             min-width: 50px;
+            font-size: 14px;
         }
         
         .crypto-overlay-price {
             font-weight: 500;
             color: var(--text-primary);
-            min-width: 70px;
+            min-width: 65px;
+            font-size: 11px;
         }
         
         .crypto-overlay-change {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 500;
-            min-width: 50px;
+            min-width: 45px;
             text-align: center;
         }
         
@@ -3706,6 +3696,99 @@
             border-color: #22c55e;
             background: var(--bg-secondary);
         }
+        
+        /* === SETTINGS CRYPTO MANAGEMENT === */
+        .crypto-management {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .crypto-search-container input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-primary);
+            background: var(--bg-primary);
+            font-size: var(--font-size-sm);
+            border-radius: 4px;
+        }
+        
+        .crypto-search-container input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+        
+        .crypto-coins-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.75rem;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 0.5rem 0;
+        }
+        
+        .settings-crypto-coin {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            border: 1px solid var(--border-primary);
+            background: var(--bg-secondary);
+            transition: all 0.2s ease;
+        }
+        
+        .settings-crypto-coin:hover {
+            border-color: var(--accent-primary);
+        }
+        
+        .settings-crypto-coin.active {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.05);
+        }
+        
+        .settings-crypto-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+        
+        .settings-crypto-symbol {
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            color: var(--text-primary);
+            min-width: 60px;
+            text-transform: uppercase;
+        }
+        
+        .settings-crypto-price {
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        
+        .settings-crypto-toggle {
+            background: transparent;
+            border: 1px solid var(--border-primary);
+            padding: 0.4rem 0.8rem;
+            font-size: var(--font-size-xs);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .settings-crypto-toggle:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-primary);
+        }
+        
+        .settings-crypto-toggle.active {
+            background: #22c55e;
+            border-color: #22c55e;
+            color: white;
+        }
 
         .crypto-coin-info {
             flex: 1;
@@ -3761,27 +3844,6 @@
         <div class="ticker-container">
             <div class="ticker-content" id="crypto-overlay-items">
                 <!-- Coins will be dynamically inserted here by JavaScript -->
-            </div>
-            <div class="ticker-actions">
-                <button class="ticker-btn" onclick="CryptoTicker.openSettings()" title="Manage Coins">
-                    <i data-lucide="plus"></i>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Settings Panel -->
-        <div class="crypto-settings-panel" style="display: none;">
-            <div class="crypto-settings-header">
-            <span>Add to Watchlist</span>
-                <button class="crypto-settings-close">
-                    <i data-lucide="x" style="width: 12px; height: 12px;"></i>
-                </button>
-            </div>
-            <div class="crypto-search">
-                <input type="text" id="crypto-search-input" placeholder="Search coins..." autocomplete="off">
-            </div>
-            <div class="crypto-available-coins" id="crypto-available-coins">
-                <!-- Will be populated with all Hyperliquid coins -->
             </div>
         </div>
     </div>
@@ -4728,6 +4790,20 @@
                         <span class="setting-description">Zeit, zu der täglich die SOL Balance für den Chart aufgezeichnet wird</span>
                     </div>
                     <button id="save-analytics-settings" class="btn">Speichern</button>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>Kryptowährung Ticker</h3>
+                    <div class="setting-item">
+                        <div class="crypto-management">
+                            <div class="crypto-search-container">
+                                <input type="text" id="settings-crypto-search" placeholder="Coin suchen..." autocomplete="off">
+                            </div>
+                            <div class="crypto-coins-grid" id="settings-crypto-coins">
+                                <!-- Will be populated with coins -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -11792,6 +11868,7 @@
                     this.renderCoinItems();
                     this.setupEventListeners();
                     this.setupSearchFunctionality();
+                    this.setupSettingsEventListeners();
                     
                     // Load price updates in background
                     this.updatePricesInBackground();
@@ -12029,6 +12106,26 @@
                     }
                 });
 
+            }
+
+            setupSettingsEventListeners() {
+                console.log('🔧 Setting up crypto settings event listeners...');
+                
+                // Settings search functionality
+                const settingsSearchInput = document.getElementById('settings-crypto-search');
+                if (settingsSearchInput) {
+                    console.log('✅ Found settings crypto search input');
+                    settingsSearchInput.addEventListener('input', (e) => {
+                        const query = e.target.value;
+                        console.log('🔍 Settings search query:', query);
+                        this.renderCoinsInSettings(query);
+                    });
+                    
+                    // Initialize with empty search to show all coins
+                    this.renderCoinsInSettings();
+                } else {
+                    console.warn('⚠️ Settings crypto search input not found');
+                }
             }
 
             async toggleCoin(symbol, enabled) {
@@ -12313,6 +12410,52 @@
                 await this.saveCoins();
                 this.renderCoinItems();
                 this.renderAvailableCoins(document.getElementById('crypto-search-input')?.value || '');
+                // Also update settings tab if it exists
+                this.renderCoinsInSettings(document.getElementById('settings-crypto-search')?.value || '');
+            }
+
+            renderCoinsInSettings(query = '') {
+                const container = document.getElementById('settings-crypto-coins');
+                if (!container) {
+                    console.log('⚠️ Settings crypto coins container not found');
+                    return;
+                }
+
+                console.log('🔄 Rendering coins in settings tab with query:', query);
+                container.innerHTML = '';
+
+                const filteredCoins = this.allSymbols
+                    .filter(symbol => symbol.toLowerCase().includes(query.toLowerCase()))
+                    .slice(0, 100); // Show more results in settings than in popup
+
+                filteredCoins.forEach(symbol => {
+                    const isAdded = this.overlaySymbols.includes(symbol);
+                    const currentPrice = this.currentPrices[symbol];
+                    const displaySymbol = symbol === 'kBONK' ? 'BONK' : symbol;
+                    
+                    const coinItem = document.createElement('div');
+                    coinItem.className = `settings-crypto-coin ${isAdded ? 'active' : ''}`;
+                    coinItem.innerHTML = `
+                        <div class="settings-crypto-info">
+                            <div class="settings-crypto-symbol">${displaySymbol}</div>
+                            <div class="settings-crypto-price">${currentPrice ? this.formatPrice(currentPrice) : 'No price'}</div>
+                        </div>
+                        <button class="settings-crypto-toggle ${isAdded ? 'active' : ''}" data-symbol="${symbol}">
+                            ${isAdded ? 'Remove' : 'Add'}
+                        </button>
+                    `;
+
+                    const toggleBtn = coinItem.querySelector('.settings-crypto-toggle');
+                    toggleBtn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        console.log(`🔘 Settings toggle clicked for ${symbol}`);
+                        await this.toggleCoinInOverlay(symbol);
+                    });
+
+                    container.appendChild(coinItem);
+                });
+
+                console.log(`✅ Rendered ${filteredCoins.length} coins in settings tab`);
             }
 
             async updatePricesAndCharts() {
