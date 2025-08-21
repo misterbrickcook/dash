@@ -8291,11 +8291,9 @@
                         name: document.getElementById('goal-name').value,
                         description: document.getElementById('goal-description').value,
                         category: document.getElementById('goal-category').value,
-                        timeframe: document.getElementById('goal-timeframe').value,
                         deadline: document.getElementById('goal-deadline').value,
-                        unit: document.getElementById('goal-unit').value,
-                        startValue: parseFloat(document.getElementById('goal-start-value').value) || 0,
-                        targetValue: parseFloat(document.getElementById('goal-target-value').value)
+                        startValue: document.getElementById('goal-start-value').value || '0',
+                        targetValue: document.getElementById('goal-target-value').value
                     };
                     
                     await GoalManager.addGoal(goalData);
