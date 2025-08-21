@@ -6463,10 +6463,7 @@
                 console.log('🔄 Calling refreshCurrentView after adding todo...');
                 this.refreshCurrentView();
                 
-                // Update counters
-                if (window.SimpleCounters) {
-                    window.SimpleCounters.onTodoChanged();
-                }
+                // Don't trigger counter animation when creating todos
             },
             
             refreshCurrentView() {
@@ -6641,11 +6638,16 @@
                             
                             console.log('✅ Database update successful');
                             
-                            // Refresh simple counter after successful database update
-                            if (todo.completed !== wasCompleted) {
-                                console.log('☁️ Refreshing todo counter via SimpleCounters...');
+                            // Trigger counter animation ONLY when todo is completed (not when uncompleted)
+                            if (!wasCompleted && todo.completed) {
+                                console.log('🎉 Todo completed! Triggering counter animation...');
                                 if (window.SimpleCounters) {
                                     window.SimpleCounters.onTodoChanged();
+                                }
+                            } else if (wasCompleted && !todo.completed) {
+                                console.log('🔄 Todo uncompleted, updating counter without animation...');
+                                if (window.SimpleCounters) {
+                                    window.SimpleCounters.updateAllCounters(); // Update without animation
                                 }
                             }
                             
@@ -6698,10 +6700,7 @@
                     this.refreshCurrentView();
                     this.updateHomeTodos();
                     
-                    // Update counter after deletion
-                    if (window.SimpleCounters) {
-                        window.SimpleCounters.onTodoChanged();
-                    }
+                    // Don't trigger counter animation when deleting todos
                     
                 } catch (error) {
                     console.error('❌ TodoManager: Error deleting todo:', error);
