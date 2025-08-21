@@ -10160,6 +10160,12 @@
                 this.init();
             }
 
+            isPomodoroActive() {
+                return window.PomodoroTimer && 
+                       (window.PomodoroTimer.isRunning || 
+                        window.PomodoroTimer.timeLeft < window.PomodoroTimer.duration);
+            }
+
             init() {
                 this.setupEventListeners();
                 // Initialize Lucide icons for QuickBar
@@ -10259,9 +10265,10 @@
                         const btn = e.target.closest('.quickbar-main-btn');
                         const category = btn.dataset.category;
                         
-                        // Special handling for actions category when Pomodoro is running
-                        if (category === 'actions' && window.PomodoroTimer && window.PomodoroTimer.isRunning) {
-                            // If Pomodoro is running, clicking the main actions button directly toggles it
+                        // Special handling for actions category when Pomodoro is active
+                        if (category === 'actions' && this.isPomodoroActive()) {
+                            // If Pomodoro is running or paused, clicking the main actions button directly toggles it
+                            console.log('🍅 Main button clicked - toggling Pomodoro timer');
                             window.PomodoroTimer.toggle();
                             this.closeAllSubMenus(); // Close any open menus
                             return;
@@ -10424,6 +10431,7 @@
             openPomodoro() {
                 if (!window.PomodoroTimer) {
                     window.PomodoroTimer = new PomodoroTimer();
+                    console.log('🍅 PomodoroTimer created and made globally available');
                 }
                 window.PomodoroTimer.toggle();
             }
