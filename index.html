@@ -10281,10 +10281,16 @@
                 document.querySelectorAll('.quickbar-main-btn').forEach(btn => {
                     btn.classList.remove('active');
                 });
+                
+                // Reset active category state
+                this.activeCategory = null;
             }
 
             handleAction(action) {
                 this.closeAllSubMenus();
+                
+                // Reset active category to allow immediate re-opening
+                this.activeCategory = null;
                 
                 // Refresh Lucide icons after closing menus
                 setTimeout(() => {
