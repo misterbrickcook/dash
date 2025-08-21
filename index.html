@@ -1620,21 +1620,7 @@
             transform: scale(1.1) !important;
         }
 
-        /* === ADD TODO MODAL === */
-        .add-todo-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 3000;
-            padding: 1rem;
-        }
-        .add-todo-modal.hide { display: none; }
+        /* === ADD TODO MODAL === removed - now using standard .modal class */
         .modal {
             position: fixed;
             top: 0;
@@ -1669,25 +1655,7 @@
         .modal-content .close:hover {
             color: #000;
         }
-        .add-todo-container {
-            background: #ffffff;
-            border: 1px solid #e0e0e0;
-            padding: 3rem;
-            width: 100%;
-            max-width: 500px;
-        }
-        .add-todo-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .add-todo-header h2 {
-            font-size: 1.5rem;
-            font-weight: 500;
-            color: #000000;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
+        /* === REMOVED unused .add-todo-container, .add-todo-header styles - now using standard .modal-content === */
         .form-row {
             display: flex;
             gap: 1rem;
@@ -3951,11 +3919,10 @@
     </div>
 
     <!-- === ADD TODO MODAL === -->
-    <div id="add-todo-modal" class="add-todo-modal hide">
-        <div class="add-todo-container">
-            <div class="add-todo-header">
-                <h2>Todo hinzufügen</h2>
-            </div>
+    <div id="add-todo-modal" class="modal hide">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('add-todo-modal').style.display='none'">&times;</span>
+            <h2>Todo hinzufügen</h2>
             
             <form id="add-todo-form" autocomplete="off">
                 <div class="form-group">
@@ -4004,11 +3971,10 @@
     </div>
 
     <!-- === ADD GOAL MODAL === -->
-    <div id="add-goal-modal" class="add-todo-modal hide">
-        <div class="add-todo-container">
-            <div class="add-todo-header">
-                <h2>Ziel hinzufügen</h2>
-            </div>
+    <div id="add-goal-modal" class="modal hide">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('add-goal-modal').style.display='none'">&times;</span>
+            <h2>Ziel hinzufügen</h2>
             
             <form id="add-goal-form" autocomplete="off">
                 <div class="form-group">
@@ -4052,11 +4018,10 @@
     </div>
 
     <!-- === ADD JOURNAL MODAL === -->
-    <div id="add-journal-modal" class="add-todo-modal hide">
-        <div class="add-todo-container">
-            <div class="add-todo-header">
-                <h2>Journal Eintrag hinzufügen</h2>
-            </div>
+    <div id="add-journal-modal" class="modal hide">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('add-journal-modal').style.display='none'">&times;</span>
+            <h2>Journal Eintrag hinzufügen</h2>
             
             <form id="add-journal-form" autocomplete="off">
                 <div class="form-group">
@@ -4083,11 +4048,10 @@
     </div>
 
     <!-- === ADD TERMIN MODAL === -->
-    <div id="add-termin-modal" class="add-todo-modal hide">
-        <div class="add-todo-container">
-            <div class="add-todo-header">
-                <h2>Termin hinzufügen</h2>
-            </div>
+    <div id="add-termin-modal" class="modal hide">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('add-termin-modal').style.display='none'">&times;</span>
+            <h2>Termin hinzufügen</h2>
             
             <form id="add-termin-form" autocomplete="off">
                 <div class="form-group">
@@ -4120,11 +4084,10 @@
     </div>
 
     <!-- === EDIT GOAL VALUE MODAL === -->
-    <div id="edit-goal-value-modal" class="add-todo-modal hide">
-        <div class="add-todo-container">
-            <div class="add-todo-header">
-                <h2 id="edit-goal-modal-title">Fortschritt aktualisieren</h2>
-            </div>
+    <div id="edit-goal-value-modal" class="modal hide">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('edit-goal-value-modal').style.display='none'">&times;</span>
+            <h2 id="edit-goal-modal-title">Fortschritt aktualisieren</h2>
             
             <div id="edit-goal-current-status" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; color: #666;">
                 <!-- Current goal status will be inserted here -->
@@ -5020,11 +4983,10 @@
     </div>
 
     <!-- Add Wiki Entry Modal -->
-    <div id="add-wiki-modal" class="add-todo-modal hide">
-        <div class="add-todo-container">
-            <div class="add-todo-header">
-                <h2>Wiki Entry hinzufügen</h2>
-            </div>
+    <div id="add-wiki-modal" class="modal hide">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('add-wiki-modal').style.display='none'">&times;</span>
+            <h2>Wiki Entry hinzufügen</h2>
             <form id="add-wiki-form" autocomplete="off">
                 <div class="form-group">
                     <label for="wiki-title">Titel</label>
