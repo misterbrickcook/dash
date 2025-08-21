@@ -12585,7 +12585,7 @@
                 if (num >= 1000) {
                     return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                 } else if (num >= 1) {
-                    return `$${num.toFixed(3)}`;
+                    return `$${num.toFixed(2)}`; // Changed from 3 to 2 decimal places for coins ≥ 1 (like SOL, HYPE)
                 } else if (num >= 0.01) {
                     return `$${num.toFixed(4)}`;
                 } else {
