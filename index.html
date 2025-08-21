@@ -7002,35 +7002,12 @@
                 this.displayGoalsForCategory(activeCategory);
             },
             
-            displayGoalsForCategory(category) {
-                const container = document.getElementById(`ziel-${category}`);
+            displayGoalsForCategory(category = 'alle') {
+                const container = document.getElementById('goals-list');
                 if (!container) return;
                 
-                let filteredGoals = [];
-                
-                switch(category) {
-                    case 'monat':
-                        filteredGoals = this.goals.filter(goal => 
-                            goal.timeframe === 'monat' && !goal.completed
-                        );
-                        break;
-                    case 'quartal':
-                        filteredGoals = this.goals.filter(goal => 
-                            goal.timeframe === 'quartal' && !goal.completed
-                        );
-                        break;
-                    case 'jahr':
-                        filteredGoals = this.goals.filter(goal => 
-                            goal.timeframe === 'jahr' && !goal.completed
-                        );
-                        break;
-                    case 'alle':
-                        filteredGoals = this.goals.filter(goal => !goal.completed);
-                        break;
-                    case 'archiv':
-                        filteredGoals = this.goals.filter(goal => goal.completed);
-                        break;
-                }
+                // Show all active goals (no category filtering)
+                const filteredGoals = this.goals.filter(goal => !goal.completed);
                 
                 // Sort by deadline
                 filteredGoals.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
