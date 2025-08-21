@@ -6924,19 +6924,33 @@
                 }
                 
                 try {
+                    // Parse numeric values from text inputs like "5 SOL" -> 5
+                    const parseValue = (value) => {
+                        if (!value) return 0;
+                        const match = value.toString().match(/[\d.]+/);
+                        return match ? parseFloat(match[0]) : 0;
+                    };
+                    
+                    // Extract unit from text inputs like "5 SOL" -> "SOL"
+                    const extractUnit = (value) => {
+                        if (!value) return '';
+                        const match = value.toString().match(/[^\d\s.]+/);
+                        return match ? match[0].trim() : '';
+                    };
+                    
                     // Map UI fields to database schema - all progress fields now supported
                     const dbGoal = {
                         title: goal.name,
                         description: goal.description,
                         category: goal.category,
                         target_date: goal.deadline,
-                        progress: goal.progress,
-                        timeframe: goal.timeframe,
-                        completed: goal.completed,
-                        start_value: goal.startValue,
-                        target_value: goal.targetValue, 
-                        current_value: goal.currentValue,
-                        unit: goal.unit,
+                        progress: goal.progress || 0,
+                        timeframe: goal.timeframe || '',
+                        completed: goal.completed || false,
+                        start_value: parseValue(goal.startValue),
+                        target_value: parseValue(goal.targetValue), 
+                        current_value: parseValue(goal.currentValue || goal.startValue),
+                        unit: extractUnit(goal.targetValue) || extractUnit(goal.startValue) || '',
                         user_id: supabase?.user?.id
                     };
                     
