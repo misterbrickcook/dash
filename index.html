@@ -6545,7 +6545,7 @@
                         return dateComparison;
                     }
                     
-                    // Then by time
+                    // Then by time (earliest first, no time goes to end)
                     const timeA = a.time || '23:59';
                     const timeB = b.time || '23:59';
                     return timeA.localeCompare(timeB);
@@ -6802,7 +6802,7 @@
                         return dateComparison;
                     }
                     
-                    // Then by time
+                    // Then by time (earliest first, no time goes to end)
                     const timeA = a.time || '23:59';
                     const timeB = b.time || '23:59';
                     return timeA.localeCompare(timeB);
