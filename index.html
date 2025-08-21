@@ -5423,9 +5423,17 @@
                 TodoManager.displayTodosForCategory(activeCategory);
             }
             
-            // If switching to home tab, update home todos
+            // If switching to home tab, update home todos and counters
             if (tabId === 'tab-home') {
                 TodoManager.updateHomeTodos();
+                
+                // Update counters when switching to home tab (mobile sync fix)
+                if (window.SimpleCounters && window.SimpleCounters.isInitialized) {
+                    console.log('📊 Updating counters for home tab...');
+                    window.SimpleCounters.updateAllCounters().catch(err => 
+                        console.warn('Counter update failed:', err)
+                    );
+                }
             }
             
             // If switching to ziele tab, load the active category
@@ -6779,6 +6787,12 @@
                     
                     // Refresh current view
                     this.refreshCurrentView();
+                    
+                    // Update counters after clearing archive (mobile sync fix)
+                    if (window.SimpleCounters) {
+                        console.log('📊 Updating counters after clearing archive...');
+                        window.SimpleCounters.onTodoChanged();
+                    }
                     
                     alert(`✅ ${completedTodos.length} erledigte Todos wurden gelöscht!`);
                 } catch (error) {
@@ -13375,6 +13389,12 @@
                             await window.TodoManager.loadTodos();
                         }
                         
+                        // Update counters after adding todo (mobile sync fix)
+                        if (window.SimpleCounters && window.SimpleCounters.isInitialized) {
+                            console.log('📊 Updating counters after mobile quick add...');
+                            await window.SimpleCounters.updateAllCounters();
+                        }
+                        
                         // Show success feedback
                         this.showSuccessFeedback();
                     } else {
@@ -13409,11 +13429,29 @@
             }
         }
         
+        // === COUNTER SYNC UTILITIES ===
+        window.ensureCountersSync = function() {
+            if (window.SimpleCounters) {
+                if (!window.SimpleCounters.isInitialized && window.supabase?.isAuthenticated()) {
+                    console.log('🔄 Initializing counters for mobile...');
+                    window.SimpleCounters.init();
+                } else if (window.SimpleCounters.isInitialized) {
+                    console.log('📊 Syncing counters...');
+                    window.SimpleCounters.updateAllCounters();
+                }
+            }
+        };
+        
         // Initialize mobile quick add when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Only initialize on mobile screens
             if (window.innerWidth <= 768) {
                 window.mobileQuickAdd = new MobileQuickAdd();
+                
+                // Ensure counters are synced on mobile
+                setTimeout(() => {
+                    window.ensureCountersSync();
+                }, 1000);
             }
         });
         
@@ -13421,6 +13459,21 @@
         window.addEventListener('resize', function() {
             if (window.innerWidth <= 768 && !window.mobileQuickAdd) {
                 window.mobileQuickAdd = new MobileQuickAdd();
+                // Sync counters when switching to mobile
+                setTimeout(() => {
+                    window.ensureCountersSync();
+                }, 500);
+            }
+        });
+        
+        // Add visibility change listener for mobile sync
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && window.innerWidth <= 768) {
+                // Page became visible on mobile - sync counters
+                console.log('📱 Page visible on mobile - syncing counters...');
+                setTimeout(() => {
+                    window.ensureCountersSync();
+                }, 500);
             }
         });
 
