@@ -1855,6 +1855,91 @@
             color: #3b82f6;
             transform: scale(1.2) rotate(360deg);
         }
+
+        /* === QUICKBAR === */
+        .quickbar {
+            position: fixed;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quickbar-main-btn {
+            width: 48px;
+            height: 48px;
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .quickbar-main-btn:hover {
+            background: #000000;
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        .quickbar-main-btn.active {
+            background: #22c55e;
+            border-color: #22c55e;
+            color: #ffffff;
+        }
+
+        .quickbar-sub-container {
+            position: absolute;
+            right: 60px;
+            top: 0;
+            min-width: 160px;
+        }
+
+        .quickbar-sub-buttons {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            background: #ffffff;
+            border: 2px solid #000000;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .quickbar-sub-buttons.show {
+            display: flex;
+        }
+
+        .quickbar-sub-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: none;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .quickbar-sub-btn:hover {
+            background: #f5f5f5;
+            border-color: #000000;
+        }
+
+        .quickbar-sub-label {
+            font-weight: 500;
+            color: #333333;
+        }
         
         /* === PAGE HEADERS === */
         .page-header {
@@ -4450,7 +4535,6 @@
             <section style="margin-bottom: 4rem;">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 1.5rem;">
                     <h2 style="font-size: 1.2rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">Anstehende Termine</h2>
-                    <button id="add-termin-btn" class="add-btn">+</button>
                 </div>
                 <div class="grid-3" id="termine-container">
                     <!-- Termine will be loaded from TerminManager -->
@@ -4480,7 +4564,6 @@
         <section id="tab-todos" class="tab-section">
             
             <div class="page-header">
-                <button id="add-todo-btn" class="add-btn">+</button>
             </div>
 
             <div class="todos-grid">
@@ -4558,7 +4641,6 @@
         <section id="tab-ziele" class="tab-section">
             
             <div class="page-header">
-                <button id="add-goal-btn" class="add-btn">+</button>
             </div>
 
             <!-- ZIELE CONTENT -->
@@ -4572,7 +4654,6 @@
         <section id="tab-journal" class="tab-section">
             
             <div class="page-header">
-                <button id="add-journal-btn" class="add-btn">+</button>
             </div>
 
             <!-- Journal Content -->
@@ -4921,7 +5002,6 @@
         <section id="tab-ressourcen" class="tab-section">
             
             <div class="page-header">
-                <button id="add-resource-btn" class="add-btn">+</button>
             </div>
 
             <div class="resources-grid">
@@ -5076,7 +5156,6 @@
         <section id="tab-wiki" class="tab-section">
             
             <div class="page-header">
-                <button id="add-wiki-btn" class="add-btn">+</button>
             </div>
 
             <!-- Wiki Content -->
@@ -10090,6 +10169,152 @@
         
         // Make QuickAdd globally available
         window.QuickAdd = new QuickAdd();
+
+        // === QUICKBAR FUNCTIONALITY ===
+        class QuickBar {
+            constructor() {
+                this.activeCategory = null;
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                // Main category button listeners
+                document.addEventListener('click', (e) => {
+                    if (e.target.closest('.quickbar-main-btn')) {
+                        const btn = e.target.closest('.quickbar-main-btn');
+                        const category = btn.dataset.category;
+                        this.toggleCategory(category);
+                    }
+                    
+                    // Sub-button action listeners
+                    if (e.target.closest('.quickbar-sub-btn')) {
+                        const subBtn = e.target.closest('.quickbar-sub-btn');
+                        const action = subBtn.dataset.action;
+                        this.handleAction(action);
+                    }
+                    
+                    // Close sub-menus when clicking outside
+                    if (!e.target.closest('.quickbar')) {
+                        this.closeAllSubMenus();
+                    }
+                });
+            }
+
+            toggleCategory(category) {
+                const subContainer = document.getElementById(`quickbar-${category}-sub`);
+                const mainBtn = document.getElementById(`quickbar-${category}`);
+                
+                if (this.activeCategory === category) {
+                    // Close current category
+                    this.closeAllSubMenus();
+                    this.activeCategory = null;
+                } else {
+                    // Close all others, open this one
+                    this.closeAllSubMenus();
+                    subContainer.classList.add('show');
+                    mainBtn.classList.add('active');
+                    this.activeCategory = category;
+                }
+            }
+
+            closeAllSubMenus() {
+                document.querySelectorAll('.quickbar-sub-buttons').forEach(sub => {
+                    sub.classList.remove('show');
+                });
+                document.querySelectorAll('.quickbar-main-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            }
+
+            handleAction(action) {
+                this.closeAllSubMenus();
+                
+                switch(action) {
+                    // === ADD ACTIONS ===
+                    case 'add-todo':
+                        document.getElementById('todo-modal').style.display = 'flex';
+                        break;
+                    case 'add-termin':
+                        document.getElementById('termin-modal').style.display = 'flex';
+                        break;
+                    case 'add-goal':
+                        document.getElementById('goal-modal').style.display = 'flex';
+                        break;
+                    case 'add-resource':
+                        document.getElementById('resource-modal').style.display = 'flex';
+                        break;
+                    case 'add-wiki':
+                        document.getElementById('wiki-modal').style.display = 'flex';
+                        break;
+                    case 'add-journal':
+                        document.getElementById('journal-modal').style.display = 'flex';
+                        break;
+                    
+                    // === QUICK ACTIONS ===
+                    case 'global-search':
+                        this.openGlobalSearch();
+                        break;
+                    case 'pomodoro':
+                        this.openPomodoro();
+                        break;
+                    case 'trading-rules':
+                        this.openTradingRules();
+                        break;
+                    
+                    // === SYSTEM ACTIONS ===
+                    case 'dark-mode':
+                        this.toggleDarkMode();
+                        break;
+                    case 'settings':
+                        this.openSettings();
+                        break;
+                    case 'logout':
+                        this.handleLogout();
+                        break;
+                }
+            }
+
+            // === QUICK ACTIONS ===
+            openGlobalSearch() {
+                alert('Global Search - Coming Soon!');
+            }
+
+            openPomodoro() {
+                alert('Pomodoro Timer - Coming Soon!');
+            }
+
+            openTradingRules() {
+                alert('Trading Rules - Coming Soon!');
+            }
+
+            // === SYSTEM ACTIONS ===
+            toggleDarkMode() {
+                alert('Dark Mode - Coming Soon!');
+            }
+
+            openSettings() {
+                alert('Settings - Coming Soon!');
+            }
+
+            async handleLogout() {
+                if (confirm('Wirklich ausloggen?')) {
+                    try {
+                        await window.supabase.signOut();
+                        location.reload();
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        alert('Logout fehlgeschlagen');
+                    }
+                }
+            }
+        }
+
+        // Make QuickBar globally available
+        window.QuickBar = new QuickBar();
         
         // Wiki and Lucide icons initialization moved to main DOMContentLoaded listener
     </script>
@@ -13345,5 +13570,87 @@
     <div class="mobile-construction">
         <h1>Under Construction</h1>
     </div>
+
+    <!-- === QUICKBAR === -->
+    <div id="quickbar" class="quickbar">
+        <!-- Main Category Buttons -->
+        <button id="quickbar-adds" class="quickbar-main-btn" data-category="adds">
+            <span>🎯</span>
+        </button>
+        
+        <button id="quickbar-actions" class="quickbar-main-btn" data-category="actions">
+            <span>⚡</span>
+        </button>
+        
+        <button id="quickbar-system" class="quickbar-main-btn" data-category="system">
+            <span>⚙️</span>
+        </button>
+        
+        <!-- Sub-buttons Container -->
+        <div id="quickbar-sub-container" class="quickbar-sub-container">
+            
+            <!-- Adds Sub-buttons -->
+            <div id="quickbar-adds-sub" class="quickbar-sub-buttons" data-category="adds">
+                <button class="quickbar-sub-btn" data-action="add-todo">
+                    <span>➕</span>
+                    <span class="quickbar-sub-label">Todo</span>
+                </button>
+                <button class="quickbar-sub-btn" data-action="add-termin">
+                    <span>📅</span>
+                    <span class="quickbar-sub-label">Termin</span>
+                </button>
+                <button class="quickbar-sub-btn" data-action="add-goal">
+                    <span>🎯</span>
+                    <span class="quickbar-sub-label">Ziel</span>
+                </button>
+                <button class="quickbar-sub-btn" data-action="add-resource">
+                    <span>💡</span>
+                    <span class="quickbar-sub-label">Resource</span>
+                </button>
+                <button class="quickbar-sub-btn" data-action="add-wiki">
+                    <span>📝</span>
+                    <span class="quickbar-sub-label">Wiki</span>
+                </button>
+                <button class="quickbar-sub-btn" data-action="add-journal">
+                    <span>💭</span>
+                    <span class="quickbar-sub-label">Journal</span>
+                </button>
+            </div>
+            
+            <!-- Actions Sub-buttons -->
+            <div id="quickbar-actions-sub" class="quickbar-sub-buttons" data-category="actions">
+                <button class="quickbar-sub-btn" data-action="global-search">
+                    <span>🔍</span>
+                    <span class="quickbar-sub-label">Search</span>
+                </button>
+                <button class="quickbar-sub-btn" data-action="pomodoro">
+                    <span>⏰</span>
+                    <span class="quickbar-sub-label">Pomodoro</span>
+                </button>
+                <button class="quickbar-sub-btn" data-action="trading-rules">
+                    <span>📊</span>
+                    <span class="quickbar-sub-label">Trading</span>
+                </button>
+            </div>
+            
+            <!-- System Sub-buttons -->
+            <div id="quickbar-system-sub" class="quickbar-sub-buttons" data-category="system">
+                <button class="quickbar-sub-btn" data-action="dark-mode">
+                    <span>🌙</span>
+                    <span class="quickbar-sub-label">Dark Mode</span>
+                </button>
+                <button class="quickbar-sub-btn" data-action="settings">
+                    <span>⚙️</span>
+                    <span class="quickbar-sub-label">Settings</span>
+                </button>
+                <button class="quickbar-sub-btn" data-action="logout">
+                    <span>🚪</span>
+                    <span class="quickbar-sub-label">Logout</span>
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
 </body>
 </html>
