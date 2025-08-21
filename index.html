@@ -1620,14 +1620,14 @@
             transform: scale(1.1) !important;
         }
 
-        /* === ADD TODO MODAL === removed - now using standard .modal class */
+        /* === UNIFIED MINIMAL MODAL DESIGN === */
         .modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1637,46 +1637,127 @@
         .modal.hide { display: none; }
         .modal-content {
             background: #ffffff;
-            border: 1px solid #e0e0e0;
-            padding: 3rem;
+            border: 2px solid #000000;
             width: 100%;
-            max-width: 500px;
+            max-width: 420px;
             position: relative;
             z-index: 4001;
+            box-shadow: 0 0 0 rgba(0, 0, 0, 0);
         }
         .modal-content .close {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
+            top: 0;
+            right: 0;
+            width: 32px;
+            height: 32px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
             cursor: pointer;
-            font-size: 1.5rem;
-            color: #666;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.1s ease;
         }
         .modal-content .close:hover {
-            color: #000;
+            background: #333333;
         }
-        /* === REMOVED unused .add-todo-container, .add-todo-header styles - now using standard .modal-content === */
+        .modal-content h2 {
+            background: #000000;
+            color: #ffffff;
+            margin: 0;
+            padding: 16px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: none;
+        }
+        /* === MINIMAL FORM STYLES === */
+        .modal-body {
+            padding: 24px;
+        }
         .form-row {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: 12px;
+            margin-bottom: 16px;
         }
         .form-row .form-group {
             flex: 1;
         }
-        .form-group select {
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #000000;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding: 1rem;
-            border: 1px solid #d0d0d0;
+            padding: 12px 16px;
+            border: 1px solid #000000;
             background: #ffffff;
             font-family: inherit;
-            font-size: 0.95rem;
+            font-size: 14px;
+            color: #000000;
+            box-sizing: border-box;
         }
-        .form-group select:focus { outline: none; border-color: #000000; }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #000000;
+            border-width: 2px;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
         .form-actions {
             display: flex;
-            gap: 1rem;
+            gap: 12px;
             justify-content: flex-end;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #000000;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: 1px solid #000000;
+            background: #ffffff;
+            color: #000000;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+        .btn:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+        .btn.secondary {
+            background: #ffffff;
+            color: #666666;
+            border-color: #666666;
+        }
+        .btn.secondary:hover {
+            background: #666666;
+            color: #ffffff;
         }
 
         /* === AUTH SCREEN === */
@@ -3921,10 +4002,11 @@
     <!-- === ADD TODO MODAL === -->
     <div id="add-todo-modal" class="modal hide">
         <div class="modal-content">
-            <span class="close" onclick="document.getElementById('add-todo-modal').style.display='none'">&times;</span>
+            <button class="close" onclick="document.getElementById('add-todo-modal').style.display='none'">×</button>
             <h2>Todo hinzufügen</h2>
             
-            <form id="add-todo-form" autocomplete="off">
+            <div class="modal-body">
+                <form id="add-todo-form" autocomplete="off">
                 <div class="form-group">
                     <label for="todo-title">Aufgabe</label>
                     <input type="text" id="todo-title" name="todo-title" placeholder="Was möchtest du erledigen?" required autocomplete="off">
@@ -3962,21 +4044,23 @@
                     </div>
                 </div>
                 
-                <div class="form-actions">
-                    <button type="button" id="cancel-todo-btn" class="btn secondary">Abbrechen</button>
-                    <button type="submit" class="btn">Todo erstellen</button>
-                </div>
-            </form>
+                    <div class="form-actions">
+                        <button type="button" id="cancel-todo-btn" class="btn secondary">Abbrechen</button>
+                        <button type="submit" class="btn">Erstellen</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <!-- === ADD GOAL MODAL === -->
     <div id="add-goal-modal" class="modal hide">
         <div class="modal-content">
-            <span class="close" onclick="document.getElementById('add-goal-modal').style.display='none'">&times;</span>
+            <button class="close" onclick="document.getElementById('add-goal-modal').style.display='none'">×</button>
             <h2>Ziel hinzufügen</h2>
             
-            <form id="add-goal-form" autocomplete="off">
+            <div class="modal-body">
+                <form id="add-goal-form" autocomplete="off">
                 <div class="form-group">
                     <label for="goal-name">Ziel-Name</label>
                     <input type="text" id="goal-name" name="goal-name" placeholder="Was möchtest du erreichen?" required autocomplete="off">
@@ -3984,7 +4068,7 @@
                 
                 <div class="form-group">
                     <label for="goal-description">Beschreibung</label>
-                    <textarea id="goal-description" placeholder="Detaillierte Beschreibung des Ziels..." rows="3" required autocomplete="off" style="width: 100%; padding: 1rem; border: 1px solid #d0d0d0; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
+                    <textarea id="goal-description" placeholder="Detaillierte Beschreibung des Ziels..." required autocomplete="off"></textarea>
                 </div>
                 
                 <div class="form-row">
@@ -4009,21 +4093,23 @@
                     </div>
                 </div>
                 
-                <div class="form-actions">
-                    <button type="button" id="cancel-goal-btn" class="btn secondary">Abbrechen</button>
-                    <button type="submit" class="btn">Ziel erstellen</button>
-                </div>
-            </form>
+                    <div class="form-actions">
+                        <button type="button" id="cancel-goal-btn" class="btn secondary">Abbrechen</button>
+                        <button type="submit" class="btn">Erstellen</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <!-- === ADD JOURNAL MODAL === -->
     <div id="add-journal-modal" class="modal hide">
         <div class="modal-content">
-            <span class="close" onclick="document.getElementById('add-journal-modal').style.display='none'">&times;</span>
-            <h2>Journal Eintrag hinzufügen</h2>
+            <button class="close" onclick="document.getElementById('add-journal-modal').style.display='none'">×</button>
+            <h2>Journal Eintrag</h2>
             
-            <form id="add-journal-form" autocomplete="off">
+            <div class="modal-body">
+                <form id="add-journal-form" autocomplete="off">
                 <div class="form-group">
                     <label for="journal-title">Titel</label>
                     <input type="text" id="journal-title" placeholder="Titel für den Eintrag..." required autocomplete="off">
@@ -4031,7 +4117,7 @@
                 
                 <div class="form-group">
                     <label for="journal-content">Inhalt</label>
-                    <textarea id="journal-content" placeholder="Was beschäftigt dich heute...?" rows="6" required autocomplete="off" style="width: 100%; padding: 1rem; border: 1px solid #d0d0d0; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
+                    <textarea id="journal-content" placeholder="Was beschäftigt dich heute...?" required autocomplete="off"></textarea>
                 </div>
                 
                 <div class="form-group">
@@ -4039,21 +4125,23 @@
                     <input type="text" id="journal-tags" placeholder="z.B. persönlich, reflektion, arbeit">
                 </div>
                 
-                <div class="form-actions">
-                    <button type="button" id="cancel-journal-btn" class="btn secondary">Abbrechen</button>
-                    <button type="submit" class="btn">Journal erstellen</button>
-                </div>
-            </form>
+                    <div class="form-actions">
+                        <button type="button" id="cancel-journal-btn" class="btn secondary">Abbrechen</button>
+                        <button type="submit" class="btn">Erstellen</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <!-- === ADD TERMIN MODAL === -->
     <div id="add-termin-modal" class="modal hide">
         <div class="modal-content">
-            <span class="close" onclick="document.getElementById('add-termin-modal').style.display='none'">&times;</span>
-            <h2>Termin hinzufügen</h2>
+            <button class="close" onclick="document.getElementById('add-termin-modal').style.display='none'">×</button>
+            <h2>Termin</h2>
             
-            <form id="add-termin-form" autocomplete="off">
+            <div class="modal-body">
+                <form id="add-termin-form" autocomplete="off">
                 <div class="form-group">
                     <label for="termin-title">Titel</label>
                     <input type="text" id="termin-title" placeholder="z.B. Zahnarzt Termin..." required autocomplete="off">
@@ -4061,7 +4149,7 @@
                 
                 <div class="form-group">
                     <label for="termin-description">Beschreibung</label>
-                    <textarea id="termin-description" placeholder="Weitere Details zum Termin..." rows="3" required autocomplete="off" style="width: 100%; padding: 1rem; border: 1px solid #d0d0d0; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
+                    <textarea id="termin-description" placeholder="Weitere Details zum Termin..." required autocomplete="off"></textarea>
                 </div>
                 
                 <div class="form-row">
@@ -4075,19 +4163,22 @@
                     </div>
                 </div>
                 
-                <div class="form-actions">
-                    <button type="button" id="cancel-termin-btn" class="btn secondary">Abbrechen</button>
-                    <button type="submit" class="btn">Termin erstellen</button>
-                </div>
-            </form>
+                    <div class="form-actions">
+                        <button type="button" id="cancel-termin-btn" class="btn secondary">Abbrechen</button>
+                        <button type="submit" class="btn">Erstellen</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <!-- === EDIT GOAL VALUE MODAL === -->
     <div id="edit-goal-value-modal" class="modal hide">
         <div class="modal-content">
-            <span class="close" onclick="document.getElementById('edit-goal-value-modal').style.display='none'">&times;</span>
-            <h2 id="edit-goal-modal-title">Fortschritt aktualisieren</h2>
+            <button class="close" onclick="document.getElementById('edit-goal-value-modal').style.display='none'">×</button>
+            <h2 id="edit-goal-modal-title">Fortschritt</h2>
+            
+            <div class="modal-body">
             
             <div id="edit-goal-current-status" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; color: #666;">
                 <!-- Current goal status will be inserted here -->
@@ -4096,14 +4187,15 @@
             <form id="edit-goal-value-form" autocomplete="off">
                 <div class="form-group">
                     <label for="new-goal-value">Neuer aktueller Wert</label>
-                    <input type="number" id="new-goal-value" name="new-goal-value" step="0.01" required autocomplete="off" style="font-size: 1.1rem; padding: 0.75rem;">
+                    <input type="number" id="new-goal-value" name="new-goal-value" step="0.01" required autocomplete="off">
                 </div>
                 
-                <div class="form-actions">
-                    <button type="button" id="cancel-edit-goal-value-btn" class="btn secondary">Abbrechen</button>
-                    <button type="submit" class="btn">Wert aktualisieren</button>
-                </div>
-            </form>
+                    <div class="form-actions">
+                        <button type="button" id="cancel-edit-goal-value-btn" class="btn secondary">Abbrechen</button>
+                        <button type="submit" class="btn">Aktualisieren</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -4922,9 +5014,11 @@
     <!-- Add Resource Modal -->
     <div id="add-resource-modal" class="modal hide">
         <div class="modal-content">
-            <span class="close" onclick="ResourceManager.hideAddResourceModal()">&times;</span>
-            <h2>Add Resource</h2>
-            <form id="add-resource-form">
+            <button class="close" onclick="ResourceManager.hideAddResourceModal()">×</button>
+            <h2>Resource</h2>
+            
+            <div class="modal-body">
+                <form id="add-resource-form">
                 <div class="form-group">
                     <label for="resource-title">Title *</label>
                     <input type="text" id="resource-title" required autocomplete="off">
@@ -4975,20 +5069,23 @@
                     <button type="button" class="btn-link" onclick="ResourceManager.toggleIconInput()" style="font-size: 0.8rem; margin-top: 0.25rem;">Enable manual typing</button>
                 </div>
                 
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="ResourceManager.hideAddResourceModal()">Cancel</button>
-                    <button type="submit" class="btn">Add Resource</button>
-                </div>
-            </form>
+                    <div class="form-actions">
+                        <button type="button" class="btn secondary" onclick="ResourceManager.hideAddResourceModal()">Abbrechen</button>
+                        <button type="submit" class="btn">Erstellen</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <!-- Add Wiki Entry Modal -->
     <div id="add-wiki-modal" class="modal hide">
         <div class="modal-content">
-            <span class="close" onclick="document.getElementById('add-wiki-modal').style.display='none'">&times;</span>
-            <h2>Wiki Entry hinzufügen</h2>
-            <form id="add-wiki-form" autocomplete="off">
+            <button class="close" onclick="document.getElementById('add-wiki-modal').style.display='none'">×</button>
+            <h2>Wiki Entry</h2>
+            
+            <div class="modal-body">
+                <form id="add-wiki-form" autocomplete="off">
                 <div class="form-group">
                     <label for="wiki-title">Titel</label>
                     <input type="text" id="wiki-title" placeholder="Titel für den Eintrag..." required autocomplete="off">
@@ -4996,7 +5093,7 @@
                 
                 <div class="form-group">
                     <label for="wiki-content">Inhalt</label>
-                    <textarea id="wiki-content" placeholder="Beschreibung, Regeln oder Learnings..." rows="6" required autocomplete="off" style="width: 100%; padding: 1rem; border: 1px solid #d0d0d0; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
+                    <textarea id="wiki-content" placeholder="Beschreibung, Regeln oder Learnings..." required autocomplete="off"></textarea>
                 </div>
                 
                 <div class="form-group">
@@ -5006,11 +5103,12 @@
                 
                 
                 
-                <div class="form-actions">
-                    <button type="button" id="cancel-wiki-btn" class="btn secondary">Abbrechen</button>
-                    <button type="submit" class="btn">Wiki Eintrag erstellen</button>
-                </div>
-            </form>
+                    <div class="form-actions">
+                        <button type="button" id="cancel-wiki-btn" class="btn secondary">Abbrechen</button>
+                        <button type="submit" class="btn">Erstellen</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
