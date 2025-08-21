@@ -6463,7 +6463,8 @@
                             priority: this.priorityIntToString(dbTodo.priority || 1)
                         };
                         this.todos.push(uiTodo);
-                        console.log('✅ Todo added to local array, refreshing view...');
+                        console.log('✅ Todo added to local array:', uiTodo);
+                        console.log('📊 Total todos in array:', this.todos.length);
                     } else {
                         throw new Error('Insert did not return data');
                     }
@@ -6474,6 +6475,7 @@
                 }
                 
                 // Refresh current view immediately
+                console.log('🔄 Calling refreshCurrentView after adding todo...');
                 this.refreshCurrentView();
                 
                 // Update counters
@@ -6521,8 +6523,13 @@
             },
             
             displayTodosForCategory(category) {
+                console.log('🔄 displayTodosForCategory called with category:', category);
                 const container = document.getElementById(`todo-${category}`);
-                if (!container) return;
+                console.log('🔍 Container found:', !!container, container ? container.id : 'NOT FOUND');
+                if (!container) {
+                    console.error('❌ Container not found for category:', category);
+                    return;
+                }
                 
                 let filteredTodos = [];
                 
@@ -6567,10 +6574,15 @@
                     return timeA.localeCompare(timeB);
                 });
                 
+                console.log('🔍 Filtered todos for category', category, ':', filteredTodos.length);
+                console.log('🔍 First few todos:', filteredTodos.slice(0, 3).map(t => ({id: t.id, title: t.title, category: t.category})));
+                
                 // Clear container
                 container.innerHTML = '';
+                console.log('🧹 Container cleared');
                 
                 if (filteredTodos.length === 0) {
+                    console.log('⚠️ No todos to display for category:', category);
                     container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Keine Todos vorhanden</p>';
                     return;
                 }
@@ -6580,12 +6592,16 @@
                 todoList.className = 'todo-list';
                 
                 // Display todos
-                filteredTodos.forEach(todo => {
+                console.log('🔧 Creating todo elements...');
+                filteredTodos.forEach((todo, index) => {
+                    console.log(`🔧 Creating element ${index + 1}/${filteredTodos.length}:`, todo.title);
                     const todoElement = this.createTodoElement(todo);
                     todoList.appendChild(todoElement);
                 });
                 
                 container.appendChild(todoList);
+                console.log('✅ Todo list appended to container:', container.id);
+                console.log('🔍 Final container children count:', container.children.length);
             },
             
             createTodoElement(todo) {
