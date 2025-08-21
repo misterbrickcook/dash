@@ -10103,6 +10103,13 @@
 
             init() {
                 this.setupEventListeners();
+                // Initialize Lucide icons for QuickBar
+                setTimeout(() => {
+                    if (window.lucide) {
+                        lucide.createIcons();
+                        console.log('🎨 Lucide icons initialized for QuickBar');
+                    }
+                }, 100);
             }
 
             setupEventListeners() {
@@ -10179,6 +10186,13 @@
 
             handleAction(action) {
                 this.closeAllSubMenus();
+                
+                // Refresh Lucide icons after closing menus
+                setTimeout(() => {
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                }, 50);
                 
                 switch(action) {
                     // === ADD ACTIONS ===
