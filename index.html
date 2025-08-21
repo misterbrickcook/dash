@@ -10093,6 +10093,9 @@
 
             updateButtonState() {
                 const pomodoroBtn = document.querySelector('[data-action="pomodoro"]');
+                const actionsMainBtn = document.getElementById('quickbar-actions');
+                
+                // Update sub-button (pomodoro button)
                 if (pomodoroBtn) {
                     const icon = pomodoroBtn.querySelector('i');
                     if (icon) {
@@ -10112,12 +10115,38 @@
                             pomodoroBtn.style.background = '';
                             pomodoroBtn.style.color = '';
                         }
-                        
-                        // Refresh Lucide icons
-                        if (window.lucide) {
-                            lucide.createIcons();
+                    }
+                }
+                
+                // Update main actions button when Pomodoro is running/paused
+                if (actionsMainBtn) {
+                    const mainIcon = actionsMainBtn.querySelector('i');
+                    if (mainIcon) {
+                        if (this.isRunning) {
+                            // Show pause icon on main button when running
+                            mainIcon.setAttribute('data-lucide', 'pause-circle');
+                            actionsMainBtn.style.background = '#ef4444'; // Red when running
+                            actionsMainBtn.style.color = 'white';
+                            actionsMainBtn.setAttribute('data-tooltip', `Pomodoro läuft - Klick zum Pausieren`);
+                        } else if (this.timeLeft < this.duration) {
+                            // Show play icon on main button when paused
+                            mainIcon.setAttribute('data-lucide', 'play-circle');
+                            actionsMainBtn.style.background = '#f59e0b'; // Orange when paused
+                            actionsMainBtn.style.color = 'white';
+                            actionsMainBtn.setAttribute('data-tooltip', `Pomodoro pausiert - Klick zum Fortsetzen`);
+                        } else {
+                            // Reset to default zap icon
+                            mainIcon.setAttribute('data-lucide', 'zap');
+                            actionsMainBtn.style.background = '';
+                            actionsMainBtn.style.color = '';
+                            actionsMainBtn.setAttribute('data-tooltip', 'Quick Actions');
                         }
                     }
+                }
+                
+                // Refresh Lucide icons
+                if (window.lucide) {
+                    lucide.createIcons();
                 }
                 
                 this.updateDisplay();
@@ -10229,6 +10258,15 @@
                     if (e.target.closest('.quickbar-main-btn')) {
                         const btn = e.target.closest('.quickbar-main-btn');
                         const category = btn.dataset.category;
+                        
+                        // Special handling for actions category when Pomodoro is running
+                        if (category === 'actions' && window.PomodoroTimer && window.PomodoroTimer.isRunning) {
+                            // If Pomodoro is running, clicking the main actions button directly toggles it
+                            window.PomodoroTimer.toggle();
+                            this.closeAllSubMenus(); // Close any open menus
+                            return;
+                        }
+                        
                         this.toggleCategory(category);
                     }
                     
