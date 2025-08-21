@@ -1754,15 +1754,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             z-index: 3001;
             border-radius: 50%;
+            color: #333333;
+        }
+
+        .quickbar-main-btn i {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
         }
 
         .quickbar-main-btn:hover {
             background: rgba(0, 0, 0, 0.1);
+            color: #000000;
             transform: scale(1.15);
         }
 
@@ -1772,6 +1779,7 @@
 
         .quickbar-main-btn.active {
             background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
             transform: scale(1.1);
         }
 
@@ -1808,12 +1816,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             opacity: 0;
             transform: translateY(-10px) scale(0.8);
+            color: #333333;
+        }
+
+        .quickbar-sub-btn i {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
         }
 
         .quickbar-sub-buttons.show .quickbar-sub-btn {
@@ -1823,6 +1837,7 @@
 
         .quickbar-sub-btn:hover {
             background: rgba(255, 255, 255, 1);
+            color: #000000;
             transform: translateY(0) scale(1.1);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         }
@@ -13190,26 +13205,26 @@
         <!-- ADDS Category -->
         <div class="quickbar-category" data-category="adds">
             <button id="quickbar-adds" class="quickbar-main-btn" data-category="adds" data-tooltip="Add Items">
-                <span>🎯</span>
+                <i data-lucide="plus"></i>
             </button>
             <div id="quickbar-adds-sub" class="quickbar-sub-buttons" data-category="adds">
                 <button class="quickbar-sub-btn" data-action="add-todo" data-tooltip="Todo hinzufügen">
-                    <span>➕</span>
+                    <i data-lucide="check-square"></i>
                 </button>
                 <button class="quickbar-sub-btn" data-action="add-termin" data-tooltip="Termin erstellen">
-                    <span>📅</span>
+                    <i data-lucide="calendar"></i>
                 </button>
                 <button class="quickbar-sub-btn" data-action="add-goal" data-tooltip="Ziel setzen">
-                    <span>🎯</span>
+                    <i data-lucide="target"></i>
                 </button>
                 <button class="quickbar-sub-btn" data-action="add-resource" data-tooltip="Resource speichern">
-                    <span>💡</span>
+                    <i data-lucide="bookmark"></i>
                 </button>
                 <button class="quickbar-sub-btn" data-action="add-wiki" data-tooltip="Wiki Eintrag">
-                    <span>📝</span>
+                    <i data-lucide="file-text"></i>
                 </button>
                 <button class="quickbar-sub-btn" data-action="add-journal" data-tooltip="Journal Eintrag">
-                    <span>💭</span>
+                    <i data-lucide="book-open"></i>
                 </button>
             </div>
         </div>
@@ -13217,17 +13232,17 @@
         <!-- ACTIONS Category -->
         <div class="quickbar-category" data-category="actions">
             <button id="quickbar-actions" class="quickbar-main-btn" data-category="actions" data-tooltip="Quick Actions">
-                <span>⚡</span>
+                <i data-lucide="zap"></i>
             </button>
             <div id="quickbar-actions-sub" class="quickbar-sub-buttons" data-category="actions">
                 <button class="quickbar-sub-btn" data-action="global-search" data-tooltip="Global Search">
-                    <span>🔍</span>
+                    <i data-lucide="search"></i>
                 </button>
                 <button class="quickbar-sub-btn" data-action="pomodoro" data-tooltip="Pomodoro Timer">
-                    <span>⏰</span>
+                    <i data-lucide="timer"></i>
                 </button>
                 <button class="quickbar-sub-btn" data-action="trading-rules" data-tooltip="Trading Rules">
-                    <span>📊</span>
+                    <i data-lucide="trending-up"></i>
                 </button>
             </div>
         </div>
@@ -13235,17 +13250,17 @@
         <!-- SYSTEM Category -->
         <div class="quickbar-category" data-category="system">
             <button id="quickbar-system" class="quickbar-main-btn" data-category="system" data-tooltip="System">
-                <span>⚙️</span>
+                <i data-lucide="settings"></i>
             </button>
             <div id="quickbar-system-sub" class="quickbar-sub-buttons" data-category="system">
                 <button class="quickbar-sub-btn" data-action="dark-mode" data-tooltip="Dark Mode">
-                    <span>🌙</span>
+                    <i data-lucide="moon"></i>
                 </button>
                 <button class="quickbar-sub-btn" data-action="settings" data-tooltip="Einstellungen">
-                    <span>⚙️</span>
+                    <i data-lucide="sliders"></i>
                 </button>
                 <button class="quickbar-sub-btn" data-action="logout" data-tooltip="Ausloggen">
-                    <span>🚪</span>
+                    <i data-lucide="log-out"></i>
                 </button>
             </div>
         </div>
