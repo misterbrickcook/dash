@@ -12876,9 +12876,23 @@
             }
             
             static openSettings() {
-                // Switch to settings tab
-                switchTab('tab-settings');
-                // Settings tab will be opened
+                // Manually activate settings tab since it's not in navbar anymore
+                const allTabs = document.querySelectorAll('.tab-section');
+                const allNavTabs = document.querySelectorAll('.nav-tab');
+                
+                // Hide all tabs
+                allTabs.forEach(tab => tab.classList.remove('active'));
+                // Remove active from all nav tabs
+                allNavTabs.forEach(tab => tab.classList.remove('active'));
+                
+                // Show settings tab
+                const settingsTab = document.getElementById('tab-settings');
+                if (settingsTab) {
+                    settingsTab.classList.add('active');
+                }
+                
+                // Update page title
+                document.title = 'Settings - Dash v4.1';
             }
             
             static logout() {
