@@ -6226,13 +6226,21 @@
                 }
             },
             
-            showAddTodoModal() {
+            showAddTodoModal(preselectedCategory = null) {
                 const modal = document.getElementById('add-todo-modal');
                 modal.classList.remove('hide');
                 
                 // Set today's date as default
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('todo-deadline').value = today;
+                
+                // Preselect category if provided
+                if (preselectedCategory) {
+                    const categorySelect = document.getElementById('todo-category');
+                    if (categorySelect) {
+                        categorySelect.value = preselectedCategory;
+                    }
+                }
             },
             
             hideAddTodoModal() {
@@ -8837,12 +8845,24 @@
                 });
             }
 
-            // Add to Category Buttons
+            // Add to Category Buttons - different behavior for todos vs resources
             const addToCategoryBtns = document.querySelectorAll('.add-to-category-btn');
             addToCategoryBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const category = btn.getAttribute('data-category');
-                    ResourceManager.showAddResourceModal(category);
+                    // Check if we're in the todos tab
+                    const todoTab = document.getElementById('tab-todos');
+                    const resourceTab = document.getElementById('tab-ressourcen');
+                    
+                    if (todoTab && todoTab.classList.contains('active')) {
+                        // We're in todos tab - open todo modal
+                        if (window.TodoManager && typeof window.TodoManager.showAddTodoModal === 'function') {
+                            window.TodoManager.showAddTodoModal(category);
+                        }
+                    } else if (resourceTab && resourceTab.classList.contains('active')) {
+                        // We're in resources tab - open resource modal
+                        ResourceManager.showAddResourceModal(category);
+                    }
                 });
             });
             
