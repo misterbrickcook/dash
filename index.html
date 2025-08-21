@@ -3990,8 +3990,8 @@
                         <input type="date" id="todo-deadline" name="todo-deadline" autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label for="todo-time">Uhrzeit</label>
-                        <input type="time" id="todo-time" name="todo-time" value="21:00" required autocomplete="off">
+                        <label for="todo-time">Uhrzeit (optional)</label>
+                        <input type="time" id="todo-time" name="todo-time" value="21:00" autocomplete="off">
                     </div>
                 </div>
                 
@@ -4027,34 +4027,19 @@
                         <input type="text" id="goal-category" placeholder="z.B. Fitness, Karriere, Finanzen..." required autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label for="goal-timeframe">Zeitrahmen</label>
-                        <select id="goal-timeframe" required autocomplete="off">
-                            <option value="monat">Monat</option>
-                            <option value="quartal">Quartal</option>
-                            <option value="jahr">Jahr</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
                         <label for="goal-deadline">Deadline</label>
                         <input type="date" id="goal-deadline" required autocomplete="off">
                     </div>
-                    <div class="form-group">
-                        <label for="goal-unit">Einheit</label>
-                        <input type="text" id="goal-unit" placeholder="z.B. kg, €, Bücher, Stunden..." autocomplete="off">
-                    </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="goal-start-value">Startwert</label>
-                        <input type="number" id="goal-start-value" placeholder="z.B. 80" step="0.01" autocomplete="off">
+                        <label for="goal-start-value">Startwert mit Einheit</label>
+                        <input type="text" id="goal-start-value" placeholder="z.B. 80kg, 1000€, 0 Bücher..." autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label for="goal-target-value">Zielwert</label>
-                        <input type="number" id="goal-target-value" placeholder="z.B. 70" step="0.01" required autocomplete="off">
+                        <label for="goal-target-value">Zielwert mit Einheit</label>
+                        <input type="text" id="goal-target-value" placeholder="z.B. 70kg, 5000€, 12 Bücher..." required autocomplete="off">
                     </div>
                 </div>
                 
@@ -4995,11 +4980,6 @@
                 <div class="form-group">
                     <label for="resource-url">URL *</label>
                     <input type="url" id="resource-url" placeholder="https://example.com" required autocomplete="off">
-                </div>
-                
-                <div class="form-group">
-                    <label for="resource-description">Description</label>
-                    <textarea id="resource-description" rows="3" placeholder="Optional description..." autocomplete="off"></textarea>
                 </div>
                 
                 <div class="form-group">
