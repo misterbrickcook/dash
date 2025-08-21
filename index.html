@@ -6485,13 +6485,14 @@
             },
             
             refreshCurrentView() {
-                // Get current active category
-                const activeTab = document.querySelector('.category-tab.active');
-                const activeCategory = activeTab ? activeTab.getAttribute('data-category') : 'heute';
+                console.log('🔄 Refreshing all todo containers...');
                 
-                console.log('🔄 Refreshing view for category:', activeCategory);
-                
-                this.displayTodosForCategory(activeCategory);
+                // Update all todo categories since there's no active tab system in todos
+                const categories = ['privat', 'uni', 'arbeit', 'projekte'];
+                categories.forEach(category => {
+                    console.log(`🔄 Refreshing category: ${category}`);
+                    this.displayTodosForCategory(category);
+                });
                 
                 // Also update home todos
                 this.updateHomeTodos();
