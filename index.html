@@ -1759,6 +1759,24 @@
             background: #666666;
             color: #ffffff;
         }
+        
+        /* === PAGE HEADERS === */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #000000;
+        }
+        .page-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #000000;
+        }
 
         /* === AUTH SCREEN === */
         .auth-screen {
@@ -4372,6 +4390,11 @@
 
         <!-- === TODOS TAB === -->
         <section id="tab-todos" class="tab-section">
+            
+            <div class="page-header">
+                <h2>Todos</h2>
+                <button id="add-todo-btn" class="btn">+ Hinzufügen</button>
+            </div>
 
             <div class="todos-grid">
                 <!-- PRIVAT BLOCK -->
@@ -4459,53 +4482,24 @@
         <!-- === ZIELE TAB === -->
         <section id="tab-ziele" class="tab-section">
             
-            <div class="category-tabs">
-                <button class="ziel-tab active" data-ziel-category="alle">Alle</button>
-                <button class="ziel-tab" data-ziel-category="monat">Monat</button>
-                <button class="ziel-tab" data-ziel-category="quartal">Quartal</button>
-                <button class="ziel-tab" data-ziel-category="jahr">Jahr</button>
-                <button class="ziel-tab" data-ziel-category="archiv">Archiv</button>
-                <button id="add-goal-btn" class="btn" style="margin-left: 2rem;">+ Add Goal</button>
-                <button id="clear-goal-archive-btn" class="btn secondary" style="margin-left: 1rem; display: none;">🗑️ Archiv leeren</button>
+            <div class="page-header">
+                <h2>Ziele</h2>
+                <button id="add-goal-btn" class="btn">+ Hinzufügen</button>
             </div>
 
-            <!-- MONAT KATEGORIE -->
-            <div class="ziel-content" id="ziel-monat">
-                <!-- Monatsziele will be loaded from database -->
-            </div>
-
-            <!-- QUARTAL KATEGORIE -->
-            <div class="ziel-content" id="ziel-quartal">
-                <!-- Quartalsziele will be loaded from database -->
-            </div>
-
-            <!-- JAHR KATEGORIE -->
-            <div class="ziel-content" id="ziel-jahr">
-                <!-- Jahresziele will be loaded from database -->
-            </div>
-
-            <!-- ALLE KATEGORIE -->
-            <div class="ziel-content active" id="ziel-alle">
-                <!-- All ziele will be loaded from database -->
-            </div>
-
-            <!-- ARCHIV KATEGORIE -->
-            <div class="ziel-content" id="ziel-archiv">
-                <!-- Completed/archived ziele will be loaded from database -->
+            <!-- ZIELE CONTENT -->
+            <div class="ziele-content" id="goals-list">
+                <!-- Ziele will be loaded from database -->
             </div>
 
         </section>
 
         <!-- === JOURNAL TAB === -->
         <section id="tab-journal" class="tab-section">
-            <!-- Search and Filter Bar -->
-            <div class="wiki-controls">
-                <div class="search-container">
-                    <input type="text" id="journal-search" placeholder="Search entries and tags..." class="search-input">
-                    <button class="search-btn" onclick="JournalManager.search()">
-                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
-                    </button>
-                </div>
+            
+            <div class="page-header">
+                <h2>Journal</h2>
+                <button id="add-journal-btn" class="btn">+ Hinzufügen</button>
             </div>
 
             <!-- Journal Content -->
@@ -4768,6 +4762,11 @@
 
         <!-- === ANALYTICS TAB === -->
         <section id="tab-analytics" class="tab-section">
+            
+            <div class="page-header">
+                <h2>Analytics</h2>
+            </div>
+            
             <div class="analytics-container">
                 
                 <!-- Analytics Charts Grid -->
@@ -4847,6 +4846,11 @@
 
         <!-- === RESSOURCEN TAB === -->
         <section id="tab-ressourcen" class="tab-section">
+            
+            <div class="page-header">
+                <h2>Ressourcen</h2>
+                <button id="add-resource-btn" class="btn">+ Hinzufügen</button>
+            </div>
 
             <div class="resources-grid">
                 <!-- PRIVAT BLOCK -->
@@ -5007,14 +5011,10 @@
 
         <!-- === WIKI TAB === -->
         <section id="tab-wiki" class="tab-section">
-            <!-- Search and Filter Bar -->
-            <div class="wiki-controls">
-                <div class="search-container">
-                    <input type="text" id="wiki-search" placeholder="Search entries and tags..." class="search-input">
-                    <button class="search-btn" onclick="Wiki.search()">
-                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
-                    </button>
-                </div>
+            
+            <div class="page-header">
+                <h2>Wiki</h2>
+                <button id="add-wiki-btn" class="btn">+ Hinzufügen</button>
             </div>
 
             <!-- Wiki Content -->
@@ -8451,6 +8451,22 @@
             if (addTerminBtn) {
                 addTerminBtn.addEventListener('click', () => {
                     TerminManager.showAddTerminModal();
+                });
+            }
+            
+            // Add Journal Button
+            const addJournalBtn = document.getElementById('add-journal-btn');
+            if (addJournalBtn) {
+                addJournalBtn.addEventListener('click', () => {
+                    document.getElementById('add-journal-modal').classList.remove('hide');
+                });
+            }
+            
+            // Add Wiki Button  
+            const addWikiBtn = document.getElementById('add-wiki-btn');
+            if (addWikiBtn) {
+                addWikiBtn.addEventListener('click', () => {
+                    document.getElementById('add-wiki-modal').classList.remove('hide');
                 });
             }
             
