@@ -1756,12 +1756,12 @@
         }
         .todo-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
             padding: 12px 16px;
             border: 1px solid #e0e0e0;
             background: #ffffff;
             transition: all 0.1s ease;
+            gap: 12px;
         }
         .todo-item:hover {
             border-color: #000000;
@@ -1772,6 +1772,7 @@
         }
         .todo-content {
             flex: 1;
+            cursor: pointer;
         }
         .todo-title {
             font-size: 14px;
@@ -1803,33 +1804,24 @@
         .todo-date {
             color: #666666;
         }
-        .todo-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .todo-complete-btn,
         .todo-delete-btn {
             width: 24px;
             height: 24px;
-            border: 1px solid #000000;
+            border: 1px solid #dc2626;
             background: #ffffff;
-            color: #000000;
+            color: #dc2626;
             font-size: 12px;
             font-weight: bold;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             transition: all 0.1s ease;
-        }
-        .todo-complete-btn:hover {
-            background: #000000;
-            color: #ffffff;
+            margin-left: auto;
         }
         .todo-delete-btn:hover {
             background: #dc2626;
             color: #ffffff;
-            border-color: #dc2626;
         }
         
         /* === PAGE HEADERS === */
@@ -4130,11 +4122,11 @@
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="todo-deadline">Deadline (optional)</label>
+                        <label for="todo-deadline">Deadline</label>
                         <input type="date" id="todo-deadline" name="todo-deadline" autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label for="todo-time">Uhrzeit (optional)</label>
+                        <label for="todo-time">Uhrzeit</label>
                         <input type="time" id="todo-time" name="todo-time" value="21:00" autocomplete="off">
                     </div>
                 </div>
@@ -6592,24 +6584,45 @@
                 todoItem.className = `todo-item${todo.completed ? ' completed' : ''}`;
                 todoItem.dataset.todoId = todo.id;
                 
-                // Create simple compact HTML with priority dot
+                // Create simple compact HTML with priority dot and checkbox
                 todoItem.innerHTML = `
                     <div class="todo-priority priority-${todo.priority || 'mittel'}"></div>
-                    <div class="todo-content">
+                    <input type="checkbox" id="todo-${todo.id}" ${todo.completed ? 'checked' : ''} onchange="TodoManager.toggleTodo('${todo.id}')">
+                    <label for="todo-${todo.id}" class="todo-content">
                         <div class="todo-title">${todo.title}</div>
                         <div class="todo-meta">
                             ${todo.date ? `<span class="todo-date">${todo.date}</span>` : ''}
                         </div>
-                    </div>
-                    <div class="todo-actions">
-                        <button class="todo-complete-btn" onclick="TodoManager.toggleTodo('${todo.id}')" title="Abhaken">
-                            ✓
-                        </button>
-                        <button class="todo-delete-btn" onclick="TodoManager.deleteTodo('${todo.id}')" title="Löschen">
-                            ×
-                        </button>
-                    </div>
+                    </label>
+                    <button class="todo-delete-btn" onclick="TodoManager.deleteTodo('${todo.id}')" title="Löschen" style="display: none;">
+                        ×
+                    </button>
                 `;
+                
+                // Add right-click functionality to show delete button
+                todoItem.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    const deleteBtn = todoItem.querySelector('.todo-delete-btn');
+                    if (deleteBtn.style.display === 'none') {
+                        deleteBtn.style.display = 'inline-flex';
+                        // Hide after 3 seconds or when clicking elsewhere
+                        setTimeout(() => {
+                            deleteBtn.style.display = 'none';
+                        }, 3000);
+                    } else {
+                        deleteBtn.style.display = 'none';
+                    }
+                });
+                
+                // Hide delete button when clicking elsewhere
+                document.addEventListener('click', (e) => {
+                    if (!todoItem.contains(e.target)) {
+                        const deleteBtn = todoItem.querySelector('.todo-delete-btn');
+                        if (deleteBtn) {
+                            deleteBtn.style.display = 'none';
+                        }
+                    }
+                });
                 
                 return todoItem;
             },
