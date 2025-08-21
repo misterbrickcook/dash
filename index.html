@@ -1763,19 +1763,11 @@
         /* === PAGE HEADERS === */
         .page-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             margin-bottom: 32px;
             padding-bottom: 16px;
             border-bottom: 1px solid #000000;
-        }
-        .page-header h2 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #000000;
         }
 
         /* === AUTH SCREEN === */
@@ -4392,7 +4384,6 @@
         <section id="tab-todos" class="tab-section">
             
             <div class="page-header">
-                <h2>Todos</h2>
                 <button id="add-todo-btn" class="btn">+ Hinzufügen</button>
             </div>
 
@@ -4404,9 +4395,6 @@
                             <i data-lucide="home" style="width: 18px; height: 18px;"></i>
                             Privat
                         </h3>
-                        <button class="add-to-category-btn" data-category="privat" title="Add to Privat">
-                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                        </button>
                     </div>
                     <div class="todo-links" id="todo-privat">
                         <div class="todo-empty-state">
@@ -4424,9 +4412,6 @@
                             <i data-lucide="graduation-cap" style="width: 18px; height: 18px;"></i>
                             Uni
                         </h3>
-                        <button class="add-to-category-btn" data-category="uni" title="Add to Uni">
-                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                        </button>
                     </div>
                     <div class="todo-links" id="todo-uni">
                         <div class="todo-empty-state">
@@ -4444,9 +4429,6 @@
                             <i data-lucide="briefcase" style="width: 18px; height: 18px;"></i>
                             Arbeit
                         </h3>
-                        <button class="add-to-category-btn" data-category="arbeit" title="Add to Arbeit">
-                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                        </button>
                     </div>
                     <div class="todo-links" id="todo-arbeit">
                         <div class="todo-empty-state">
@@ -4464,9 +4446,6 @@
                             <i data-lucide="trending-up" style="width: 18px; height: 18px;"></i>
                             Projekte
                         </h3>
-                        <button class="add-to-category-btn" data-category="projekte" title="Add to Projekte">
-                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                        </button>
                     </div>
                     <div class="todo-links" id="todo-projekte">
                         <div class="todo-empty-state">
@@ -4483,7 +4462,6 @@
         <section id="tab-ziele" class="tab-section">
             
             <div class="page-header">
-                <h2>Ziele</h2>
                 <button id="add-goal-btn" class="btn">+ Hinzufügen</button>
             </div>
 
@@ -4498,7 +4476,6 @@
         <section id="tab-journal" class="tab-section">
             
             <div class="page-header">
-                <h2>Journal</h2>
                 <button id="add-journal-btn" class="btn">+ Hinzufügen</button>
             </div>
 
@@ -4763,9 +4740,6 @@
         <!-- === ANALYTICS TAB === -->
         <section id="tab-analytics" class="tab-section">
             
-            <div class="page-header">
-                <h2>Analytics</h2>
-            </div>
             
             <div class="analytics-container">
                 
@@ -4848,7 +4822,6 @@
         <section id="tab-ressourcen" class="tab-section">
             
             <div class="page-header">
-                <h2>Ressourcen</h2>
                 <button id="add-resource-btn" class="btn">+ Hinzufügen</button>
             </div>
 
@@ -4860,9 +4833,6 @@
                             <i data-lucide="home" style="width: 18px; height: 18px;"></i>
                             Privat
                         </h3>
-                        <button class="add-to-category-btn" data-category="privat" title="Add to Privat">
-                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                        </button>
                     </div>
                     <div class="resource-links" id="resource-privat">
                         <!-- Private resources will be loaded here -->
@@ -4876,9 +4846,6 @@
                             <i data-lucide="trending-up" style="width: 18px; height: 18px;"></i>
                             Crypto
                         </h3>
-                        <button class="add-to-category-btn" data-category="crypto" title="Add to Crypto">
-                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                        </button>
                     </div>
                     <div class="resource-links" id="resource-crypto">
                         <!-- Crypto resources will be loaded here -->
@@ -4892,9 +4859,6 @@
                             <i data-lucide="briefcase" style="width: 18px; height: 18px;"></i>
                             Arbeit
                         </h3>
-                        <button class="add-to-category-btn" data-category="arbeit" title="Add to Arbeit">
-                            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                        </button>
                     </div>
                     <div class="resource-links" id="resource-arbeit">
                         <!-- Work resources will be loaded here -->
@@ -5013,7 +4977,6 @@
         <section id="tab-wiki" class="tab-section">
             
             <div class="page-header">
-                <h2>Wiki</h2>
                 <button id="add-wiki-btn" class="btn">+ Hinzufügen</button>
             </div>
 
