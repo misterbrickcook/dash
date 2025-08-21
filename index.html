@@ -6659,6 +6659,42 @@
                 }
             },
             
+            async deleteTodo(todoId) {
+                if (!confirm('Todo wirklich löschen?')) {
+                    return;
+                }
+                
+                if (!supabase?.isAuthenticated()) {
+                    console.error('❌ TodoManager: Not authenticated - cannot delete todo in pure cloud mode');
+                    alert('Fehler: Nicht authentifiziert. Todo kann nicht gelöscht werden.');
+                    return;
+                }
+                
+                try {
+                    console.log('🗑️ Deleting todo with ID:', todoId);
+                    
+                    // Delete from cloud database
+                    await supabase.delete('todos', String(todoId));
+                    console.log('✅ Todo deleted from cloud');
+                    
+                    // Remove from local array
+                    this.todos = this.todos.filter(todo => String(todo.id) !== String(todoId));
+                    
+                    // Refresh current view
+                    this.refreshCurrentView();
+                    this.updateHomeTodos();
+                    
+                    // Update counter after deletion
+                    if (window.SimpleCounters) {
+                        window.SimpleCounters.onTodoChanged();
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ TodoManager: Error deleting todo:', error);
+                    alert('Fehler beim Löschen: ' + error.message);
+                }
+            },
+            
             async clearArchive() {
                 console.log('☁️ TodoManager: clearArchive() called (pure cloud mode)');
                 if (!confirm('Wirklich alle erledigten Todos dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden!')) {
