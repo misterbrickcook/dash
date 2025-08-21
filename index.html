@@ -1045,18 +1045,6 @@
             color: #ffffff;
         }
         
-        .todo-tag {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 0.25rem 0.75rem;
-            border: 1px solid;
-            color: #ffffff;
-            font-weight: 500;
-        }
-        .todo-tag.wichtig { background-color: #ff6600; border-color: #ff6600; }
-        .todo-tag.dringend { background-color: #cc0000; border-color: #cc0000; }
-        .todo-tag.normal { background-color: #666666; border-color: #666666; }
 
         /* === ZIELE SPECIFIC === */
         .ziel-card {
@@ -1797,23 +1785,20 @@
             font-size: 12px;
         }
         .todo-priority {
-            padding: 2px 6px;
-            border-radius: 2px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 12px;
+            flex-shrink: 0;
         }
         .priority-dringend {
-            background: #fee2e2;
-            color: #dc2626;
+            background: #dc2626;
         }
         .priority-wichtig {
-            background: #fef3c7;
-            color: #d97706;
+            background: #d97706;
         }
         .priority-mittel {
-            background: #f3f4f6;
-            color: #6b7280;
+            background: #3b82f6;
         }
         .todo-date {
             color: #666666;
@@ -6610,12 +6595,12 @@
                 todoItem.className = `todo-item${todo.completed ? ' completed' : ''}`;
                 todoItem.dataset.todoId = todo.id;
                 
-                // Create simple compact HTML
+                // Create simple compact HTML with priority dot
                 todoItem.innerHTML = `
+                    <div class="todo-priority priority-${todo.priority || 'mittel'}"></div>
                     <div class="todo-content">
                         <div class="todo-title">${todo.title}</div>
                         <div class="todo-meta">
-                            <span class="todo-priority priority-${todo.priority || 'mittel'}">${todo.priority || 'Normal'}</span>
                             ${todo.date ? `<span class="todo-date">${todo.date}</span>` : ''}
                         </div>
                     </div>
@@ -6806,11 +6791,11 @@
                     const todoItem = document.createElement('div');
                     todoItem.className = 'checkbox-item todo-item';
                     todoItem.innerHTML = `
-                        <div class="todo-left">
+                        <div class="todo-left" style="display: flex; align-items: center;">
+                            <div class="todo-priority priority-${this.getPriorityString(todo.priority)}"></div>
                             <input type="checkbox" id="home-todo-${todo.id}" onchange="TodoManager.toggleTodo('${todo.id}')">
                             <label for="home-todo-${todo.id}">
-                                ${todo.title} 
-                                <span class="todo-tag ${TodoManager.getPriorityString(todo.priority)}" style="margin-left: 0.5rem;">${TodoManager.getPriorityDisplay(todo.priority)}</span>
+                                ${todo.title}
                             </label>
                         </div>
                         <span class="todo-time">${todo.time || '21:00'}</span>
