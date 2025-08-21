@@ -8273,6 +8273,12 @@
             
             console.log('✅ DOM loaded');
             
+            // Hide QuickBar initially until authentication is confirmed
+            const quickbar = document.getElementById('quickbar');
+            if (quickbar) {
+                quickbar.style.display = 'none';
+            }
+            
             // Initialize Supabase first
             if (window.initializeSupabase) {
                 window.initializeSupabase();
@@ -10564,6 +10570,13 @@
                 // Direct logout without confirmation popup
                 try {
                     console.log('🚪 Logging out...');
+                    
+                    // Hide QuickBar immediately before logout
+                    const quickbar = document.getElementById('quickbar');
+                    if (quickbar) {
+                        quickbar.style.display = 'none';
+                    }
+                    
                     if (window.supabase) {
                         await window.supabase.signOut();
                     }
