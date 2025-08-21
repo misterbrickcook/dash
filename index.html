@@ -10127,7 +10127,88 @@
                         lucide.createIcons();
                         console.log('🎨 Lucide icons initialized for QuickBar');
                     }
-                }, 100);
+                    
+                    // Re-initialize page-level add button listeners
+                    this.initializePageLevelButtons();
+                }, 150);
+            }
+
+            initializePageLevelButtons() {
+                console.log('🔗 Re-initializing page-level add button listeners...');
+                
+                // Add Todo Button
+                const addTodoBtn = document.getElementById('add-todo-btn');
+                if (addTodoBtn && !addTodoBtn.hasAttribute('data-listener-added')) {
+                    addTodoBtn.addEventListener('click', () => {
+                        if (window.TodoManager) {
+                            TodoManager.showAddTodoModal();
+                        }
+                    });
+                    addTodoBtn.setAttribute('data-listener-added', 'true');
+                    console.log('✅ Todo button listener added');
+                }
+
+                // Add Goal Button  
+                const addGoalBtn = document.getElementById('add-goal-btn');
+                if (addGoalBtn && !addGoalBtn.hasAttribute('data-listener-added')) {
+                    addGoalBtn.addEventListener('click', () => {
+                        if (window.GoalManager) {
+                            GoalManager.showAddGoalModal();
+                        }
+                    });
+                    addGoalBtn.setAttribute('data-listener-added', 'true');
+                    console.log('✅ Goal button listener added');
+                }
+
+                // Add Journal Button
+                const addJournalBtn = document.getElementById('add-journal-btn');
+                if (addJournalBtn && !addJournalBtn.hasAttribute('data-listener-added')) {
+                    addJournalBtn.addEventListener('click', () => {
+                        const modal = document.getElementById('journal-modal');
+                        if (modal) {
+                            modal.style.display = 'flex';
+                        }
+                    });
+                    addJournalBtn.setAttribute('data-listener-added', 'true');
+                    console.log('✅ Journal button listener added');
+                }
+
+                // Add Resource Button
+                const addResourceBtn = document.getElementById('add-resource-btn');
+                if (addResourceBtn && !addResourceBtn.hasAttribute('data-listener-added')) {
+                    addResourceBtn.addEventListener('click', () => {
+                        if (window.ResourceManager) {
+                            ResourceManager.showAddResourceModal();
+                        }
+                    });
+                    addResourceBtn.setAttribute('data-listener-added', 'true');
+                    console.log('✅ Resource button listener added');
+                }
+
+                // Add Wiki Button
+                const addWikiBtn = document.getElementById('add-wiki-btn');
+                if (addWikiBtn && !addWikiBtn.hasAttribute('data-listener-added')) {
+                    addWikiBtn.addEventListener('click', () => {
+                        const modal = document.getElementById('wiki-modal');
+                        if (modal) {
+                            modal.style.display = 'flex';
+                        }
+                    });
+                    addWikiBtn.setAttribute('data-listener-added', 'true');
+                    console.log('✅ Wiki button listener added');
+                }
+
+                // Add Termin Button
+                const addTerminBtn = document.getElementById('add-termin-btn');
+                if (addTerminBtn && !addTerminBtn.hasAttribute('data-listener-added')) {
+                    addTerminBtn.addEventListener('click', () => {
+                        if (window.TerminManager) {
+                            TerminManager.showAddTerminModal();
+                        }
+                    });
+                    addTerminBtn.setAttribute('data-listener-added', 'true');
+                    console.log('✅ Termin button listener added');
+                }
             }
 
             setupEventListeners() {
@@ -10215,22 +10296,44 @@
                 switch(action) {
                     // === ADD ACTIONS ===
                     case 'add-todo':
-                        document.getElementById('todo-modal').style.display = 'flex';
+                        if (window.TodoManager) {
+                            TodoManager.showAddTodoModal();
+                        } else {
+                            document.getElementById('todo-modal').style.display = 'flex';
+                        }
                         break;
                     case 'add-termin':
-                        document.getElementById('termin-modal').style.display = 'flex';
+                        if (window.TerminManager) {
+                            TerminManager.showAddTerminModal();
+                        } else {
+                            document.getElementById('termin-modal').style.display = 'flex';
+                        }
                         break;
                     case 'add-goal':
-                        document.getElementById('goal-modal').style.display = 'flex';
+                        if (window.GoalManager) {
+                            GoalManager.showAddGoalModal();
+                        } else {
+                            document.getElementById('goal-modal').style.display = 'flex';
+                        }
                         break;
                     case 'add-resource':
-                        document.getElementById('resource-modal').style.display = 'flex';
+                        if (window.ResourceManager) {
+                            ResourceManager.showAddResourceModal();
+                        } else {
+                            document.getElementById('resource-modal').style.display = 'flex';
+                        }
                         break;
                     case 'add-wiki':
-                        document.getElementById('wiki-modal').style.display = 'flex';
+                        const wikiModal = document.getElementById('wiki-modal');
+                        if (wikiModal) {
+                            wikiModal.style.display = 'flex';
+                        }
                         break;
                     case 'add-journal':
-                        document.getElementById('journal-modal').style.display = 'flex';
+                        const journalModal = document.getElementById('journal-modal');
+                        if (journalModal) {
+                            journalModal.style.display = 'flex';
+                        }
                         break;
                     
                     // === QUICK ACTIONS ===
