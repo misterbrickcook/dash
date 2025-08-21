@@ -7687,7 +7687,7 @@
                 if (!container) return;
                 
                 // Use filteredEntries if available, otherwise use all entries
-                const entriesToShow = this.filteredEntries.length > 0 || document.getElementById('journal-search').value 
+                const entriesToShow = this.filteredEntries.length > 0 
                     ? this.filteredEntries 
                     : this.entries;
                 
@@ -7864,16 +7864,8 @@
             },
 
             search() {
-                const query = document.getElementById('journal-search').value.toLowerCase();
-                
-                this.filteredEntries = this.entries.filter(entry => {
-                    if (!query) return true;
-                    
-                    return entry.title.toLowerCase().includes(query) ||
-                           entry.content.toLowerCase().includes(query) ||
-                           this.getEntryTags(entry).some(tag => tag.toLowerCase().includes(query));
-                });
-                
+                // Search disabled - no search bar available
+                this.filteredEntries = this.entries;
                 this.renderEntries();
             },
 
@@ -9065,6 +9057,7 @@
             }
             
             // ResourceManager initialization moved to main DOMContentLoaded listener
+            window.ResourceManager = ResourceManager;
             
             // === SIMPLE LOGOUT (URL-based) ===
             console.log('✅ Logout is now URL-based, no JavaScript needed');
@@ -9346,19 +9339,11 @@
             
             setupEventListeners() {
                 const form = document.getElementById('add-wiki-form');
-                const searchInput = document.getElementById('wiki-search');
                 
                 if (form) {
                     form.addEventListener('submit', (e) => {
                         e.preventDefault();
                         this.addEntry();
-                    });
-                }
-                
-                if (searchInput) {
-                    searchInput.addEventListener('input', () => {
-                        clearTimeout(this.searchTimeout);
-                        this.searchTimeout = setTimeout(() => this.search(), 300);
                     });
                 }
             },
@@ -9473,19 +9458,9 @@
                 console.log('☁️ Wiki: Entry deleted:', entry.title);
             },
             
-            search() {
-                const query = document.getElementById('wiki-search').value.toLowerCase();
-                
-                this.filteredEntries = this.entries.filter(entry => {
-                    const matchesSearch = !query || 
-                        entry.title.toLowerCase().includes(query) ||
-                        entry.content.toLowerCase().includes(query) ||
-                        entry.tags.some(tag => tag.toLowerCase().includes(query)) ||
-                        (entry.source && entry.source.toLowerCase().includes(query));
-                    
-                    return matchesSearch;
-                });
-                
+            search(query = '') {
+                // Search disabled - no search bar available
+                this.filteredEntries = this.entries;
                 this.render();
             },
             
@@ -9494,8 +9469,7 @@
                 const container = document.getElementById('wiki-entries');
                 if (!container) return;
                 
-                const entriesToShow = this.filteredEntries.length > 0 || 
-                    document.getElementById('wiki-search').value 
+                const entriesToShow = this.filteredEntries.length > 0 
                     ? this.filteredEntries : this.entries;
                 
                 if (entriesToShow.length === 0) {
