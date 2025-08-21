@@ -3298,178 +3298,76 @@
         }
 
         @media (max-width: 768px) {
-            /* MINIMAL MOBILE - Only Login + Quick Add Todo */
+            /* MOBILE: Under Construction */
             
-            /* Hide everything except login and basic structure */
-            .crypto-ticker-bar,
-            .sticky-nav,
-            .quick-actions-bar,
-            .main-content .grid-2,
-            .main-content .grid-3,
-            .routine-grid,
-            .streak-grid,
-            .resource-grid,
-            .settings-container,
-            .tab-section:not(#tab-home),
-            .journal-entries,
-            .wiki-content {
+            /* Hide everything */
+            body > *:not(.mobile-construction) {
                 display: none !important;
             }
             
-            /* Show only essential login and todo elements */
+            /* Show construction page */
             body {
-                padding: 20px;
-                background: var(--bg-primary);
-            }
-            
-            /* Login form mobile optimization */
-            .login-container {
-                max-width: 100%;
-                padding: 2rem 1.5rem;
                 margin: 0;
-            }
-            .login-form input {
-                font-size: 16px; /* Prevent iOS zoom */
-                padding: 1rem;
-                border-radius: 8px;
-                min-height: 48px;
-            }
-            .login-form button {
-                font-size: 16px;
-                padding: 1rem;
-                min-height: 48px;
-                border-radius: 8px;
-            }
-            
-            /* Simplified home tab - only todos */
-            #tab-home {
-                padding: 1rem 0;
-            }
-            #tab-home .section-title {
-                font-size: 1.5rem;
-                margin-bottom: 1rem;
-                text-align: center;
-            }
-            
-            /* Mobile-optimized todo list */
-            .todo-section {
-                margin-bottom: 2rem;
-            }
-            .todo-list {
-                gap: 0.75rem;
-            }
-            .todo-item {
-                padding: 1rem;
-                border-radius: 8px;
-                background: var(--bg-secondary);
-                border: 1px solid var(--border-primary);
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-            }
-            .todo-checkbox {
-                width: 20px;
-                height: 20px;
-                flex-shrink: 0;
-            }
-            .todo-text {
-                font-size: 1rem;
-                line-height: 1.4;
-                flex: 1;
-            }
-            
-            /* Mobile Quick Add Todo FAB */
-            .mobile-quick-add {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                width: 60px;
-                height: 60px;
-                background: var(--accent-primary);
-                color: white;
-                border: none;
-                border-radius: 50%;
-                font-size: 1.5rem;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-                z-index: 1000;
-                cursor: pointer;
-                transition: all 0.3s ease;
+                padding: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-            }
-            .mobile-quick-add:active {
-                transform: scale(0.95);
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             }
             
-            /* Quick input field */
-            .mobile-quick-input {
-                position: fixed;
-                bottom: 90px;
-                left: 15px;
-                right: 15px;
-                background: white;
-                border-radius: 12px;
-                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-                padding: 1rem;
-                z-index: 1001;
-                transform: translateY(20px);
-                opacity: 0;
-                visibility: hidden;
-                transition: all 0.3s ease;
-            }
-            .mobile-quick-input.show {
-                transform: translateY(0);
-                opacity: 1;
-                visibility: visible;
-            }
-            .mobile-quick-input input {
-                width: 100%;
-                border: none;
-                font-size: 16px; /* Prevent iOS zoom */
-                padding: 0.75rem;
-                background: var(--bg-secondary);
-                border-radius: 8px;
-                margin-bottom: 0.75rem;
-                min-height: 48px;
-            }
-            .mobile-quick-input input:focus {
-                outline: 2px solid var(--accent-primary);
-            }
-            .mobile-quick-actions {
-                display: flex;
-                gap: 0.5rem;
-                justify-content: flex-end;
-            }
-            .mobile-quick-btn {
-                padding: 0.75rem 1rem;
-                border: none;
-                border-radius: 6px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                min-height: 44px;
-            }
-            .mobile-quick-btn.save {
-                background: var(--accent-primary);
+            .mobile-construction {
+                text-align: center;
                 color: white;
-            }
-            .mobile-quick-btn.cancel {
-                background: var(--bg-secondary);
-                color: var(--text-secondary);
+                padding: 2rem;
+                max-width: 400px;
+                width: 90%;
             }
             
-            /* Touch-friendly inputs */
-            input, select, textarea, button {
-                min-height: 44px;
-                font-size: 16px; /* Prevent iOS zoom */
+            .mobile-construction h1 {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+                font-weight: 700;
+            }
+            
+            .mobile-construction p {
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+                opacity: 0.9;
+                line-height: 1.6;
+            }
+            
+            .mobile-construction .desktop-link {
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 12px;
+                text-decoration: none;
+                font-size: 1rem;
+                font-weight: 600;
+                backdrop-filter: blur(10px);
+                transition: all 0.3s ease;
+                display: inline-block;
+            }
+            
+            .mobile-construction .desktop-link:hover {
+                background: rgba(255, 255, 255, 0.3);
+                border-color: rgba(255, 255, 255, 0.5);
+                transform: translateY(-2px);
+            }
+            
+            .mobile-construction .icon {
+                font-size: 4rem;
+                margin-bottom: 1.5rem;
+                opacity: 0.8;
             }
         }
         
-        /* Hide mobile FAB on desktop */
+        /* Desktop: Hide mobile construction */
         @media (min-width: 769px) {
-            .mobile-quick-add,
-            .mobile-quick-input {
+            .mobile-construction {
                 display: none;
             }
         }
@@ -13214,144 +13112,18 @@
             }
         });
 
-        // === MOBILE QUICK ADD TODO FUNCTIONALITY ===
-        class MobileQuickAdd {
-            constructor() {
-                this.quickAddBtn = document.getElementById('mobile-quick-add');
-                this.quickInput = document.getElementById('mobile-quick-input');
-                this.quickText = document.getElementById('mobile-quick-text');
-                this.quickSave = document.getElementById('mobile-quick-save');
-                this.quickCancel = document.getElementById('mobile-quick-cancel');
-                
-                this.init();
-            }
-            
-            init() {
-                if (!this.quickAddBtn) return; // Only init on mobile
-                
-                this.quickAddBtn.addEventListener('click', () => this.showQuickInput());
-                this.quickCancel.addEventListener('click', () => this.hideQuickInput());
-                this.quickSave.addEventListener('click', () => this.saveQuickTodo());
-                
-                // Save on Enter key
-                this.quickText.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        this.saveQuickTodo();
-                    } else if (e.key === 'Escape') {
-                        this.hideQuickInput();
-                    }
-                });
-                
-                // Close on outside click
-                document.addEventListener('click', (e) => {
-                    if (!this.quickInput.contains(e.target) && !this.quickAddBtn.contains(e.target)) {
-                        this.hideQuickInput();
-                    }
-                });
-            }
-            
-            showQuickInput() {
-                this.quickInput.classList.add('show');
-                this.quickText.focus();
-                this.quickText.value = '';
-            }
-            
-            hideQuickInput() {
-                this.quickInput.classList.remove('show');
-                this.quickText.value = '';
-            }
-            
-            async saveQuickTodo() {
-                const text = this.quickText.value.trim();
-                if (!text) return;
-                
-                try {
-                    // Create todo with default values optimized for mobile
-                    const todo = {
-                        id: this.generateId(),
-                        title: text,
-                        category: 'privat', // Default to privat for quick add
-                        priority: 'medium',
-                        due_date: null,
-                        completed: false,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    };
-                    
-                    // Save using existing todo system
-                    if (window.cloudStorage) {
-                        await window.cloudStorage.saveTodo(todo);
-                        console.log('📱 Mobile quick todo saved:', text);
-                        
-                        // Refresh todo display 
-                        if (window.TodoManager && typeof window.TodoManager.loadTodos === 'function') {
-                            await window.TodoManager.loadTodos();
-                        }
-                        
-                        // Show success feedback
-                        this.showSuccessFeedback();
-                    } else {
-                        console.error('CloudStorage not available');
-                    }
-                    
-                    this.hideQuickInput();
-                } catch (error) {
-                    console.error('❌ Failed to save mobile quick todo:', error);
-                    this.showErrorFeedback();
-                }
-            }
-            
-            generateId() {
-                return Date.now().toString(36) + Math.random().toString(36).substr(2);
-            }
-            
-            showSuccessFeedback() {
-                // Brief success indication
-                this.quickAddBtn.style.background = '#22c55e';
-                setTimeout(() => {
-                    this.quickAddBtn.style.background = 'var(--accent-primary)';
-                }, 1000);
-            }
-            
-            showErrorFeedback() {
-                // Brief error indication  
-                this.quickAddBtn.style.background = '#ef4444';
-                setTimeout(() => {
-                    this.quickAddBtn.style.background = 'var(--accent-primary)';
-                }, 1000);
-            }
-        }
-        
-        // === MINIMAL MOBILE: Only Quick Add ===
-        // Initialize mobile quick add when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Only initialize on mobile screens
-            if (window.innerWidth <= 768) {
-                window.mobileQuickAdd = new MobileQuickAdd();
-            }
-        });
-        
-        // Handle screen resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth <= 768 && !window.mobileQuickAdd) {
-                window.mobileQuickAdd = new MobileQuickAdd();
-            }
-        });
+        // === MOBILE: No JavaScript needed - Under Construction ===
 
     </script>
 
-    <!-- === MOBILE QUICK ADD TODO === -->
-    <button class="mobile-quick-add" id="mobile-quick-add" title="Quick Todo hinzufügen">
-        <i data-lucide="plus"></i>
-    </button>
-    
-    <div class="mobile-quick-input" id="mobile-quick-input">
-        <input type="text" placeholder="Schnell Todo hinzufügen..." id="mobile-quick-text" maxlength="100">
-        <div class="mobile-quick-actions">
-            <button class="mobile-quick-btn cancel" id="mobile-quick-cancel">Abbrechen</button>
-            <button class="mobile-quick-btn save" id="mobile-quick-save">Speichern</button>
-        </div>
+    <!-- === MOBILE UNDER CONSTRUCTION === -->
+    <div class="mobile-construction">
+        <div class="icon">🚧</div>
+        <h1>Desktop Only</h1>
+        <p>Dieses Dashboard ist optimiert für Desktop-Nutzung. Für die beste Erfahrung öffne es bitte am Computer.</p>
+        <a href="#" onclick="window.location.reload()" class="desktop-link">
+            🖥️ Am Desktop öffnen
+        </a>
     </div>
 </body>
 </html>
