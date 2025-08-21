@@ -4134,7 +4134,7 @@
             <button class="nav-tab" data-tab="tab-todos">ToDos</button>
             <button class="nav-tab" data-tab="tab-ziele">Ziele</button>
             <button class="nav-tab" data-tab="tab-journal">Journal</button>
-            <button class="nav-tab" data-tab="tab-trading">Trading</button>
+            <!-- <button class="nav-tab" data-tab="tab-trading">Trading</button> -->
             <button class="nav-tab" data-tab="tab-analytics">Analytics</button>
             <button class="nav-tab" data-tab="tab-ressourcen">Ressourcen</button>
             <button class="nav-tab" data-tab="tab-wiki">Wiki</button>
@@ -4409,8 +4409,8 @@
 
         </section>
 
-        <!-- === TRADING TAB === -->
-        <section id="tab-trading" class="tab-section">
+        <!-- === TRADING TAB === TEMPORARILY DISABLED -->
+        <!-- <section id="tab-trading" class="tab-section">
             
             <!-- Trading Rules Sticky Note -->
             <div class="trading-rules-sticky">
@@ -4658,6 +4658,7 @@
                 </div>
             </div>
         </div>
+        </section> -->
 
         <!-- === ANALYTICS TAB === -->
         <section id="tab-analytics" class="tab-section">
@@ -5221,7 +5222,7 @@
             'tab-todos': 'todos',
             'tab-ziele': 'goals', 
             'tab-journal': 'journal',
-            'tab-trading': 'trading',
+            // 'tab-trading': 'trading', // DISABLED
             'tab-ressourcen': 'resources',
             'tab-wiki': 'wiki',
             'tab-settings': 'settings'
@@ -5302,12 +5303,12 @@
                 }
             }
             
-            // If switching to trading tab, update portfolio stats
-            if (tabId === 'tab-trading') {
-                if (window.TradingManager) {
-                    window.TradingManager.updatePortfolioStats();
-                }
-            }
+            // DISABLED: Trading tab functionality
+            // if (tabId === 'tab-trading') {
+            //     if (window.TradingManager) {
+            //         window.TradingManager.updatePortfolioStats();
+            //     }
+            // }
         }
 
         // Handle hash changes for direct URL navigation
@@ -10104,9 +10105,10 @@
 
             setupTabListener() {
                 document.addEventListener('click', (e) => {
-                    if (e.target.matches('[data-tab="tab-trading"]')) {
-                        this.loadTrades();
-                    }
+                    // DISABLED: Trading tab functionality
+                    // if (e.target.matches('[data-tab="tab-trading"]')) {
+                    //     this.loadTrades();
+                    // }
                 });
             }
 
@@ -12952,8 +12954,9 @@
             }
             
             static addTrade() {
-                // Switch to trading tab
-                switchTab('tab-trading');
+                // DISABLED: Trading functionality
+                // switchTab('tab-trading');
+                alert('Trading functionality is temporarily disabled');
                 
                 // Hide watchlist when modal opens
                 this.hideWatchlist();
