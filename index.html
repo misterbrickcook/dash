@@ -9995,13 +9995,19 @@
             }
 
             setupRightClickListener() {
-                // Add right-click listener to Pomodoro button in QuickBar
+                // Add right-click listener to Pomodoro button AND main actions button
                 document.addEventListener('contextmenu', (e) => {
-                    if (e.target.closest('[data-action="pomodoro"]')) {
+                    if (e.target.closest('[data-action="pomodoro"]') || 
+                        (e.target.closest('#quickbar-actions') && this.isPomodoroActive())) {
                         e.preventDefault();
+                        console.log('🍅 Right-click detected - resetting timer');
                         this.reset();
                     }
                 });
+            }
+
+            isPomodoroActive() {
+                return this.isRunning || this.timeLeft < this.duration;
             }
 
             toggle() {
@@ -10161,9 +10167,7 @@
             }
 
             isPomodoroActive() {
-                return window.PomodoroTimer && 
-                       (window.PomodoroTimer.isRunning || 
-                        window.PomodoroTimer.timeLeft < window.PomodoroTimer.duration);
+                return window.PomodoroTimer && window.PomodoroTimer.isPomodoroActive();
             }
 
             init() {
@@ -10429,10 +10433,8 @@
             }
 
             openPomodoro() {
-                if (!window.PomodoroTimer) {
-                    window.PomodoroTimer = new PomodoroTimer();
-                    console.log('🍅 PomodoroTimer created and made globally available');
-                }
+                // PomodoroTimer is now initialized globally at startup
+                console.log('🍅 Toggling Pomodoro timer via openPomodoro()');
                 window.PomodoroTimer.toggle();
             }
 
@@ -10497,6 +10499,10 @@
 
         // Make QuickBar globally available
         window.QuickBar = new QuickBar();
+        
+        // Initialize PomodoroTimer globally so it's always available
+        window.PomodoroTimer = new PomodoroTimer();
+        console.log('🍅 PomodoroTimer initialized globally on startup');
         
         // Wiki and Lucide icons initialization moved to main DOMContentLoaded listener
     </script>
