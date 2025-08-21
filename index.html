@@ -179,7 +179,14 @@
             background: none;
             font-family: inherit;
         }
-        .nav-tab:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+        .nav-tab:hover { 
+            color: var(--accent-primary); 
+            transform: translateY(-2px);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.05));
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
         .nav-tab.active {
             color: var(--accent-primary);
             font-weight: 700;
