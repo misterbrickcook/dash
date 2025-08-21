@@ -1718,7 +1718,7 @@
             z-index: 3000;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 24px;
         }
 
         /* Category container */
@@ -1728,6 +1728,20 @@
             flex-direction: column;
             align-items: center;
             gap: 8px;
+            opacity: 1;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Hide non-active categories when any is expanded */
+        .quickbar.has-active .quickbar-category:not(.active) {
+            opacity: 0;
+            transform: scale(0.7);
+            pointer-events: none;
+        }
+
+        .quickbar-category.active {
+            opacity: 1;
+            transform: scale(1);
         }
 
         /* Main category buttons */
@@ -10096,8 +10110,10 @@
             }
 
             toggleCategory(category) {
+                const categoryContainer = document.querySelector(`.quickbar-category[data-category="${category}"]`);
                 const subContainer = document.getElementById(`quickbar-${category}-sub`);
                 const mainBtn = document.getElementById(`quickbar-${category}`);
+                const quickbar = document.getElementById('quickbar');
                 
                 if (this.activeCategory === category) {
                     // Close current category
@@ -10106,6 +10122,14 @@
                 } else {
                     // Close all others, open this one
                     this.closeAllSubMenus();
+                    
+                    // Mark quickbar as having active state
+                    quickbar.classList.add('has-active');
+                    
+                    // Mark category as active
+                    categoryContainer.classList.add('active');
+                    
+                    // Show sub-buttons
                     subContainer.classList.add('show');
                     mainBtn.classList.add('active');
                     this.activeCategory = category;
@@ -10113,9 +10137,22 @@
             }
 
             closeAllSubMenus() {
+                const quickbar = document.getElementById('quickbar');
+                
+                // Remove has-active state from quickbar
+                quickbar.classList.remove('has-active');
+                
+                // Remove active from all categories
+                document.querySelectorAll('.quickbar-category').forEach(cat => {
+                    cat.classList.remove('active');
+                });
+                
+                // Hide all sub-buttons
                 document.querySelectorAll('.quickbar-sub-buttons').forEach(sub => {
                     sub.classList.remove('show');
                 });
+                
+                // Remove active from all main buttons
                 document.querySelectorAll('.quickbar-main-btn').forEach(btn => {
                     btn.classList.remove('active');
                 });
