@@ -4348,46 +4348,91 @@
         <!-- === TODOS TAB === -->
         <section id="tab-todos" class="tab-section">
             
-            <div class="category-tabs">
-                <button class="category-tab active" data-category="alle">Alle <span id="overdue-count" class="badge" style="display: none;"></span></button>
-                <button class="category-tab" data-category="heute">Heute</button>
-                <button class="category-tab" data-category="privat">Privat</button>
-                <button class="category-tab" data-category="uni">Uni</button>
-                <button class="category-tab" data-category="arbeit">Arbeit</button>
-                <button class="category-tab" data-category="archiv">Archiv</button>
-                <button id="add-todo-btn" class="btn" style="margin-left: 2rem;">+ Add Todo</button>
-                <button id="clear-archive-btn" class="btn secondary" style="margin-left: 1rem; display: none;">🗑️ Archiv leeren</button>
-            </div>
-
-            <!-- HEUTE KATEGORIE -->
-            <div class="category-content" id="heute">
-                <!-- Todos for today and overdue will be loaded from database -->
+            <!-- Todo Actions -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h1 class="section-title" style="margin: 0; text-align: left;">Alle Todos</h1>
+                <div>
+                    <button id="add-todo-btn" class="btn">+ Add Todo</button>
+                    <button id="clear-archive-btn" class="btn secondary" style="margin-left: 1rem; display: none;">🗑️ Archiv leeren</button>
+                </div>
             </div>
 
             <!-- PRIVAT KATEGORIE -->
-            <div class="category-content" id="privat">
-                <!-- Private todos will be loaded from database -->
+            <div class="todo-category-section">
+                <div class="todo-category-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                    <h2 class="todo-category-title">
+                        <span class="category-icon">🏠</span>
+                        Privat
+                        <span class="todo-count" id="privat-count">(0)</span>
+                    </h2>
+                    <button class="category-toggle">−</button>
+                </div>
+                <div class="todo-category-content" id="privat">
+                    <div class="todo-empty-state" style="display: none;">
+                        <p>🌱 Zeit für dich selbst</p>
+                        <small>Persönliche Ziele warten darauf, erfüllt zu werden</small>
+                    </div>
+                    <!-- Private todos will be loaded here -->
+                </div>
             </div>
 
             <!-- UNI KATEGORIE -->
-            <div class="category-content" id="uni">
-                <!-- Uni todos will be loaded from database -->
+            <div class="todo-category-section">
+                <div class="todo-category-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                    <h2 class="todo-category-title">
+                        <span class="category-icon">🎓</span>
+                        Uni
+                        <span class="todo-count" id="uni-count">(0)</span>
+                    </h2>
+                    <button class="category-toggle">−</button>
+                </div>
+                <div class="todo-category-content" id="uni">
+                    <div class="todo-empty-state" style="display: none;">
+                        <p>📚 Wissen ist Macht</p>
+                        <small>Jede Vorlesung bringt dich deinem Abschluss näher</small>
+                    </div>
+                    <!-- Uni todos will be loaded here -->
+                </div>
             </div>
 
             <!-- ARBEIT KATEGORIE -->
-            <div class="category-content" id="arbeit">
-                <!-- Work todos will be loaded from database -->
+            <div class="todo-category-section">
+                <div class="todo-category-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                    <h2 class="todo-category-title">
+                        <span class="category-icon">💼</span>
+                        Arbeit
+                        <span class="todo-count" id="arbeit-count">(0)</span>
+                    </h2>
+                    <button class="category-toggle">−</button>
+                </div>
+                <div class="todo-category-content" id="arbeit">
+                    <div class="todo-empty-state" style="display: none;">
+                        <p>⚡ Erfolg beginnt mit dem ersten Schritt</p>
+                        <small>Professionelle Ziele, professionelle Ergebnisse</small>
+                    </div>
+                    <!-- Work todos will be loaded here -->
+                </div>
             </div>
 
-            <!-- ALLE KATEGORIE -->
-            <div class="category-content active" id="alle">
-                <!-- All todos will be loaded from database -->
+            <!-- PROJEKTE KATEGORIE -->
+            <div class="todo-category-section">
+                <div class="todo-category-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                    <h2 class="todo-category-title">
+                        <span class="category-icon">📈</span>
+                        Projekte
+                        <span class="todo-count" id="projekte-count">(0)</span>
+                    </h2>
+                    <button class="category-toggle">−</button>
+                </div>
+                <div class="todo-category-content" id="projekte">
+                    <div class="todo-empty-state" style="display: none;">
+                        <p>🚀 Große Träume werden aus kleinen Schritten gemacht</p>
+                        <small>Verwandle deine Vision in konkrete Aktionen</small>
+                    </div>
+                    <!-- Project todos will be loaded here -->
+                </div>
             </div>
 
-            <!-- ARCHIV KATEGORIE -->
-            <div class="category-content" id="archiv">
-                <!-- Completed/archived todos will be loaded from database -->
-            </div>
         </section>
 
         <!-- === ZIELE TAB === -->
