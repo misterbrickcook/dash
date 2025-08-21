@@ -1716,7 +1716,7 @@
             top: 50%;
             transform: translateY(-50%);
             z-index: 3000;
-            display: flex;
+            display: none; /* Hidden by default until authentication */
             flex-direction: column;
             gap: 4px;
         }
@@ -5325,6 +5325,8 @@
             showAuthScreen() {
                 document.getElementById('auth-screen').classList.remove('hide');
                 document.getElementById('crypto-overlay').style.display = 'none';
+                // Hide QuickBar on login screen
+                document.getElementById('quickbar').style.display = 'none';
             },
             
             async refreshRoutineUI() {
@@ -5352,6 +5354,8 @@
             async showDashboard() {
                 document.getElementById('auth-screen').classList.add('hide');
                 document.getElementById('crypto-overlay').style.display = 'block';
+                // Show QuickBar when authenticated
+                document.getElementById('quickbar').style.display = 'flex';
                 
                 // Load all data after successful login
                 if (supabase?.isAuthenticated()) {
