@@ -6680,6 +6680,13 @@
                     // Remove from local array
                     this.todos = this.todos.filter(todo => String(todo.id) !== String(todoId));
                     
+                    // Immediately remove the deleted todo from DOM
+                    const todoElement = document.querySelector(`[data-todo-id="${todoId}"]`);
+                    if (todoElement) {
+                        todoElement.remove();
+                        console.log('✅ Todo element removed from DOM immediately');
+                    }
+                    
                     // Refresh current view
                     this.refreshCurrentView();
                     this.updateHomeTodos();
