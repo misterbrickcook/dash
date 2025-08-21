@@ -10379,18 +10379,44 @@
             }
 
             openSettings() {
-                alert('Settings - Coming Soon!');
+                // Switch to settings tab
+                const allTabs = document.querySelectorAll('.tab-section');
+                const allNavTabs = document.querySelectorAll('.nav-tab');
+                
+                // Hide all tabs
+                allTabs.forEach(tab => tab.classList.remove('active'));
+                // Remove active from all nav tabs
+                allNavTabs.forEach(tab => tab.classList.remove('active'));
+                
+                // Show settings tab
+                const settingsTab = document.getElementById('tab-settings');
+                if (settingsTab) {
+                    settingsTab.classList.add('active');
+                }
+                
+                // Update page title
+                document.title = 'Settings - Dash v4.1';
+                
+                console.log('✅ Switched to Settings page');
             }
 
             async handleLogout() {
-                if (confirm('Wirklich ausloggen?')) {
-                    try {
+                // Direct logout without confirmation popup
+                try {
+                    console.log('🚪 Logging out...');
+                    if (window.supabase) {
                         await window.supabase.signOut();
-                        location.reload();
-                    } catch (error) {
-                        console.error('Logout error:', error);
-                        alert('Logout fehlgeschlagen');
                     }
+                    
+                    // Clear any local auth data
+                    localStorage.removeItem('supabase.auth.token');
+                    
+                    // Force page reload to show auth screen
+                    location.reload();
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    // Force reload anyway to clear state
+                    location.reload();
                 }
             }
         }
