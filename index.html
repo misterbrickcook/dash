@@ -2033,7 +2033,8 @@
             color: #999999;
         }
 
-        /* === TRADING TAB STYLES === */
+        /* === TRADING TAB STYLES === DISABLED */
+        /*
         .add-trade-section {
             background: #ffffff;
             border: 1px solid #e0e0e0;
@@ -2154,7 +2155,10 @@
             border-color: #000000;
         }
 
-        /* === CLOSE TRADE MODAL === */
+        */
+        
+        /* === CLOSE TRADE MODAL === DISABLED */
+        /*
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -2240,7 +2244,10 @@
             color: #000000;
         }
 
-        /* === TRADE DETAILS MODAL === */
+        */
+        
+        /* === TRADE DETAILS MODAL === DISABLED */
+        /*
         .trade-details-info {
             display: flex;
             flex-direction: column;
@@ -2297,6 +2304,8 @@
             font-style: italic;
         }
 
+        */
+        
         /* === MOTIVATIONAL QUOTE WIDGET === */
         .quote-widget {
             background: #ffffff;
@@ -10048,9 +10057,9 @@
     </script>
     
     <!-- ========================================= -->
-    <!-- TRADING MANAGER -->
+    <!-- TRADING MANAGER - DISABLED -->
     <!-- ========================================= -->
-    <script>
+    <!-- <script>
         class TradingManager {
             constructor() {
                 this.apiKey = '35ffdb6a-2061-4573-a66b-ea263c5eaa34';
@@ -11132,8 +11141,8 @@
             }
         }
 
-        // Initialize Trading Manager
-        window.TradingManager = new TradingManager();
+        // Initialize Trading Manager - DISABLED
+        // window.TradingManager = new TradingManager();
         
         // Initialize lucide icons for trade action buttons
         setTimeout(() => {
@@ -11142,7 +11151,7 @@
                 console.log('🎨 Lucide icons initialized for trade action buttons');
             }
         }, 100);
-    </script>
+    </script> -->
     
     <!-- ========================================= -->
     <!-- ANALYTICS MANAGER -->
@@ -13063,14 +13072,14 @@
                 // Hide watchlist when modal opens
                 this.hideWatchlist();
                 
-                // Show trade add modal
-                setTimeout(() => {
-                    if (window.TradingManager && typeof window.TradingManager.showAddTradeModal === 'function') {
-                        window.TradingManager.showAddTradeModal();
-                    } else {
-                        console.error('❌ TradingManager.showAddTradeModal not found');
-                    }
-                }, 300);
+                // DISABLED: Trading functionality
+                // setTimeout(() => {
+                //     if (window.TradingManager && typeof window.TradingManager.showAddTradeModal === 'function') {
+                //         window.TradingManager.showAddTradeModal();
+                //     } else {
+                //         console.error('❌ TradingManager.showAddTradeModal not found');
+                //     }
+                // }, 300);
                 
                 // Trade modal will be opened
             }
