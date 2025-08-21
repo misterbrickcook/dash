@@ -6463,6 +6463,7 @@
                             priority: this.priorityIntToString(dbTodo.priority || 1)
                         };
                         this.todos.push(uiTodo);
+                        console.log('✅ Todo added to local array, refreshing view...');
                     } else {
                         throw new Error('Insert did not return data');
                     }
@@ -6472,9 +6473,13 @@
                     throw error; // Don't hide errors in pure cloud mode
                 }
                 
-                
-                // Refresh current view
+                // Refresh current view immediately
                 this.refreshCurrentView();
+                
+                // Update counters
+                if (window.SimpleCounters) {
+                    window.SimpleCounters.onTodoChanged();
+                }
             },
             
             refreshCurrentView() {
@@ -8261,6 +8266,11 @@
                     
                     await TodoManager.addTodo(todoData);
                     TodoManager.hideAddTodoModal();
+                    
+                    // Force refresh after modal closes
+                    setTimeout(() => {
+                        TodoManager.refreshCurrentView();
+                    }, 100);
                 });
             }
             
