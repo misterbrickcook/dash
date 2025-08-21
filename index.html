@@ -1772,7 +1772,9 @@
         }
         .todo-content {
             flex: 1;
-            cursor: pointer;
+        }
+        .todo-item input[type="checkbox"] {
+            margin-left: auto;
         }
         .todo-title {
             font-size: 14px;
@@ -6584,16 +6586,30 @@
                 todoItem.className = `todo-item${todo.completed ? ' completed' : ''}`;
                 todoItem.dataset.todoId = todo.id;
                 
-                // Create simple compact HTML with priority dot and checkbox
+                // Format date and time for display
+                let dateTimeDisplay = '';
+                if (todo.date) {
+                    // Convert YYYY-MM-DD to DD.MM.YYYY format
+                    const [year, month, day] = todo.date.split('-');
+                    const germanDate = `${day}.${month}.${year}`;
+                    dateTimeDisplay = germanDate;
+                    
+                    // Add time if available
+                    if (todo.time) {
+                        dateTimeDisplay += ` ${todo.time}`;
+                    }
+                }
+                
+                // Create simple compact HTML with priority dot and right-aligned checkbox
                 todoItem.innerHTML = `
                     <div class="todo-priority priority-${todo.priority || 'mittel'}"></div>
-                    <input type="checkbox" id="todo-${todo.id}" ${todo.completed ? 'checked' : ''} onchange="TodoManager.toggleTodo('${todo.id}')">
-                    <label for="todo-${todo.id}" class="todo-content">
+                    <div class="todo-content">
                         <div class="todo-title">${todo.title}</div>
                         <div class="todo-meta">
-                            ${todo.date ? `<span class="todo-date">${todo.date}</span>` : ''}
+                            ${dateTimeDisplay ? `<span class="todo-date">${dateTimeDisplay}</span>` : ''}
                         </div>
-                    </label>
+                    </div>
+                    <input type="checkbox" id="todo-${todo.id}" ${todo.completed ? 'checked' : ''} onchange="TodoManager.toggleTodo('${todo.id}')">
                     <button class="todo-delete-btn" onclick="TodoManager.deleteTodo('${todo.id}')" title="Löschen" style="display: none;">
                         ×
                     </button>
