@@ -7445,7 +7445,7 @@
                             subtitle: `Todo • ${todo.category || 'Uncategorized'}`,
                             action: () => {
                                 GlobalSearch.hide();
-                                window.showPage('todos');
+                                switchTab('tab-todos');
                             }
                         }));
                 }
@@ -7463,7 +7463,7 @@
                             subtitle: `Goal • ${goal.category || 'Uncategorized'}`,
                             action: () => {
                                 GlobalSearch.hide();
-                                window.showPage('ziele');
+                                switchTab('tab-ziele');
                             }
                         }));
                 }
@@ -7481,7 +7481,7 @@
                             subtitle: `Journal • ${entry.date || 'No date'}`,
                             action: () => {
                                 GlobalSearch.hide();
-                                window.showPage('journal');
+                                switchTab('tab-journal');
                             }
                         }));
                 }
@@ -7499,7 +7499,7 @@
                             subtitle: `Termin • ${termin.date || 'No date'}`,
                             action: () => {
                                 GlobalSearch.hide();
-                                window.showPage('termine');
+                                switchTab('tab-home');
                             }
                         }));
                 }
