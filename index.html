@@ -7444,7 +7444,7 @@
                             title: todo.title || todo.text,
                             subtitle: `Todo • ${todo.category || 'Uncategorized'}`,
                             action: () => {
-                                this.hide();
+                                GlobalSearch.hide();
                                 window.showPage('todos');
                             }
                         }));
@@ -7462,7 +7462,7 @@
                             title: goal.title,
                             subtitle: `Goal • ${goal.category || 'Uncategorized'}`,
                             action: () => {
-                                this.hide();
+                                GlobalSearch.hide();
                                 window.showPage('ziele');
                             }
                         }));
@@ -7480,7 +7480,7 @@
                             title: entry.title,
                             subtitle: `Journal • ${entry.date || 'No date'}`,
                             action: () => {
-                                this.hide();
+                                GlobalSearch.hide();
                                 window.showPage('journal');
                             }
                         }));
@@ -7498,7 +7498,7 @@
                             title: termin.title,
                             subtitle: `Termin • ${termin.date || 'No date'}`,
                             action: () => {
-                                this.hide();
+                                GlobalSearch.hide();
                                 window.showPage('termine');
                             }
                         }));
@@ -7520,12 +7520,17 @@
                     return;
                 }
                 
-                container.innerHTML = results.map(result => `
-                    <div class="search-result-item" onclick="(${result.action.toString()})()">
+                container.innerHTML = '';
+                results.forEach((result, index) => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'search-result-item';
+                    resultDiv.innerHTML = `
                         <div class="search-result-title">${result.title}</div>
                         <div class="search-result-subtitle">${result.subtitle}</div>
-                    </div>
-                `).join('');
+                    `;
+                    resultDiv.onclick = result.action;
+                    container.appendChild(resultDiv);
+                });
             },
             
             clearResults() {
