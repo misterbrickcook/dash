@@ -10451,6 +10451,7 @@
         class QuickBar {
             constructor() {
                 this.activeCategory = null;
+                this.hasRunSecondFix = false;
                 this.initTheme();
                 this.init();
             }
@@ -10765,10 +10766,19 @@
                     this.fixWhiteElementsInDarkMode();
                 }
                 
-                // Force style recalculation
+                // Force style recalculation and cache bust
                 document.body.style.display = 'none';
                 document.body.offsetHeight; // Trigger reflow
                 document.body.style.display = '';
+                
+                // Cache busting - force browser to re-render
+                const timestamp = Date.now();
+                document.documentElement.style.setProperty('--cache-bust', timestamp);
+                
+                // Additional force refresh
+                if (window.getComputedStyle) {
+                    window.getComputedStyle(document.body).getPropertyValue('background-color');
+                }
                 
                 // Update icon based on theme
                 const moonIcon = document.querySelector('[data-action="dark-mode"] i');
@@ -10786,36 +10796,88 @@
             }
 
             fixWhiteElementsInDarkMode() {
-                // Fix all elements with white/light backgrounds
-                const whiteElements = document.querySelectorAll('*');
-                whiteElements.forEach(el => {
+                console.log('🔧 Starting aggressive white element fix...');
+                
+                // Force fix specific known problematic elements
+                const specificSelectors = [
+                    '.termin-days-until',
+                    '.ziel-days-until', 
+                    '.delete-entry-btn',
+                    '.journal-entry-actions button',
+                    '.add-btn',
+                    'button[style*="background"]',
+                    'div[style*="background: #fafafa"]',
+                    'span[style*="background"]'
+                ];
+                
+                specificSelectors.forEach(selector => {
+                    const elements = document.querySelectorAll(selector);
+                    elements.forEach(el => {
+                        if (selector.includes('days-until')) {
+                            el.style.setProperty('background', '#2d3748', 'important');
+                            el.style.setProperty('color', '#63b3ed', 'important');
+                            el.style.setProperty('border', '1px solid #4a5568', 'important');
+                        } else {
+                            el.style.setProperty('background', '#1a1a2e', 'important');
+                            el.style.setProperty('color', '#e2e8f0', 'important');
+                            el.style.setProperty('border', '1px solid #2d3748', 'important');
+                        }
+                        console.log('🎯 Fixed element:', el.className || el.tagName);
+                    });
+                });
+                
+                // Scan ALL elements for white backgrounds
+                const allElements = document.querySelectorAll('*');
+                let fixedCount = 0;
+                
+                allElements.forEach(el => {
                     const styles = window.getComputedStyle(el);
                     const bgColor = styles.backgroundColor;
+                    const inlineStyle = el.style.backgroundColor;
                     
-                    if (bgColor === 'rgb(255, 255, 255)' || 
-                        bgColor === 'rgb(250, 250, 250)' || 
-                        bgColor === 'rgb(248, 249, 250)' ||
-                        el.style.backgroundColor === 'white' ||
-                        el.style.backgroundColor === '#ffffff' ||
-                        el.style.backgroundColor === '#fafafa') {
-                        
-                        // Fix based on element type
+                    // Check for any white/light colors
+                    const isWhite = bgColor === 'rgb(255, 255, 255)' || 
+                                   bgColor === 'rgb(250, 250, 250)' || 
+                                   bgColor === 'rgb(248, 249, 250)' ||
+                                   bgColor === 'white' ||
+                                   inlineStyle === 'white' ||
+                                   inlineStyle === '#ffffff' ||
+                                   inlineStyle === '#fafafa' ||
+                                   inlineStyle === 'rgb(255, 255, 255)';
+                    
+                    if (isWhite) {
+                        // Force fix with !important
                         if (el.classList.contains('termin-days-until') || el.classList.contains('ziel-days-until')) {
-                            el.style.backgroundColor = '#2d3748';
-                            el.style.color = '#63b3ed';
-                            el.style.border = '1px solid #4a5568';
-                        } else if (el.tagName === 'BUTTON' || el.classList.contains('btn')) {
-                            el.style.backgroundColor = '#1a1a2e';
-                            el.style.color = '#e2e8f0';
-                            el.style.border = '1px solid #2d3748';
+                            el.style.setProperty('background-color', '#2d3748', 'important');
+                            el.style.setProperty('color', '#63b3ed', 'important');
+                            el.style.setProperty('border', '1px solid #4a5568', 'important');
                         } else {
-                            el.style.backgroundColor = '#1a1a2e';
-                            el.style.color = '#e2e8f0';
+                            el.style.setProperty('background-color', '#1a1a2e', 'important');
+                            el.style.setProperty('color', '#e2e8f0', 'important');
                         }
+                        fixedCount++;
+                        console.log('🔧 Fixed white element:', el.tagName, el.className, bgColor);
                     }
                 });
                 
-                console.log('🔧 Fixed white elements for dark mode');
+                console.log(`✅ Fixed ${fixedCount} white elements for dark mode`);
+                
+                // Run once more after a delay to catch dynamically loaded content
+                if (!this.hasRunSecondFix) {
+                    this.hasRunSecondFix = true;
+                    setTimeout(() => {
+                        console.log('🔄 Running second pass for dynamic content...');
+                        const allElements2 = document.querySelectorAll('*');
+                        allElements2.forEach(el => {
+                            const styles = window.getComputedStyle(el);
+                            const bgColor = styles.backgroundColor;
+                            if (bgColor === 'rgb(255, 255, 255)' || bgColor === 'rgb(250, 250, 250)') {
+                                el.style.setProperty('background-color', '#1a1a2e', 'important');
+                                el.style.setProperty('color', '#e2e8f0', 'important');
+                            }
+                        });
+                    }, 1000);
+                }
             }
 
             openSettings() {
