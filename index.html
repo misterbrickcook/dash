@@ -10892,7 +10892,7 @@
             // === SYSTEM ACTIONS ===
             toggleDarkMode() {
                 const html = document.documentElement;
-                const currentTheme = html.getAttribute('data-theme');
+                const currentTheme = html.getAttribute('data-theme') || 'light';
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                 
                 console.log('🌙 Dark Mode Toggle:', { currentTheme, newTheme });
@@ -10904,6 +10904,7 @@
                     this.fixWhiteElementsInDarkMode();
                     this.updateChartsForDarkMode();
                 } else {
+                    this.resetLightModeStyles();
                     this.updateChartsForLightMode();
                 }
                 
@@ -11048,6 +11049,27 @@
                     chart.update();
                     console.log('📊 Updated charts for dark mode');
                 }
+            }
+
+            resetLightModeStyles() {
+                // Reset any inline styles that were applied by dark mode
+                const elementsToReset = document.querySelectorAll('*[style*="background"]');
+                elementsToReset.forEach(el => {
+                    // Remove inline styles that were added by dark mode fixes
+                    if (el.style.backgroundColor === '#1a1a2e' || 
+                        el.style.backgroundColor === '#2d3748' ||
+                        el.style.backgroundColor === 'rgb(26, 26, 46)' ||
+                        el.style.backgroundColor === 'rgb(45, 55, 72)') {
+                        el.style.removeProperty('background-color');
+                        el.style.removeProperty('color');
+                        el.style.removeProperty('border');
+                    }
+                });
+                
+                // Reset hasRunSecondFix flag
+                this.hasRunSecondFix = false;
+                
+                console.log('🔄 Reset light mode styles');
             }
 
             updateChartsForLightMode() {
