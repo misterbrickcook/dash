@@ -870,7 +870,7 @@
             align-items: center;
             width: 100%;
             padding: 1rem;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0;
             background: var(--bg-primary);
             border: 1px solid var(--border-primary);
             border-radius: 0;
@@ -885,12 +885,11 @@
             background: var(--bg-secondary);
         }
 
-        /* Blauer Punkt links */
+        /* Prioritätspunkt links - richtige Farbe je nach Priorität */
         #home-todos .checkbox-item.todo-item .todo-priority {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #007bff !important;
             margin-right: 0.75rem;
             flex-shrink: 0;
         }
@@ -7341,7 +7340,7 @@
                     const todoItem = document.createElement('div');
                     todoItem.className = 'checkbox-item todo-item';
                     todoItem.innerHTML = `
-                        <div class="todo-priority"></div>
+                        <div class="todo-priority priority-${this.getPriorityString(todo.priority)}"></div>
                         <input type="checkbox" id="home-todo-${todo.id}" onchange="TodoManager.toggleTodo('${todo.id}')">
                         <div class="todo-title">${todo.title}</div>
                         <div class="todo-time">${todo.time || '21:00'}</div>
