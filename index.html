@@ -11200,15 +11200,16 @@
                 
                 html.setAttribute('data-theme', newTheme);
                 
-                // Update dark mode button icon
+                // Update dark mode button icon - force re-render
                 const darkModeBtn = document.querySelector('[data-action="dark-mode"] i');
                 if (darkModeBtn) {
+                    const parentElement = darkModeBtn.parentElement;
                     if (newTheme === 'dark') {
-                        darkModeBtn.setAttribute('data-lucide', 'sun');
+                        parentElement.innerHTML = '<i data-lucide="sun" style="width: 20px; height: 20px;"></i>';
                     } else {
-                        darkModeBtn.setAttribute('data-lucide', 'moon');
+                        parentElement.innerHTML = '<i data-lucide="moon" style="width: 20px; height: 20px;"></i>';
                     }
-                    // Refresh lucide icons to update the icon
+                    // Force lucide to render the new icon
                     if (window.lucide) {
                         lucide.createIcons();
                     }
