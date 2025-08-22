@@ -425,6 +425,41 @@
 
         /* Home todos - keine extra dark mode styles nötig */
 
+        /* === GLOBAL SEARCH STYLES === */
+        .search-result-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-primary);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .search-result-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-title {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .search-result-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        [data-theme="dark"] .search-result-title {
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="dark"] .search-result-subtitle {
+            color: #a0aec0 !important;
+        }
+
         /* === RESET & BASE === */
         * { 
             margin: 0; 
@@ -7319,6 +7354,168 @@
 
         // Make TodoManager globally available
         window.TodoManager = TodoManager;
+
+        // === GLOBAL SEARCH MANAGER ===
+        const GlobalSearch = {
+            isOpen: false,
+            
+            toggle() {
+                if (this.isOpen) {
+                    this.hide();
+                } else {
+                    this.show();
+                }
+            },
+            
+            show() {
+                const modal = document.getElementById('global-search-modal');
+                const input = document.getElementById('global-search-input');
+                
+                modal.classList.remove('hide');
+                input.focus();
+                input.value = '';
+                
+                this.isOpen = true;
+                this.clearResults();
+                
+                // Add event listener for real-time search
+                input.oninput = (e) => this.search(e.target.value);
+                
+                // Add escape key handler
+                document.addEventListener('keydown', this.handleKeydown);
+            },
+            
+            hide() {
+                const modal = document.getElementById('global-search-modal');
+                modal.classList.add('hide');
+                this.isOpen = false;
+                
+                // Remove event listener
+                document.removeEventListener('keydown', this.handleKeydown);
+            },
+            
+            handleKeydown(e) {
+                if (e.key === 'Escape') {
+                    GlobalSearch.hide();
+                }
+            },
+            
+            async search(query) {
+                if (!query || query.length < 2) {
+                    this.clearResults();
+                    return;
+                }
+                
+                const results = [];
+                const searchTerm = query.toLowerCase();
+                
+                // Search Todos
+                if (window.TodoManager?.todos) {
+                    window.TodoManager.todos
+                        .filter(todo => 
+                            todo.title?.toLowerCase().includes(searchTerm) ||
+                            todo.text?.toLowerCase().includes(searchTerm)
+                        )
+                        .forEach(todo => results.push({
+                            type: 'todo',
+                            title: todo.title || todo.text,
+                            subtitle: `Todo • ${todo.category || 'Uncategorized'}`,
+                            action: () => {
+                                this.hide();
+                                window.showPage('todos');
+                            }
+                        }));
+                }
+                
+                // Search Goals
+                if (window.GoalManager?.goals) {
+                    window.GoalManager.goals
+                        .filter(goal => 
+                            goal.title?.toLowerCase().includes(searchTerm) ||
+                            goal.description?.toLowerCase().includes(searchTerm)
+                        )
+                        .forEach(goal => results.push({
+                            type: 'goal',
+                            title: goal.title,
+                            subtitle: `Goal • ${goal.category || 'Uncategorized'}`,
+                            action: () => {
+                                this.hide();
+                                window.showPage('ziele');
+                            }
+                        }));
+                }
+                
+                // Search Journal entries
+                if (window.JournalManager?.entries) {
+                    window.JournalManager.entries
+                        .filter(entry => 
+                            entry.title?.toLowerCase().includes(searchTerm) ||
+                            entry.content?.toLowerCase().includes(searchTerm)
+                        )
+                        .forEach(entry => results.push({
+                            type: 'journal',
+                            title: entry.title,
+                            subtitle: `Journal • ${entry.date || 'No date'}`,
+                            action: () => {
+                                this.hide();
+                                window.showPage('journal');
+                            }
+                        }));
+                }
+                
+                // Search Termine
+                if (window.TerminManager?.termine) {
+                    window.TerminManager.termine
+                        .filter(termin => 
+                            termin.title?.toLowerCase().includes(searchTerm) ||
+                            termin.description?.toLowerCase().includes(searchTerm)
+                        )
+                        .forEach(termin => results.push({
+                            type: 'termin',
+                            title: termin.title,
+                            subtitle: `Termin • ${termin.date || 'No date'}`,
+                            action: () => {
+                                this.hide();
+                                window.showPage('termine');
+                            }
+                        }));
+                }
+                
+                this.displayResults(results.slice(0, 20)); // Limit to 20 results
+            },
+            
+            displayResults(results) {
+                const container = document.getElementById('search-results');
+                const emptyState = document.getElementById('search-empty');
+                
+                if (results.length === 0) {
+                    emptyState.style.display = 'block';
+                    emptyState.textContent = 'No results found';
+                    container.innerHTML = '<div id="search-empty" style="text-align: center; color: var(--text-muted); padding: 2rem;">No results found</div>';
+                    return;
+                }
+                
+                emptyState.style.display = 'none';
+                container.innerHTML = results.map(result => `
+                    <div class="search-result-item" onclick="(${result.action.toString()})()">
+                        <div class="search-result-title">${result.title}</div>
+                        <div class="search-result-subtitle">${result.subtitle}</div>
+                    </div>
+                `).join('');
+            },
+            
+            clearResults() {
+                const container = document.getElementById('search-results');
+                const emptyState = document.getElementById('search-empty');
+                
+                emptyState.style.display = 'block';
+                emptyState.textContent = 'Start typing to search...';
+                container.innerHTML = '<div id="search-empty" style="text-align: center; color: var(--text-muted); padding: 2rem;">Start typing to search...</div>';
+            }
+        };
+        
+        // Make GlobalSearch globally available
+        window.GlobalSearch = GlobalSearch;
 
         // === GOAL MANAGEMENT ===
         const GoalManager = {
