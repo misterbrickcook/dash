@@ -7284,40 +7284,20 @@
                     return;
                 }
                 
-                // Use EXACT same rendering as privat todos
+                // EXAKT wie Privat-Todos mit todo-item Klasse
                 todayTodos.forEach(todo => {
                     const todoItem = document.createElement('div');
-                    todoItem.className = 'checkbox-item';
-                    
-                    const todoLeft = document.createElement('div');
-                    todoLeft.className = 'todo-left';
-                    
-                    const priority = document.createElement('div');
-                    priority.className = `todo-priority priority-${this.getPriorityString(todo.priority)}`;
-                    
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `home-todo-${todo.id}`;
-                    checkbox.checked = todo.completed;
-                    checkbox.onchange = () => this.toggleTodo(todo.id);
-                    
-                    const label = document.createElement('label');
-                    label.htmlFor = `home-todo-${todo.id}`;
-                    label.textContent = todo.title;
-                    if (todo.completed) {
-                        label.classList.add('completed');
-                    }
-                    
-                    todoLeft.appendChild(priority);
-                    todoLeft.appendChild(checkbox);
-                    todoLeft.appendChild(label);
-                    
-                    const todoRight = document.createElement('div');
-                    todoRight.className = 'todo-right';
-                    todoRight.textContent = todo.time || '21:00';
-                    
-                    todoItem.appendChild(todoLeft);
-                    todoItem.appendChild(todoRight);
+                    todoItem.className = 'todo-item';
+                    todoItem.innerHTML = `
+                        <div class="todo-priority priority-${this.getPriorityString(todo.priority)}"></div>
+                        <div class="todo-content">
+                            <div class="todo-title">${todo.title || todo.text}</div>
+                            <div class="todo-meta">
+                                <span class="todo-time">${todo.time || '21:00'}</span>
+                            </div>
+                        </div>
+                        <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="TodoManager.toggleTodo('${todo.id}')">
+                    `;
                     homeContainer.appendChild(todoItem);
                 });
                 
