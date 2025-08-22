@@ -208,6 +208,58 @@
             transform: translateY(-1px) !important;
         }
 
+        /* Fix white "IN X TAGEN" containers in dark mode */
+        [data-theme="dark"] .termin-days-until,
+        [data-theme="dark"] .ziel-days-until {
+            background: #2d3748 !important;
+            color: #63b3ed !important;
+            border: 1px solid #4a5568 !important;
+            font-weight: 600 !important;
+        }
+
+        /* Enhanced edit/delete buttons for dark mode */
+        [data-theme="dark"] .termin-edit-icon {
+            background: rgba(99, 179, 237, 0.2) !important;
+            color: #63b3ed !important;
+            border: 1px solid rgba(99, 179, 237, 0.3) !important;
+        }
+
+        [data-theme="dark"] .termin-edit-icon:hover {
+            background: #63b3ed !important;
+            color: #0f0f23 !important;
+            border-color: #63b3ed !important;
+            box-shadow: 0 4px 12px rgba(99, 179, 237, 0.4) !important;
+        }
+
+        [data-theme="dark"] .termin-delete-icon {
+            background: rgba(248, 113, 113, 0.2) !important;
+            color: #f87171 !important;
+            border: 1px solid rgba(248, 113, 113, 0.3) !important;
+        }
+
+        [data-theme="dark"] .termin-delete-icon:hover {
+            background: #f87171 !important;
+            color: #0f0f23 !important;
+            border-color: #f87171 !important;
+            box-shadow: 0 4px 12px rgba(248, 113, 113, 0.4) !important;
+        }
+
+        /* Enhanced plus button for dark mode */
+        [data-theme="dark"] .add-btn {
+            color: #63b3ed !important;
+            background: rgba(99, 179, 237, 0.1) !important;
+            border: 1px solid rgba(99, 179, 237, 0.2) !important;
+            border-radius: 50% !important;
+        }
+
+        [data-theme="dark"] .add-btn:hover {
+            color: #0f0f23 !important;
+            background: #63b3ed !important;
+            border-color: #63b3ed !important;
+            box-shadow: 0 4px 16px rgba(99, 179, 237, 0.4) !important;
+            transform: rotate(90deg) scale(1.1) !important;
+        }
+
         /* === RESET & BASE === */
         * { 
             margin: 0; 
