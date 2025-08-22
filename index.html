@@ -414,8 +414,8 @@
 
         /* Home todos dark mode styling */
         [data-theme="dark"] #home-todos .checkbox-item.todo-item {
-            background: #1a1a2e !important;
-            border-color: #2d3748 !important;
+            background: transparent !important;
+            border-bottom-color: #2d3748 !important;
         }
 
         [data-theme="dark"] #home-todos .checkbox-item.todo-item:hover {
@@ -864,21 +864,22 @@
             gap: 0.75rem;
             margin-bottom: 1rem;
         }
-        /* Home todos - FINAL LAYOUT: blauer punkt | checkbox | text | zeit rechtsbündig */
+        /* Home todos - wie Privat Container Design */
         #home-todos .checkbox-item.todo-item {
             display: flex;
             align-items: center;
             width: 100%;
-            padding: 1rem;
+            padding: 0.75rem 1rem;
             margin-bottom: 0;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-primary);
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border-primary);
             border-radius: 0;
             transition: all 0.2s ease;
         }
 
         #home-todos .checkbox-item.todo-item:last-child {
-            margin-bottom: 0;
+            border-bottom: none;
         }
 
         #home-todos .checkbox-item.todo-item:hover {
