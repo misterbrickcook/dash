@@ -320,6 +320,21 @@
             border: 1px solid #4a5568 !important;
         }
 
+        /* Journal and Wiki tags */
+        [data-theme="dark"] .journal-tag,
+        [data-theme="dark"] .wiki-tag,
+        [data-theme="dark"] .todo-tag {
+            background: #2d3748 !important;
+            color: #63b3ed !important;
+            border: 1px solid #4a5568 !important;
+            border-radius: 4px !important;
+        }
+
+        [data-theme="dark"] .journal-entry-tags,
+        [data-theme="dark"] .wiki-entry-tags {
+            background: transparent !important;
+        }
+
         /* === RESET & BASE === */
         * { 
             margin: 0; 
@@ -1327,8 +1342,8 @@
             flex-wrap: wrap;
         }
         .journal-tag {
-            background: #f3f4f6;
-            color: #374151;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
             padding: 0.25rem 0.5rem;
             border-radius: 0;
             font-size: 0.75rem;
@@ -2396,8 +2411,8 @@
         }
         
         .wiki-tag {
-            background: #e5e7eb;
-            color: #374151;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
             padding: 0.25rem 0.5rem;
             border-radius: 0;
             font-size: 0.75rem;
@@ -10850,6 +10865,9 @@
                     '.ziel-days-until', 
                     '.delete-entry-btn',
                     '.journal-entry-actions button',
+                    '.journal-tag',
+                    '.wiki-tag',
+                    '.todo-tag',
                     '.add-btn',
                     'button[style*="background"]',
                     'div[style*="background: #fafafa"]',
