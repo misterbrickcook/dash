@@ -37,6 +37,18 @@
             --spacing-xl: 2rem;
         }
 
+        /* Dark mode variables */
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e1e1e1;
+            --text-secondary: #b3b3b3;
+            --text-muted: #808080;
+            --border-primary: #404040;
+            --border-secondary: #4a5568;
+            --accent-primary: #ffffff;
+        }
+
         /* === RESET & BASE === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
@@ -10163,7 +10175,22 @@
         class QuickBar {
             constructor() {
                 this.activeCategory = null;
+                this.initTheme();
                 this.init();
+            }
+
+            initTheme() {
+                // Check for saved theme preference or default to 'light' mode
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                
+                // Update the icon based on current theme
+                setTimeout(() => {
+                    const moonIcon = document.querySelector('[data-action="dark-mode"] i');
+                    if (moonIcon) {
+                        moonIcon.setAttribute('data-lucide', savedTheme === 'dark' ? 'sun' : 'moon');
+                    }
+                }, 100);
             }
 
             isPomodoroActive() {
@@ -10444,7 +10471,28 @@
 
             // === SYSTEM ACTIONS ===
             toggleDarkMode() {
-                alert('Dark Mode - Coming Soon!');
+                const html = document.documentElement;
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                html.setAttribute('data-theme', newTheme);
+                
+                // Save preference to localStorage
+                localStorage.setItem('theme', newTheme);
+                
+                // Update icon based on theme
+                const moonIcon = document.querySelector('[data-action="dark-mode"] i');
+                if (moonIcon) {
+                    moonIcon.setAttribute('data-lucide', newTheme === 'dark' ? 'sun' : 'moon');
+                    // Re-initialize lucide to update the icon
+                    setTimeout(() => {
+                        if (window.lucide) {
+                            lucide.createIcons();
+                        }
+                    }, 10);
+                }
+                
+                this.closeCategory();
             }
 
             openSettings() {
