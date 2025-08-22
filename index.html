@@ -7509,16 +7509,17 @@
             
             displayResults(results) {
                 const container = document.getElementById('search-results');
-                const emptyState = document.getElementById('search-empty');
                 
-                if (results.length === 0) {
-                    emptyState.style.display = 'block';
-                    emptyState.textContent = 'No results found';
-                    container.innerHTML = '<div id="search-empty" style="text-align: center; color: var(--text-muted); padding: 2rem;">No results found</div>';
+                if (!container) {
+                    console.error('Search results container not found');
                     return;
                 }
                 
-                emptyState.style.display = 'none';
+                if (results.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">No results found</div>';
+                    return;
+                }
+                
                 container.innerHTML = results.map(result => `
                     <div class="search-result-item" onclick="(${result.action.toString()})()">
                         <div class="search-result-title">${result.title}</div>
@@ -7529,11 +7530,13 @@
             
             clearResults() {
                 const container = document.getElementById('search-results');
-                const emptyState = document.getElementById('search-empty');
                 
-                emptyState.style.display = 'block';
-                emptyState.textContent = 'Start typing to search...';
-                container.innerHTML = '<div id="search-empty" style="text-align: center; color: var(--text-muted); padding: 2rem;">Start typing to search...</div>';
+                if (!container) {
+                    console.error('Search results container not found');
+                    return;
+                }
+                
+                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Start typing to search...</div>';
             }
         };
         
