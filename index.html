@@ -7432,12 +7432,14 @@
                 const results = [];
                 const searchTerm = query.toLowerCase();
                 
-                // Search Todos
+                // Search Todos (only active, not completed/archived)
                 if (window.TodoManager?.todos) {
                     window.TodoManager.todos
                         .filter(todo => 
-                            todo.title?.toLowerCase().includes(searchTerm) ||
-                            todo.text?.toLowerCase().includes(searchTerm)
+                            !todo.completed && 
+                            !todo.archived && 
+                            (todo.title?.toLowerCase().includes(searchTerm) ||
+                            todo.text?.toLowerCase().includes(searchTerm))
                         )
                         .forEach(todo => results.push({
                             type: 'todo',
