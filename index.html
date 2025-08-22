@@ -10481,6 +10481,7 @@
 
             init() {
                 this.setupEventListeners();
+                this.setupDynamicContentObserver();
                 // Initialize Lucide icons for QuickBar
                 setTimeout(() => {
                     if (window.lucide) {
@@ -10491,6 +10492,40 @@
                     // Re-initialize page-level add button listeners
                     this.initializePageLevelButtons();
                 }, 150);
+            }
+
+            setupDynamicContentObserver() {
+                // Watch for dynamic content changes
+                const observer = new MutationObserver((mutations) => {
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    if (currentTheme === 'dark') {
+                        let shouldFix = false;
+                        mutations.forEach(mutation => {
+                            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                                mutation.addedNodes.forEach(node => {
+                                    if (node.nodeType === 1) { // Element node
+                                        shouldFix = true;
+                                    }
+                                });
+                            }
+                        });
+                        
+                        if (shouldFix) {
+                            console.log('🔄 Dynamic content detected, fixing white elements...');
+                            setTimeout(() => {
+                                this.fixWhiteElementsInDarkMode();
+                            }, 100);
+                        }
+                    }
+                });
+
+                // Start observing
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+
+                console.log('👀 Dynamic content observer started');
             }
 
             initializePageLevelButtons() {
@@ -10595,6 +10630,17 @@
                         const subBtn = e.target.closest('.quickbar-sub-btn');
                         const action = subBtn.dataset.action;
                         this.handleAction(action);
+                    }
+
+                    // Tab clicks - fix dark mode after tab switch
+                    if (e.target.closest('.nav-tab')) {
+                        const currentTheme = document.documentElement.getAttribute('data-theme');
+                        if (currentTheme === 'dark') {
+                            setTimeout(() => {
+                                console.log('📑 Tab switched, fixing dark mode elements...');
+                                this.fixWhiteElementsInDarkMode();
+                            }, 300);
+                        }
                     }
                     
                     // Close sub-menus when clicking outside
