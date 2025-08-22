@@ -49,6 +49,17 @@
             --accent-primary: #f0f0f0 !important;
         }
 
+        /* Override any remaining black text in dark mode */
+        [data-theme="dark"] * {
+            color: #e8e8e8 !important;
+        }
+
+        /* Exceptions for elements that should keep specific colors */
+        [data-theme="dark"] .btn,
+        [data-theme="dark"] .quickbar-sub-btn {
+            color: #e8e8e8 !important;
+        }
+
         /* Dark mode enhancements */
         [data-theme="dark"] body {
             background: #1e1e1e !important;
@@ -65,6 +76,61 @@
             background: #1e1e1e !important;
             border-color: #3a3a3a !important;
             color: #e8e8e8 !important;
+        }
+
+        /* Text elements in dark mode */
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4,
+        [data-theme="dark"] h5,
+        [data-theme="dark"] h6,
+        [data-theme="dark"] p,
+        [data-theme="dark"] span,
+        [data-theme="dark"] div,
+        [data-theme="dark"] .todo-title,
+        [data-theme="dark"] .resource-title,
+        [data-theme="dark"] .goal-title,
+        [data-theme="dark"] .journal-title,
+        [data-theme="dark"] label {
+            color: #e8e8e8 !important;
+        }
+
+        /* Links and interactive text */
+        [data-theme="dark"] a,
+        [data-theme="dark"] .resource-url {
+            color: #9bb3ff !important;
+        }
+
+        /* Muted text */
+        [data-theme="dark"] .text-muted,
+        [data-theme="dark"] .todo-date,
+        [data-theme="dark"] .resource-description {
+            color: #9a9a9a !important;
+        }
+
+        /* Form elements */
+        [data-theme="dark"] input,
+        [data-theme="dark"] textarea,
+        [data-theme="dark"] select {
+            background: #2a2a2a !important;
+            border-color: #3a3a3a !important;
+            color: #e8e8e8 !important;
+        }
+
+        [data-theme="dark"] input::placeholder,
+        [data-theme="dark"] textarea::placeholder {
+            color: #9a9a9a !important;
+        }
+
+        /* Navigation */
+        [data-theme="dark"] .nav-tab {
+            color: #c0c0c0 !important;
+        }
+
+        [data-theme="dark"] .nav-tab.active {
+            color: #f0f0f0 !important;
+            border-bottom-color: #f0f0f0 !important;
         }
 
         [data-theme="dark"] .quickbar-sub-btn {
