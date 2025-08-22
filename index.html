@@ -310,13 +310,14 @@
             color: #63b3ed !important;
         }
 
-        /* Generic white buttons fix */
-        [data-theme="dark"] button[style*="background: white"],
-        [data-theme="dark"] button[style*="background:white"],
-        [data-theme="dark"] .btn[style*="background: white"] {
-            background: #1a1a2e !important;
-            color: #e2e8f0 !important;
-            border: 1px solid #2d3748 !important;
+        /* JavaScript-generated elements fix */
+        [data-theme="dark"] div[style*="background: #fafafa"],
+        [data-theme="dark"] div[style*="background:#fafafa"],
+        [data-theme="dark"] span[style*="background: white"],
+        [data-theme="dark"] span[style*="background: #ffffff"] {
+            background: #2d3748 !important;
+            color: #63b3ed !important;
+            border: 1px solid #4a5568 !important;
         }
 
         /* === RESET & BASE === */
@@ -10465,6 +10466,11 @@
                     if (moonIcon) {
                         moonIcon.setAttribute('data-lucide', defaultTheme === 'dark' ? 'sun' : 'moon');
                     }
+                    
+                    // Fix white elements if dark mode is active
+                    if (defaultTheme === 'dark') {
+                        this.fixWhiteElementsInDarkMode();
+                    }
                 }, 100);
             }
 
@@ -10754,6 +10760,11 @@
                 
                 html.setAttribute('data-theme', newTheme);
                 
+                // Fix white elements with JavaScript
+                if (newTheme === 'dark') {
+                    this.fixWhiteElementsInDarkMode();
+                }
+                
                 // Force style recalculation
                 document.body.style.display = 'none';
                 document.body.offsetHeight; // Trigger reflow
@@ -10772,6 +10783,39 @@
                 }
                 
                 this.closeAllSubMenus();
+            }
+
+            fixWhiteElementsInDarkMode() {
+                // Fix all elements with white/light backgrounds
+                const whiteElements = document.querySelectorAll('*');
+                whiteElements.forEach(el => {
+                    const styles = window.getComputedStyle(el);
+                    const bgColor = styles.backgroundColor;
+                    
+                    if (bgColor === 'rgb(255, 255, 255)' || 
+                        bgColor === 'rgb(250, 250, 250)' || 
+                        bgColor === 'rgb(248, 249, 250)' ||
+                        el.style.backgroundColor === 'white' ||
+                        el.style.backgroundColor === '#ffffff' ||
+                        el.style.backgroundColor === '#fafafa') {
+                        
+                        // Fix based on element type
+                        if (el.classList.contains('termin-days-until') || el.classList.contains('ziel-days-until')) {
+                            el.style.backgroundColor = '#2d3748';
+                            el.style.color = '#63b3ed';
+                            el.style.border = '1px solid #4a5568';
+                        } else if (el.tagName === 'BUTTON' || el.classList.contains('btn')) {
+                            el.style.backgroundColor = '#1a1a2e';
+                            el.style.color = '#e2e8f0';
+                            el.style.border = '1px solid #2d3748';
+                        } else {
+                            el.style.backgroundColor = '#1a1a2e';
+                            el.style.color = '#e2e8f0';
+                        }
+                    }
+                });
+                
+                console.log('🔧 Fixed white elements for dark mode');
             }
 
             openSettings() {
