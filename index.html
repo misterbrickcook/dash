@@ -10180,15 +10180,15 @@
             }
 
             initTheme() {
-                // Check for saved theme preference or default to 'light' mode
-                const savedTheme = localStorage.getItem('theme') || 'light';
-                document.documentElement.setAttribute('data-theme', savedTheme);
+                // Default to light mode (no localStorage dependency)
+                const defaultTheme = 'light';
+                document.documentElement.setAttribute('data-theme', defaultTheme);
                 
                 // Update the icon based on current theme
                 setTimeout(() => {
                     const moonIcon = document.querySelector('[data-action="dark-mode"] i');
                     if (moonIcon) {
-                        moonIcon.setAttribute('data-lucide', savedTheme === 'dark' ? 'sun' : 'moon');
+                        moonIcon.setAttribute('data-lucide', defaultTheme === 'dark' ? 'sun' : 'moon');
                     }
                 }, 100);
             }
@@ -10476,9 +10476,6 @@
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                 
                 html.setAttribute('data-theme', newTheme);
-                
-                // Save preference to localStorage
-                localStorage.setItem('theme', newTheme);
                 
                 // Update icon based on theme
                 const moonIcon = document.querySelector('[data-action="dark-mode"] i');
