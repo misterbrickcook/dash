@@ -412,11 +412,25 @@
             border-color: #63b3ed !important;
         }
 
-        /* Home todos time badges in dark mode */
-        [data-theme="dark"] .checkbox-item.todo-item .todo-time {
+        /* Home todos dark mode styling */
+        [data-theme="dark"] .checkbox-item.todo-item {
+            background: #1a1a2e !important;
+            border-color: transparent !important;
+        }
+
+        [data-theme="dark"] .checkbox-item.todo-item:hover {
             background: #2d3748 !important;
-            color: #a0aec0 !important;
             border-color: #4a5568 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        [data-theme="dark"] .checkbox-item.todo-item .todo-time {
+            background: rgba(255, 255, 255, 0.06) !important;
+            color: #9a9a9a !important;
+        }
+
+        [data-theme="dark"] .checkbox-item.todo-item .todo-left label {
+            color: #e2e8f0 !important;
         }
 
         /* === RESET & BASE === */
@@ -841,31 +855,69 @@
             margin-bottom: 1rem;
         }
         .checkbox-item.todo-item {
-            justify-content: flex-start;
+            display: grid;
+            grid-template-columns: 12px 20px 1fr auto;
+            gap: 0.75rem;
+            align-items: center;
             width: 100%;
-            position: relative;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            background: var(--bg-primary);
+            border: 1px solid transparent;
         }
+
+        .checkbox-item.todo-item:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-primary);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkbox-item.todo-item .todo-priority {
+            grid-column: 1;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin: 0;
+        }
+
+        .checkbox-item.todo-item input[type="checkbox"] {
+            grid-column: 2;
+            margin: 0;
+        }
+
         .checkbox-item.todo-item .todo-left {
+            grid-column: 3;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            flex: 1;
-            min-width: 0; /* Allow shrinking */
-            margin-right: 6rem; /* Space for time on the right */
+            gap: 0;
+            margin: 0;
+            min-width: 0;
         }
-        .checkbox-item.todo-item .todo-time {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+
+        .checkbox-item.todo-item .todo-left label {
+            font-size: 0.95rem;
             font-weight: 500;
-            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            line-height: 1.4;
+        }
+
+        .checkbox-item.todo-item .todo-time {
+            grid-column: 4;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: none;
+            border: none;
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
-            border: 1px solid var(--border-primary);
-            min-width: 5rem;
+            background: rgba(0, 0, 0, 0.04);
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            letter-spacing: 0.5px;
+            margin: 0;
+            min-width: auto;
             text-align: center;
         }
         .checkbox-item input[type="checkbox"] {
