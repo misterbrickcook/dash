@@ -412,22 +412,7 @@
             border-color: #63b3ed !important;
         }
 
-        /* Home todos dark mode styling */
-        [data-theme="dark"] #home-todos .checkbox-item.todo-item {
-            background: transparent !important;
-        }
-
-        [data-theme="dark"] #home-todos .checkbox-item.todo-item:hover {
-            background: #16213e !important;
-        }
-
-        [data-theme="dark"] #home-todos .checkbox-item.todo-item .todo-time {
-            color: #a0aec0 !important;
-        }
-
-        [data-theme="dark"] #home-todos .checkbox-item.todo-item .todo-title {
-            color: #e2e8f0 !important;
-        }
+        /* Home todos - keine extra dark mode styles nötig */
 
         /* === RESET & BASE === */
         * { 
@@ -863,57 +848,7 @@
             gap: 0.75rem;
             margin-bottom: 1rem;
         }
-        /* Home todos - wie Privat Container Design */
-        #home-todos .checkbox-item.todo-item {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 0.75rem 1rem;
-            margin-bottom: 0;
-            background: transparent;
-            border: none;
-            border-radius: 0;
-            transition: all 0.2s ease;
-        }
-
-        #home-todos .checkbox-item.todo-item:hover {
-            background: var(--bg-secondary);
-        }
-
-        /* Prioritätspunkt links - richtige Farbe je nach Priorität */
-        #home-todos .checkbox-item.todo-item .todo-priority {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 0.75rem;
-            flex-shrink: 0;
-        }
-
-        /* Checkbox nach dem Punkt */
-        #home-todos .checkbox-item.todo-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            margin-right: 0.75rem;
-            flex-shrink: 0;
-        }
-
-        /* Text in der Mitte */
-        #home-todos .checkbox-item.todo-item .todo-title {
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            flex: 1;
-            margin: 0;
-        }
-
-        /* Zeit rechtsbündig */
-        #home-todos .checkbox-item.todo-item .todo-time {
-            font-size: 0.8rem;
-            font-weight: 400;
-            color: var(--text-muted);
-            margin-left: auto;
-            flex-shrink: 0;
-        }
+        /* Home todos - EXAKT wie Privat Container */
 
         /* Empty state for home todos */
         #home-todos:empty::after {
@@ -7331,15 +7266,40 @@
                     return;
                 }
                 
+                // Use EXACT same rendering as privat todos
                 todayTodos.forEach(todo => {
                     const todoItem = document.createElement('div');
-                    todoItem.className = 'checkbox-item todo-item';
-                    todoItem.innerHTML = `
-                        <div class="todo-priority priority-${this.getPriorityString(todo.priority)}"></div>
-                        <input type="checkbox" id="home-todo-${todo.id}" onchange="TodoManager.toggleTodo('${todo.id}')">
-                        <div class="todo-title">${todo.title}</div>
-                        <div class="todo-time">${todo.time || '21:00'}</div>
-                    `;
+                    todoItem.className = 'checkbox-item';
+                    
+                    const todoLeft = document.createElement('div');
+                    todoLeft.className = 'todo-left';
+                    
+                    const priority = document.createElement('div');
+                    priority.className = `todo-priority priority-${this.getPriorityString(todo.priority)}`;
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `home-todo-${todo.id}`;
+                    checkbox.checked = todo.completed;
+                    checkbox.onchange = () => this.toggleTodo(todo.id);
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `home-todo-${todo.id}`;
+                    label.textContent = todo.title;
+                    if (todo.completed) {
+                        label.classList.add('completed');
+                    }
+                    
+                    todoLeft.appendChild(priority);
+                    todoLeft.appendChild(checkbox);
+                    todoLeft.appendChild(label);
+                    
+                    const todoRight = document.createElement('div');
+                    todoRight.className = 'todo-right';
+                    todoRight.textContent = todo.time || '21:00';
+                    
+                    todoItem.appendChild(todoLeft);
+                    todoItem.appendChild(todoRight);
                     homeContainer.appendChild(todoItem);
                 });
                 
