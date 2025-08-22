@@ -11203,25 +11203,33 @@
                 // Update dark mode button icon - aggressive force re-render
                 console.log('🔄 Updating dark mode icon to:', newTheme === 'dark' ? 'sun' : 'moon');
                 
-                // Try multiple approaches to ensure icon updates
-                setTimeout(() => {
-                    const darkModeBtn = document.querySelector('[data-action="dark-mode"]');
-                    if (darkModeBtn) {
-                        const iconElement = darkModeBtn.querySelector('i');
-                        if (iconElement) {
-                            // Method 1: Replace entire icon
-                            const newIcon = newTheme === 'dark' ? 'sun' : 'moon';
-                            iconElement.outerHTML = `<i data-lucide="${newIcon}" style="width: 20px; height: 20px;"></i>`;
-                            
-                            // Method 2: Force Lucide re-render
-                            if (window.lucide) {
-                                lucide.createIcons();
-                            }
-                            
-                            console.log('✅ Icon should now be:', newIcon);
+                // IMMEDIATE update - no setTimeout
+                const darkModeBtn = document.querySelector('[data-action="dark-mode"]');
+                console.log('🔍 Found dark mode button:', darkModeBtn);
+                
+                if (darkModeBtn) {
+                    const iconElement = darkModeBtn.querySelector('i');
+                    console.log('🔍 Found icon element:', iconElement);
+                    
+                    if (iconElement) {
+                        // Method 1: Replace entire icon
+                        const newIcon = newTheme === 'dark' ? 'sun' : 'moon';
+                        console.log('🔄 Replacing with icon:', newIcon);
+                        iconElement.outerHTML = `<i data-lucide="${newIcon}" style="width: 20px; height: 20px;"></i>`;
+                        
+                        // Method 2: Force Lucide re-render
+                        if (window.lucide) {
+                            console.log('🔄 Calling lucide.createIcons()');
+                            lucide.createIcons();
                         }
+                        
+                        console.log('✅ Icon replacement complete:', newIcon);
+                    } else {
+                        console.error('❌ Icon element not found');
                     }
-                }, 100); // Small delay to ensure DOM is ready
+                } else {
+                    console.error('❌ Dark mode button not found');
+                }
                 
                 // Fix white elements with JavaScript
                 if (newTheme === 'dark') {
