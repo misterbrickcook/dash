@@ -11200,20 +11200,28 @@
                 
                 html.setAttribute('data-theme', newTheme);
                 
-                // Update dark mode button icon - force re-render
-                const darkModeBtn = document.querySelector('[data-action="dark-mode"] i');
-                if (darkModeBtn) {
-                    const parentElement = darkModeBtn.parentElement;
-                    if (newTheme === 'dark') {
-                        parentElement.innerHTML = '<i data-lucide="sun" style="width: 20px; height: 20px;"></i>';
-                    } else {
-                        parentElement.innerHTML = '<i data-lucide="moon" style="width: 20px; height: 20px;"></i>';
+                // Update dark mode button icon - aggressive force re-render
+                console.log('🔄 Updating dark mode icon to:', newTheme === 'dark' ? 'sun' : 'moon');
+                
+                // Try multiple approaches to ensure icon updates
+                setTimeout(() => {
+                    const darkModeBtn = document.querySelector('[data-action="dark-mode"]');
+                    if (darkModeBtn) {
+                        const iconElement = darkModeBtn.querySelector('i');
+                        if (iconElement) {
+                            // Method 1: Replace entire icon
+                            const newIcon = newTheme === 'dark' ? 'sun' : 'moon';
+                            iconElement.outerHTML = `<i data-lucide="${newIcon}" style="width: 20px; height: 20px;"></i>`;
+                            
+                            // Method 2: Force Lucide re-render
+                            if (window.lucide) {
+                                lucide.createIcons();
+                            }
+                            
+                            console.log('✅ Icon should now be:', newIcon);
+                        }
                     }
-                    // Force lucide to render the new icon
-                    if (window.lucide) {
-                        lucide.createIcons();
-                    }
-                }
+                }, 100); // Small delay to ensure DOM is ready
                 
                 // Fix white elements with JavaScript
                 if (newTheme === 'dark') {
