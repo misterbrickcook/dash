@@ -11200,6 +11200,20 @@
                 
                 html.setAttribute('data-theme', newTheme);
                 
+                // Update dark mode button icon
+                const darkModeBtn = document.querySelector('[data-action="dark-mode"] i');
+                if (darkModeBtn) {
+                    if (newTheme === 'dark') {
+                        darkModeBtn.setAttribute('data-lucide', 'sun');
+                    } else {
+                        darkModeBtn.setAttribute('data-lucide', 'moon');
+                    }
+                    // Refresh lucide icons to update the icon
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                }
+                
                 // Fix white elements with JavaScript
                 if (newTheme === 'dark') {
                     this.fixWhiteElementsInDarkMode();
