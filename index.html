@@ -260,6 +260,65 @@
             transform: rotate(90deg) scale(1.1) !important;
         }
 
+        /* Journal entry buttons */
+        [data-theme="dark"] .journal-entry-actions {
+            background: transparent !important;
+        }
+
+        [data-theme="dark"] .delete-entry-btn {
+            background: rgba(248, 113, 113, 0.2) !important;
+            border: 1px solid rgba(248, 113, 113, 0.3) !important;
+            color: #f87171 !important;
+            border-radius: 6px !important;
+            padding: 0.5rem !important;
+        }
+
+        [data-theme="dark"] .delete-entry-btn:hover {
+            background: #f87171 !important;
+            color: #0f0f23 !important;
+            border-color: #f87171 !important;
+            box-shadow: 0 4px 12px rgba(248, 113, 113, 0.4) !important;
+        }
+
+        /* Trade action buttons */
+        [data-theme="dark"] .trade-action-btn {
+            background: #1a1a2e !important;
+            border: 1px solid #2d3748 !important;
+            color: #e2e8f0 !important;
+            border-radius: 6px !important;
+        }
+
+        [data-theme="dark"] .trade-action-btn:hover {
+            background: #2d3748 !important;
+            border-color: #63b3ed !important;
+            color: #f7fafc !important;
+            box-shadow: 0 4px 12px rgba(99, 179, 237, 0.3) !important;
+        }
+
+        /* Icon selection buttons */
+        [data-theme="dark"] .icon-btn {
+            background: #1a1a2e !important;
+            border: 1px solid #2d3748 !important;
+            color: #e2e8f0 !important;
+            border-radius: 6px !important;
+        }
+
+        [data-theme="dark"] .icon-btn:hover,
+        [data-theme="dark"] .icon-btn.selected {
+            background: #2d3748 !important;
+            border-color: #63b3ed !important;
+            color: #63b3ed !important;
+        }
+
+        /* Generic white buttons fix */
+        [data-theme="dark"] button[style*="background: white"],
+        [data-theme="dark"] button[style*="background:white"],
+        [data-theme="dark"] .btn[style*="background: white"] {
+            background: #1a1a2e !important;
+            color: #e2e8f0 !important;
+            border: 1px solid #2d3748 !important;
+        }
+
         /* === RESET & BASE === */
         * { 
             margin: 0; 
