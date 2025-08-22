@@ -335,6 +335,83 @@
             background: transparent !important;
         }
 
+        /* Analytics Charts and Heatmaps */
+        [data-theme="dark"] .chart-container,
+        [data-theme="dark"] .chart-section {
+            background: #1a1a2e !important;
+            border-color: #2d3748 !important;
+        }
+
+        /* Fix heatmap white squares */
+        [data-theme="dark"] .heatmap-square.level-0 {
+            background-color: #2d3748 !important;
+            border: 1px solid #4a5568 !important;
+        }
+
+        [data-theme="dark"] .heatmap-square.level-1 {
+            background-color: #3d5a5b !important;
+        }
+
+        [data-theme="dark"] .heatmap-square.level-2 {
+            background-color: #2d6748 !important;
+        }
+
+        [data-theme="dark"] .heatmap-square.level-3 {
+            background-color: #22543d !important;
+        }
+
+        [data-theme="dark"] .heatmap-square.level-4 {
+            background-color: #1a4338 !important;
+        }
+
+        /* Performance heatmap colors adjusted for dark mode */
+        [data-theme="dark"] .heatmap-square.performance-loss {
+            background-color: #c53030 !important;
+        }
+
+        [data-theme="dark"] .heatmap-square.performance-neutral {
+            background-color: #dd6b20 !important;
+        }
+
+        [data-theme="dark"] .heatmap-square.performance-gain {
+            background-color: #38a169 !important;
+        }
+
+        /* Legend squares for dark mode */
+        [data-theme="dark"] .legend-square.level-0 {
+            background-color: #2d3748 !important;
+        }
+
+        [data-theme="dark"] .legend-square.level-1 {
+            background-color: #3d5a5b !important;
+        }
+
+        [data-theme="dark"] .legend-square.level-2 {
+            background-color: #2d6748 !important;
+        }
+
+        [data-theme="dark"] .legend-square.level-3 {
+            background-color: #22543d !important;
+        }
+
+        [data-theme="dark"] .legend-square.level-4 {
+            background-color: #1a4338 !important;
+        }
+
+        /* Period buttons for chart controls */
+        [data-theme="dark"] .period-btn {
+            background: #2d3748 !important;
+            color: #e2e8f0 !important;
+            border: 1px solid #4a5568 !important;
+        }
+
+        [data-theme="dark"] .period-btn.active,
+        [data-theme="dark"] .period-btn:hover {
+            background: #4a5568 !important;
+            color: #f7fafc !important;
+            border-color: #63b3ed !important;
+        }
+
         /* === RESET & BASE === */
         * { 
             margin: 0; 
@@ -10825,6 +10902,9 @@
                 // Fix white elements with JavaScript
                 if (newTheme === 'dark') {
                     this.fixWhiteElementsInDarkMode();
+                    this.updateChartsForDarkMode();
+                } else {
+                    this.updateChartsForLightMode();
                 }
                 
                 // Force style recalculation and cache bust
@@ -10941,6 +11021,58 @@
                             }
                         });
                     }, 1000);
+                }
+            }
+
+            updateChartsForDarkMode() {
+                // Update Chart.js charts for dark mode
+                if (window.Chart && window.AnalyticsManager && window.AnalyticsManager.chart) {
+                    const chart = window.AnalyticsManager.chart;
+                    
+                    // Update chart options for dark mode
+                    chart.options.scales.x.ticks.color = '#e2e8f0';
+                    chart.options.scales.x.grid.color = '#2d3748';
+                    chart.options.scales.y.ticks.color = '#e2e8f0';
+                    chart.options.scales.y.grid.color = '#2d3748';
+                    
+                    // Update dataset colors
+                    chart.data.datasets.forEach(dataset => {
+                        if (dataset.borderColor === '#000000' || dataset.borderColor === 'black') {
+                            dataset.borderColor = '#63b3ed';
+                        }
+                        if (dataset.backgroundColor === '#000000' || dataset.backgroundColor === 'black') {
+                            dataset.backgroundColor = 'rgba(99, 179, 237, 0.1)';
+                        }
+                    });
+                    
+                    chart.update();
+                    console.log('📊 Updated charts for dark mode');
+                }
+            }
+
+            updateChartsForLightMode() {
+                // Update Chart.js charts for light mode
+                if (window.Chart && window.AnalyticsManager && window.AnalyticsManager.chart) {
+                    const chart = window.AnalyticsManager.chart;
+                    
+                    // Update chart options for light mode
+                    chart.options.scales.x.ticks.color = '#333333';
+                    chart.options.scales.x.grid.color = '#e0e0e0';
+                    chart.options.scales.y.ticks.color = '#333333';
+                    chart.options.scales.y.grid.color = '#e0e0e0';
+                    
+                    // Update dataset colors
+                    chart.data.datasets.forEach(dataset => {
+                        if (dataset.borderColor === '#63b3ed') {
+                            dataset.borderColor = '#000000';
+                        }
+                        if (dataset.backgroundColor === 'rgba(99, 179, 237, 0.1)') {
+                            dataset.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+                        }
+                    });
+                    
+                    chart.update();
+                    console.log('📊 Updated charts for light mode');
                 }
             }
 
