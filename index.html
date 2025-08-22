@@ -4752,6 +4752,29 @@
         </div>
     </div>
 
+    <!-- === GLOBAL SEARCH MODAL === -->
+    <div id="global-search-modal" class="modal hide">
+        <div class="modal-content" style="max-width: 600px; width: 90vw;">
+            <button class="close" onclick="GlobalSearch.hide()">×</button>
+            <h2>
+                <i data-lucide="search" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
+                Global Search
+            </h2>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" id="global-search-input" placeholder="Search todos, goals, termine, journal entries..." 
+                           style="font-size: 1rem; padding: 0.75rem; width: 100%; border: 2px solid var(--border-primary); box-sizing: border-box;">
+                </div>
+                
+                <div id="search-results" style="max-height: 400px; overflow-y: auto;">
+                    <div id="search-empty" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        Start typing to search...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- === ADD TERMIN MODAL === -->
     <div id="add-termin-modal" class="modal hide">
         <div class="modal-content">
