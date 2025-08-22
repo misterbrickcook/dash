@@ -886,6 +886,20 @@
             line-height: 1.4;
         }
 
+        /* Todo structure classes für home todos */
+        .todo-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .todo-right {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
         /* === PROGRESS BAR === */
         .progress-container {
             display: flex;
@@ -2043,6 +2057,10 @@
         }
         .priority-mittel {
             background: #3b82f6;
+        }
+
+        .priority-niedrig {
+            background: #22c55e;
         }
         .todo-date {
             color: var(--text-secondary);
