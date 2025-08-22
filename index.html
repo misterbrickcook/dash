@@ -39,43 +39,61 @@
 
         /* Dark mode variables - Warm, eye-friendly colors */
         [data-theme="dark"] {
-            --bg-primary: #1e1e1e;
-            --bg-secondary: #2a2a2a;
-            --text-primary: #e8e8e8;
-            --text-secondary: #c0c0c0;
-            --text-muted: #9a9a9a;
-            --border-primary: #3a3a3a;
-            --border-secondary: #484848;
-            --accent-primary: #f0f0f0;
+            --bg-primary: #1e1e1e !important;
+            --bg-secondary: #2a2a2a !important;
+            --text-primary: #e8e8e8 !important;
+            --text-secondary: #c0c0c0 !important;
+            --text-muted: #9a9a9a !important;
+            --border-primary: #3a3a3a !important;
+            --border-secondary: #484848 !important;
+            --accent-primary: #f0f0f0 !important;
         }
 
         /* Dark mode enhancements */
         [data-theme="dark"] body {
-            background: var(--bg-primary);
+            background: #1e1e1e !important;
+            color: #e8e8e8 !important;
+        }
+
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .todo-item,
+        [data-theme="dark"] .todo-block,
+        [data-theme="dark"] .resource-block,
+        [data-theme="dark"] .modal-content {
+            background: #1e1e1e !important;
+            border-color: #3a3a3a !important;
+            color: #e8e8e8 !important;
         }
 
         [data-theme="dark"] .quickbar-sub-btn {
-            background: rgba(42, 42, 42, 0.95);
-            border: 1px solid var(--border-primary);
+            background: rgba(42, 42, 42, 0.95) !important;
+            border: 1px solid #3a3a3a !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            color: #e8e8e8 !important;
         }
 
         [data-theme="dark"] .quickbar-sub-btn:hover {
-            background: rgba(58, 58, 58, 0.95);
-            border-color: var(--accent-primary);
+            background: rgba(58, 58, 58, 0.95) !important;
+            border-color: #f0f0f0 !important;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
         }
 
+        [data-theme="dark"] .btn {
+            background: #1e1e1e !important;
+            color: #f0f0f0 !important;
+            border-color: #f0f0f0 !important;
+        }
+
         [data-theme="dark"] .btn:hover {
-            background: var(--bg-secondary);
-            color: var(--accent-primary);
-            border-color: var(--accent-primary);
+            background: #2a2a2a !important;
+            color: #f0f0f0 !important;
+            border-color: #f0f0f0 !important;
         }
 
         [data-theme="dark"] .card:hover,
         [data-theme="dark"] .todo-item:hover,
         [data-theme="dark"] .resource-block:hover {
-            border-color: var(--border-secondary);
+            border-color: #484848 !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
@@ -10510,7 +10528,14 @@
                 const currentTheme = html.getAttribute('data-theme');
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                 
+                console.log('🌙 Dark Mode Toggle:', { currentTheme, newTheme });
+                
                 html.setAttribute('data-theme', newTheme);
+                
+                // Force style recalculation
+                document.body.style.display = 'none';
+                document.body.offsetHeight; // Trigger reflow
+                document.body.style.display = '';
                 
                 // Update icon based on theme
                 const moonIcon = document.querySelector('[data-action="dark-mode"] i');
