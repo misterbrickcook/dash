@@ -685,18 +685,40 @@
             border-bottom: 20px solid rgba(255, 255, 255, 0.25);
         }
 
-        /* Always show animation on login page - simpler approach */
-        .animated-background,
-        .floating-shapes,
-        .floating-particles {
-            display: block !important;
-            z-index: 1 !important;
+        /* DIRECT body animation - always visible until login */
+        body {
+            background: linear-gradient(-45deg, 
+                rgba(238, 119, 82, 0.3), 
+                rgba(231, 60, 126, 0.25), 
+                rgba(35, 166, 213, 0.2), 
+                rgba(35, 213, 171, 0.15)) !important;
+            background-size: 400% 400% !important;
+            animation: gradientShift 10s ease infinite !important;
         }
 
-        /* Hide when authenticated */
-        body.authenticated .animated-background,
-        body.authenticated .floating-shapes,
-        body.authenticated .floating-particles {
+        /* Overlay patterns directly on body */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(120, 100, 255, 0.3) 0%, transparent 30%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 120, 120, 0.25) 0%, transparent 30%),
+                        radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.2) 0%, transparent 30%);
+            animation: pulse 15s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Remove animations when logged in */
+        body.authenticated {
+            background: var(--bg-primary) !important;
+            animation: none !important;
+        }
+
+        body.authenticated::before {
             display: none !important;
         }
 
