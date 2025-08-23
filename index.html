@@ -5896,6 +5896,16 @@
                 </div>
                 
                 <div class="setting-group">
+                    <h3>Pomodoro Timer</h3>
+                    <div class="setting-item">
+                        <label for="pomodoro-duration">Timer Dauer (Minuten):</label>
+                        <input type="number" id="pomodoro-duration" min="5" max="60" value="25" step="1">
+                        <span class="setting-description">Dauer eines Pomodoro-Intervalls in Minuten</span>
+                    </div>
+                    <button id="save-pomodoro-settings" class="btn">Speichern</button>
+                </div>
+                
+                <div class="setting-group">
                     <h3>Kryptowährung Ticker</h3>
                     <div class="setting-item">
                         <div class="crypto-management">
@@ -11140,13 +11150,52 @@
         // === POMODORO TIMER ===
         class PomodoroTimer {
             constructor() {
-                this.duration = 25 * 60; // 25 minutes in seconds
+                this.defaultDuration = 25 * 60; // 25 minutes in seconds
+                this.duration = this.defaultDuration;
                 this.timeLeft = this.duration;
                 this.isRunning = false;
                 this.interval = null;
                 this.audio = null;
                 this.createNotification();
                 this.setupRightClickListener();
+                this.loadDurationFromSettings();
+            }
+            
+            async loadDurationFromSettings() {
+                try {
+                    if (window.supabase && window.supabase.user) {
+                        const { data, error } = await window.supabase.supabase
+                            .from('user_settings')
+                            .select('setting_value')
+                            .eq('user_id', window.supabase.user.id)
+                            .eq('setting_key', 'pomodoroDuration')
+                            .maybeSingle();
+                        
+                        if (!error && data) {
+                            const minutes = parseInt(data.setting_value);
+                            if (minutes >= 5 && minutes <= 60) {
+                                this.setDuration(minutes);
+                                // Update the input field in settings if it exists
+                                const durationInput = document.getElementById('pomodoro-duration');
+                                if (durationInput) {
+                                    durationInput.value = minutes;
+                                }
+                                console.log(`🍅 Loaded Pomodoro duration: ${minutes} minutes`);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading Pomodoro duration:', error);
+                }
+            }
+            
+            setDuration(minutes) {
+                this.duration = minutes * 60; // Convert minutes to seconds
+                // Only reset timeLeft if timer is not currently running
+                if (!this.isRunning) {
+                    this.timeLeft = this.duration;
+                }
+                console.log(`🍅 Pomodoro duration set to ${minutes} minutes`);
             }
 
             createNotification() {
@@ -13885,6 +13934,46 @@
                                 alert(`Analytics Einstellungen gespeichert! SOL Balance wird täglich um ${timeInput.value} Uhr aufgezeichnet.`);
                             } catch (error) {
                                 console.error('Error saving analytics settings:', error);
+                                alert('Fehler beim Speichern der Einstellungen.');
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Save Pomodoro settings
+            const savePomodoroBtn = document.getElementById('save-pomodoro-settings');
+            if (savePomodoroBtn) {
+                savePomodoroBtn.addEventListener('click', async () => {
+                    const durationInput = document.getElementById('pomodoro-duration');
+                    if (durationInput && window.supabase?.isAuthenticated()) {
+                        const user = window.supabase.getCurrentUser();
+                        if (user) {
+                            try {
+                                const minutes = parseInt(durationInput.value);
+                                if (minutes < 5 || minutes > 60) {
+                                    alert('Bitte geben Sie eine Dauer zwischen 5 und 60 Minuten ein.');
+                                    return;
+                                }
+                                
+                                // Save to cloud
+                                const setting = {
+                                    user_id: user.id,
+                                    setting_key: 'pomodoroDuration',
+                                    setting_value: minutes.toString(),
+                                    updated_at: new Date().toISOString()
+                                };
+                                
+                                await window.supabase.upsert('user_settings', setting, ['user_id', 'setting_key']);
+                                
+                                // Update the PomodoroTimer with the new duration
+                                if (window.PomodoroTimer) {
+                                    window.PomodoroTimer.setDuration(minutes);
+                                }
+                                
+                                alert(`Pomodoro Einstellungen gespeichert! Timer Dauer: ${minutes} Minuten.`);
+                            } catch (error) {
+                                console.error('Error saving Pomodoro settings:', error);
                                 alert('Fehler beim Speichern der Einstellungen.');
                             }
                         }
