@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS public.visions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Remove category column if it exists (migration for existing tables)
+ALTER TABLE public.visions DROP COLUMN IF EXISTS category;
+
 -- Enable Row Level Security
 ALTER TABLE public.visions ENABLE ROW LEVEL SECURITY;
 
