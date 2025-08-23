@@ -6298,7 +6298,6 @@
         })();
         
         // Debug: Check if basic JavaScript works
-        console.log('🔧 JavaScript loading started...');
         
         window.addEventListener('error', function(e) {
             console.error('❌ JavaScript Error:', e.error);
@@ -6313,8 +6312,6 @@
             async init() {
                 window.Auth = this;
                 
-                console.log('🔍 AUTH INIT: Starting auth initialization');
-                console.log('🔍 AUTH INIT: Supabase exists:', !!supabase);
                 
                 // SECURITY: Ensure login fields are empty and prevent auto-fill
                 const emailField = document.getElementById('login-email');
@@ -6335,15 +6332,11 @@
                 }
                 
                 this.currentUser = supabase.getCurrentUser();
-                console.log('🔍 AUTH INIT: Current user:', this.currentUser);
-                console.log('🔍 AUTH INIT: Is authenticated:', supabase.isAuthenticated());
                 
                 if (supabase.isAuthenticated()) {
-                    console.log('✅ User authenticated successfully - CALLING SHOWDASHBOARD');
                     this.isAuthenticated = true;
                     await this.showDashboard();
                 } else {
-                    console.log('❌ User not authenticated - CALLING SHOWAUTHSCREEN');
                     this.showAuthScreen();
                 }
                 
@@ -6466,7 +6459,6 @@
             
             async refreshRoutineUI() {
                 // Simple refresh for routine UI without retries
-                console.log('🔄 Refreshing routine UI...');
                 
                 try {
                     // Note: Counter updates now handled by SimpleCounters
@@ -6480,7 +6472,6 @@
                         });
                     }
                     
-                    console.log('✅ Routine UI refreshed');
                 } catch (error) {
                     console.error('❌ Error refreshing routine UI:', error);
                 }
@@ -6744,20 +6735,17 @@
             const today = new Date().toISOString().split('T')[0];
             
             // Pure cloud mode - no localStorage saving needed
-            console.log(`☁️ Pure cloud mode: Checkbox state ${checkboxId} = ${isChecked} (not saved to localStorage)`);
             
             // Skip database save for routine checkboxes - handled by routine completion system
             const checkbox = document.getElementById(checkboxId);
             const routineSection = checkbox?.closest('.routine-section');
             
             if (routineSection) {
-                console.log(`📝 Routine checkbox ${checkboxId} state saved to localStorage only - database sync handled by routine system`);
                 return;
             }
             
             // Save non-routine checkboxes to database if authenticated
             if (supabase?.isAuthenticated()) {
-                console.log(`💾 Saving non-routine checkbox ${checkboxId} to database...`);
                 // Only save non-routine checkboxes to database
                 // Routine checkboxes are handled by the routine completion system
             }
@@ -6784,8 +6772,6 @@
                     progressFill.style.width = percentage + '%';
                 }
                 
-                // Optional: Log progress for debugging
-                console.log(`Routine progress: ${percentage}% (${checkedBoxes.length}/${checkboxes.length})`);
                 
                 // Update monthly streaks based on completion status (pure cloud mode)
                 const today = new Date().toISOString().split('T')[0];
@@ -6793,20 +6779,15 @@
                 
                 let completionStatus;
                 if (percentage === 100) {
-                    console.log('🔍 DEBUG: 100% reached, marking as complete');
                     completionStatus = true;
                 } else {
-                    console.log('🔍 DEBUG: Less than 100%, marking as incomplete');
                     completionStatus = false;
                 }
-                
-                console.log(`☁️ Pure cloud mode: ${routineType} completion: ${completionStatus}`);
                 
                 // Save to cloud if authenticated (async without blocking)
                 if (supabase?.isAuthenticated()) {
                     (async () => {
                         try {
-                            console.log(`☁️ Saving routine completion to cloud: ${routineType} = ${completionStatus}`);
                             await cloudStorage.saveRoutineCompletion(`${routineType}_routine`, today, completionStatus);
                             
                             // Note: Counter updates now handled by SimpleCounters
@@ -7661,12 +7642,10 @@
             },
             
             refreshCurrentView() {
-                console.log('🔄 Refreshing all todo containers...');
                 
                 // Update all todo categories since there's no active tab system in todos
                 const categories = ['privat', 'uni', 'arbeit', 'projekte'];
                 categories.forEach(category => {
-                    console.log(`🔄 Refreshing category: ${category}`);
                     this.displayTodosForCategory(category);
                 });
                 
@@ -7759,7 +7738,6 @@
                 console.log('🧹 Container cleared');
                 
                 if (filteredTodos.length === 0) {
-                    console.log('⚠️ No todos to display for category:', category);
                     container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Keine Todos vorhanden</p>';
                     return;
                 }
@@ -7769,16 +7747,12 @@
                 todoList.className = 'todo-list';
                 
                 // Display todos
-                console.log('🔧 Creating todo elements...');
                 filteredTodos.forEach((todo, index) => {
-                    console.log(`🔧 Creating element ${index + 1}/${filteredTodos.length}:`, todo.title);
                     const todoElement = this.createTodoElement(todo);
                     todoList.appendChild(todoElement);
                 });
                 
                 container.appendChild(todoList);
-                console.log('✅ Todo list appended to container:', container.id);
-                console.log('🔍 Final container children count:', container.children.length);
             },
             
             createTodoElement(todo) {
@@ -10305,17 +10279,14 @@
                                 const data = await window.supabase.query(`visions?user_id=eq.${user.id}&order=created_at.desc`);
                                 this.visions = data || [];
                                 this.renderVisions();
-                                console.log(`✅ Loaded ${this.visions.length} visions from cloud`);
                                 return;
                             }
                         }
                         
                         // Pure cloud mode - no localStorage fallback
-                        console.log('⚠️ Not authenticated - visions require cloud authentication');
                         this.visions = [];
                         this.renderVisions();
                     } catch (error) {
-                        console.error('❌ Error in loadVisions:', error);
                         this.visions = [];
                         this.renderVisions();
                     }
@@ -10415,17 +10386,12 @@
                             created_at: new Date().toISOString()
                         };
                         
-                        console.log('🎯 Adding vision:', vision);
                         
                         // Pure cloud mode - no localStorage fallback
                         await window.supabase.upsert('visions', vision, ['user_id', 'title', 'created_at']);
-                        console.log('✅ Vision added to cloud');
-                        
-                        console.log('✅ Vision added successfully');
                         this.hideAddVisionModal();
                         await this.loadVisions();
                     } catch (error) {
-                        console.error('❌ Error in addVision:', error);
                         alert('Fehler beim Erstellen der Vision Card: ' + error.message);
                     }
                 },
@@ -10442,11 +10408,9 @@
                         
                         // Pure cloud mode - no localStorage fallback
                         await window.supabase.delete('visions', visionId);
-                        console.log('✅ Vision deleted from cloud');
                         
                         await this.loadVisions();
                     } catch (error) {
-                        console.error('❌ Error in deleteVision:', error);
                         alert('Fehler beim Löschen der Vision Card: ' + error.message);
                     }
                 },
@@ -10454,7 +10418,6 @@
                 
                 editVision(visionId) {
                     // Placeholder for edit functionality
-                    console.log('Edit vision:', visionId);
                     alert('Vision bearbeiten - Coming Soon! 🎯');
                 }
             };
@@ -10463,7 +10426,6 @@
             window.VisionManager = VisionManager;
             
             // Initialize VisionManager
-            console.log('🔄 Initializing VisionManager...');
             VisionManager.loadVisions();
 
             // === QUICK NOTES FUNCTIONALITY ===
