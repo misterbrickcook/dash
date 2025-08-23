@@ -10302,23 +10302,18 @@
                         if (window.supabase?.isAuthenticated()) {
                             const user = window.supabase.getCurrentUser();
                             if (user) {
-                                try {
-                                    const data = await window.supabase.query(`visions?user_id=eq.${user.id}&order=created_at.desc`);
-                                    this.visions = data || [];
-                                    this.renderVisions();
-                                    console.log(`✅ Loaded ${this.visions.length} visions from cloud`);
-                                    return;
-                                } catch (error) {
-                                    console.warn('⚠️ Cloud visions not available yet, using localStorage:', error.message);
-                                }
+                                const data = await window.supabase.query(`visions?user_id=eq.${user.id}&order=created_at.desc`);
+                                this.visions = data || [];
+                                this.renderVisions();
+                                console.log(`✅ Loaded ${this.visions.length} visions from cloud`);
+                                return;
                             }
                         }
                         
-                        // Fallback to localStorage
-                        const localVisions = localStorage.getItem('visions');
-                        this.visions = localVisions ? JSON.parse(localVisions) : [];
+                        // Pure cloud mode - no localStorage fallback
+                        console.log('⚠️ Not authenticated - visions require cloud authentication');
+                        this.visions = [];
                         this.renderVisions();
-                        console.log(`✅ Loaded ${this.visions.length} visions from localStorage`);
                     } catch (error) {
                         console.error('❌ Error in loadVisions:', error);
                         this.visions = [];
@@ -10399,9 +10394,20 @@
                 
                 async addVision(formData) {
                     try {
+                        if (!window.supabase?.isAuthenticated()) {
+                            alert('Bitte anmelden, um Vision Cards zu erstellen.');
+                            return;
+                        }
+                        
+                        const user = window.supabase.getCurrentUser();
+                        if (!user) {
+                            alert('Benutzerinformationen nicht verfügbar. Bitte erneut anmelden.');
+                            return;
+                        }
+                        
                         const vision = {
-                            id: Date.now().toString(), // Simple ID for localStorage
-                            user_id: window.supabase?.getCurrentUser()?.id || 'local',
+                            id: Date.now().toString(),
+                            user_id: user.id,
                             title: formData.title,
                             description: formData.description || '',
                             category: formData.category,
@@ -10411,18 +10417,9 @@
                         
                         console.log('🎯 Adding vision:', vision);
                         
-                        // Try cloud first, fallback to localStorage
-                        if (window.supabase?.isAuthenticated()) {
-                            try {
-                                await window.supabase.upsert('visions', vision, ['user_id', 'title', 'created_at']);
-                                console.log('✅ Vision added to cloud');
-                            } catch (error) {
-                                console.warn('⚠️ Cloud save failed, using localStorage:', error.message);
-                                this.saveToLocalStorage(vision);
-                            }
-                        } else {
-                            this.saveToLocalStorage(vision);
-                        }
+                        // Pure cloud mode - no localStorage fallback
+                        await window.supabase.upsert('visions', vision, ['user_id', 'title', 'created_at']);
+                        console.log('✅ Vision added to cloud');
                         
                         console.log('✅ Vision added successfully');
                         this.hideAddVisionModal();
@@ -10433,46 +10430,27 @@
                     }
                 },
                 
-                saveToLocalStorage(vision) {
-                    const existingVisions = localStorage.getItem('visions');
-                    const visions = existingVisions ? JSON.parse(existingVisions) : [];
-                    visions.unshift(vision); // Add to beginning
-                    localStorage.setItem('visions', JSON.stringify(visions));
-                    console.log('💾 Vision saved to localStorage');
-                },
                 
                 async deleteVision(visionId) {
                     if (!confirm('Vision Card wirklich löschen?')) return;
                     
                     try {
-                        // Try cloud first
-                        if (window.supabase?.isAuthenticated()) {
-                            try {
-                                await window.supabase.delete('visions', visionId);
-                                console.log('✅ Vision deleted from cloud');
-                            } catch (error) {
-                                console.warn('⚠️ Cloud delete failed, deleting from localStorage');
-                                this.deleteFromLocalStorage(visionId);
-                            }
-                        } else {
-                            this.deleteFromLocalStorage(visionId);
+                        if (!window.supabase?.isAuthenticated()) {
+                            alert('Bitte anmelden, um Vision Cards zu löschen.');
+                            return;
                         }
+                        
+                        // Pure cloud mode - no localStorage fallback
+                        await window.supabase.delete('visions', visionId);
+                        console.log('✅ Vision deleted from cloud');
                         
                         await this.loadVisions();
                     } catch (error) {
                         console.error('❌ Error in deleteVision:', error);
+                        alert('Fehler beim Löschen der Vision Card: ' + error.message);
                     }
                 },
                 
-                deleteFromLocalStorage(visionId) {
-                    const existingVisions = localStorage.getItem('visions');
-                    if (!existingVisions) return;
-                    
-                    const visions = JSON.parse(existingVisions);
-                    const filteredVisions = visions.filter(v => v.id !== visionId);
-                    localStorage.setItem('visions', JSON.stringify(filteredVisions));
-                    console.log('💾 Vision deleted from localStorage');
-                },
                 
                 editVision(visionId) {
                     // Placeholder for edit functionality
