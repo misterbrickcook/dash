@@ -487,52 +487,82 @@
         }
 
 
-        /* === LOGIN PAGE BLACK EFFECTS - ALWAYS VISIBLE === */
-        body {
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Black geometric shapes floating - MUCH MORE VISIBLE */
-        body::before {
-            content: '';
+        /* === LOGIN BLACK EFFECTS - VISIBLE ELEMENTS === */
+        .login-effects {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                radial-gradient(circle at 15% 25%, rgba(0, 0, 0, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 85% 75%, rgba(0, 0, 0, 0.12) 0%, transparent 35%),
-                radial-gradient(circle at 50% 10%, rgba(0, 0, 0, 0.08) 0%, transparent 45%);
-            animation: floatPatterns 15s ease-in-out infinite alternate;
             pointer-events: none;
             z-index: 1;
         }
 
-        /* Strong moving lines */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 200%;
-            height: 200%;
-            background: repeating-linear-gradient(
-                45deg,
-                transparent,
-                transparent 40px,
-                rgba(0, 0, 0, 0.05) 42px,
-                rgba(0, 0, 0, 0.05) 44px
-            );
-            animation: slideLines 25s linear infinite;
-            pointer-events: none;
-            z-index: 1;
+        .login-effects .black-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.08);
+            animation: floatUp 20s linear infinite;
         }
 
-        /* HIDE when authenticated */
-        body.authenticated::before,
-        body.authenticated::after {
+        .login-effects .black-circle:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .login-effects .black-circle:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            left: 70%;
+            animation-delay: 3s;
+        }
+
+        .login-effects .black-circle:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            left: 30%;
+            animation-delay: 6s;
+        }
+
+        .login-effects .black-square {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.06);
+            transform: rotate(45deg);
+            animation: floatUp 25s linear infinite;
+        }
+
+        .login-effects .black-square:nth-child(4) {
+            left: 50%;
+            animation-delay: 2s;
+        }
+
+        .login-effects .black-square:nth-child(5) {
+            left: 80%;
+            animation-delay: 8s;
+        }
+
+        @keyframes floatUp {
+            0% {
+                bottom: -100px;
+                opacity: 0;
+                transform: translateX(0) rotate(0deg);
+            }
+            10%, 90% {
+                opacity: 1;
+            }
+            100% {
+                bottom: 100vh;
+                opacity: 0;
+                transform: translateX(50px) rotate(360deg);
+            }
+        }
+
+        /* Hide when authenticated */
+        body.authenticated .login-effects {
             display: none !important;
         }
 
@@ -556,7 +586,7 @@
             }
         }
 
-        /* Ensure login form is above effects */
+        /* Login form styling */
         .login-form,
         .auth-form,
         .login-container {
@@ -14568,6 +14598,15 @@
     <!-- === MOBILE UNDER CONSTRUCTION === -->
     <div class="mobile-construction">
         <h1>Under Construction</h1>
+    </div>
+
+    <!-- Login Effects -->
+    <div class="login-effects">
+        <div class="black-circle"></div>
+        <div class="black-circle"></div>
+        <div class="black-circle"></div>
+        <div class="black-square"></div>
+        <div class="black-square"></div>
     </div>
 
     <!-- === ENHANCED QUICKBAR === -->
