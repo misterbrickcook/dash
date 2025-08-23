@@ -11839,44 +11839,16 @@
                     // Update pomodoro button state
                     if (window.PomodoroTimer && pomodoroBtn) {
                         const isRunning = window.PomodoroTimer.isRunning;
-                        console.log('🔍 PomodoroBtn found:', !!pomodoroBtn);
-                        console.log('🔍 PomodoroBtn HTML:', pomodoroBtn ? pomodoroBtn.innerHTML : 'null');
-                        const icon = pomodoroBtn.querySelector('i');
-                        console.log('🔍 Icon found:', !!icon);
                         
-                        if (icon) {
-                            if (isRunning) {
-                                icon.setAttribute('data-lucide', 'pause-circle');
-                                pomodoroBtn.setAttribute('data-tooltip', 'Pause Timer');
-                                pomodoroBtn.classList.add('pomodoro-active');
-                            } else {
-                                icon.setAttribute('data-lucide', 'play-circle');
-                                pomodoroBtn.setAttribute('data-tooltip', 'Resume Timer');
-                                pomodoroBtn.classList.add('pomodoro-active');
-                            }
-                        } else {
-                            console.error('❌ Dynamic Pomodoro icon element not found - trying to create it');
-                            // Try to recreate the icon if it's missing
-                            pomodoroBtn.innerHTML = '<i data-lucide="pause-circle"></i>';
-                            if (window.lucide) {
-                                lucide.createIcons();
-                                // Try again after creating icons
-                                setTimeout(() => {
-                                    const newIcon = pomodoroBtn.querySelector('i');
-                                    if (newIcon) {
-                                        if (isRunning) {
-                                            newIcon.setAttribute('data-lucide', 'pause-circle');
-                                            pomodoroBtn.setAttribute('data-tooltip', 'Pause Timer');
-                                        } else {
-                                            newIcon.setAttribute('data-lucide', 'play-circle');
-                                            pomodoroBtn.setAttribute('data-tooltip', 'Resume Timer');
-                                        }
-                                        pomodoroBtn.classList.add('pomodoro-active');
-                                        lucide.createIcons();
-                                    }
-                                }, 100);
-                            }
-                        }
+                        // Always recreate the icon to ensure it exists and is correct
+                        const iconType = isRunning ? 'pause-circle' : 'play-circle';
+                        const tooltipText = isRunning ? 'Pause Timer' : 'Resume Timer';
+                        
+                        pomodoroBtn.innerHTML = `<i data-lucide="${iconType}"></i>`;
+                        pomodoroBtn.setAttribute('data-tooltip', tooltipText);
+                        pomodoroBtn.classList.add('pomodoro-active');
+                        
+                        console.log(`🍅 Updated dynamic Pomodoro button: ${iconType}`);
                     }
                 } else {
                     console.log('⏹️ Hiding dynamic pomodoro button');
