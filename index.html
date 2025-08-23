@@ -11130,12 +11130,9 @@
                 const defaultTheme = 'light';
                 document.documentElement.setAttribute('data-theme', defaultTheme);
                 
-                // Update the icon based on current theme
+                // Update button icon using the clean method
                 setTimeout(() => {
-                    const moonIcon = document.querySelector('[data-action="dark-mode"] i');
-                    if (moonIcon) {
-                        moonIcon.setAttribute('data-lucide', defaultTheme === 'dark' ? 'sun' : 'moon');
-                    }
+                    this.updateDarkModeIcon(defaultTheme);
                     
                     // Fix white elements if dark mode is active
                     if (defaultTheme === 'dark') {
@@ -11476,36 +11473,8 @@
                 
                 html.setAttribute('data-theme', newTheme);
                 
-                // Update dark mode button icon - aggressive force re-render
-                console.log('🔄 Updating dark mode icon to:', newTheme === 'dark' ? 'sun' : 'moon');
-                
-                // IMMEDIATE update - no setTimeout
-                const darkModeBtn = document.querySelector('[data-action="dark-mode"]');
-                console.log('🔍 Found dark mode button:', darkModeBtn);
-                
-                if (darkModeBtn) {
-                    const iconElement = darkModeBtn.querySelector('i');
-                    console.log('🔍 Found icon element:', iconElement);
-                    
-                    if (iconElement) {
-                        // Method 1: Replace entire icon
-                        const newIcon = newTheme === 'dark' ? 'sun' : 'moon';
-                        console.log('🔄 Replacing with icon:', newIcon);
-                        iconElement.outerHTML = `<i data-lucide="${newIcon}" style="width: 20px; height: 20px;"></i>`;
-                        
-                        // Method 2: Force Lucide re-render
-                        if (window.lucide) {
-                            console.log('🔄 Calling lucide.createIcons()');
-                            lucide.createIcons();
-                        }
-                        
-                        console.log('✅ Icon replacement complete:', newIcon);
-                    } else {
-                        console.error('❌ Icon element not found');
-                    }
-                } else {
-                    console.error('❌ Dark mode button not found');
-                }
+                // Update dark mode button icon - single clean method
+                this.updateDarkModeIcon(newTheme);
                 
                 // Fix white elements with JavaScript
                 if (newTheme === 'dark') {
@@ -11530,19 +11499,46 @@
                     window.getComputedStyle(document.body).getPropertyValue('background-color');
                 }
                 
-                // Update icon based on theme
-                const moonIcon = document.querySelector('[data-action="dark-mode"] i');
-                if (moonIcon) {
-                    moonIcon.setAttribute('data-lucide', newTheme === 'dark' ? 'sun' : 'moon');
-                    // Re-initialize lucide to update the icon
-                    setTimeout(() => {
-                        if (window.lucide) {
-                            lucide.createIcons();
-                        }
-                    }, 10);
-                }
                 
                 this.closeAllSubMenus();
+            },
+            
+            updateDarkModeIcon(theme) {
+                console.log('🌙 Updating dark mode icon for theme:', theme);
+                
+                const darkModeBtn = document.querySelector('[data-action="dark-mode"]');
+                if (!darkModeBtn) {
+                    console.error('❌ Dark mode button not found');
+                    return;
+                }
+                
+                const iconElement = darkModeBtn.querySelector('i');
+                if (!iconElement) {
+                    console.error('❌ Icon element not found');
+                    return;
+                }
+                
+                // Clear existing icon
+                iconElement.removeAttribute('data-lucide');
+                iconElement.innerHTML = '';
+                
+                // Set new icon based on current theme
+                // If dark theme: show sun (to switch back to light)
+                // If light theme: show moon (to switch to dark)
+                const newIcon = theme === 'dark' ? 'sun' : 'moon';
+                iconElement.setAttribute('data-lucide', newIcon);
+                
+                console.log('🔄 Setting icon to:', newIcon);
+                
+                // Force Lucide to re-render this specific icon
+                if (window.lucide) {
+                    lucide.createIcons({
+                        iconNode: iconElement
+                    });
+                    console.log('✅ Lucide icon updated');
+                } else {
+                    console.warn('⚠️ Lucide not available');
+                }
             }
 
             fixWhiteElementsInDarkMode() {
