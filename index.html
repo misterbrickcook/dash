@@ -11694,18 +11694,22 @@
                     pomodoroButton.style.display = 'block';
                     
                     // Update pomodoro button state
-                    if (window.PomodoroTimer) {
+                    if (window.PomodoroTimer && pomodoroBtn) {
                         const isRunning = window.PomodoroTimer.isRunning;
                         const icon = pomodoroBtn.querySelector('i');
                         
-                        if (isRunning) {
-                            icon.setAttribute('data-lucide', 'pause-circle');
-                            pomodoroBtn.setAttribute('data-tooltip', 'Pause Timer');
-                            pomodoroBtn.classList.add('pomodoro-active');
+                        if (icon) {
+                            if (isRunning) {
+                                icon.setAttribute('data-lucide', 'pause-circle');
+                                pomodoroBtn.setAttribute('data-tooltip', 'Pause Timer');
+                                pomodoroBtn.classList.add('pomodoro-active');
+                            } else {
+                                icon.setAttribute('data-lucide', 'play-circle');
+                                pomodoroBtn.setAttribute('data-tooltip', 'Resume Timer');
+                                pomodoroBtn.classList.add('pomodoro-active');
+                            }
                         } else {
-                            icon.setAttribute('data-lucide', 'play-circle');
-                            pomodoroBtn.setAttribute('data-tooltip', 'Resume Timer');
-                            pomodoroBtn.classList.add('pomodoro-active');
+                            console.error('❌ Dynamic Pomodoro icon element not found');
                         }
                     }
                 } else {
