@@ -1147,11 +1147,57 @@
             font-style: italic;
         }
         
-        /* Dark mode support for vision cards */
+        /* Vision Card Context Menu */
+        .vision-context-menu {
+            position: fixed;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 0.5rem 0;
+            min-width: 140px;
+            display: none;
+        }
+
+        .vision-context-menu-item {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            transition: background-color 0.1s ease;
+        }
+
+        .vision-context-menu-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .vision-context-menu-item.delete {
+            color: #dc2626;
+        }
+
+        .vision-context-menu-item.delete:hover {
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        /* Dark mode support for vision cards and context menu */
         [data-theme="dark"] .vision-card {
             background: var(--bg-secondary) !important;
             border-color: var(--border-primary) !important;
             color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .vision-context-menu {
+            background: var(--bg-secondary) !important;
+            border-color: var(--border-primary) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .vision-context-menu-item:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
         }
 
         /* === MAIN CONTENT === */
@@ -6003,6 +6049,14 @@
             </div>
         </section>
 
+        <!-- Vision Context Menu -->
+        <div id="vision-context-menu" class="vision-context-menu">
+            <div class="vision-context-menu-item delete" onclick="VisionManager.deleteVisionFromMenu()">
+                <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                Löschen
+            </div>
+        </div>
+
         <!-- === WIKI TAB === -->
         <section id="tab-wiki" class="tab-section">
             
@@ -10280,25 +10334,23 @@
                     }
                     
                     const html = this.visions.map(vision => `
-                        <div class="vision-card" onclick="VisionManager.editVision('${vision.id}')" style="position: relative;">
+                        <div class="vision-card" 
+                             onclick="VisionManager.editVision('${vision.id}')" 
+                             oncontextmenu="VisionManager.showContextMenu(event, '${vision.id}'); return false;"
+                             data-vision-id="${vision.id}">
                             <div class="vision-card-icon">
                                 <i data-lucide="${vision.icon}" style="width: 40px; height: 40px;"></i>
                             </div>
                             <div class="vision-card-title">${vision.title}</div>
                             ${vision.description ? `<div class="vision-card-description">${vision.description}</div>` : ''}
-                            <button class="delete-vision-btn" onclick="event.stopPropagation(); VisionManager.deleteVision('${vision.id}')" style="position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(220, 38, 38, 0.8); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: none;">×</button>
                         </div>
                     `).join('');
                     
                     container.innerHTML = html;
                     if (window.lucide) lucide.createIcons();
                     
-                    // Show delete buttons on hover
-                    container.querySelectorAll('.vision-card').forEach(card => {
-                        const deleteBtn = card.querySelector('.delete-vision-btn');
-                        card.addEventListener('mouseenter', () => deleteBtn.style.display = 'block');
-                        card.addEventListener('mouseleave', () => deleteBtn.style.display = 'none');
-                    });
+                    // Hide context menu when clicking elsewhere
+                    document.addEventListener('click', this.hideContextMenu.bind(this));
                 },
                 
                 
@@ -10377,6 +10429,39 @@
                 editVision(visionId) {
                     // Placeholder for edit functionality
                     alert('Vision bearbeiten - Coming Soon! 🎯');
+                },
+
+                currentVisionId: null,
+
+                showContextMenu(event, visionId) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    this.currentVisionId = visionId;
+                    const contextMenu = document.getElementById('vision-context-menu');
+                    
+                    // Position the context menu
+                    contextMenu.style.left = event.pageX + 'px';
+                    contextMenu.style.top = event.pageY + 'px';
+                    contextMenu.style.display = 'block';
+                    
+                    // Create lucide icons in context menu
+                    if (window.lucide) lucide.createIcons();
+                },
+
+                hideContextMenu() {
+                    const contextMenu = document.getElementById('vision-context-menu');
+                    if (contextMenu) {
+                        contextMenu.style.display = 'none';
+                    }
+                    this.currentVisionId = null;
+                },
+
+                async deleteVisionFromMenu() {
+                    if (!this.currentVisionId) return;
+                    
+                    this.hideContextMenu();
+                    await this.deleteVision(this.currentVisionId);
                 }
             };
             
