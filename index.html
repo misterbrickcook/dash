@@ -495,14 +495,14 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 1;
+            z-index: 999;
         }
 
         .login-effects .black-circle {
             position: absolute;
             border-radius: 50%;
-            background: rgba(0, 0, 0, 0.08);
-            animation: floatUp 20s linear infinite;
+            background: rgba(0, 0, 0, 0.15);
+            animation: floatUp 15s linear infinite;
         }
 
         .login-effects .black-circle:nth-child(1) {
@@ -530,9 +530,9 @@
             position: absolute;
             width: 40px;
             height: 40px;
-            background: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 0, 0, 0.12);
             transform: rotate(45deg);
-            animation: floatUp 25s linear infinite;
+            animation: floatUp 18s linear infinite;
         }
 
         .login-effects .black-square:nth-child(4) {
@@ -561,9 +561,9 @@
             }
         }
 
-        /* Hide when authenticated */
-        body.authenticated .login-effects {
-            display: none !important;
+        /* Login effects - simple control */
+        .login-effects {
+            display: block;
         }
 
         @keyframes floatPatterns {
@@ -5986,6 +5986,9 @@
                     sessionStorage.clear();
                     console.log('✅ Logout successful, redirecting to login...');
                     
+                    // Remove authenticated class from body
+                    document.body.classList.remove('authenticated');
+                    
                     // Clear URL hash and redirect to clean login page
                     window.history.replaceState(null, null, window.location.pathname);
                     window.location.reload();
@@ -5994,6 +5997,8 @@
                     // Only clear auth-related data, preserve user data
                     localStorage.removeItem('supabase.auth.token');
                     sessionStorage.clear();
+                    // Remove authenticated class from body even on error
+                    document.body.classList.remove('authenticated');
                     window.location.reload();
                 }
             },
@@ -6008,7 +6013,13 @@
             },
             
             showAuthScreen() {
+                console.log('🔹 LOGIN: Showing login effects');
+                document.body.classList.remove('authenticated');
                 document.getElementById('auth-screen').classList.remove('hide');
+                const loginEffects = document.querySelector('.login-effects');
+                if (loginEffects) {
+                    loginEffects.style.display = 'block';
+                }
                 document.getElementById('crypto-overlay').style.display = 'none';
                 // Hide QuickBar on login screen
                 document.getElementById('quickbar').style.display = 'none';
@@ -6037,7 +6048,13 @@
             },
             
             async showDashboard() {
+                console.log('🔹 DASHBOARD: Hiding login effects');
+                document.body.classList.add('authenticated');
                 document.getElementById('auth-screen').classList.add('hide');
+                const loginEffects = document.querySelector('.login-effects');
+                if (loginEffects) {
+                    loginEffects.style.display = 'none';
+                }
                 document.getElementById('crypto-overlay').style.display = 'block';
                 // Show QuickBar when authenticated
                 document.getElementById('quickbar').style.display = 'flex';
