@@ -501,72 +501,75 @@
         .login-effects .black-circle {
             position: absolute;
             border-radius: 50%;
-            background: red;
-            animation: floatUp 5s linear infinite;
+            background: rgba(0, 0, 0, 0.03);
+            animation: subtleFloat 25s ease-in-out infinite;
         }
 
         .login-effects .black-circle:nth-child(1) {
-            width: 200px;
-            height: 200px;
-            left: 10%;
-            top: 200px;
-            animation: none;
+            width: 300px;
+            height: 300px;
+            left: -50px;
+            top: -50px;
+            animation-delay: 0s;
         }
 
         .login-effects .black-circle:nth-child(2) {
-            width: 150px;
-            height: 150px;
-            left: 60%;
-            top: 300px;
-            animation: none;
+            width: 200px;
+            height: 200px;
+            right: -30px;
+            bottom: -30px;
+            animation-delay: 8s;
         }
 
         .login-effects .black-circle:nth-child(3) {
-            width: 100px;
-            height: 100px;
-            left: 30%;
-            top: 100px;
-            animation: none;
+            width: 150px;
+            height: 150px;
+            left: 20%;
+            bottom: 10%;
+            animation-delay: 15s;
         }
 
         .login-effects .black-square {
             position: absolute;
-            width: 40px;
-            height: 40px;
-            background: blue;
+            width: 20px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.05);
             transform: rotate(45deg);
-            animation: floatUp 5s linear infinite;
+            animation: subtleFloat 30s ease-in-out infinite reverse;
         }
 
         .login-effects .black-square:nth-child(4) {
-            left: 50%;
-            top: 400px;
-            animation: none;
-            width: 80px;
-            height: 80px;
+            right: 15%;
+            top: 20%;
+            animation-delay: 5s;
+            width: 25px;
+            height: 25px;
         }
 
         .login-effects .black-square:nth-child(5) {
-            left: 80%;
-            top: 150px;
-            animation: none;
-            width: 60px;
-            height: 60px;
+            left: 10%;
+            top: 70%;
+            animation-delay: 12s;
+            width: 15px;
+            height: 15px;
         }
 
-        @keyframes floatUp {
-            0% {
-                bottom: -100px;
-                opacity: 0;
-                transform: translateX(0) rotate(0deg);
+        @keyframes subtleFloat {
+            0%, 100% {
+                transform: translateY(0) scale(1) rotate(0deg);
+                opacity: 0.3;
             }
-            10%, 90% {
-                opacity: 1;
+            25% {
+                transform: translateY(-20px) scale(1.1) rotate(90deg);
+                opacity: 0.8;
             }
-            100% {
-                bottom: 100vh;
-                opacity: 0;
-                transform: translateX(50px) rotate(360deg);
+            50% {
+                transform: translateY(-10px) scale(0.9) rotate(180deg);
+                opacity: 0.5;
+            }
+            75% {
+                transform: translateY(-30px) scale(1.05) rotate(270deg);
+                opacity: 0.7;
             }
         }
 
@@ -2589,7 +2592,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: transparent;
+            background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
