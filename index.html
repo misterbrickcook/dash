@@ -1099,6 +1099,77 @@
         .btn-secondary:hover {
             background: #4b5563 !important;
         }
+        
+        /* === VISION BOARD === */
+        .vision-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+        
+        .vision-card {
+            background: #f8f9fa;
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .vision-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .vision-card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+        }
+        
+        .vision-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .vision-card-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .vision-card-category {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        /* Dark mode support for vision cards */
+        [data-theme="dark"] .vision-card {
+            background: #1a1a2e !important;
+            border-color: #2d3748 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        [data-theme="dark"] .vision-card-category {
+            background: rgba(26, 26, 46, 0.9) !important;
+            color: #e2e8f0 !important;
+        }
 
         /* === MAIN CONTENT === */
         .main-content { padding: 0 20px 40px 20px; }
@@ -5974,8 +6045,8 @@
             </div>
 
             <!-- Vision Content -->
-            <div class="vision-content" id="vision-entries">
-                <!-- Vision entries will be loaded here -->
+            <div class="vision-board" id="vision-entries">
+                <!-- Vision cards will be loaded here -->
             </div>
         </section>
 
@@ -6041,6 +6112,63 @@
                 
                     <div class="form-actions">
                         <button type="button" class="btn secondary" onclick="ResourceManager.hideAddResourceModal()">Abbrechen</button>
+                        <button type="submit" class="btn">Erstellen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Vision Modal -->
+    <div id="add-vision-modal" class="modal hide">
+        <div class="modal-content">
+            <button class="close" onclick="VisionManager.hideAddVisionModal()">×</button>
+            <h2>Vision Card</h2>
+            
+            <div class="modal-body">
+                <form id="add-vision-form">
+                    <div class="form-group">
+                        <label for="vision-title">Titel *</label>
+                        <input type="text" id="vision-title" required autocomplete="off" placeholder="z.B. Traumhaus, Weltreise, Fitness Ziel">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="vision-description">Beschreibung</label>
+                        <input type="text" id="vision-description" autocomplete="off" placeholder="z.B. 2026, 70kg erreicht, Eigenes Business">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="vision-category">Kategorie *</label>
+                        <select id="vision-category" required autocomplete="off">
+                            <option value="">Kategorie wählen...</option>
+                            <option value="lifestyle">🏠 Lifestyle</option>
+                            <option value="travel">✈️ Reisen</option>
+                            <option value="fitness">💪 Fitness</option>
+                            <option value="career">💼 Karriere</option>
+                            <option value="finance">💰 Finanzen</option>
+                            <option value="personal">🌟 Persönlich</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="vision-icon">Icon *</label>
+                        <input type="text" id="vision-icon" required autocomplete="off" value="star" readonly>
+                        <div class="icon-grid">
+                            <button type="button" class="icon-btn" onclick="VisionManager.selectIcon('home')"><i data-lucide="home" style="width: 16px; height: 16px;"></i></button>
+                            <button type="button" class="icon-btn" onclick="VisionManager.selectIcon('globe')"><i data-lucide="globe" style="width: 16px; height: 16px;"></i></button>
+                            <button type="button" class="icon-btn" onclick="VisionManager.selectIcon('dumbbell')"><i data-lucide="dumbbell" style="width: 16px; height: 16px;"></i></button>
+                            <button type="button" class="icon-btn" onclick="VisionManager.selectIcon('briefcase')"><i data-lucide="briefcase" style="width: 16px; height: 16px;"></i></button>
+                            <button type="button" class="icon-btn" onclick="VisionManager.selectIcon('dollar-sign')"><i data-lucide="dollar-sign" style="width: 16px; height: 16px;"></i></button>
+                            <button type="button" class="icon-btn" onclick="VisionManager.selectIcon('star')"><i data-lucide="star" style="width: 16px; height: 16px;"></i></button>
+                            <button type="button" class="icon-btn" onclick="VisionManager.selectIcon('heart')"><i data-lucide="heart" style="width: 16px; height: 16px;"></i></button>
+                            <button type="button" class="icon-btn" onclick="VisionManager.selectIcon('target')"><i data-lucide="target" style="width: 16px; height: 16px;"></i></button>
+                            <button type="button" class="icon-btn" onclick="VisionManager.selectIcon('trophy')"><i data-lucide="trophy" style="width: 16px; height: 16px;"></i></button>
+                            <button type="button" class="icon-btn" onclick="VisionManager.selectIcon('crown')"><i data-lucide="crown" style="width: 16px; height: 16px;"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn secondary" onclick="VisionManager.hideAddVisionModal()">Abbrechen</button>
                         <button type="submit" class="btn">Erstellen</button>
                     </div>
                 </form>
@@ -9758,8 +9886,7 @@
             const addVisionBtn = document.getElementById('add-vision-btn');
             if (addVisionBtn) {
                 addVisionBtn.addEventListener('click', () => {
-                    // For now, just show a placeholder message
-                    alert('Vision Board feature coming soon! 🎯✨');
+                    document.getElementById('add-vision-modal').classList.remove('hide');
                 });
             }
             
@@ -10166,6 +10293,177 @@
             console.log('🔄 Initializing ResourceManager after definition...');
             ResourceManager.loadResources();
 
+            // === VISION MANAGER ===
+            const VisionManager = {
+                visions: [],
+                
+                async loadVisions() {
+                    if (!window.supabase?.isAuthenticated()) return;
+                    
+                    try {
+                        const user = window.supabase.getCurrentUser();
+                        if (!user) return;
+                        
+                        const { data, error } = await window.supabase.supabase
+                            .from('visions')
+                            .select('*')
+                            .eq('user_id', user.id)
+                            .order('created_at', { ascending: false });
+                        
+                        if (error) {
+                            console.error('❌ Error loading visions:', error);
+                            return;
+                        }
+                        
+                        this.visions = data || [];
+                        this.renderVisions();
+                        console.log(`✅ Loaded ${this.visions.length} visions`);
+                    } catch (error) {
+                        console.error('❌ Error in loadVisions:', error);
+                    }
+                },
+                
+                renderVisions() {
+                    const container = document.getElementById('vision-entries');
+                    if (!container) return;
+                    
+                    if (this.visions.length === 0) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                                <i data-lucide="eye" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                                <p>Noch keine Vision Cards erstellt.</p>
+                                <p>Klicke auf den + Button um zu beginnen!</p>
+                            </div>
+                        `;
+                        if (window.lucide) lucide.createIcons();
+                        return;
+                    }
+                    
+                    const html = this.visions.map(vision => `
+                        <div class="vision-card" onclick="VisionManager.editVision('${vision.id}')" style="position: relative;">
+                            <div class="vision-card-category">${this.getCategoryEmoji(vision.category)}</div>
+                            <div class="vision-card-icon">
+                                <i data-lucide="${vision.icon}" style="width: 40px; height: 40px;"></i>
+                            </div>
+                            <div class="vision-card-title">${vision.title}</div>
+                            ${vision.description ? `<div class="vision-card-description">${vision.description}</div>` : ''}
+                            <button class="delete-vision-btn" onclick="event.stopPropagation(); VisionManager.deleteVision('${vision.id}')" style="position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(220, 38, 38, 0.8); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: none;">×</button>
+                        </div>
+                    `).join('');
+                    
+                    container.innerHTML = html;
+                    if (window.lucide) lucide.createIcons();
+                    
+                    // Show delete buttons on hover
+                    container.querySelectorAll('.vision-card').forEach(card => {
+                        const deleteBtn = card.querySelector('.delete-vision-btn');
+                        card.addEventListener('mouseenter', () => deleteBtn.style.display = 'block');
+                        card.addEventListener('mouseleave', () => deleteBtn.style.display = 'none');
+                    });
+                },
+                
+                getCategoryEmoji(category) {
+                    const emojis = {
+                        lifestyle: '🏠',
+                        travel: '✈️', 
+                        fitness: '💪',
+                        career: '💼',
+                        finance: '💰',
+                        personal: '🌟'
+                    };
+                    return emojis[category] || '🎯';
+                },
+                
+                showAddVisionModal() {
+                    document.getElementById('add-vision-modal').classList.remove('hide');
+                    // Reset form
+                    document.getElementById('add-vision-form').reset();
+                    document.getElementById('vision-icon').value = 'star';
+                },
+                
+                hideAddVisionModal() {
+                    document.getElementById('add-vision-modal').classList.add('hide');
+                },
+                
+                selectIcon(iconName) {
+                    document.getElementById('vision-icon').value = iconName;
+                    // Update selected state
+                    document.querySelectorAll('#add-vision-modal .icon-btn').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    document.querySelector(`#add-vision-modal .icon-btn[onclick*="${iconName}"]`).classList.add('selected');
+                },
+                
+                async addVision(formData) {
+                    if (!window.supabase?.isAuthenticated()) return;
+                    
+                    try {
+                        const user = window.supabase.getCurrentUser();
+                        if (!user) return;
+                        
+                        const vision = {
+                            user_id: user.id,
+                            title: formData.title,
+                            description: formData.description,
+                            category: formData.category,
+                            icon: formData.icon,
+                            created_at: new Date().toISOString()
+                        };
+                        
+                        const { error } = await window.supabase.supabase
+                            .from('visions')
+                            .insert(vision);
+                        
+                        if (error) {
+                            console.error('❌ Error adding vision:', error);
+                            alert('Fehler beim Erstellen der Vision Card.');
+                            return;
+                        }
+                        
+                        console.log('✅ Vision added successfully');
+                        this.hideAddVisionModal();
+                        await this.loadVisions();
+                    } catch (error) {
+                        console.error('❌ Error in addVision:', error);
+                        alert('Fehler beim Erstellen der Vision Card.');
+                    }
+                },
+                
+                async deleteVision(visionId) {
+                    if (!confirm('Vision Card wirklich löschen?')) return;
+                    
+                    try {
+                        const { error } = await window.supabase.supabase
+                            .from('visions')
+                            .delete()
+                            .eq('id', visionId);
+                        
+                        if (error) {
+                            console.error('❌ Error deleting vision:', error);
+                            return;
+                        }
+                        
+                        console.log('✅ Vision deleted');
+                        await this.loadVisions();
+                    } catch (error) {
+                        console.error('❌ Error in deleteVision:', error);
+                    }
+                },
+                
+                editVision(visionId) {
+                    // Placeholder for edit functionality
+                    console.log('Edit vision:', visionId);
+                    alert('Vision bearbeiten - Coming Soon! 🎯');
+                }
+            };
+            
+            // Make VisionManager globally available
+            window.VisionManager = VisionManager;
+            
+            // Initialize VisionManager
+            console.log('🔄 Initializing VisionManager...');
+            VisionManager.loadVisions();
+
             // === QUICK NOTES FUNCTIONALITY ===
             const QuickNotes = {
                 textarea: null,
@@ -10343,6 +10641,38 @@
                 addResourceModal.addEventListener('click', (e) => {
                     if (e.target === addResourceModal) {
                         ResourceManager.hideAddResourceModal();
+                    }
+                });
+            }
+            
+            // Add Vision Form Handler
+            const addVisionForm = document.getElementById('add-vision-form');
+            if (addVisionForm) {
+                addVisionForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const formData = {
+                        title: document.getElementById('vision-title').value.trim(),
+                        description: document.getElementById('vision-description').value.trim(),
+                        category: document.getElementById('vision-category').value,
+                        icon: document.getElementById('vision-icon').value
+                    };
+                    
+                    if (!formData.title || !formData.category || !formData.icon) {
+                        alert('Bitte füllen Sie alle Pflichtfelder aus.');
+                        return;
+                    }
+                    
+                    await VisionManager.addVision(formData);
+                });
+            }
+            
+            // Close vision modal when clicking outside
+            const addVisionModal = document.getElementById('add-vision-modal');
+            if (addVisionModal) {
+                addVisionModal.addEventListener('click', (e) => {
+                    if (e.target === addVisionModal) {
+                        VisionManager.hideAddVisionModal();
                     }
                 });
             }
