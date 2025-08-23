@@ -265,6 +265,36 @@ class SupabaseClient {
         return this.query(`${table}?id=eq.${id}`, 'PATCH', data);
     }
 
+    async upsert(table, data, conflictColumns = ['id']) {
+        // Use Prefer: resolution=merge-duplicates header for upsert behavior
+        const url = `${this.url}/rest/v1/${table}?select=*`;
+        const options = {
+            method: 'POST',
+            headers: {
+                ...this.headers,
+                'Prefer': 'return=representation,resolution=merge-duplicates'
+            },
+            body: JSON.stringify(data)
+        };
+
+        try {
+            const response = await fetch(url, options);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Supabase ${response.status} Error:`, errorText);
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            
+            const text = await response.text();
+            const result = text ? JSON.parse(text) : [];
+            return result;
+        } catch (error) {
+            console.error('Upsert error:', error);
+            return null;
+        }
+    }
+
     async delete(table, condition) {
         // Handle both ID and condition formats
         if (typeof condition === 'string' && condition.includes('=eq.')) {
