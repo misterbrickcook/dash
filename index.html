@@ -5916,6 +5916,9 @@
             async init() {
                 window.Auth = this;
                 
+                console.log('🔍 AUTH INIT: Starting auth initialization');
+                console.log('🔍 AUTH INIT: Supabase exists:', !!supabase);
+                
                 if (!supabase) {
                     console.log('⚠️ Demo mode - showing login screen with effects');
                     this.showAuthScreen();
@@ -5923,11 +5926,15 @@
                 }
                 
                 this.currentUser = supabase.getCurrentUser();
+                console.log('🔍 AUTH INIT: Current user:', this.currentUser);
+                console.log('🔍 AUTH INIT: Is authenticated:', supabase.isAuthenticated());
+                
                 if (supabase.isAuthenticated()) {
-                    console.log('✅ User authenticated successfully');
+                    console.log('✅ User authenticated successfully - CALLING SHOWDASHBOARD');
                     this.isAuthenticated = true;
                     await this.showDashboard();
                 } else {
+                    console.log('❌ User not authenticated - CALLING SHOWAUTHSCREEN');
                     this.showAuthScreen();
                 }
                 
