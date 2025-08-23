@@ -5917,8 +5917,8 @@
                 window.Auth = this;
                 
                 if (!supabase) {
-                    console.log('⚠️ Demo mode - no authentication');
-                    await this.showDashboard();
+                    console.log('⚠️ Demo mode - showing login screen with effects');
+                    this.showAuthScreen();
                     return;
                 }
                 
