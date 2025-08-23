@@ -44,8 +44,8 @@
             --text-primary: #e2e8f0 !important;
             --text-secondary: #a0aec0 !important;
             --text-muted: #718096 !important;
-            --border-primary: #2d3748 !important;
-            --border-secondary: #4a5568 !important;
+            --border-primary: #ffffff !important;
+            --border-secondary: #e2e8f0 !important;
             --accent-primary: #ffffff !important;
         }
 
@@ -91,6 +91,15 @@
             color: #f7fafc !important;
         }
 
+        /* Override hardcoded gray borders to white in dark mode */
+        [data-theme="dark"] * {
+            border-color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] *[style*="border"] {
+            border-color: #ffffff !important;
+        }
+        
         /* Perfect text hierarchy */
         [data-theme="dark"] h1,
         [data-theme="dark"] h2,
@@ -1495,7 +1504,7 @@
         .section-divider {
             flex: 1;
             height: 1px;
-            background: #e0e0e0;
+            background: var(--border-primary);
         }
         .section-count {
             font-size: 0.8rem;
