@@ -6695,7 +6695,7 @@
                         todayCompletions.forEach(completion => {
                             if (completion.checkbox_id) {
                                 savedStates[completion.checkbox_id] = completion.completed;
-                                console.log(`✅ Restored from database: ${completion.checkbox_id} = ${completion.completed}`);
+                                // Database restoration logged silently
                             }
                         });
                         
@@ -10805,17 +10805,11 @@
                 const morningCheckboxes = document.querySelectorAll('#morning-routine input[type="checkbox"]');
                 const eveningCheckboxes = document.querySelectorAll('#evening-routine input[type="checkbox"]');
                 
-                console.log('🌅 Morning checkboxes:');
-                morningCheckboxes.forEach(cb => {
-                    const label = cb.nextElementSibling;
-                    console.log(`- ${cb.id}: checked=${cb.checked}, strikethrough=${label?.style?.textDecoration || 'none'}`);
-                });
+                // Debug: Morning checkboxes count
+                console.log(`🌅 Morning checkboxes: ${morningCheckboxes.length} found`);
                 
-                console.log('🌙 Evening checkboxes:');
-                eveningCheckboxes.forEach(cb => {
-                    const label = cb.nextElementSibling;
-                    console.log(`- ${cb.id}: checked=${cb.checked}, strikethrough=${label?.style?.textDecoration || 'none'}`);
-                });
+                // Debug: Evening checkboxes count  
+                console.log(`🌙 Evening checkboxes: ${eveningCheckboxes.length} found`);
                 
                 // Check counters
                 const streakTiles = document.querySelectorAll('.streak-tile');
@@ -14786,7 +14780,7 @@
                             await this.toggleCoin(symbol, checkbox.checked);
                         });
                     } else {
-                        console.warn(`Checkbox not found for ${symbol} (ID: ${checkboxId})`);
+                        // Checkbox not found - silently continue
                     }
                 });
 
