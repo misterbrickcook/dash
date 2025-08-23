@@ -186,6 +186,40 @@
             border-bottom-color: #4299e1 !important;
         }
 
+        /* Dynamic main buttons */
+        .dynamic-main-button {
+            animation: slideInFromRight 0.3s ease-out;
+        }
+        
+        .pomodoro-active {
+            background: #dc2626 !important;
+            color: white !important;
+        }
+        
+        .pomodoro-active:hover {
+            background: #b91c1c !important;
+        }
+        
+        .darkmode-active {
+            background: #1f2937 !important;
+            color: white !important;
+        }
+        
+        .darkmode-active:hover {
+            background: #111827 !important;
+        }
+        
+        @keyframes slideInFromRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
         /* Professional QuickBar */
         [data-theme="dark"] .quickbar-sub-btn {
             background: #1a1a2e !important;
@@ -9237,6 +9271,22 @@
         // Make TerminManager globally available
         window.TerminManager = TerminManager;
 
+        // Right-click handling for dynamic buttons
+        document.addEventListener('contextmenu', (e) => {
+            // Right-click on dynamic pomodoro button to reset
+            if (e.target.closest('#dynamic-pomodoro-btn')) {
+                e.preventDefault();
+                console.log('🍅 Right-click on dynamic Pomodoro - resetting timer');
+                if (window.PomodoroTimer) {
+                    window.PomodoroTimer.reset();
+                    // Update main buttons after reset
+                    if (window.QuickBar) {
+                        window.QuickBar.updateDynamicButtons();
+                    }
+                }
+            }
+        });
+
         // === INITIALIZE ===
         document.addEventListener('DOMContentLoaded', async () => {
             // Logout is now handled by separate logout.html page
@@ -11453,6 +11503,17 @@
                     case 'dark-mode':
                         this.toggleDarkMode();
                         break;
+                    case 'pomodoro-toggle':
+                        console.log('🍅 Dynamic Pomodoro button clicked');
+                        if (window.PomodoroTimer) {
+                            window.PomodoroTimer.toggle();
+                            this.updateDynamicButtons();
+                        }
+                        break;
+                    case 'darkmode-toggle':
+                        console.log('🌙 Dynamic Dark Mode button clicked');
+                        this.toggleDarkMode();
+                        break;
                     case 'settings':
                         this.openSettings();
                         break;
@@ -11485,6 +11546,10 @@
                 console.log('🍅 Calling PomodoroTimer.toggle()');
                 window.PomodoroTimer.toggle();
                 console.log('✅ PomodoroTimer.toggle() completed');
+                
+                // Update dynamic buttons to show/hide the main button
+                this.updateDynamicButtons();
+                this.closeAllSubMenus();
             }
 
             openTradingRules() {
@@ -11534,6 +11599,9 @@
             updateDarkModeIcon(theme) {
                 console.log('🌙 Updating dark mode icon for theme:', theme);
                 
+                // Update dynamic main button for dark mode
+                this.updateDynamicButtons();
+                
                 const darkModeBtn = document.querySelector('[data-action="dark-mode"]');
                 if (!darkModeBtn) {
                     console.error('❌ Dark mode button not found');
@@ -11569,6 +11637,58 @@
                         }
                     }
                 }, 100);
+            }
+            
+            updateDynamicButtons() {
+                console.log('🔄 Updating dynamic main buttons');
+                
+                // Handle Dark Mode dynamic button
+                const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+                const darkModeButton = document.getElementById('dynamic-darkmode');
+                
+                if (isDarkMode) {
+                    console.log('🌙 Showing dynamic dark mode button');
+                    darkModeButton.style.display = 'block';
+                } else {
+                    console.log('☀️ Hiding dynamic dark mode button');
+                    darkModeButton.style.display = 'none';
+                }
+                
+                // Handle Pomodoro dynamic button
+                const isPomodoroActive = this.isPomodoroActive();
+                const pomodoroButton = document.getElementById('dynamic-pomodoro');
+                const pomodoroBtn = document.getElementById('dynamic-pomodoro-btn');
+                
+                if (isPomodoroActive) {
+                    console.log('🍅 Showing dynamic pomodoro button');
+                    pomodoroButton.style.display = 'block';
+                    
+                    // Update pomodoro button state
+                    if (window.PomodoroTimer) {
+                        const isRunning = window.PomodoroTimer.isRunning;
+                        const icon = pomodoroBtn.querySelector('i');
+                        
+                        if (isRunning) {
+                            icon.setAttribute('data-lucide', 'pause-circle');
+                            pomodoroBtn.setAttribute('data-tooltip', 'Pause Timer');
+                            pomodoroBtn.classList.add('pomodoro-active');
+                        } else {
+                            icon.setAttribute('data-lucide', 'play-circle');
+                            pomodoroBtn.setAttribute('data-tooltip', 'Resume Timer');
+                            pomodoroBtn.classList.add('pomodoro-active');
+                        }
+                    }
+                } else {
+                    console.log('⏹️ Hiding dynamic pomodoro button');
+                    pomodoroButton.style.display = 'none';
+                }
+                
+                // Re-initialize Lucide icons for dynamic buttons
+                setTimeout(() => {
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                }, 50);
             }
 
             fixWhiteElementsInDarkMode() {
@@ -14742,6 +14862,23 @@
     <!-- === ENHANCED QUICKBAR === -->
 
     <div id="quickbar" class="quickbar">
+        
+        <!-- DYNAMIC MAIN BUTTONS -->
+        <!-- These buttons appear when certain actions are active -->
+        
+        <!-- Dynamic Pomodoro Button (appears when timer is active) -->
+        <div id="dynamic-pomodoro" class="quickbar-category dynamic-main-button" style="display: none;">
+            <button id="dynamic-pomodoro-btn" class="quickbar-main-btn pomodoro-active" data-action="pomodoro-toggle" data-tooltip="Pomodoro Timer">
+                <i data-lucide="pause-circle"></i>
+            </button>
+        </div>
+        
+        <!-- Dynamic Dark Mode Button (appears when dark mode is active) -->
+        <div id="dynamic-darkmode" class="quickbar-category dynamic-main-button" style="display: none;">
+            <button id="dynamic-darkmode-btn" class="quickbar-main-btn darkmode-active" data-action="darkmode-toggle" data-tooltip="Switch to Light Mode">
+                <i data-lucide="sun"></i>
+            </button>
+        </div>
         
         <!-- ADDS Category -->
         <div class="quickbar-category" data-category="adds">
