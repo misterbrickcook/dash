@@ -499,77 +499,7 @@
         }
 
         
-        /* Dashboard themed floating icons */
-        .login-effects .dash-icon {
-            position: absolute;
-            font-size: 24px;
-            opacity: 0.15;
-            animation: dashFloat 20s ease-in-out infinite;
-        }
-        
-        .login-effects .dash-icon::before {
-            content: attr(data-icon);
-            filter: grayscale(100%);
-            transition: all 0.3s ease;
-        }
-        
-        .login-effects .dash-icon:nth-child(1) {
-            left: 10%;
-            top: 80%;
-            animation-delay: 0s;
-            animation-duration: 18s;
-        }
-        
-        .login-effects .dash-icon:nth-child(2) {
-            left: 25%;
-            top: 85%;
-            animation-delay: 2s;
-            animation-duration: 22s;
-        }
-        
-        .login-effects .dash-icon:nth-child(3) {
-            left: 40%;
-            top: 90%;
-            animation-delay: 4s;
-            animation-duration: 16s;
-        }
-        
-        .login-effects .dash-icon:nth-child(4) {
-            left: 55%;
-            top: 85%;
-            animation-delay: 6s;
-            animation-duration: 24s;
-        }
-        
-        .login-effects .dash-icon:nth-child(5) {
-            left: 70%;
-            top: 80%;
-            animation-delay: 8s;
-            animation-duration: 20s;
-        }
-        
-        .login-effects .dash-icon:nth-child(6) {
-            left: 15%;
-            top: 75%;
-            animation-delay: 3s;
-            animation-duration: 19s;
-        }
-        
-        .login-effects .dash-icon:nth-child(7) {
-            left: 85%;
-            top: 88%;
-            animation-delay: 7s;
-            animation-duration: 21s;
-        }
-        
-        .login-effects .dash-icon:nth-child(8) {
-            left: 60%;
-            top: 78%;
-            animation-delay: 5s;
-            animation-duration: 17s;
-        }
-        
-        /* Data visualization points */
+        /* Simple data points */
         .login-effects .data-point {
             position: absolute;
             width: 6px;
@@ -579,70 +509,54 @@
             animation: dataFlow 15s linear infinite;
         }
         
-        .login-effects .data-point:nth-child(9) {
-            left: 20%;
+        .login-effects .data-point:nth-child(1) {
+            left: 10%;
             animation-delay: 0s;
         }
         
-        .login-effects .data-point:nth-child(10) {
-            left: 45%;
+        .login-effects .data-point:nth-child(2) {
+            left: 20%;
+            animation-delay: 2s;
+        }
+        
+        .login-effects .data-point:nth-child(3) {
+            left: 30%;
             animation-delay: 4s;
         }
         
-        .login-effects .data-point:nth-child(11) {
-            left: 65%;
+        .login-effects .data-point:nth-child(4) {
+            left: 40%;
+            animation-delay: 6s;
+        }
+        
+        .login-effects .data-point:nth-child(5) {
+            left: 50%;
             animation-delay: 8s;
         }
         
-        .login-effects .data-point:nth-child(12) {
-            left: 80%;
+        .login-effects .data-point:nth-child(6) {
+            left: 60%;
+            animation-delay: 10s;
+        }
+        
+        .login-effects .data-point:nth-child(7) {
+            left: 70%;
             animation-delay: 12s;
         }
         
-        /* Chart bars */
-        .login-effects .chart-bar {
-            position: absolute;
-            width: 3px;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
-            animation: chartGrow 12s ease-in-out infinite;
-            bottom: 0;
+        .login-effects .data-point:nth-child(8) {
+            left: 80%;
+            animation-delay: 14s;
         }
         
-        .login-effects .chart-bar:nth-child(13) {
-            left: 5%;
-            animation-delay: 0s;
-            height: 40px;
+        .login-effects .data-point:nth-child(9) {
+            left: 90%;
+            animation-delay: 16s;
         }
         
-        .login-effects .chart-bar:nth-child(14) {
-            left: 30%;
-            animation-delay: 2s;
-            height: 60px;
-        }
-        
-        .login-effects .chart-bar:nth-child(15) {
-            left: 75%;
-            animation-delay: 4s;
-            height: 35px;
-        }
-        
-        @keyframes dashFloat {
-            0%, 100% {
-                transform: translateY(0px) rotate(0deg) scale(1);
-                opacity: 0.15;
-            }
-            25% {
-                transform: translateY(-30px) rotate(5deg) scale(1.1);
-                opacity: 0.25;
-            }
-            50% {
-                transform: translateY(-15px) rotate(-3deg) scale(0.9);
-                opacity: 0.3;
-            }
-            75% {
-                transform: translateY(-40px) rotate(2deg) scale(1.05);
-                opacity: 0.2;
-            }
+        .login-effects .data-point:nth-child(10) {
+            left: 15%;
+            animation-delay: 1s;
         }
         
         @keyframes dataFlow {
@@ -661,17 +575,6 @@
                 bottom: 100vh;
                 opacity: 0;
                 transform: translateX(30px);
-            }
-        }
-        
-        @keyframes chartGrow {
-            0%, 100% {
-                transform: scaleY(0.3);
-                opacity: 0.1;
-            }
-            50% {
-                transform: scaleY(1);
-                opacity: 0.4;
             }
         }
 
@@ -14759,21 +14662,16 @@
 
     <!-- Login Effects -->
     <div class="login-effects">
-        <div class="dash-icon" data-icon="📊"></div>
-        <div class="dash-icon" data-icon="💰"></div>
-        <div class="dash-icon" data-icon="📈"></div>
-        <div class="dash-icon" data-icon="⚡"></div>
-        <div class="dash-icon" data-icon="🎯"></div>
-        <div class="dash-icon" data-icon="📝"></div>
-        <div class="dash-icon" data-icon="⏰"></div>
-        <div class="dash-icon" data-icon="🔥"></div>
         <div class="data-point"></div>
         <div class="data-point"></div>
         <div class="data-point"></div>
         <div class="data-point"></div>
-        <div class="chart-bar"></div>
-        <div class="chart-bar"></div>
-        <div class="chart-bar"></div>
+        <div class="data-point"></div>
+        <div class="data-point"></div>
+        <div class="data-point"></div>
+        <div class="data-point"></div>
+        <div class="data-point"></div>
+        <div class="data-point"></div>
     </div>
 
     <!-- === ENHANCED QUICKBAR === -->
