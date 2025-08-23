@@ -666,6 +666,33 @@
             background: #63b3ed !important;
         }
 
+        /* Aggressive login page dark mode fixes */
+        [data-theme="dark"] body {
+            background: #0f0f23 !important;
+        }
+
+        [data-theme="dark"] * {
+            border-color: #2d3748 !important;
+        }
+
+        [data-theme="dark"] div,
+        [data-theme="dark"] form,
+        [data-theme="dark"] section,
+        [data-theme="dark"] main {
+            background: #1a1a2e !important;
+            color: #e2e8f0 !important;
+        }
+
+        /* Target specific white elements on login */
+        [data-theme="dark"] [style*="background: white"],
+        [data-theme="dark"] [style*="background:#fff"],
+        [data-theme="dark"] [style*="background: #fff"],
+        [data-theme="dark"] [style*="background-color: white"],
+        [data-theme="dark"] [style*="background-color:#fff"],
+        [data-theme="dark"] [style*="background-color: #fff"] {
+            background: #1a1a2e !important;
+        }
+
         /* === RESET & BASE === */
         * { 
             margin: 0; 
