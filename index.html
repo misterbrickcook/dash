@@ -570,9 +570,14 @@
             }
         }
 
-        /* Login effects - simple control */
+        /* Login effects - hide by default */
         .login-effects {
-            display: block;
+            display: none;
+        }
+        
+        /* Show ONLY when auth-screen is visible (not hidden) */
+        #auth-screen:not(.hide) ~ .login-effects {
+            display: block !important;
         }
 
         @keyframes floatPatterns {
