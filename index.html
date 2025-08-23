@@ -11342,17 +11342,28 @@
                     if (e.target.closest('.quickbar-main-btn')) {
                         const btn = e.target.closest('.quickbar-main-btn');
                         const category = btn.dataset.category;
+                        const action = btn.dataset.action;
                         
-                        // Special handling for actions category when Pomodoro is active
-                        if (category === 'actions' && this.isPomodoroActive()) {
-                            // If Pomodoro is running or paused, clicking the main actions button directly toggles it
-                            console.log('🍅 Main button clicked - toggling Pomodoro timer');
-                            window.PomodoroTimer.toggle();
-                            this.closeAllSubMenus(); // Close any open menus
+                        // Handle dynamic buttons with data-action
+                        if (action && !category) {
+                            console.log(`🔄 Dynamic button clicked: ${action}`);
+                            this.handleAction(action);
                             return;
                         }
                         
-                        this.toggleCategory(category);
+                        // Handle regular category buttons with data-category
+                        if (category) {
+                            // Special handling for actions category when Pomodoro is active
+                            if (category === 'actions' && this.isPomodoroActive()) {
+                                // If Pomodoro is running or paused, clicking the main actions button directly toggles it
+                                console.log('🍅 Main button clicked - toggling Pomodoro timer');
+                                window.PomodoroTimer.toggle();
+                                this.closeAllSubMenus(); // Close any open menus
+                                return;
+                            }
+                            
+                            this.toggleCategory(category);
+                        }
                     }
                     
                     // Sub-button action listeners
@@ -11381,6 +11392,11 @@
             }
 
             toggleCategory(category) {
+                if (!category) {
+                    console.warn('⚠️ toggleCategory called with null/undefined category, ignoring');
+                    return;
+                }
+                
                 const categoryContainer = document.querySelector(`.quickbar-category[data-category="${category}"]`);
                 const subContainer = document.getElementById(`quickbar-${category}-sub`);
                 const mainBtn = document.getElementById(`quickbar-${category}`);
@@ -11393,6 +11409,20 @@
                 } else {
                     // Close all others, open this one
                     this.closeAllSubMenus();
+                    
+                    // Verify elements exist before manipulating them
+                    if (!categoryContainer) {
+                        console.error(`❌ Category container not found for category: ${category}`);
+                        return;
+                    }
+                    if (!subContainer) {
+                        console.error(`❌ Sub container not found for category: ${category}`);
+                        return;
+                    }
+                    if (!mainBtn) {
+                        console.error(`❌ Main button not found for category: ${category}`);
+                        return;
+                    }
                     
                     // Mark quickbar as having active state
                     quickbar.classList.add('has-active');
