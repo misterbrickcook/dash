@@ -11526,28 +11526,35 @@
                     return;
                 }
                 
-                const iconElement = darkModeBtn.querySelector('i');
-                if (!iconElement) {
-                    console.error('❌ Icon element not found');
-                    return;
-                }
+                console.log('✅ Dark mode button found:', darkModeBtn);
                 
                 // Set new icon based on current theme
-                // If dark theme: show sun (to switch back to light)
+                // If dark theme: show sun (to switch back to light)  
                 // If light theme: show moon (to switch to dark)
                 const newIcon = theme === 'dark' ? 'sun' : 'moon';
                 console.log('🔄 Theme is:', theme, '→ Setting icon to:', newIcon);
                 
-                // Complete icon replacement approach
-                iconElement.outerHTML = `<i data-lucide="${newIcon}"></i>`;
+                // Replace the entire button innerHTML with new icon
+                const currentHTML = darkModeBtn.innerHTML;
+                console.log('📝 Current button HTML:', currentHTML);
                 
-                // Re-initialize Lucide for the entire quickbar
+                darkModeBtn.innerHTML = `<i data-lucide="${newIcon}"></i>`;
+                console.log('📝 New button HTML set to:', darkModeBtn.innerHTML);
+                
+                // Re-initialize Lucide for all icons
                 setTimeout(() => {
                     if (window.lucide) {
+                        console.log('🔄 Re-initializing Lucide icons...');
                         lucide.createIcons();
-                        console.log('✅ Lucide icons re-created, icon should be:', newIcon);
+                        console.log('✅ Lucide icons re-created, icon should now be:', newIcon);
+                        
+                        // Verify the icon changed
+                        const updatedIcon = darkModeBtn.querySelector('i');
+                        if (updatedIcon) {
+                            console.log('🔍 Icon verification - data-lucide attr:', updatedIcon.getAttribute('data-lucide'));
+                        }
                     }
-                }, 50);
+                }, 100);
             }
 
             fixWhiteElementsInDarkMode() {
