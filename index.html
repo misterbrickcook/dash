@@ -5148,11 +5148,11 @@
             <form id="login-form" autocomplete="off">
                 <div class="form-group">
                     <label for="login-email">Email</label>
-                    <input type="email" id="login-email" name="email" placeholder="your@email.com" required autocomplete="email">
+                    <input type="email" id="login-email" name="email" placeholder="your@email.com" required autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
                 </div>
                 <div class="form-group">
                     <label for="login-password">Password</label>
-                    <input type="password" id="login-password" name="password" placeholder="Your password" required autocomplete="current-password">
+                    <input type="password" id="login-password" name="password" placeholder="Your password" required autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
                 </div>
                 <button id="login-btn" type="submit" class="auth-btn">Login</button>
                 <div id="login-error" class="auth-error"></div>
@@ -5997,6 +5997,87 @@
     <script src="simple-counters.js"></script>
     <script src="simple-routine-system.js"></script>
     <script>
+        // === SECURITY: PREVENT CREDENTIAL EXPOSURE ===
+        (function() {
+            // Override console functions to sanitize any URLs that might contain credentials
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            
+            function sanitizeMessage(message) {
+                if (typeof message === 'string') {
+                    // Remove any URLs with email/password parameters (multiple patterns)
+                    message = message.replace(/\?[^?\s]*email=[^&\s]*[^?\s]*/gi, '?[CREDENTIALS REMOVED]');
+                    message = message.replace(/&email=[^&\s]*/gi, '&[EMAIL REMOVED]');
+                    message = message.replace(/\?[^?\s]*password=[^&\s]*[^?\s]*/gi, '?[CREDENTIALS REMOVED]');
+                    message = message.replace(/&password=[^&\s]*/gi, '&[PASSWORD REMOVED]');
+                    // Remove any URL-encoded credentials
+                    message = message.replace(/%40[^&\s]*[^?\s]*/gi, '[EMAIL REMOVED]');
+                    message = message.replace(/email=%[^&\s]*/gi, '[EMAIL REMOVED]');
+                    message = message.replace(/password=[^&\s]*/gi, '[PASSWORD REMOVED]');
+                }
+                return message;
+            }
+            
+            console.log = function(...args) {
+                const sanitizedArgs = args.map(arg => sanitizeMessage(arg));
+                originalConsoleLog.apply(console, sanitizedArgs);
+            };
+            
+            console.error = function(...args) {
+                const sanitizedArgs = args.map(arg => sanitizeMessage(arg));
+                originalConsoleError.apply(console, sanitizedArgs);
+            };
+            
+            console.warn = function(...args) {
+                const sanitizedArgs = args.map(arg => sanitizeMessage(arg));
+                originalConsoleWarn.apply(console, sanitizedArgs);
+            };
+            
+            // Clear URL parameters immediately if they contain credentials
+            if (window.location.search && (window.location.search.includes('email=') || window.location.search.includes('password='))) {
+                console.log('🔒 SECURITY: URL parameters detected and cleared to prevent credential exposure');
+                const url = new URL(window.location.href);
+                url.search = '';
+                window.history.replaceState({}, document.title, url.toString());
+            }
+            
+            // Monitor for any unauthorized auto-fill attempts
+            document.addEventListener('DOMContentLoaded', () => {
+                const emailField = document.getElementById('login-email');
+                const passwordField = document.getElementById('login-password');
+                
+                if (emailField || passwordField) {
+                    // Set up mutation observer to detect unauthorized value changes
+                    const observer = new MutationObserver((mutations) => {
+                        mutations.forEach((mutation) => {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                                const target = mutation.target;
+                                if (target.id === 'login-email' || target.id === 'login-password') {
+                                    // Check if change was not user-initiated
+                                    if (!target.dataset.userInitiated) {
+                                        console.log('🔒 SECURITY: Unauthorized auto-fill attempt blocked');
+                                        target.value = '';
+                                    }
+                                }
+                            }
+                        });
+                    });
+                    
+                    if (emailField) {
+                        observer.observe(emailField, { attributes: true, attributeOldValue: true });
+                        emailField.addEventListener('input', () => emailField.dataset.userInitiated = 'true');
+                        emailField.addEventListener('focus', () => emailField.dataset.userInitiated = 'true');
+                    }
+                    if (passwordField) {
+                        observer.observe(passwordField, { attributes: true, attributeOldValue: true });
+                        passwordField.addEventListener('input', () => passwordField.dataset.userInitiated = 'true');
+                        passwordField.addEventListener('focus', () => passwordField.dataset.userInitiated = 'true');
+                    }
+                }
+            });
+        })();
+        
         // Debug: Check if basic JavaScript works
         console.log('🔧 JavaScript loading started...');
         
@@ -6015,6 +6096,18 @@
                 
                 console.log('🔍 AUTH INIT: Starting auth initialization');
                 console.log('🔍 AUTH INIT: Supabase exists:', !!supabase);
+                
+                // SECURITY: Ensure login fields are empty and prevent auto-fill
+                const emailField = document.getElementById('login-email');
+                const passwordField = document.getElementById('login-password');
+                if (emailField) {
+                    emailField.value = '';
+                    emailField.autocomplete = 'off';
+                }
+                if (passwordField) {
+                    passwordField.value = '';
+                    passwordField.autocomplete = 'off';
+                }
                 
                 if (!supabase) {
                     console.log('⚠️ Demo mode - showing login screen with effects');
@@ -9290,6 +9383,15 @@
         // === INITIALIZE ===
         document.addEventListener('DOMContentLoaded', async () => {
             // Logout is now handled by separate logout.html page
+            
+            // SECURITY: Clear URL parameters immediately to prevent credential exposure
+            if (window.location.search) {
+                console.log('🔒 SECURITY: Clearing URL parameters to prevent credential exposure');
+                // Clear URL parameters without page reload
+                const url = new URL(window.location.href);
+                url.search = '';
+                window.history.replaceState({}, document.title, url.toString());
+            }
             
             console.log('✅ DOM loaded');
             
@@ -14867,6 +14969,17 @@
         document.addEventListener('DOMContentLoaded', () => {
             if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
                 Notification.requestPermission();
+            }
+        });
+        
+        // Final security check on window load
+        window.addEventListener('load', () => {
+            // Double-check URL parameters are cleared
+            if (window.location.search && (window.location.search.includes('email=') || window.location.search.includes('password='))) {
+                console.log('🔒 SECURITY: Final URL parameter cleanup on window load');
+                const url = new URL(window.location.href);
+                url.search = '';
+                window.history.replaceState({}, document.title, url.toString());
             }
         });
 
