@@ -5235,6 +5235,7 @@
             <!-- <button class="nav-tab" data-tab="tab-trading">Trading</button> -->
             <button class="nav-tab" data-tab="tab-analytics">Analytics</button>
             <button class="nav-tab" data-tab="tab-ressourcen">Ressourcen</button>
+            <button class="nav-tab" data-tab="tab-vision">Vision</button>
             <button class="nav-tab" data-tab="tab-wiki">Wiki</button>
             <div class="nav-actions">
                 <!-- Settings and Logout moved to Quick Actions Bar -->
@@ -5963,6 +5964,21 @@
             </div>
         </section>
 
+        <!-- === VISION TAB === -->
+        <section id="tab-vision" class="tab-section">
+            
+            <div class="page-header">
+                <button id="add-vision-btn" class="add-btn">
+                    <i data-lucide="plus"></i>
+                </button>
+            </div>
+
+            <!-- Vision Content -->
+            <div class="vision-content" id="vision-entries">
+                <!-- Vision entries will be loaded here -->
+            </div>
+        </section>
+
     </div>
 
     <!-- Add Resource Modal -->
@@ -6422,6 +6438,7 @@
             'tab-journal': 'journal',
             // 'tab-trading': 'trading', // DISABLED
             'tab-ressourcen': 'resources',
+            'tab-vision': 'vision',
             'tab-wiki': 'wiki',
             'tab-settings': 'settings'
         };
@@ -9734,6 +9751,15 @@
             if (addWikiBtn) {
                 addWikiBtn.addEventListener('click', () => {
                     document.getElementById('add-wiki-modal').classList.remove('hide');
+                });
+            }
+            
+            // Add Vision Button
+            const addVisionBtn = document.getElementById('add-vision-btn');
+            if (addVisionBtn) {
+                addVisionBtn.addEventListener('click', () => {
+                    // For now, just show a placeholder message
+                    alert('Vision Board feature coming soon! 🎯✨');
                 });
             }
             
