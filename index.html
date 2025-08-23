@@ -6021,11 +6021,23 @@
             
             showAuthScreen() {
                 console.log('🔹 LOGIN: Showing login effects');
+                console.trace('🔹 LOGIN: Call stack for showAuthScreen()');
                 document.body.classList.remove('authenticated');
                 document.getElementById('auth-screen').classList.remove('hide');
                 const loginEffects = document.querySelector('.login-effects');
                 if (loginEffects) {
                     loginEffects.style.display = 'block';
+                    console.log('🔹 LOGIN: Set display to block for login effects');
+                    
+                    // Debug: Check if it stays visible
+                    setTimeout(() => {
+                        const currentDisplay = loginEffects.style.display;
+                        console.log('🔹 LOGIN: After 2 seconds, display is:', currentDisplay);
+                        if (currentDisplay === 'none') {
+                            console.log('❌ LOGIN: Effects were hidden after showAuthScreen!');
+                            console.trace('❌ LOGIN: Something hid the effects!');
+                        }
+                    }, 2000);
                 }
                 document.getElementById('crypto-overlay').style.display = 'none';
                 // Hide QuickBar on login screen
@@ -6056,11 +6068,13 @@
             
             async showDashboard() {
                 console.log('🔹 DASHBOARD: Hiding login effects');
+                console.trace('🔹 DASHBOARD: Call stack for showDashboard()');
                 document.body.classList.add('authenticated');
                 document.getElementById('auth-screen').classList.add('hide');
                 const loginEffects = document.querySelector('.login-effects');
                 if (loginEffects) {
                     loginEffects.style.display = 'none';
+                    console.log('🔹 DASHBOARD: Set display to none for login effects');
                 }
                 document.getElementById('crypto-overlay').style.display = 'block';
                 // Show QuickBar when authenticated
