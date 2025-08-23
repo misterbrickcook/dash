@@ -11470,7 +11470,21 @@
             openPomodoro() {
                 // PomodoroTimer is now initialized globally at startup
                 console.log('🍅 Toggling Pomodoro timer via openPomodoro()');
+                
+                if (!window.PomodoroTimer) {
+                    console.error('❌ PomodoroTimer not found! Trying to initialize...');
+                    try {
+                        window.PomodoroTimer = new PomodoroTimer();
+                        console.log('✅ PomodoroTimer initialized successfully');
+                    } catch (error) {
+                        console.error('❌ Failed to initialize PomodoroTimer:', error);
+                        return;
+                    }
+                }
+                
+                console.log('🍅 Calling PomodoroTimer.toggle()');
                 window.PomodoroTimer.toggle();
+                console.log('✅ PomodoroTimer.toggle() completed');
             }
 
             openTradingRules() {
