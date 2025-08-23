@@ -685,8 +685,8 @@
             border-bottom: 20px solid rgba(255, 255, 255, 0.25);
         }
 
-        /* DIRECT body animation - always visible until login */
-        body {
+        /* LOGIN ONLY - only before authentication */
+        body:not(.authenticated) {
             background: linear-gradient(-45deg, 
                 rgba(238, 119, 82, 0.3), 
                 rgba(231, 60, 126, 0.25), 
@@ -696,8 +696,8 @@
             animation: gradientShift 10s ease infinite !important;
         }
 
-        /* Overlay patterns directly on body */
-        body::before {
+        /* Overlay patterns ONLY on login */
+        body:not(.authenticated)::before {
             content: '';
             position: fixed;
             top: 0;
@@ -712,7 +712,7 @@
             z-index: -1;
         }
 
-        /* Remove animations when logged in */
+        /* Normal body after login */
         body.authenticated {
             background: var(--bg-primary) !important;
             animation: none !important;
