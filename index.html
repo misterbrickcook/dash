@@ -5324,14 +5324,14 @@
                 <h2>DASHBOARD</h2>
             </div>
             
-            <form id="login-form" autocomplete="off">
+            <form id="login-form" autocomplete="on">
                 <div class="form-group">
                     <label for="login-email">Email</label>
-                    <input type="email" id="login-email" name="email" placeholder="your@email.com" required autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
+                    <input type="email" id="login-email" name="email" placeholder="your@email.com" required autocomplete="email">
                 </div>
                 <div class="form-group">
                     <label for="login-password">Password</label>
-                    <input type="password" id="login-password" name="password" placeholder="Your password" required autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
+                    <input type="password" id="login-password" name="password" placeholder="Your password" required autocomplete="current-password">
                 </div>
                 <button id="login-btn" type="submit" class="auth-btn">Login</button>
                 <div id="login-error" class="auth-error"></div>
@@ -6300,40 +6300,6 @@
                 window.history.replaceState({}, document.title, url.toString());
             }
             
-            // Monitor for any unauthorized auto-fill attempts
-            document.addEventListener('DOMContentLoaded', () => {
-                const emailField = document.getElementById('login-email');
-                const passwordField = document.getElementById('login-password');
-                
-                if (emailField || passwordField) {
-                    // Set up mutation observer to detect unauthorized value changes
-                    const observer = new MutationObserver((mutations) => {
-                        mutations.forEach((mutation) => {
-                            if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-                                const target = mutation.target;
-                                if (target.id === 'login-email' || target.id === 'login-password') {
-                                    // Check if change was not user-initiated
-                                    if (!target.dataset.userInitiated) {
-                                        console.log('🔒 SECURITY: Unauthorized auto-fill attempt blocked');
-                                        target.value = '';
-                                    }
-                                }
-                            }
-                        });
-                    });
-                    
-                    if (emailField) {
-                        observer.observe(emailField, { attributes: true, attributeOldValue: true });
-                        emailField.addEventListener('input', () => emailField.dataset.userInitiated = 'true');
-                        emailField.addEventListener('focus', () => emailField.dataset.userInitiated = 'true');
-                    }
-                    if (passwordField) {
-                        observer.observe(passwordField, { attributes: true, attributeOldValue: true });
-                        passwordField.addEventListener('input', () => passwordField.dataset.userInitiated = 'true');
-                        passwordField.addEventListener('focus', () => passwordField.dataset.userInitiated = 'true');
-                    }
-                }
-            });
         })();
         
         // Debug: Check if basic JavaScript works
@@ -6352,17 +6318,6 @@
                 window.Auth = this;
                 
                 
-                // SECURITY: Ensure login fields are empty and prevent auto-fill
-                const emailField = document.getElementById('login-email');
-                const passwordField = document.getElementById('login-password');
-                if (emailField) {
-                    emailField.value = '';
-                    emailField.autocomplete = 'off';
-                }
-                if (passwordField) {
-                    passwordField.value = '';
-                    passwordField.autocomplete = 'off';
-                }
                 
                 if (!supabase) {
                     console.log('⚠️ Demo mode - showing login screen with effects');
