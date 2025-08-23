@@ -498,177 +498,166 @@
             z-index: 99999;
         }
 
-        .login-effects .black-circle {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.02) 70%, transparent 100%);
-            animation: coolFloat 20s ease-in-out infinite;
-        }
-
-        .login-effects .black-circle:nth-child(1) {
-            width: 400px;
-            height: 400px;
-            left: -100px;
-            top: -100px;
-            animation: coolFloat 18s ease-in-out infinite, pulse 8s ease-in-out infinite;
-            animation-delay: 0s;
-        }
-
-        .login-effects .black-circle:nth-child(2) {
-            width: 250px;
-            height: 250px;
-            right: -60px;
-            bottom: -60px;
-            animation: coolFloat 22s ease-in-out infinite reverse, pulse 12s ease-in-out infinite;
-            animation-delay: 5s;
-        }
-
-        .login-effects .black-circle:nth-child(3) {
-            width: 180px;
-            height: 180px;
-            left: 15%;
-            bottom: 5%;
-            animation: coolFloat 16s ease-in-out infinite, pulse 6s ease-in-out infinite;
-            animation-delay: 10s;
-        }
-
-        .login-effects .black-square {
-            position: absolute;
-            background: linear-gradient(45deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
-            animation: spinFloat 25s linear infinite, drift 40s ease-in-out infinite;
-            border-radius: 2px;
-        }
-
-        .login-effects .black-square:nth-child(4) {
-            right: 20%;
-            top: 15%;
-            width: 30px;
-            height: 30px;
-            animation: spinFloat 20s linear infinite, drift 35s ease-in-out infinite;
-            animation-delay: 3s;
-        }
-
-        .login-effects .black-square:nth-child(5) {
-            left: 15%;
-            top: 65%;
-            width: 20px;
-            height: 20px;
-            animation: spinFloat 30s linear infinite reverse, drift 45s ease-in-out infinite;
-            animation-delay: 8s;
-        }
-
-        @keyframes coolFloat {
-            0%, 100% {
-                transform: translateY(0px) translateX(0px) scale(1);
-            }
-            25% {
-                transform: translateY(-30px) translateX(20px) scale(1.05);
-            }
-            50% {
-                transform: translateY(-10px) translateX(-15px) scale(0.95);
-            }
-            75% {
-                transform: translateY(-40px) translateX(10px) scale(1.1);
-            }
-        }
         
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 0.3;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.7;
-                transform: scale(1.1);
-            }
-        }
-        
-        @keyframes spinFloat {
-            0% {
-                transform: rotate(0deg) translateY(0px);
-            }
-            25% {
-                transform: rotate(90deg) translateY(-15px);
-            }
-            50% {
-                transform: rotate(180deg) translateY(-5px);
-            }
-            75% {
-                transform: rotate(270deg) translateY(-20px);
-            }
-            100% {
-                transform: rotate(360deg) translateY(0px);
-            }
-        }
-        
-        @keyframes drift {
-            0%, 100% {
-                transform: translateX(0px) translateY(0px);
-            }
-            33% {
-                transform: translateX(30px) translateY(-20px);
-            }
-            66% {
-                transform: translateX(-25px) translateY(15px);
-            }
-        }
-        
-        /* Floating particles */
+        /* Dynamic floating particles */
         .login-effects .particle {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(0, 0, 0, 0.1);
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 100%);
             border-radius: 50%;
-            animation: floatUp 15s linear infinite;
+            animation: floatUp 10s linear infinite;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .login-effects .particle:nth-child(1) {
+            left: 5%;
+            animation-delay: 0s;
+            animation-duration: 8s;
+            width: 12px;
+            height: 12px;
+        }
+        
+        .login-effects .particle:nth-child(2) {
+            left: 15%;
+            animation-delay: 1s;
+            animation-duration: 12s;
+            width: 6px;
+            height: 6px;
+        }
+        
+        .login-effects .particle:nth-child(3) {
+            left: 25%;
+            animation-delay: 2s;
+            animation-duration: 9s;
+            width: 10px;
+            height: 10px;
+        }
+        
+        .login-effects .particle:nth-child(4) {
+            left: 35%;
+            animation-delay: 3s;
+            animation-duration: 14s;
+            width: 7px;
+            height: 7px;
+        }
+        
+        .login-effects .particle:nth-child(5) {
+            left: 45%;
+            animation-delay: 4s;
+            animation-duration: 11s;
+            width: 9px;
+            height: 9px;
         }
         
         .login-effects .particle:nth-child(6) {
-            left: 10%;
-            animation-delay: 0s;
-            animation-duration: 12s;
+            left: 55%;
+            animation-delay: 5s;
+            animation-duration: 13s;
+            width: 8px;
+            height: 8px;
         }
         
         .login-effects .particle:nth-child(7) {
-            left: 30%;
-            animation-delay: 3s;
-            animation-duration: 18s;
+            left: 65%;
+            animation-delay: 6s;
+            animation-duration: 10s;
+            width: 11px;
+            height: 11px;
         }
         
         .login-effects .particle:nth-child(8) {
-            left: 50%;
-            animation-delay: 6s;
-            animation-duration: 14s;
+            left: 75%;
+            animation-delay: 7s;
+            animation-duration: 15s;
+            width: 6px;
+            height: 6px;
         }
         
         .login-effects .particle:nth-child(9) {
-            left: 70%;
-            animation-delay: 9s;
-            animation-duration: 16s;
+            left: 85%;
+            animation-delay: 8s;
+            animation-duration: 12s;
+            width: 13px;
+            height: 13px;
         }
         
         .login-effects .particle:nth-child(10) {
+            left: 95%;
+            animation-delay: 9s;
+            animation-duration: 16s;
+            width: 7px;
+            height: 7px;
+        }
+        
+        .login-effects .particle:nth-child(11) {
+            left: 10%;
+            animation-delay: 1.5s;
+            animation-duration: 11s;
+            width: 5px;
+            height: 5px;
+        }
+        
+        .login-effects .particle:nth-child(12) {
+            left: 30%;
+            animation-delay: 2.5s;
+            animation-duration: 13s;
+            width: 9px;
+            height: 9px;
+        }
+        
+        .login-effects .particle:nth-child(13) {
+            left: 50%;
+            animation-delay: 3.5s;
+            animation-duration: 9s;
+            width: 14px;
+            height: 14px;
+        }
+        
+        .login-effects .particle:nth-child(14) {
+            left: 70%;
+            animation-delay: 4.5s;
+            animation-duration: 17s;
+            width: 8px;
+            height: 8px;
+        }
+        
+        .login-effects .particle:nth-child(15) {
             left: 90%;
-            animation-delay: 12s;
-            animation-duration: 20s;
+            animation-delay: 5.5s;
+            animation-duration: 14s;
+            width: 10px;
+            height: 10px;
         }
         
         @keyframes floatUp {
             0% {
-                bottom: -10px;
+                bottom: -20px;
                 opacity: 0;
-                transform: translateX(0px) scale(0.5);
+                transform: translateX(0px) scale(0.3);
             }
-            10% {
+            5% {
                 opacity: 1;
             }
-            90% {
-                opacity: 0.8;
+            25% {
+                transform: translateX(-30px) scale(1.2);
+                opacity: 0.9;
+            }
+            50% {
+                transform: translateX(40px) scale(0.8);
+                opacity: 1;
+            }
+            75% {
+                transform: translateX(-20px) scale(1.1);
+                opacity: 0.7;
+            }
+            95% {
+                opacity: 0.3;
             }
             100% {
                 bottom: 100vh;
                 opacity: 0;
-                transform: translateX(50px) scale(1.5);
+                transform: translateX(60px) scale(1.8);
             }
         }
 
@@ -14756,11 +14745,16 @@
 
     <!-- Login Effects -->
     <div class="login-effects">
-        <div class="black-circle"></div>
-        <div class="black-circle"></div>
-        <div class="black-circle"></div>
-        <div class="black-square"></div>
-        <div class="black-square"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
         <div class="particle"></div>
         <div class="particle"></div>
         <div class="particle"></div>
