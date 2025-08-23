@@ -487,6 +487,79 @@
         }
 
 
+        /* === LOGIN PAGE BLACK EFFECTS ON WHITE === */
+        body:not(.authenticated) {
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Black geometric shapes floating */
+        body:not(.authenticated)::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 15% 25%, rgba(0, 0, 0, 0.03) 0%, transparent 30%),
+                radial-gradient(circle at 85% 75%, rgba(0, 0, 0, 0.04) 0%, transparent 25%),
+                radial-gradient(circle at 50% 10%, rgba(0, 0, 0, 0.02) 0%, transparent 35%);
+            animation: floatPatterns 20s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Subtle moving lines */
+        body:not(.authenticated)::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 50px,
+                rgba(0, 0, 0, 0.01) 52px,
+                rgba(0, 0, 0, 0.01) 54px
+            );
+            animation: slideLines 30s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes floatPatterns {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateY(-20px) scale(1.02);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideLines {
+            0% {
+                transform: translateX(-50px) translateY(-50px);
+            }
+            100% {
+                transform: translateX(50px) translateY(50px);
+            }
+        }
+
+        /* Ensure login form is above effects */
+        body:not(.authenticated) .login-form,
+        body:not(.authenticated) .auth-form,
+        body:not(.authenticated) .login-container {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+        }
+
         /* Login page dark mode styling */
         [data-theme="dark"] .login-container,
         [data-theme="dark"] .auth-container {
