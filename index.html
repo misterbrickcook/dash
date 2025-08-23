@@ -2605,6 +2605,25 @@
             padding: 1rem;
         }
         .auth-screen.hide { display: none; }
+        
+        /* Hide all dashboard content by default until authenticated */
+        body:not(.authenticated) #crypto-overlay,
+        body:not(.authenticated) #quickbar,
+        body:not(.authenticated) .home-section,
+        body:not(.authenticated) .tabs-container,
+        body:not(.authenticated) .tab-content {
+            display: none !important;
+        }
+        
+        /* Show login screen by default until JS loads */
+        .auth-screen {
+            display: flex !important;
+        }
+        
+        /* Only hide login screen when explicitly authenticated */
+        body.authenticated .auth-screen {
+            display: none !important;
+        }
         .auth-container {
             background: var(--bg-primary);
             border: 1px solid var(--border-primary);
@@ -5066,7 +5085,7 @@
     </div>
 
     <!-- === AUTH SCREEN === -->
-    <div id="auth-screen" class="auth-screen hide">
+    <div id="auth-screen" class="auth-screen">
         <div class="auth-container">
             <div class="auth-header">
                 <h2>DASHBOARD</h2>
