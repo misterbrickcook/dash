@@ -1103,20 +1103,20 @@
         /* === VISION BOARD === */
         .vision-board {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-            padding: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            padding: 0;
         }
         
         .vision-card {
-            background: #f8f9fa;
+            background: var(--bg-primary);
             border: 1px solid var(--border-primary);
-            border-radius: 12px;
-            padding: 2rem;
+            border-radius: 4px;
+            padding: 1.5rem;
             text-align: center;
-            transition: all 0.2s ease;
+            transition: border-color 0.2s ease;
             cursor: pointer;
-            min-height: 180px;
+            min-height: 140px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -1125,8 +1125,7 @@
         }
         
         .vision-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: var(--accent-primary);
         }
         
         .vision-card-icon {
@@ -1148,27 +1147,11 @@
             font-style: italic;
         }
         
-        .vision-card-category {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            font-size: 0.8rem;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 0.2rem 0.5rem;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-        
         /* Dark mode support for vision cards */
         [data-theme="dark"] .vision-card {
-            background: #1a1a2e !important;
-            border-color: #2d3748 !important;
-            color: #e2e8f0 !important;
-        }
-        
-        [data-theme="dark"] .vision-card-category {
-            background: rgba(26, 26, 46, 0.9) !important;
-            color: #e2e8f0 !important;
+            background: var(--bg-secondary) !important;
+            border-color: var(--border-primary) !important;
+            color: var(--text-primary) !important;
         }
 
         /* === MAIN CONTENT === */
@@ -6137,18 +6120,6 @@
                         <input type="text" id="vision-description" autocomplete="off" placeholder="z.B. 2026, 70kg erreicht, Eigenes Business">
                     </div>
                     
-                    <div class="form-group">
-                        <label for="vision-category">Kategorie *</label>
-                        <select id="vision-category" required autocomplete="off">
-                            <option value="">Kategorie wählen...</option>
-                            <option value="lifestyle">🏠 Lifestyle</option>
-                            <option value="travel">✈️ Reisen</option>
-                            <option value="fitness">💪 Fitness</option>
-                            <option value="career">💼 Karriere</option>
-                            <option value="finance">💰 Finanzen</option>
-                            <option value="personal">🌟 Persönlich</option>
-                        </select>
-                    </div>
                     
                     <div class="form-group">
                         <label for="vision-icon">Icon *</label>
@@ -10310,7 +10281,6 @@
                     
                     const html = this.visions.map(vision => `
                         <div class="vision-card" onclick="VisionManager.editVision('${vision.id}')" style="position: relative;">
-                            <div class="vision-card-category">${this.getCategoryEmoji(vision.category)}</div>
                             <div class="vision-card-icon">
                                 <i data-lucide="${vision.icon}" style="width: 40px; height: 40px;"></i>
                             </div>
@@ -10331,17 +10301,6 @@
                     });
                 },
                 
-                getCategoryEmoji(category) {
-                    const emojis = {
-                        lifestyle: '🏠',
-                        travel: '✈️', 
-                        fitness: '💪',
-                        career: '💼',
-                        finance: '💰',
-                        personal: '🌟'
-                    };
-                    return emojis[category] || '🎯';
-                },
                 
                 showAddVisionModal() {
                     document.getElementById('add-vision-modal').classList.remove('hide');
@@ -10381,7 +10340,6 @@
                             user_id: user.id,
                             title: formData.title,
                             description: formData.description || '',
-                            category: formData.category,
                             icon: formData.icon,
                             created_at: new Date().toISOString()
                         };
@@ -10618,11 +10576,10 @@
                     const formData = {
                         title: document.getElementById('vision-title').value.trim(),
                         description: document.getElementById('vision-description').value.trim(),
-                        category: document.getElementById('vision-category').value,
                         icon: document.getElementById('vision-icon').value
                     };
                     
-                    if (!formData.title || !formData.category || !formData.icon) {
+                    if (!formData.title || !formData.icon) {
                         alert('Bitte füllen Sie alle Pflichtfelder aus.');
                         return;
                     }
