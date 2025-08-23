@@ -11142,6 +11142,7 @@
                 // Default to light mode (no localStorage dependency)
                 const defaultTheme = 'light';
                 document.documentElement.setAttribute('data-theme', defaultTheme);
+                console.log('🎨 Initializing theme to:', defaultTheme);
                 
                 // Update button icon using the clean method
                 setTimeout(() => {
@@ -11151,7 +11152,7 @@
                     if (defaultTheme === 'dark') {
                         this.fixWhiteElementsInDarkMode();
                     }
-                }, 100);
+                }, 200);
             }
 
             isPomodoroActive() {
@@ -11531,27 +11532,22 @@
                     return;
                 }
                 
-                // Clear existing icon
-                iconElement.removeAttribute('data-lucide');
-                iconElement.innerHTML = '';
-                
                 // Set new icon based on current theme
                 // If dark theme: show sun (to switch back to light)
                 // If light theme: show moon (to switch to dark)
                 const newIcon = theme === 'dark' ? 'sun' : 'moon';
-                iconElement.setAttribute('data-lucide', newIcon);
+                console.log('🔄 Theme is:', theme, '→ Setting icon to:', newIcon);
                 
-                console.log('🔄 Setting icon to:', newIcon);
+                // Complete icon replacement approach
+                iconElement.outerHTML = `<i data-lucide="${newIcon}"></i>`;
                 
-                // Force Lucide to re-render this specific icon
-                if (window.lucide) {
-                    lucide.createIcons({
-                        iconNode: iconElement
-                    });
-                    console.log('✅ Lucide icon updated');
-                } else {
-                    console.warn('⚠️ Lucide not available');
-                }
+                // Re-initialize Lucide for the entire quickbar
+                setTimeout(() => {
+                    if (window.lucide) {
+                        lucide.createIcons();
+                        console.log('✅ Lucide icons re-created, icon should be:', newIcon);
+                    }
+                }, 50);
             }
 
             fixWhiteElementsInDarkMode() {
