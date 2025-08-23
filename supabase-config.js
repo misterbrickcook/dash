@@ -70,7 +70,7 @@ class SupabaseClient {
             });
             
             const data = await response.json();
-            console.log('🔍 Full Supabase response:', data);
+            console.log('🔍 Authentication response received');
             
             if (!response.ok) {
                 console.error('❌ HTTP Error:', response.status, response.statusText);
@@ -89,8 +89,8 @@ class SupabaseClient {
             
             return { user: null, session: null, error: data.error_description || data.error || 'Login failed' };
         } catch (error) {
-            console.error('❌ Network error:', error);
-            return { user: null, session: null, error: error.message };
+            console.error('❌ Network error during authentication:', error.message || 'Connection failed');
+            return { user: null, session: null, error: error.message || 'Network error' };
         }
     }
     
