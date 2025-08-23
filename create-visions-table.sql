@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS public.visions (
     title TEXT NOT NULL,
     description TEXT,
     icon TEXT NOT NULL DEFAULT 'star',
+    display_order INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

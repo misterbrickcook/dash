@@ -1115,17 +1115,31 @@
             padding: 2rem;
             text-align: center;
             transition: all 0.2s ease;
-            cursor: pointer;
+            cursor: grab;
             min-height: 140px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             position: relative;
+            user-select: none;
         }
         
         .vision-card:hover {
             border-color: var(--accent-primary);
+        }
+
+        .vision-card.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+            transform: rotate(2deg);
+            z-index: 1000;
+        }
+
+        .vision-card.drag-over {
+            border-color: var(--accent-primary);
+            border-width: 2px;
+            border-style: dashed;
         }
         
         .vision-card-icon {
@@ -10301,7 +10315,7 @@
                         if (window.supabase?.isAuthenticated()) {
                             const user = window.supabase.getCurrentUser();
                             if (user) {
-                                const data = await window.supabase.query(`visions?user_id=eq.${user.id}&order=created_at.desc`);
+                                const data = await window.supabase.query(`visions?user_id=eq.${user.id}&select=*&order=display_order.asc.nullslast,created_at.asc`);
                                 this.visions = data || [];
                                 this.renderVisions();
                                 return;
@@ -10335,9 +10349,15 @@
                     
                     const html = this.visions.map(vision => `
                         <div class="vision-card" 
+                             draggable="true"
                              onclick="VisionManager.editVision('${vision.id}')" 
                              oncontextmenu="VisionManager.showContextMenu(event, '${vision.id}'); return false;"
-                             data-vision-id="${vision.id}">
+                             ondragstart="VisionManager.handleDragStart(event)"
+                             ondragover="VisionManager.handleDragOver(event)"
+                             ondrop="VisionManager.handleDrop(event)"
+                             ondragend="VisionManager.handleDragEnd(event)"
+                             data-vision-id="${vision.id}"
+                             data-display-order="${vision.display_order || 0}">
                             <div class="vision-card-icon">
                                 <i data-lucide="${vision.icon}" style="width: 40px; height: 40px;"></i>
                             </div>
@@ -10387,12 +10407,16 @@
                             return;
                         }
                         
+                        // Get next display_order (max + 1)
+                        const maxOrder = this.visions.length > 0 ? Math.max(...this.visions.map(v => v.display_order || 0)) : 0;
+                        
                         const vision = {
                             id: Date.now().toString(),
                             user_id: user.id,
                             title: formData.title,
                             description: formData.description || '',
                             icon: formData.icon,
+                            display_order: maxOrder + 1,
                             created_at: new Date().toISOString()
                         };
                         
@@ -10431,6 +10455,114 @@
                     alert('Vision bearbeiten - Coming Soon! 🎯');
                 },
 
+                // Drag and drop functionality
+                draggedElement: null,
+                
+                handleDragStart(event) {
+                    this.draggedElement = event.target.closest('.vision-card');
+                    this.draggedElement.style.opacity = '0.5';
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/html', this.draggedElement.outerHTML);
+                },
+                
+                handleDragOver(event) {
+                    if (event.preventDefault) {
+                        event.preventDefault();
+                    }
+                    event.dataTransfer.dropEffect = 'move';
+                    
+                    const targetCard = event.target.closest('.vision-card');
+                    if (targetCard && targetCard !== this.draggedElement) {
+                        const container = document.getElementById('vision-entries');
+                        const afterElement = this.getDragAfterElement(container, event.clientY);
+                        
+                        if (afterElement == null) {
+                            container.appendChild(this.draggedElement);
+                        } else {
+                            container.insertBefore(this.draggedElement, afterElement);
+                        }
+                    }
+                    
+                    return false;
+                },
+                
+                handleDrop(event) {
+                    if (event.stopPropagation) {
+                        event.stopPropagation();
+                    }
+                    
+                    // Update display order based on new positions
+                    this.updateDisplayOrder();
+                    
+                    return false;
+                },
+                
+                handleDragEnd(event) {
+                    if (this.draggedElement) {
+                        this.draggedElement.style.opacity = '1';
+                        this.draggedElement = null;
+                    }
+                },
+                
+                getDragAfterElement(container, y) {
+                    const draggableElements = [...container.querySelectorAll('.vision-card:not(.dragging)')];
+                    
+                    return draggableElements.reduce((closest, child) => {
+                        const box = child.getBoundingClientRect();
+                        const offset = y - box.top - box.height / 2;
+                        
+                        if (offset < 0 && offset > closest.offset) {
+                            return { offset: offset, element: child };
+                        } else {
+                            return closest;
+                        }
+                    }, { offset: Number.NEGATIVE_INFINITY }).element;
+                },
+                
+                async updateDisplayOrder() {
+                    try {
+                        if (!window.supabase?.isAuthenticated()) {
+                            console.warn('Not authenticated - cannot update display order');
+                            return;
+                        }
+                        
+                        const container = document.getElementById('vision-entries');
+                        const visionCards = container.querySelectorAll('.vision-card');
+                        
+                        // Update display order for each vision based on current DOM position
+                        const updates = [];
+                        visionCards.forEach((card, index) => {
+                            const visionId = card.getAttribute('data-vision-id');
+                            const newDisplayOrder = index + 1; // Start from 1
+                            updates.push({
+                                id: visionId,
+                                display_order: newDisplayOrder
+                            });
+                        });
+                        
+                        // Batch update display orders in Supabase
+                        for (const update of updates) {
+                            await window.supabase.update('visions', update.id, { display_order: update.display_order });
+                        }
+                        
+                        // Update local visions array to match new order
+                        this.visions.forEach(vision => {
+                            const update = updates.find(u => u.id === vision.id);
+                            if (update) {
+                                vision.display_order = update.display_order;
+                            }
+                        });
+                        
+                        // Sort local array by display_order
+                        this.visions.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+                        
+                    } catch (error) {
+                        console.error('Error updating display order:', error);
+                        // Reload visions to reset to server state
+                        await this.loadVisions();
+                    }
+                },
+
                 currentVisionId: null,
 
                 showContextMenu(event, visionId) {
@@ -10462,6 +10594,93 @@
                     
                     this.hideContextMenu();
                     await this.deleteVision(this.currentVisionId);
+                },
+
+                // Drag and Drop functionality
+                draggedElement: null,
+
+                handleDragStart(event) {
+                    this.draggedElement = event.target.closest('.vision-card');
+                    this.draggedElement.classList.add('dragging');
+                    
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/html', this.draggedElement.outerHTML);
+                },
+
+                handleDragOver(event) {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = 'move';
+                    
+                    const afterElement = this.getDragAfterElement(event.currentTarget.parentElement, event.clientY);
+                    const container = document.getElementById('vision-entries');
+                    
+                    if (afterElement == null) {
+                        container.appendChild(this.draggedElement);
+                    } else {
+                        container.insertBefore(this.draggedElement, afterElement);
+                    }
+                },
+
+                handleDrop(event) {
+                    event.preventDefault();
+                    this.updateDisplayOrder();
+                },
+
+                handleDragEnd(event) {
+                    const dragging = document.querySelector('.dragging');
+                    if (dragging) {
+                        dragging.classList.remove('dragging');
+                    }
+                    this.draggedElement = null;
+                },
+
+                getDragAfterElement(container, y) {
+                    const draggableElements = [...container.querySelectorAll('.vision-card:not(.dragging)')];
+                    
+                    return draggableElements.reduce((closest, child) => {
+                        const box = child.getBoundingClientRect();
+                        const offset = y - box.top - box.height / 2;
+                        
+                        if (offset < 0 && offset > closest.offset) {
+                            return { offset: offset, element: child };
+                        } else {
+                            return closest;
+                        }
+                    }, { offset: Number.NEGATIVE_INFINITY }).element;
+                },
+
+                async updateDisplayOrder() {
+                    if (!window.supabase?.isAuthenticated()) return;
+                    
+                    try {
+                        const visionCards = document.querySelectorAll('.vision-card');
+                        const updates = [];
+                        
+                        visionCards.forEach((card, index) => {
+                            const visionId = card.dataset.visionId;
+                            updates.push({
+                                id: visionId,
+                                display_order: index + 1
+                            });
+                        });
+                        
+                        // Update display_order in database
+                        for (const update of updates) {
+                            await window.supabase.update('visions', { display_order: update.display_order }, update.id);
+                        }
+                        
+                        // Update local visions array order
+                        this.visions.sort((a, b) => {
+                            const aOrder = updates.find(u => u.id == a.id)?.display_order || 0;
+                            const bOrder = updates.find(u => u.id == b.id)?.display_order || 0;
+                            return aOrder - bOrder;
+                        });
+                        
+                    } catch (error) {
+                        console.error('Error updating display order:', error);
+                        // Reload visions on error
+                        this.loadVisions();
+                    }
                 }
             };
             
