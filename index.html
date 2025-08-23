@@ -8,6 +8,47 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z%22/><path d=%22M5 3v4%22/><path d=%22M19 17v4%22/><path d=%22M3 5h4%22/><path d=%22M17 19h4%22/></svg>">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- SECURITY: Remove credentials from URL immediately -->
+    <script>
+        // Clear URL parameters with credentials immediately on load
+        (function() {
+            const url = new URL(window.location);
+            if (url.searchParams.has('email') || url.searchParams.has('password')) {
+                console.warn('🔒 Clearing credentials from URL for security');
+                // Clear all URL parameters
+                window.history.replaceState({}, document.title, url.pathname);
+            }
+            
+            // Override console functions to prevent credential logging
+            const originalLog = console.log;
+            const originalError = console.error;
+            const originalWarn = console.warn;
+            
+            function sanitizeMessage(msg) {
+                if (typeof msg === 'string') {
+                    // Remove email and password patterns from logs
+                    return msg.replace(/[?&]email=[^&]*/gi, '[EMAIL_REMOVED]')
+                             .replace(/[?&]password=[^&]*/gi, '[PASSWORD_REMOVED]')
+                             .replace(/mail%40[^&]*/gi, '[EMAIL_REMOVED]')
+                             .replace(/password=[^&]*/gi, '[PASSWORD_REMOVED]');
+                }
+                return msg;
+            }
+            
+            console.log = function(msg, ...args) {
+                originalLog(sanitizeMessage(msg), ...args);
+            };
+            
+            console.error = function(msg, ...args) {
+                originalError(sanitizeMessage(msg), ...args);
+            };
+            
+            console.warn = function(msg, ...args) {
+                originalWarn(sanitizeMessage(msg), ...args);
+            };
+        })();
+    </script>
     <style>
         /* === DESIGN SYSTEM === */
         :root {
@@ -11798,7 +11839,10 @@
                     // Update pomodoro button state
                     if (window.PomodoroTimer && pomodoroBtn) {
                         const isRunning = window.PomodoroTimer.isRunning;
+                        console.log('🔍 PomodoroBtn found:', !!pomodoroBtn);
+                        console.log('🔍 PomodoroBtn HTML:', pomodoroBtn ? pomodoroBtn.innerHTML : 'null');
                         const icon = pomodoroBtn.querySelector('i');
+                        console.log('🔍 Icon found:', !!icon);
                         
                         if (icon) {
                             if (isRunning) {
@@ -11811,7 +11855,27 @@
                                 pomodoroBtn.classList.add('pomodoro-active');
                             }
                         } else {
-                            console.error('❌ Dynamic Pomodoro icon element not found');
+                            console.error('❌ Dynamic Pomodoro icon element not found - trying to create it');
+                            // Try to recreate the icon if it's missing
+                            pomodoroBtn.innerHTML = '<i data-lucide="pause-circle"></i>';
+                            if (window.lucide) {
+                                lucide.createIcons();
+                                // Try again after creating icons
+                                setTimeout(() => {
+                                    const newIcon = pomodoroBtn.querySelector('i');
+                                    if (newIcon) {
+                                        if (isRunning) {
+                                            newIcon.setAttribute('data-lucide', 'pause-circle');
+                                            pomodoroBtn.setAttribute('data-tooltip', 'Pause Timer');
+                                        } else {
+                                            newIcon.setAttribute('data-lucide', 'play-circle');
+                                            pomodoroBtn.setAttribute('data-tooltip', 'Resume Timer');
+                                        }
+                                        pomodoroBtn.classList.add('pomodoro-active');
+                                        lucide.createIcons();
+                                    }
+                                }, 100);
+                            }
                         }
                     }
                 } else {
