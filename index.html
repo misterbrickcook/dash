@@ -498,14 +498,15 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
+            z-index: 1;
+            pointer-events: none;
             background: linear-gradient(-45deg, 
-                rgba(238, 119, 82, 0.15), 
-                rgba(231, 60, 126, 0.12), 
-                rgba(35, 166, 213, 0.1), 
-                rgba(35, 213, 171, 0.08));
+                rgba(238, 119, 82, 0.25), 
+                rgba(231, 60, 126, 0.2), 
+                rgba(35, 166, 213, 0.15), 
+                rgba(35, 213, 171, 0.12));
             background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            animation: gradientShift 12s ease infinite;
         }
 
         .animated-background::before {
@@ -551,7 +552,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: -1;
+            z-index: 2;
         }
 
         .floating-shape {
@@ -568,7 +569,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: -1;
+            z-index: 2;
             overflow: hidden;
         }
 
@@ -684,17 +685,19 @@
             border-bottom: 20px solid rgba(255, 255, 255, 0.25);
         }
 
-        /* Only show animation on login page */
-        body:not(.authenticated) .animated-background,
-        body:not(.authenticated) .floating-shapes,
-        body:not(.authenticated) .floating-particles {
-            display: block;
+        /* Always show animation on login page - simpler approach */
+        .animated-background,
+        .floating-shapes,
+        .floating-particles {
+            display: block !important;
+            z-index: 1 !important;
         }
 
+        /* Hide when authenticated */
         body.authenticated .animated-background,
         body.authenticated .floating-shapes,
         body.authenticated .floating-particles {
-            display: none;
+            display: none !important;
         }
 
         /* Login page dark mode styling */
