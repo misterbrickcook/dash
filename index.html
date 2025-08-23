@@ -1062,6 +1062,30 @@
             max-width: 200px;
         }
         
+        .pomodoro-duration-input {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            max-width: 200px;
+        }
+        
+        .pomodoro-duration-input input[type="number"] {
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            flex: 1;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .pomodoro-duration-input .duration-unit {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            min-width: 30px;
+        }
+        
         .setting-description {
             font-size: 0.85rem;
             color: var(--text-secondary);
@@ -5899,7 +5923,10 @@
                     <h3>Pomodoro Timer</h3>
                     <div class="setting-item">
                         <label for="pomodoro-duration">Timer Dauer (Minuten):</label>
-                        <input type="number" id="pomodoro-duration" min="5" max="60" value="25" step="1">
+                        <div class="pomodoro-duration-input">
+                            <input type="number" id="pomodoro-duration" min="5" max="60" value="25" step="1">
+                            <span class="duration-unit">min</span>
+                        </div>
                         <span class="setting-description">Dauer eines Pomodoro-Intervalls in Minuten</span>
                     </div>
                     <button id="save-pomodoro-settings" class="btn">Speichern</button>
