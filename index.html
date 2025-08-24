@@ -6361,133 +6361,224 @@
 
         <!-- === TRADING RULES TAB === -->
         <section id="tab-trading-rules" class="tab-section">
-            <div class="settings-container">
-                <div class="setting-group">
-                    <h3>📊 Trading Rules</h3>
-                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                        Deine persönlichen Trading-Regeln für diszipliniertes und profitables Trading.
-                    </p>
-                </div>
+            <div class="resources-grid">
                 
-                <div class="trading-rule-category">
-                    <h3>🛡️ Risk Management</h3>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-max-risk" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-max-risk">Nie mehr als 2% des Portfolios pro Trade riskieren</label>
-                        </div>
+                <!-- Risk Management Block -->
+                <div class="resource-block">
+                    <div class="resource-block-header">
+                        <h3><i data-lucide="shield" style="width: 16px; height: 16px;"></i> Risk Management</h3>
                     </div>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-stop-loss" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-stop-loss">Immer Stop-Loss setzen bevor der Trade eröffnet wird</label>
+                    <div class="resource-links">
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-max-risk" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-max-risk">Nie mehr als 2% des Portfolios pro Trade riskieren</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-position-size" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-position-size">Positionsgröße basierend auf Stop-Loss berechnen</label>
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-stop-loss" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-stop-loss">Immer Stop-Loss setzen bevor der Trade eröffnet wird</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="trading-rule-category">
-                    <h3>📈 Entry Rules</h3>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-confirmation" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-confirmation">Warten auf Bestätigung des Setups</label>
-                        </div>
-                    </div>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-trend" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-trend">Nur in Richtung des übergeordneten Trends traden</label>
-                        </div>
-                    </div>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-volume" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-volume">Volumen-Bestätigung abwarten</label>
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-position-size" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-position-size">Positionsgröße basierend auf Stop-Loss berechnen</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="trading-rule-category">
-                    <h3>📉 Exit Rules</h3>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-profit-target" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-profit-target">Gewinnziel vor Trade-Entry festlegen</label>
-                        </div>
+                <!-- Entry Rules Block -->
+                <div class="resource-block">
+                    <div class="resource-block-header">
+                        <h3><i data-lucide="trending-up" style="width: 16px; height: 16px;"></i> Entry Rules</h3>
                     </div>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-trailing-stop" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-trailing-stop">Trailing Stop verwenden bei gewinnbringenden Trades</label>
+                    <div class="resource-links">
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-confirmation" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-confirmation">Warten auf Bestätigung des Setups</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-emotional-exit" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-emotional-exit">Nie aus Emotion heraus Positionen schließen</label>
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-trend" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-trend">Nur in Richtung des übergeordneten Trends traden</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="trading-rule-category">
-                    <h3>🧠 Psychology & Discipline</h3>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-plan" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-plan">Trading-Plan vor Markteröffnung erstellen</label>
-                        </div>
-                    </div>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-fomo" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-fomo">Nicht FOMO-basiert handeln</label>
-                        </div>
-                    </div>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-revenge" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-revenge">Keine Revenge-Trades nach Verlusten</label>
-                        </div>
-                    </div>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-journal" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-journal">Jeden Trade im Journal dokumentieren</label>
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-volume" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-volume">Volumen-Bestätigung abwarten</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="trading-rule-category">
-                    <h3>⏰ Time Management</h3>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-market-hours" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-market-hours">Nur während optimaler Handelszeiten traden</label>
-                        </div>
+                <!-- Exit Rules Block -->
+                <div class="resource-block">
+                    <div class="resource-block-header">
+                        <h3><i data-lucide="trending-down" style="width: 16px; height: 16px;"></i> Exit Rules</h3>
                     </div>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-break" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-break">Pausen einhalten nach 3 aufeinanderfolgenden Trades</label>
+                    <div class="resource-links">
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-profit-target" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-profit-target">Gewinnziel vor Trade-Entry festlegen</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="trading-rule">
-                        <input type="checkbox" id="rule-daily-limit" class="trading-rule-checkbox">
-                        <div class="trading-rule-content">
-                            <label for="rule-daily-limit">Tägliches Verlustlimit respektieren</label>
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-trailing-stop" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-trailing-stop">Trailing Stop verwenden bei gewinnbringenden Trades</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-emotional-exit" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-emotional-exit">Nie aus Emotion heraus Positionen schließen</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="setting-group" style="margin-top: 2rem;">
-                    <button id="reset-trading-rules" class="btn secondary">Alle Rules zurücksetzen</button>
-                    <button id="save-trading-rules" class="btn">Rules speichern</button>
+                <!-- Psychology & Discipline Block -->
+                <div class="resource-block">
+                    <div class="resource-block-header">
+                        <h3><i data-lucide="brain" style="width: 16px; height: 16px;"></i> Psychology & Discipline</h3>
+                    </div>
+                    <div class="resource-links">
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-plan" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-plan">Trading-Plan vor Markteröffnung erstellen</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-fomo" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-fomo">Nicht FOMO-basiert handeln</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-revenge" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-revenge">Keine Revenge-Trades nach Verlusten</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-journal" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-journal">Jeden Trade im Journal dokumentieren</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Time Management Block -->
+                <div class="resource-block">
+                    <div class="resource-block-header">
+                        <h3><i data-lucide="clock" style="width: 16px; height: 16px;"></i> Time Management</h3>
+                    </div>
+                    <div class="resource-links">
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-market-hours" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-market-hours">Nur während optimaler Handelszeiten traden</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-break" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-break">Pausen einhalten nach 3 aufeinanderfolgenden Trades</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <input type="checkbox" id="rule-daily-limit" class="trading-rule-checkbox">
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-daily-limit">Tägliches Verlustlimit respektieren</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Trading Rules Actions Block -->
+                <div class="resource-block" style="margin-top: 2rem;">
+                    <div class="resource-block-header">
+                        <h3><i data-lucide="settings" style="width: 16px; height: 16px;"></i> Actions</h3>
+                    </div>
+                    <div class="resource-links">
+                        <div class="resource-item">
+                            <button id="reset-trading-rules" class="btn secondary" style="margin-right: 1rem;">Alle Rules zurücksetzen</button>
+                            <button id="save-trading-rules" class="btn">Rules speichern</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
