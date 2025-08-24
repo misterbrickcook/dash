@@ -8474,16 +8474,43 @@
                         }));
                 }
                 
-                // Search Journal entries
+                // Search Journal entries (enhanced with tags, wiki, weather)
                 if (window.JournalManager?.entries) {
                     console.log('🔍 GlobalSearch: Searching', window.JournalManager.entries.length, 'journal entries for:', searchTerm);
                     window.JournalManager.entries
                         .filter(entry => {
                             const titleMatch = entry.title?.toLowerCase().includes(searchTerm);
                             const contentMatch = entry.content?.toLowerCase().includes(searchTerm);
-                            const match = titleMatch || contentMatch;
+                            
+                            // Search in tags
+                            let tagsMatch = false;
+                            if (entry.tags && Array.isArray(entry.tags)) {
+                                tagsMatch = entry.tags.some(tag => 
+                                    tag?.toLowerCase().includes(searchTerm)
+                                );
+                            }
+                            
+                            // Search in wiki field
+                            const wikiMatch = entry.wiki?.toLowerCase().includes(searchTerm);
+                            
+                            // Search in weather field (if exists)
+                            const weatherMatch = entry.weather?.toLowerCase().includes(searchTerm);
+                            
+                            // Search in mood, reflection, lessons fields
+                            const moodMatch = entry.mood?.toLowerCase().includes(searchTerm);
+                            const reflectionMatch = entry.reflection?.toLowerCase().includes(searchTerm);
+                            const lessonsMatch = entry.lessons?.toLowerCase().includes(searchTerm);
+                            
+                            const match = titleMatch || contentMatch || tagsMatch || wikiMatch || weatherMatch || moodMatch || reflectionMatch || lessonsMatch;
+                            
                             if (match) {
-                                console.log('✅ Found journal match:', entry.title, '| Content preview:', entry.content?.substring(0, 50));
+                                console.log('✅ Found journal match:', entry.title);
+                                console.log('  - Title:', titleMatch ? '✓' : '✗');
+                                console.log('  - Content:', contentMatch ? '✓' : '✗');
+                                console.log('  - Tags:', tagsMatch ? '✓' : '✗', entry.tags);
+                                console.log('  - Wiki:', wikiMatch ? '✓' : '✗');
+                                console.log('  - Weather:', weatherMatch ? '✓' : '✗');
+                                console.log('  - Mood:', moodMatch ? '✓' : '✗');
                             }
                             return match;
                         })
@@ -8495,6 +8522,15 @@
                             action: () => {
                                 GlobalSearch.hide();
                                 switchTab('tab-journal');
+                                // Try to highlight the specific entry
+                                setTimeout(() => {
+                                    const entryElement = document.querySelector(`[data-entry-id="${entry.id}"]`);
+                                    if (entryElement) {
+                                        entryElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        entryElement.style.backgroundColor = 'rgba(255, 235, 59, 0.2)';
+                                        setTimeout(() => entryElement.style.backgroundColor = '', 2000);
+                                    }
+                                }, 100);
                             }
                         }));
                 }
