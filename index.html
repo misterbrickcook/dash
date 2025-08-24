@@ -8361,22 +8361,6 @@
                     GlobalSearch.navigateUp();
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
-                    
-                    // Check if we have a direct command that can be executed
-                    const input = document.getElementById('global-search-input');
-                    const query = input ? input.value.trim() : '';
-                    
-                    if (query.startsWith('/')) {
-                        // Execute command directly
-                        GlobalSearch.handleCommand(query);
-                        return;
-                    } else if (query.startsWith('@') || query.startsWith('#')) {
-                        // Execute smart filter directly
-                        GlobalSearch.handleSmartFilter(query);
-                        return;
-                    }
-                    
-                    // Otherwise, execute selected item or first item if none selected
                     GlobalSearch.executeSelected();
                 }
             },
@@ -8561,52 +8545,8 @@
                 const commands = [];
                 const cmd = query.toLowerCase().slice(1); // Remove '/' prefix
                 
-                // Check for exact command matches that can be executed immediately
-                if (cmd === 'timer' || cmd === 'pomodoro') {
-                    // Execute timer command immediately
-                    GlobalSearch.hide();
-                    if (window.PomodoroTimer) {
-                        window.PomodoroTimer.toggle();
-                        if (window.QuickBar) {
-                            window.QuickBar.updateDynamicButtons();
-                        }
-                    }
-                    return;
-                }
-                
-                if (cmd === 'add') {
-                    // Execute add todo command immediately
-                    GlobalSearch.hide();
-                    switchTab('tab-todos');
-                    setTimeout(() => {
-                        const addBtn = document.querySelector('[onclick="TodoManager.createTodo()"]');
-                        if (addBtn) addBtn.click();
-                    }, 100);
-                    return;
-                }
-                
-                if (cmd === 'new') {
-                    // Execute new goal command immediately
-                    GlobalSearch.hide();
-                    switchTab('tab-ziele');
-                    setTimeout(() => {
-                        const addBtn = document.querySelector('#goals-section [onclick*="createGoal"]');
-                        if (addBtn) addBtn.click();
-                    }, 100);
-                    return;
-                }
-                
-                if (cmd === 'dark' || cmd === 'theme') {
-                    // Execute dark mode toggle immediately
-                    GlobalSearch.hide();
-                    if (window.toggleTheme) {
-                        window.toggleTheme();
-                    }
-                    return;
-                }
-                
-                // Show command suggestions for partial matches
-                if (cmd.startsWith('add') || cmd.startsWith('new')) {
+                // Show command suggestions (no immediate execution)
+                if (cmd.startsWith('add') || cmd.startsWith('new') || cmd === 'add' || cmd === 'new') {
                     commands.push({
                         title: '/add Todo - Schnell neuen Todo erstellen',
                         subtitle: 'Command • Todo hinzufügen',
@@ -8636,7 +8576,7 @@
                     });
                 }
                 
-                if (cmd.startsWith('timer') || cmd.startsWith('pomodoro')) {
+                if (cmd.startsWith('timer') || cmd.startsWith('pomodoro') || cmd === 'timer' || cmd === 'pomodoro') {
                     commands.push({
                         title: '/timer - Pomodoro Timer starten',
                         subtitle: 'Command • Timer öffnen',
@@ -8654,7 +8594,7 @@
                     });
                 }
                 
-                if (cmd.startsWith('dark') || cmd.startsWith('theme')) {
+                if (cmd.startsWith('dark') || cmd.startsWith('theme') || cmd === 'dark' || cmd === 'theme') {
                     commands.push({
                         title: '/dark - Dark Mode umschalten',
                         subtitle: 'Command • Theme wechseln',
