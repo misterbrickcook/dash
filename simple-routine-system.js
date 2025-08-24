@@ -56,7 +56,6 @@ class SimpleRoutineManager {
         try {
             // Pure cloud mode - authentication required
             if (!window.supabase || !window.supabase.isAuthenticated()) {
-                console.warn('⚠️ SimpleRoutineManager: Not authenticated yet - will reload after login');
                 this.routineData = this.getEmptyData();
                 return;
             }
@@ -78,19 +77,16 @@ class SimpleRoutineManager {
             // No data found - start fresh
             this.routineData = this.getEmptyData();
         } catch (error) {
-            console.error('❌ Error loading routine data:', error);
+            console.error('Error loading routine data:', error);
             this.routineData = this.getEmptyData();
         }
     }
 
     async migrateFromOldSystem() {
         try {
-            console.log('🔄 Attempting to migrate from old system...');
-            
             // Check old localStorage data first
             const oldLocalData = localStorage.getItem('routineCompletionData');
             if (!oldLocalData) {
-                console.log('⚠️ No old system data found');
                 return null;
             }
             
@@ -98,11 +94,8 @@ class SimpleRoutineManager {
             const todayOldData = parsed[this.today];
             
             if (!todayOldData) {
-                console.log('⚠️ No old system data for today');
                 return null;
             }
-            
-            console.log('🔄 Found old system data for today:', todayOldData);
             
             const newData = this.getEmptyData();
             const todayData = newData[this.today];
@@ -113,7 +106,6 @@ class SimpleRoutineManager {
             if (todayOldData.morning === true) {
                 Object.keys(todayData.morning).forEach(key => {
                     todayData.morning[key] = true;
-                    console.log(`🔄 Migrated morning: ${key} = true`);
                 });
                 foundData = true;
             }
@@ -121,7 +113,6 @@ class SimpleRoutineManager {
             if (todayOldData.evening === true) {
                 Object.keys(todayData.evening).forEach(key => {
                     todayData.evening[key] = true;
-                    console.log(`🔄 Migrated evening: ${key} = true`);
                 });
                 foundData = true;
             }
@@ -132,7 +123,6 @@ class SimpleRoutineManager {
                     const keys = Object.keys(todayData.morning);
                     if (keys[index] && completed) {
                         todayData.morning[keys[index]] = true;
-                        console.log(`🔄 Migrated morning task ${index}: ${keys[index]} = true`);
                         foundData = true;
                     }
                 });
@@ -143,7 +133,6 @@ class SimpleRoutineManager {
                     const keys = Object.keys(todayData.evening);
                     if (keys[index] && completed) {
                         todayData.evening[keys[index]] = true;
-                        console.log(`🔄 Migrated evening task ${index}: ${keys[index]} = true`);
                         foundData = true;
                     }
                 });
@@ -156,15 +145,12 @@ class SimpleRoutineManager {
                 
                 // Clean up old localStorage data after successful migration
                 localStorage.removeItem('routineCompletionData');
-                console.log('🧹 Cleaned up old localStorage data after migration');
-                
-                console.log('✅ Successfully migrated old system data');
                 return newData;
             }
             
             return null;
         } catch (error) {
-            console.error('❌ Error migrating from old system:', error);
+            console.error('Error migrating from old system:', error);
             return null;
         }
     }
@@ -180,7 +166,7 @@ class SimpleRoutineManager {
             }
             return null;
         } catch (error) {
-            console.error('❌ Error loading from cloud:', error);
+            console.error('Error loading from cloud:', error);
             return null;
         }
     }
@@ -208,10 +194,9 @@ class SimpleRoutineManager {
                 await window.supabase.insert('simple_routines', [dataToSave]);
             }
 
-            console.log('☁️ Saved routine data to cloud');
             return true;
         } catch (error) {
-            console.error('❌ Error saving to cloud:', error);
+            console.error('Error saving to cloud:', error);
             return false;
         }
     }

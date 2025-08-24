@@ -11,7 +11,7 @@ class SimpleCounters {
         if (this.isInitialized) return;
         
         if (!window.supabase?.isAuthenticated()) {
-            console.error('❌ SimpleCounters: Not authenticated');
+            console.error('SimpleCounters: Not authenticated');
             return;
         }
 
@@ -106,7 +106,7 @@ class SimpleCounters {
 
 
         } catch (error) {
-            console.error('❌ SimpleCounters: Update failed:', error);
+            console.error('SimpleCounters: Update failed:', error);
         }
     }
 
@@ -333,7 +333,6 @@ class SimpleCounters {
     
     // Test confetti animation
     testConfetti() {
-        console.log('🎉 Testing confetti animations on all counters...');
         for (let i = 0; i < 4; i++) {
             setTimeout(() => {
                 this.triggerSuccessAnimation(i);

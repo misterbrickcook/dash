@@ -23,7 +23,6 @@ class CloudStorage {
                    typeof supabase.isAuthenticated === 'function' && 
                    supabase.isAuthenticated();
         } catch (error) {
-            console.warn('Error checking Supabase authentication:', error);
             return false;
         }
     }
@@ -275,7 +274,7 @@ class CloudStorage {
             // Pure cloud mode - no local saving needed
             
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                console.error('❌ CloudStorage: Cannot save routine completion - not authenticated or offline');
+                console.error('CloudStorage: Cannot save routine completion - not authenticated or offline');
                 throw new Error('Pure cloud mode requires authentication and online connection');
             }
             
@@ -421,12 +420,11 @@ class CloudStorage {
     
     async getResources() {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.error('❌ CloudStorage: Not authenticated - pure cloud mode requires authentication');
+            console.error('CloudStorage: Not authenticated');
             return [];
         }
         
         try {
-            console.log('☁️ CloudStorage: Fetching resources from cloud...');
             const user = supabase.getCurrentUser();
             if (!user) {
                 throw new Error('No current user found');
@@ -435,26 +433,23 @@ class CloudStorage {
             const data = await supabase.query(`resources?user_id=eq.${user.id}&select=*`);
             
             if (data && Array.isArray(data)) {
-                console.log(`☁️ CloudStorage: Loaded ${data.length} resources from cloud`);
                 return data;
             } else {
-                console.log('☁️ CloudStorage: No resources found in cloud');
                 return [];
             }
         } catch (error) {
-            console.error('❌ CloudStorage: Error fetching resources:', error);
+            console.error('CloudStorage: Error fetching resources:', error);
             throw error; // Don't hide errors in pure cloud mode
         }
     }
     
     async saveResource(resource) {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.error('❌ CloudStorage: Not authenticated - cannot save resource in pure cloud mode');
+            console.error('CloudStorage: Not authenticated - cannot save resource');
             throw new Error('Not authenticated - pure cloud mode requires authentication');
         }
         
         try {
-            console.log('☁️ CloudStorage: Saving resource to cloud:', resource.title);
             
             // Add user_id to resource before saving
             const user = supabase.getCurrentUser();
@@ -471,15 +466,10 @@ class CloudStorage {
                               resource.id > 0;
             
             if (isRealDbId) {
-                console.log('☁️ CloudStorage: Updating existing resource in cloud with ID:', resource.id);
                 await supabase.update('resources', resource, resource.id);
-                console.log('☁️ CloudStorage: Resource updated in cloud');
             } else {
-                console.log('☁️ CloudStorage: Inserting new resource to cloud...');
-                
                 // Remove any ID that's not a proper database BIGSERIAL ID
                 if (resource.id) {
-                    console.log('☁️ CloudStorage: Removing non-database ID:', resource.id);
                     delete resource.id;
                 }
                 
@@ -487,50 +477,42 @@ class CloudStorage {
                 
                 if (result && result.length > 0 && result[0]) {
                     const newId = result[0].id;
-                    console.log('☁️ CloudStorage: New resource inserted with database ID:', newId);
                     resource.id = newId; // Update the passed resource object
                 } else {
                     throw new Error('Failed to insert resource - unexpected response format');
                 }
             }
-            
-            console.log('☁️ CloudStorage: Resource synced to cloud:', resource.title);
         } catch (error) {
-            console.error('❌ CloudStorage: Error saving resource to cloud:', error);
+            console.error('CloudStorage: Error saving resource:', error);
             throw error; // Don't hide errors in pure cloud mode
         }
     }
     
     async deleteResource(resourceId) {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.error('❌ CloudStorage: Not authenticated - cannot delete resource in pure cloud mode');
+            console.error('CloudStorage: Not authenticated - cannot delete resource');
             throw new Error('Not authenticated - pure cloud mode requires authentication');
         }
         
         try {
-            console.log('☁️ CloudStorage: Deleting resource from cloud:', resourceId);
             await supabase.delete('resources', resourceId);
-            console.log('☁️ CloudStorage: Resource deleted from cloud:', resourceId);
         } catch (error) {
-            console.error('❌ CloudStorage: Error deleting resource:', error);
+            console.error('CloudStorage: Error deleting resource:', error);
             throw error; // Don't hide errors in pure cloud mode
         }
     }
     
     getLocalResources() {
         // Pure cloud mode - no localStorage fallbacks
-        console.warn('⚠️ CloudStorage: getLocalResources() called in pure cloud mode - should not be used');
         return [];
     }
     
     saveLocalResource(resource) {
         // Pure cloud mode - no localStorage saving
-        console.warn('⚠️ CloudStorage: saveLocalResource() called in pure cloud mode - should not be used');
     }
     
     deleteLocalResource(resourceId) {
         // Pure cloud mode - no localStorage operations
-        console.warn('⚠️ CloudStorage: deleteLocalResource() called in pure cloud mode - should not be used');
     }
     
     getLocalRoutineData() {
@@ -602,33 +584,15 @@ cloudStorage.startPeriodicSync();
 
 // Add global debug functions for resources
 window.debugResources = function() {
-    console.log('🔍 === RESOURCE DEBUG (DIRECT CLOUD MODE) ===');
-    console.log('☁️ Direct cloud mode: No sync queue (immediate operations)');
-    console.log('🔍 Auth status:', cloudStorage.isSupabaseAuthenticated());
-    console.log('🌐 Online status:', cloudStorage.isOnline);
-    console.log('🔌 Supabase available:', !!window.supabase);
-    if (window.supabase) {
-        try {
-            const user = window.supabase.getCurrentUser();
-            console.log('👤 Current user:', !!user, user ? `(ID: ${user.id})` : '(null)');
-        } catch (e) {
-            console.log('👤 User check error:', e.message);
-        }
-    }
-    
-    console.log('☁️ Direct cloud mode - no local resource storage');
-    
-    if (window.ResourceManager) {
-        console.log('🏠 ResourceManager resources:', window.ResourceManager.resources.length);
-    }
+    console.log('Auth:', cloudStorage.isSupabaseAuthenticated() ? 'OK' : 'NO');
+    console.log('Resources:', window.ResourceManager?.resources?.length || 0);
 };
 
 window.forceSyncResources = async function() {
-    console.log('☁️ Direct cloud mode: No sync queue to process - operations are immediate');
+    // Direct cloud mode - no sync needed
 };
 
 window.testResourceSave = async function() {
-    console.log('🧪 Testing resource save (without manual ID)...');
     const testResource = {
         // No manual ID - let database auto-generate
         title: 'Test Resource ' + Date.now(),
@@ -641,32 +605,23 @@ window.testResourceSave = async function() {
     
     try {
         await cloudStorage.saveResource(testResource);
-        console.log('✅ Test resource save completed');
-        console.log('🔍 Final resource object:', testResource);
         
         // Reload ResourceManager to see updated list
         if (window.ResourceManager && window.ResourceManager.loadResources) {
-            console.log('🔄 Reloading ResourceManager...');
             await window.ResourceManager.loadResources();
         }
     } catch (error) {
-        console.error('❌ Test resource save failed:', error);
+        console.error('Test resource save failed:', error);
     }
 };
 
 window.checkResourceState = function() {
-    console.log('🔍 === RESOURCE STATE CHECK (DIRECT CLOUD MODE) ===');
-    console.log('☁️ Direct cloud mode: No sync queue (immediate operations)');
-    console.log('📱 ResourceManager resources:', window.ResourceManager?.resources?.length || 0);
-    console.log('☁️ Direct cloud mode - no localStorage cache for resources');
+    console.log('Resources:', window.ResourceManager?.resources?.length || 0);
     
     if (window.ResourceManager && window.ResourceManager.resources.length > 0) {
-        console.log('📋 Sample ResourceManager resource IDs:', 
-            window.ResourceManager.resources.slice(0, 3).map(r => `${r.id} (${typeof r.id})`));
+        console.log('Sample IDs:', 
+            window.ResourceManager.resources.slice(0, 3).map(r => r.id));
     }
-    
-    console.log('☁️ Direct cloud mode - no cached resources');
-    console.log('================================');
 };
 
-console.log('🔍 Debug functions available: debugResources(), forceSyncResources(), testResourceSave(), checkResourceState()');
+// Debug functions: debugResources(), forceSyncResources(), testResourceSave(), checkResourceState()

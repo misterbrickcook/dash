@@ -37,10 +37,6 @@ class CloudPolicy {
         
         // Überwache localStorage Zugriffe
         this.monitorLocalStorageAccess();
-        
-        console.log("🛡️ Cloud-First Policy activated - Version", this.policyVersion);
-        console.log("📋 All data operations must be cloud-only");
-        console.log("❌ localStorage fallbacks are prohibited");
     }
     
     /**
@@ -73,12 +69,10 @@ class CloudPolicy {
             // Authentifizierung erzwingen
             const user = this.enforceAuthentication(operationName);
             
-            console.log(`☁️ CLOUD POLICY: Executing ${operationName} for user ${user.id}`);
             
             // Cloud-Operation ausführen
             const result = await cloudFunction(user);
             
-            console.log(`✅ CLOUD POLICY: ${operationName} completed successfully`);
             return result;
             
         } catch (error) {
@@ -117,12 +111,10 @@ class CloudPolicy {
                 return originalSetItem.call(this, key, value);
             }
             
-            console.warn(`🛡️ CLOUD POLICY: Blocked localStorage.setItem("${key}")`);
-            console.warn("📋 Use cloud storage only - no local data allowed");
             
-            // In development: Warnung zeigen, in production: blockieren
+            // In development: Allow with warning, in production: block silently
             if (window.location.hostname === 'localhost') {
-                console.warn("⚠️ Development mode: localStorage access allowed but discouraged");
+                console.warn(`CLOUD POLICY: localStorage.setItem blocked for "${key}" - use cloud storage`);
                 return originalSetItem.call(this, key, value);
             } else {
                 throw new Error(`Cloud Policy Violation: localStorage access blocked for key "${key}"`);
@@ -134,14 +126,13 @@ class CloudPolicy {
                 return originalGetItem.call(this, key);
             }
             
-            console.warn(`🛡️ CLOUD POLICY: Blocked localStorage.getItem("${key}")`);
             
-            // In development: Warnung zeigen, in production: blockieren
+            // In development: Allow with warning, in production: return null silently
             if (window.location.hostname === 'localhost') {
-                console.warn("⚠️ Development mode: localStorage access allowed but discouraged");
+                console.warn(`CLOUD POLICY: localStorage.getItem blocked for "${key}" - use cloud storage`);
                 return originalGetItem.call(this, key);
             } else {
-                return null; // Kein Fehler, aber auch keine Daten
+                return null; // No error, but no data
             }
         };
     }
@@ -172,7 +163,6 @@ class CloudPolicy {
      * Kann verwendet werden um zu prüfen ob ein Manager cloud-konform ist
      */
     validateManager(managerName, managerObject) {
-        console.log(`🔍 CLOUD POLICY: Validating ${managerName}...`);
         
         const violations = [];
         
@@ -195,7 +185,6 @@ class CloudPolicy {
             return false;
         }
         
-        console.log(`✅ CLOUD POLICY: ${managerName} is compliant`);
         return true;
     }
     
@@ -252,5 +241,3 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = CloudPolicy;
 }
 
-console.log("🛡️ Cloud-First Policy loaded and enforced");
-console.log("📖 Use cloudPolicy.getManagerTemplate('NewManager') for new implementations");
