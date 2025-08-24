@@ -520,33 +520,236 @@
 
         /* Home todos - keine extra dark mode styles nötig */
 
-        /* === GLOBAL SEARCH STYLES === */
-        .search-result-item {
-            padding: 0.75rem;
+        /* === INTELLIGENT GLOBAL SEARCH STYLES === */
+        .search-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
             border-bottom: 1px solid var(--border-primary);
+            background: var(--bg-secondary);
+        }
+        
+        .search-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .search-shortcuts {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .search-shortcut {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.4rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 3px;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+        
+        .search-input-container {
+            position: relative;
+            padding: 1rem 1.5rem 0.5rem 1.5rem;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 2rem;
+            top: 1.75rem;
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+        
+        #global-search-input {
+            width: 100%;
+            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            font-size: 1rem;
+            border: 2px solid var(--border-primary);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            box-sizing: border-box;
+            transition: border-color 0.2s ease;
+        }
+        
+        #global-search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+        
+        .search-filters {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.75rem;
+        }
+        
+        .filter-btn {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-primary);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+        
+        .search-results-container {
+            max-height: 450px;
+            overflow-y: auto;
+            padding: 1rem 1.5rem;
+        }
+        
+        .search-suggestions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .suggestion-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .suggestion-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+        
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.2s ease;
+        }
+        
+        .suggestion-item:hover {
+            background: var(--bg-secondary);
+        }
+        
+        .suggestion-item i {
+            width: 16px;
+            height: 16px;
+            color: var(--accent-primary);
+        }
+        
+        .suggestion-item span {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        
+        .search-results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .search-result-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border: 1px solid transparent;
         }
 
         .search-result-item:hover {
             background: var(--bg-secondary);
+            border-color: var(--border-primary);
         }
-
-        .search-result-item:last-child {
-            border-bottom: none;
+        
+        .search-result-item.selected {
+            background: var(--bg-secondary);
+            border-color: var(--accent-primary);
+        }
+        
+        .search-result-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--accent-primary);
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+        
+        .search-result-content {
+            flex: 1;
+            min-width: 0;
         }
 
         .search-result-title {
             font-weight: 500;
             color: var(--text-primary);
             margin-bottom: 0.25rem;
+            font-size: 0.95rem;
         }
 
         .search-result-subtitle {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+        
+        .search-result-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+        
+        .search-result-category {
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            background: var(--accent-primary);
+            color: white;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        
+        .search-result-date {
+            font-size: 0.7rem;
             color: var(--text-muted);
         }
+        
+        .search-no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+        
+        .search-no-results i {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
 
+        /* Dark mode support */
+        [data-theme="dark"] .search-header {
+            background: var(--bg-primary);
+        }
+        
         [data-theme="dark"] .search-result-title {
             color: #e2e8f0 !important;
         }
@@ -5231,24 +5434,68 @@
         </div>
     </div>
 
-    <!-- === GLOBAL SEARCH MODAL === -->
+    <!-- === INTELLIGENT GLOBAL SEARCH === -->
     <div id="global-search-modal" class="modal hide">
-        <div class="modal-content" style="max-width: 600px; width: 90vw;">
+        <div class="modal-content" style="max-width: 700px; width: 95vw;">
             <button class="close" onclick="GlobalSearch.hide()">×</button>
-            <h2>
-                <i data-lucide="search" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
-                Global Search
-            </h2>
+            <div class="search-header">
+                <i data-lucide="command" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
+                <span class="search-title">Command Center</span>
+                <div class="search-shortcuts">
+                    <span class="search-shortcut">Ctrl+K</span>
+                    <span class="search-shortcut">Esc</span>
+                </div>
+            </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <input type="text" id="global-search-input" placeholder="Search todos, goals, termine, journal entries..." 
-                           style="font-size: 1rem; padding: 0.75rem; width: 100%; border: 2px solid var(--border-primary); box-sizing: border-box;">
+                <div class="search-input-container">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="global-search-input" 
+                           placeholder="Search everything or try /add, /new, @todos, #today..." 
+                           spellcheck="false"
+                           autocomplete="off">
+                    <div class="search-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="todos">Todos</button>
+                        <button class="filter-btn" data-filter="goals">Goals</button>
+                        <button class="filter-btn" data-filter="visions">Visions</button>
+                        <button class="filter-btn" data-filter="recent">Recent</button>
+                    </div>
                 </div>
                 
-                <div id="search-results" style="max-height: 400px; overflow-y: auto;">
-                    <div id="search-empty" style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                        Start typing to search...
+                <div id="search-results" class="search-results-container">
+                    <div id="search-suggestions" class="search-suggestions">
+                        <div class="suggestion-group">
+                            <div class="suggestion-header">Quick Actions</div>
+                            <div class="suggestion-item" data-command="/add">
+                                <i data-lucide="plus"></i>
+                                <span><strong>/add</strong> Create new todo</span>
+                            </div>
+                            <div class="suggestion-item" data-command="/new">
+                                <i data-lucide="target"></i>
+                                <span><strong>/new</strong> Create new goal</span>
+                            </div>
+                            <div class="suggestion-item" data-command="/timer">
+                                <i data-lucide="timer"></i>
+                                <span><strong>/timer</strong> Start pomodoro</span>
+                            </div>
+                        </div>
+                        <div class="suggestion-group">
+                            <div class="suggestion-header">Smart Filters</div>
+                            <div class="suggestion-item" data-command="@todos">
+                                <i data-lucide="check-circle"></i>
+                                <span><strong>@todos</strong> Search only todos</span>
+                            </div>
+                            <div class="suggestion-item" data-command="#today">
+                                <i data-lucide="calendar"></i>
+                                <span><strong>#today</strong> Today's items</span>
+                            </div>
+                            <div class="suggestion-item" data-command="#overdue">
+                                <i data-lucide="alert-circle"></i>
+                                <span><strong>#overdue</strong> Overdue items</span>
+                            </div>
+                        </div>
                     </div>
+                    <div id="search-results-list" class="search-results-list" style="display: none;"></div>
                 </div>
             </div>
         </div>
@@ -8078,9 +8325,11 @@
         // Make TodoManager globally available
         window.TodoManager = TodoManager;
 
-        // === GLOBAL SEARCH MANAGER ===
+        // === INTELLIGENT GLOBAL SEARCH COMMAND CENTER ===
         const GlobalSearch = {
             isOpen: false,
+            selectedIndex: -1,
+            suggestions: [],
             
             toggle() {
                 if (this.isOpen) {
@@ -8099,12 +8348,11 @@
                 input.value = '';
                 
                 this.isOpen = true;
-                this.clearResults();
+                this.selectedIndex = -1;
+                this.showSuggestions();
                 
-                // Add event listener for real-time search
-                input.oninput = (e) => this.search(e.target.value);
-                
-                // Add escape key handler
+                // Add event listeners
+                input.oninput = (e) => this.handleInput(e.target.value);
                 document.addEventListener('keydown', this.handleKeydown);
             },
             
@@ -8112,6 +8360,7 @@
                 const modal = document.getElementById('global-search-modal');
                 modal.classList.add('hide');
                 this.isOpen = false;
+                this.selectedIndex = -1;
                 
                 // Remove event listener
                 document.removeEventListener('keydown', this.handleKeydown);
@@ -8120,19 +8369,44 @@
             handleKeydown(e) {
                 if (e.key === 'Escape') {
                     GlobalSearch.hide();
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    GlobalSearch.navigateDown();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    GlobalSearch.navigateUp();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    GlobalSearch.executeSelected();
+                }
+            },
+            
+            handleInput(query) {
+                if (!query.trim()) {
+                    this.showSuggestions();
+                    return;
+                }
+                
+                // Handle commands
+                if (query.startsWith('/')) {
+                    this.handleCommand(query);
+                } else if (query.startsWith('@') || query.startsWith('#')) {
+                    this.handleSmartFilter(query);
+                } else {
+                    this.search(query);
                 }
             },
             
             async search(query) {
                 if (!query || query.length < 2) {
-                    this.clearResults();
+                    this.showSuggestions();
                     return;
                 }
                 
                 const results = [];
                 const searchTerm = query.toLowerCase();
                 
-                // Search Todos (only active, not completed/archived)
+                // Search Todos (enhanced)
                 if (window.TodoManager?.todos) {
                     window.TodoManager.todos
                         .filter(todo => 
@@ -8144,15 +8418,25 @@
                         .forEach(todo => results.push({
                             type: 'todo',
                             title: todo.title || todo.text,
-                            subtitle: `Todo • ${todo.category || 'Uncategorized'}`,
+                            subtitle: `📋 Todo • ${todo.category || 'Uncategorized'}`,
+                            icon: '✅',
                             action: () => {
                                 GlobalSearch.hide();
                                 switchTab('tab-todos');
+                                // Scroll to todo if possible
+                                setTimeout(() => {
+                                    const todoElement = document.querySelector(`[data-todo-id="${todo.id}"]`);
+                                    if (todoElement) {
+                                        todoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        todoElement.style.backgroundColor = 'rgba(255, 235, 59, 0.2)';
+                                        setTimeout(() => todoElement.style.backgroundColor = '', 2000);
+                                    }
+                                }, 100);
                             }
                         }));
                 }
                 
-                // Search Goals
+                // Search Goals (enhanced)
                 if (window.GoalManager?.goals) {
                     window.GoalManager.goals
                         .filter(goal => 
@@ -8162,10 +8446,30 @@
                         .forEach(goal => results.push({
                             type: 'goal',
                             title: goal.title,
-                            subtitle: `Goal • ${goal.category || 'Uncategorized'}`,
+                            subtitle: `🎯 Goal • ${goal.category || 'Uncategorized'}`,
+                            icon: '🎯',
                             action: () => {
                                 GlobalSearch.hide();
                                 switchTab('tab-ziele');
+                            }
+                        }));
+                }
+                
+                // Search Visions (if VisionCards exists)
+                if (window.VisionCards?.visions) {
+                    window.VisionCards.visions
+                        .filter(vision => 
+                            vision.title?.toLowerCase().includes(searchTerm) ||
+                            vision.description?.toLowerCase().includes(searchTerm)
+                        )
+                        .forEach(vision => results.push({
+                            type: 'vision',
+                            title: vision.title,
+                            subtitle: `✨ Vision • ${vision.category || 'Uncategorized'}`,
+                            icon: '✨',
+                            action: () => {
+                                GlobalSearch.hide();
+                                switchTab('tab-visions');
                             }
                         }));
                 }
@@ -8180,7 +8484,8 @@
                         .forEach(entry => results.push({
                             type: 'journal',
                             title: entry.title,
-                            subtitle: `Journal • ${entry.date || 'No date'}`,
+                            subtitle: `📝 Journal • ${entry.date || 'No date'}`,
+                            icon: '📝',
                             action: () => {
                                 GlobalSearch.hide();
                                 switchTab('tab-journal');
@@ -8198,7 +8503,8 @@
                         .forEach(termin => results.push({
                             type: 'termin',
                             title: termin.title,
-                            subtitle: `Termin • ${termin.date || 'No date'}`,
+                            subtitle: `📅 Termin • ${termin.date || 'No date'}`,
+                            icon: '📅',
                             action: () => {
                                 GlobalSearch.hide();
                                 switchTab('tab-home');
@@ -8206,7 +8512,208 @@
                         }));
                 }
                 
-                this.displayResults(results.slice(0, 20)); // Limit to 20 results
+                this.displayResults(results.slice(0, 15)); // Limit to 15 results
+            },
+            
+            handleCommand(query) {
+                const commands = [];
+                const cmd = query.toLowerCase().slice(1); // Remove '/' prefix
+                
+                if (cmd.startsWith('add') || cmd.startsWith('new')) {
+                    commands.push({
+                        title: '/add Todo - Schnell neuen Todo erstellen',
+                        subtitle: 'Command • Todo hinzufügen',
+                        icon: '➕',
+                        action: () => {
+                            GlobalSearch.hide();
+                            switchTab('tab-todos');
+                            setTimeout(() => {
+                                const addBtn = document.querySelector('[onclick="TodoManager.createTodo()"]');
+                                if (addBtn) addBtn.click();
+                            }, 100);
+                        }
+                    });
+                    
+                    commands.push({
+                        title: '/new Goal - Neues Ziel erstellen',
+                        subtitle: 'Command • Ziel hinzufügen',
+                        icon: '🎯',
+                        action: () => {
+                            GlobalSearch.hide();
+                            switchTab('tab-ziele');
+                            setTimeout(() => {
+                                const addBtn = document.querySelector('#goals-section [onclick*="createGoal"]');
+                                if (addBtn) addBtn.click();
+                            }, 100);
+                        }
+                    });
+                }
+                
+                if (cmd.startsWith('timer') || cmd.startsWith('pomodoro')) {
+                    commands.push({
+                        title: '/timer - Pomodoro Timer starten',
+                        subtitle: 'Command • Timer öffnen',
+                        icon: '⏰',
+                        action: () => {
+                            GlobalSearch.hide();
+                            if (window.PomodoroTimer) {
+                                window.PomodoroTimer.show();
+                            }
+                        }
+                    });
+                }
+                
+                if (cmd.startsWith('dark') || cmd.startsWith('theme')) {
+                    commands.push({
+                        title: '/dark - Dark Mode umschalten',
+                        subtitle: 'Command • Theme wechseln',
+                        icon: '🌙',
+                        action: () => {
+                            GlobalSearch.hide();
+                            if (window.toggleTheme) {
+                                window.toggleTheme();
+                            }
+                        }
+                    });
+                }
+                
+                this.displayResults(commands);
+            },
+            
+            handleSmartFilter(query) {
+                const results = [];
+                const filter = query.toLowerCase();
+                
+                if (filter.startsWith('@')) {
+                    // Smart filters: @todos, @goals, @today, etc.
+                    if (filter.includes('todo')) {
+                        if (window.TodoManager?.todos) {
+                            const activeTodos = window.TodoManager.todos.filter(t => !t.completed && !t.archived);
+                            results.push({
+                                title: `@todos - ${activeTodos.length} aktive Todos`,
+                                subtitle: 'Smart Filter • Alle offenen Todos anzeigen',
+                                icon: '📋',
+                                action: () => {
+                                    GlobalSearch.hide();
+                                    switchTab('tab-todos');
+                                }
+                            });
+                        }
+                    }
+                    
+                    if (filter.includes('today') || filter.includes('heute')) {
+                        const today = new Date().toISOString().split('T')[0];
+                        results.push({
+                            title: '@today - Heutige Aufgaben',
+                            subtitle: 'Smart Filter • Nur heutige Items',
+                            icon: '📅',
+                            action: () => {
+                                GlobalSearch.hide();
+                                switchTab('tab-home');
+                            }
+                        });
+                    }
+                } else if (filter.startsWith('#')) {
+                    // Context filters: #overdue, #urgent, #today
+                    if (filter.includes('overdue') || filter.includes('überfällig')) {
+                        results.push({
+                            title: '#overdue - Überfällige Aufgaben',
+                            subtitle: 'Context Filter • Überfällige Deadlines',
+                            icon: '🚨',
+                            action: () => {
+                                GlobalSearch.hide();
+                                switchTab('tab-home');
+                            }
+                        });
+                    }
+                    
+                    if (filter.includes('today') || filter.includes('heute')) {
+                        results.push({
+                            title: '#today - Heutiger Fokus',
+                            subtitle: 'Context Filter • Für heute geplant',
+                            icon: '🎯',
+                            action: () => {
+                                GlobalSearch.hide();
+                                switchTab('tab-home');
+                            }
+                        });
+                    }
+                }
+                
+                this.displayResults(results);
+            },
+            
+            showSuggestions() {
+                const suggestions = [
+                    {
+                        title: 'Typ "/add" für schnellen Todo',
+                        subtitle: 'Quick Commands • Schnelle Aktionen',
+                        icon: '💡',
+                        action: () => {
+                            document.getElementById('global-search-input').value = '/add ';
+                            document.getElementById('global-search-input').focus();
+                        }
+                    },
+                    {
+                        title: 'Typ "@todos" für alle Todos',
+                        subtitle: 'Smart Filters • Intelligente Filter',
+                        icon: '📋',
+                        action: () => {
+                            document.getElementById('global-search-input').value = '@todos';
+                            this.handleSmartFilter('@todos');
+                        }
+                    },
+                    {
+                        title: 'Typ "/timer" für Pomodoro',
+                        subtitle: 'Quick Commands • Timer starten',
+                        icon: '⏰',
+                        action: () => {
+                            document.getElementById('global-search-input').value = '/timer';
+                            this.handleCommand('/timer');
+                        }
+                    },
+                    {
+                        title: 'Einfach tippen zum Suchen',
+                        subtitle: 'Global Search • Alle Bereiche durchsuchen',
+                        icon: '🔍',
+                        action: () => {}
+                    }
+                ];
+                
+                this.displayResults(suggestions);
+            },
+            
+            navigateDown() {
+                const items = document.querySelectorAll('.search-result-item');
+                if (items.length === 0) return;
+                
+                this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
+                this.updateSelection(items);
+            },
+            
+            navigateUp() {
+                const items = document.querySelectorAll('.search-result-item');
+                if (items.length === 0) return;
+                
+                this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
+                this.updateSelection(items);
+            },
+            
+            updateSelection(items) {
+                items.forEach((item, index) => {
+                    if (index === this.selectedIndex) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+            },
+            
+            executeSelected() {
+                const items = document.querySelectorAll('.search-result-item');
+                if (items[this.selectedIndex]) {
+                    items[this.selectedIndex].click();
+                }
             },
             
             displayResults(results) {
@@ -8222,13 +8729,20 @@
                     return;
                 }
                 
+                this.selectedIndex = -1; // Reset selection
                 container.innerHTML = '';
+                
                 results.forEach((result, index) => {
                     const resultDiv = document.createElement('div');
                     resultDiv.className = 'search-result-item';
                     resultDiv.innerHTML = `
-                        <div class="search-result-title">${result.title}</div>
-                        <div class="search-result-subtitle">${result.subtitle}</div>
+                        <div class="search-result-content">
+                            <div class="search-result-icon">${result.icon || '📄'}</div>
+                            <div class="search-result-text">
+                                <div class="search-result-title">${result.title}</div>
+                                <div class="search-result-subtitle">${result.subtitle}</div>
+                            </div>
+                        </div>
                     `;
                     resultDiv.onclick = result.action;
                     container.appendChild(resultDiv);
@@ -8236,19 +8750,27 @@
             },
             
             clearResults() {
-                const container = document.getElementById('search-results');
-                
-                if (!container) {
-                    console.error('Search results container not found');
-                    return;
-                }
-                
-                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Start typing to search...</div>';
+                this.showSuggestions();
             }
         };
         
         // Make GlobalSearch globally available
         window.GlobalSearch = GlobalSearch;
+        
+        // === GLOBAL KEYBOARD SHORTCUTS ===
+        // Add global Ctrl+K shortcut for search
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+K or Cmd+K to open global search from anywhere
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Don't open if search is already open
+                if (!GlobalSearch.isOpen) {
+                    GlobalSearch.show();
+                }
+            }
+        });
 
         // === GOAL MANAGEMENT ===
         const GoalManager = {
