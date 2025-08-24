@@ -5443,6 +5443,8 @@
                 <span class="search-title">Command Center</span>
                 <div class="search-shortcuts">
                     <span class="search-shortcut">Ctrl+K</span>
+                    <span class="search-shortcut">Ctrl+Space</span>
+                    <span class="search-shortcut">F3</span>
                     <span class="search-shortcut">Esc</span>
                 </div>
             </div>
@@ -8800,19 +8802,44 @@
         window.GlobalSearch = GlobalSearch;
         
         // === GLOBAL KEYBOARD SHORTCUTS ===
-        // Add global Ctrl+K shortcut for search
+        // Add global keyboard shortcuts for search
         document.addEventListener('keydown', function(e) {
             // Ctrl+K or Cmd+K to open global search from anywhere
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
                 e.stopPropagation();
+                e.stopImmediatePropagation();
                 
-                // Don't open if search is already open
+                // Don't open if search is already open or if we're in an input field
+                if (!GlobalSearch.isOpen && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    GlobalSearch.show();
+                }
+                return false;
+            }
+            
+            // Alternative: Ctrl+Space as backup shortcut
+            if (e.ctrlKey && e.code === 'Space') {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                if (!GlobalSearch.isOpen && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    GlobalSearch.show();
+                }
+                return false;
+            }
+            
+            // Alternative: F3 as another backup
+            if (e.key === 'F3') {
+                e.preventDefault();
+                e.stopPropagation();
+                
                 if (!GlobalSearch.isOpen) {
                     GlobalSearch.show();
                 }
+                return false;
             }
-        });
+        }, true); // Use capture phase to intercept before browser
 
         // === GOAL MANAGEMENT ===
         const GoalManager = {
