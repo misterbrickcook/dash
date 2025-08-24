@@ -520,24 +520,38 @@
 
         /* Home todos - keine extra dark mode styles nötig */
 
-        /* === TRADING RULES STYLES === */
+        /* === TRADING RULES STYLES - Minimalist Dashboard Design === */
         .trading-rule {
             display: flex;
             align-items: center;
-            margin-bottom: 0.75rem;
-            padding: 0.5rem;
-            border-radius: 6px;
-            transition: background-color 0.2s ease;
+            padding: 12px 16px;
+            border: 1px solid var(--border-primary);
+            background: var(--bg-primary);
+            margin-bottom: 1rem;
+            transition: all 0.1s ease;
+            gap: 12px;
         }
         
         .trading-rule:hover {
-            background-color: var(--bg-secondary);
+            border-color: var(--accent-primary);
+        }
+        
+        .trading-rule.completed {
+            opacity: 0.6;
+            background: var(--bg-secondary);
         }
         
         .trading-rule-checkbox {
-            margin-right: 0.75rem;
-            transform: scale(1.1);
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--border-primary);
+            background: var(--bg-primary);
+            margin: 0;
             accent-color: var(--accent-primary);
+        }
+        
+        .trading-rule-content {
+            flex: 1;
         }
         
         .trading-rule label {
@@ -546,12 +560,27 @@
             font-size: var(--font-size-base);
             line-height: 1.4;
             color: var(--text-primary);
-            flex: 1;
+            font-weight: 400;
+            margin: 0;
+            display: block;
         }
         
-        .trading-rule input[type="checkbox"]:checked + label {
+        .trading-rule input[type="checkbox"]:checked + .trading-rule-content label {
             color: var(--text-secondary);
             text-decoration: line-through;
+        }
+        
+        .trading-rule-category {
+            margin-bottom: 1.5rem;
+        }
+        
+        .trading-rule-category h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-primary);
+            padding-bottom: 0.5rem;
         }
 
         /* === INTELLIGENT GLOBAL SEARCH STYLES === */
@@ -6340,87 +6369,119 @@
                     </p>
                 </div>
                 
-                <div class="setting-group">
+                <div class="trading-rule-category">
                     <h3>🛡️ Risk Management</h3>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-max-risk" class="trading-rule-checkbox">
-                        <label for="rule-max-risk">Nie mehr als 2% des Portfolios pro Trade riskieren</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-max-risk">Nie mehr als 2% des Portfolios pro Trade riskieren</label>
+                        </div>
                     </div>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-stop-loss" class="trading-rule-checkbox">
-                        <label for="rule-stop-loss">Immer Stop-Loss setzen bevor der Trade eröffnet wird</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-stop-loss">Immer Stop-Loss setzen bevor der Trade eröffnet wird</label>
+                        </div>
                     </div>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-position-size" class="trading-rule-checkbox">
-                        <label for="rule-position-size">Positionsgröße basierend auf Stop-Loss berechnen</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-position-size">Positionsgröße basierend auf Stop-Loss berechnen</label>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="setting-group">
+                <div class="trading-rule-category">
                     <h3>📈 Entry Rules</h3>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-confirmation" class="trading-rule-checkbox">
-                        <label for="rule-confirmation">Warten auf Bestätigung des Setups</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-confirmation">Warten auf Bestätigung des Setups</label>
+                        </div>
                     </div>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-trend" class="trading-rule-checkbox">
-                        <label for="rule-trend">Nur in Richtung des übergeordneten Trends traden</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-trend">Nur in Richtung des übergeordneten Trends traden</label>
+                        </div>
                     </div>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-volume" class="trading-rule-checkbox">
-                        <label for="rule-volume">Volumen-Bestätigung abwarten</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-volume">Volumen-Bestätigung abwarten</label>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="setting-group">
+                <div class="trading-rule-category">
                     <h3>📉 Exit Rules</h3>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-profit-target" class="trading-rule-checkbox">
-                        <label for="rule-profit-target">Gewinnziel vor Trade-Entry festlegen</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-profit-target">Gewinnziel vor Trade-Entry festlegen</label>
+                        </div>
                     </div>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-trailing-stop" class="trading-rule-checkbox">
-                        <label for="rule-trailing-stop">Trailing Stop verwenden bei gewinnbringenden Trades</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-trailing-stop">Trailing Stop verwenden bei gewinnbringenden Trades</label>
+                        </div>
                     </div>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-emotional-exit" class="trading-rule-checkbox">
-                        <label for="rule-emotional-exit">Nie aus Emotion heraus Positionen schließen</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-emotional-exit">Nie aus Emotion heraus Positionen schließen</label>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="setting-group">
+                <div class="trading-rule-category">
                     <h3>🧠 Psychology & Discipline</h3>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-plan" class="trading-rule-checkbox">
-                        <label for="rule-plan">Trading-Plan vor Markteröffnung erstellen</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-plan">Trading-Plan vor Markteröffnung erstellen</label>
+                        </div>
                     </div>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-fomo" class="trading-rule-checkbox">
-                        <label for="rule-fomo">Nicht FOMO-basiert handeln</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-fomo">Nicht FOMO-basiert handeln</label>
+                        </div>
                     </div>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-revenge" class="trading-rule-checkbox">
-                        <label for="rule-revenge">Keine Revenge-Trades nach Verlusten</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-revenge">Keine Revenge-Trades nach Verlusten</label>
+                        </div>
                     </div>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-journal" class="trading-rule-checkbox">
-                        <label for="rule-journal">Jeden Trade im Journal dokumentieren</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-journal">Jeden Trade im Journal dokumentieren</label>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="setting-group">
+                <div class="trading-rule-category">
                     <h3>⏰ Time Management</h3>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-market-hours" class="trading-rule-checkbox">
-                        <label for="rule-market-hours">Nur während optimaler Handelszeiten traden</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-market-hours">Nur während optimaler Handelszeiten traden</label>
+                        </div>
                     </div>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-break" class="trading-rule-checkbox">
-                        <label for="rule-break">Pausen einhalten nach 3 aufeinanderfolgenden Trades</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-break">Pausen einhalten nach 3 aufeinanderfolgenden Trades</label>
+                        </div>
                     </div>
                     <div class="trading-rule">
                         <input type="checkbox" id="rule-daily-limit" class="trading-rule-checkbox">
-                        <label for="rule-daily-limit">Tägliches Verlustlimit respektieren</label>
+                        <div class="trading-rule-content">
+                            <label for="rule-daily-limit">Tägliches Verlustlimit respektieren</label>
+                        </div>
                     </div>
                 </div>
                 
