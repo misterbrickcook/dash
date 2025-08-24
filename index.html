@@ -8476,15 +8476,21 @@
                 
                 // Search Journal entries
                 if (window.JournalManager?.entries) {
+                    console.log('🔍 GlobalSearch: Searching', window.JournalManager.entries.length, 'journal entries for:', searchTerm);
                     window.JournalManager.entries
-                        .filter(entry => 
-                            entry.title?.toLowerCase().includes(searchTerm) ||
-                            entry.content?.toLowerCase().includes(searchTerm)
-                        )
+                        .filter(entry => {
+                            const titleMatch = entry.title?.toLowerCase().includes(searchTerm);
+                            const contentMatch = entry.content?.toLowerCase().includes(searchTerm);
+                            const match = titleMatch || contentMatch;
+                            if (match) {
+                                console.log('✅ Found journal match:', entry.title, '| Content preview:', entry.content?.substring(0, 50));
+                            }
+                            return match;
+                        })
                         .forEach(entry => results.push({
                             type: 'journal',
-                            title: entry.title,
-                            subtitle: `📝 Journal • ${entry.date || 'No date'}`,
+                            title: entry.title || 'Untitled Entry',
+                            subtitle: `📝 Journal • ${entry.date || entry.created_at?.split('T')[0] || 'No date'}`,
                             icon: '📝',
                             action: () => {
                                 GlobalSearch.hide();
