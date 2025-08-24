@@ -12490,12 +12490,14 @@
                 const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
                 const darkModeButton = document.getElementById('dynamic-darkmode');
                 
-                if (isDarkMode) {
-                    console.log('🌙 Showing dynamic dark mode button');
-                    darkModeButton.style.display = 'block';
-                } else {
-                    console.log('☀️ Hiding dynamic dark mode button');
-                    darkModeButton.style.display = 'none';
+                if (darkModeButton) {
+                    if (isDarkMode) {
+                        console.log('🌙 Showing dynamic dark mode button');
+                        darkModeButton.style.display = 'block';
+                    } else {
+                        console.log('☀️ Hiding dynamic dark mode button');
+                        darkModeButton.style.display = 'none';
+                    }
                 }
                 
                 // Handle Pomodoro dynamic button
@@ -12503,27 +12505,29 @@
                 const pomodoroButton = document.getElementById('dynamic-pomodoro');
                 const pomodoroBtn = document.getElementById('dynamic-pomodoro-btn');
                 
-                if (isPomodoroActive) {
-                    console.log('🍅 Showing dynamic pomodoro button');
-                    pomodoroButton.style.display = 'block';
-                    
-                    // Update pomodoro button state
-                    if (window.PomodoroTimer && pomodoroBtn) {
-                        const isRunning = window.PomodoroTimer.isRunning;
+                if (pomodoroButton) {
+                    if (isPomodoroActive) {
+                        console.log('🍅 Showing dynamic pomodoro button');
+                        pomodoroButton.style.display = 'block';
                         
-                        // Always recreate the icon to ensure it exists and is correct
-                        const iconType = isRunning ? 'pause-circle' : 'play-circle';
-                        const tooltipText = isRunning ? 'Pause Timer' : 'Resume Timer';
-                        
-                        pomodoroBtn.innerHTML = `<i data-lucide="${iconType}"></i>`;
-                        pomodoroBtn.setAttribute('data-tooltip', tooltipText);
-                        pomodoroBtn.classList.add('pomodoro-active');
-                        
-                        console.log(`🍅 Updated dynamic Pomodoro button: ${iconType}`);
+                        // Update pomodoro button state
+                        if (window.PomodoroTimer && pomodoroBtn) {
+                            const isRunning = window.PomodoroTimer.isRunning;
+                            
+                            // Always recreate the icon to ensure it exists and is correct
+                            const iconType = isRunning ? 'pause-circle' : 'play-circle';
+                            const tooltipText = isRunning ? 'Pause Timer' : 'Resume Timer';
+                            
+                            pomodoroBtn.innerHTML = `<i data-lucide="${iconType}"></i>`;
+                            pomodoroBtn.setAttribute('data-tooltip', tooltipText);
+                            pomodoroBtn.classList.add('pomodoro-active');
+                            
+                            console.log(`🍅 Updated dynamic Pomodoro button: ${iconType}`);
+                        }
+                    } else {
+                        console.log('⏹️ Hiding dynamic pomodoro button');
+                        pomodoroButton.style.display = 'none';
                     }
-                } else {
-                    console.log('⏹️ Hiding dynamic pomodoro button');
-                    pomodoroButton.style.display = 'none';
                 }
                 
                 // Re-initialize Lucide icons for dynamic buttons
