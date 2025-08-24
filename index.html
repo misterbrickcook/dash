@@ -8584,6 +8584,10 @@
                             GlobalSearch.hide();
                             if (window.PomodoroTimer) {
                                 window.PomodoroTimer.toggle();
+                                // Update dynamic buttons to show/hide the red timer button
+                                if (window.QuickBar) {
+                                    window.QuickBar.updateDynamicButtons();
+                                }
                             }
                         }
                     });
