@@ -8608,6 +8608,17 @@
                     });
                 }
                 
+                if (cmd.startsWith('help') || cmd.startsWith('commands') || cmd === 'help' || cmd === 'commands' || cmd === '?') {
+                    commands.push({
+                        title: '/help - Alle verfügbaren Kommandos anzeigen',
+                        subtitle: 'Command • Hilfe & Übersicht',
+                        icon: '❓',
+                        action: () => {
+                            GlobalSearch.showHelp();
+                        }
+                    });
+                }
+                
                 this.displayResults(commands);
             },
             
@@ -8704,6 +8715,15 @@
                         }
                     },
                     {
+                        title: 'Typ "/help" für alle Kommandos',
+                        subtitle: 'Help • Vollständige Übersicht',
+                        icon: '❓',
+                        action: () => {
+                            document.getElementById('global-search-input').value = '/help';
+                            this.handleCommand('/help');
+                        }
+                    },
+                    {
                         title: 'Einfach tippen zum Suchen',
                         subtitle: 'Global Search • Alle Bereiche durchsuchen',
                         icon: '🔍',
@@ -8786,6 +8806,172 @@
                     resultDiv.onclick = result.action;
                     container.appendChild(resultDiv);
                 });
+            },
+            
+            showHelp() {
+                const helpItems = [
+                    {
+                        title: '🚀 Quick Commands',
+                        subtitle: 'Schnelle Aktionen für produktives Arbeiten',
+                        icon: '⚡',
+                        action: () => {}
+                    },
+                    {
+                        title: '/add - Neuen Todo erstellen',
+                        subtitle: 'Öffnet Todo-Dialog für schnelle Aufgabe',
+                        icon: '➕',
+                        action: () => {
+                            GlobalSearch.hide();
+                            switchTab('tab-todos');
+                            setTimeout(() => {
+                                const addBtn = document.querySelector('[onclick="TodoManager.createTodo()"]');
+                                if (addBtn) addBtn.click();
+                            }, 100);
+                        }
+                    },
+                    {
+                        title: '/new - Neues Ziel erstellen',
+                        subtitle: 'Öffnet Goal-Dialog für neues Ziel',
+                        icon: '🎯',
+                        action: () => {
+                            GlobalSearch.hide();
+                            switchTab('tab-ziele');
+                            setTimeout(() => {
+                                const addBtn = document.querySelector('#goals-section [onclick*="createGoal"]');
+                                if (addBtn) addBtn.click();
+                            }, 100);
+                        }
+                    },
+                    {
+                        title: '/timer - Pomodoro Timer starten',
+                        subtitle: 'Startet/stoppt den Fokus-Timer',
+                        icon: '⏰',
+                        action: () => {
+                            GlobalSearch.hide();
+                            if (window.PomodoroTimer) {
+                                window.PomodoroTimer.toggle();
+                                if (window.QuickBar) {
+                                    window.QuickBar.updateDynamicButtons();
+                                }
+                            }
+                        }
+                    },
+                    {
+                        title: '/dark - Theme umschalten',
+                        subtitle: 'Wechselt zwischen Hell- und Dunkelmodus',
+                        icon: '🌙',
+                        action: () => {
+                            GlobalSearch.hide();
+                            if (window.toggleTheme) {
+                                window.toggleTheme();
+                            }
+                        }
+                    },
+                    {
+                        title: '',
+                        subtitle: '',
+                        icon: '',
+                        action: () => {}
+                    },
+                    {
+                        title: '🔍 Smart Filters',
+                        subtitle: 'Intelligente Filter für schnelle Navigation',
+                        icon: '🎯',
+                        action: () => {}
+                    },
+                    {
+                        title: '@todos - Alle aktiven Todos',
+                        subtitle: 'Zeigt Übersicht aller offenen Aufgaben',
+                        icon: '📋',
+                        action: () => {
+                            GlobalSearch.hide();
+                            switchTab('tab-todos');
+                        }
+                    },
+                    {
+                        title: '@today - Heutige Aufgaben',
+                        subtitle: 'Filtert nach heutigen Terminen und Tasks',
+                        icon: '📅',
+                        action: () => {
+                            GlobalSearch.hide();
+                            switchTab('tab-home');
+                        }
+                    },
+                    {
+                        title: '#overdue - Überfällige Items',
+                        subtitle: 'Zeigt alle überfälligen Deadlines',
+                        icon: '🚨',
+                        action: () => {
+                            GlobalSearch.hide();
+                            switchTab('tab-home');
+                        }
+                    },
+                    {
+                        title: '#today - Heutiger Fokus',
+                        subtitle: 'Kontext-Filter für heutige Prioritäten',
+                        icon: '⭐',
+                        action: () => {
+                            GlobalSearch.hide();
+                            switchTab('tab-home');
+                        }
+                    },
+                    {
+                        title: '',
+                        subtitle: '',
+                        icon: '',
+                        action: () => {}
+                    },
+                    {
+                        title: '⌨️ Keyboard Shortcuts',
+                        subtitle: 'Tastenkombinationen für schnellen Zugriff',
+                        icon: '⚡',
+                        action: () => {}
+                    },
+                    {
+                        title: 'Ctrl+K / Ctrl+Space / F3 - Search öffnen',
+                        subtitle: 'Öffnet Command Center von überall',
+                        icon: '🔍',
+                        action: () => {}
+                    },
+                    {
+                        title: 'Pfeiltasten + Enter - Navigation',
+                        subtitle: 'Navigiere durch Ergebnisse und bestätige',
+                        icon: '⬆️',
+                        action: () => {}
+                    },
+                    {
+                        title: 'Escape - Schließen',
+                        subtitle: 'Schließt das Command Center',
+                        icon: '❌',
+                        action: () => {}
+                    },
+                    {
+                        title: '',
+                        subtitle: '',
+                        icon: '',
+                        action: () => {}
+                    },
+                    {
+                        title: '🔎 Global Search',
+                        subtitle: 'Durchsuche alle Bereiche gleichzeitig',
+                        icon: '🌐',
+                        action: () => {}
+                    },
+                    {
+                        title: 'Einfach tippen - Universelle Suche',
+                        subtitle: 'Durchsucht Todos, Goals, Visions, Journal, Termine',
+                        icon: '🔍',
+                        action: () => {}
+                    },
+                    {
+                        title: 'Journal-Suche - Alle Felder',
+                        subtitle: 'Sucht in Title, Content, Tags, Wiki, Weather, Mood',
+                        icon: '📝',
+                        action: () => {}
+                    }
+                ];
+                
+                this.displayResults(helpItems);
             },
             
             clearResults() {
