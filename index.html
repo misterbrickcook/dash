@@ -6685,6 +6685,22 @@
                 }
             }
             
+            // If switching to vision tab, load visions
+            if (tabId === 'tab-vision') {
+                if (window.VisionManager && typeof window.VisionManager.loadVisions === 'function') {
+                    // Always reload visions when switching to ensure they're up to date
+                    VisionManager.loadVisions();
+                    
+                    // Additional check: if container exists but appears empty, force reload
+                    setTimeout(() => {
+                        const container = document.getElementById('vision-entries');
+                        if (container && container.children.length === 0) {
+                            VisionManager.loadVisions();
+                        }
+                    }, 100);
+                }
+            }
+            
             // DISABLED: Trading tab functionality
             // if (tabId === 'tab-trading') {
             //     if (window.TradingManager) {
