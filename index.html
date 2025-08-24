@@ -11352,12 +11352,9 @@
                         const ruleEl = document.createElement('div');
                         ruleEl.className = 'resource-item';
                         ruleEl.innerHTML = `
-                            <input type="checkbox" id="rule-${rule.id}" class="trading-rule-checkbox" ${rule.completed ? 'checked' : ''}>
                             <div class="resource-info">
                                 <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-${rule.id}">${rule.title}</label>
-                                    </div>
+                                    <div class="resource-title">${rule.title}</div>
                                     ${rule.description ? `<div class="resource-description">${rule.description}</div>` : ''}
                                 </div>
                                 <div class="resource-actions">
@@ -11368,38 +11365,11 @@
                             </div>
                         `;
                         container.appendChild(ruleEl);
-                        
-                        // Add event listener for checkbox
-                        const checkbox = ruleEl.querySelector(`#rule-${rule.id}`);
-                        checkbox.addEventListener('change', () => {
-                            this.updateRuleStatus(rule.id, checkbox.checked);
-                        });
                     });
                     
                     // Re-render Lucide icons
                     if (typeof lucide !== 'undefined' && lucide.createIcons) {
                         lucide.createIcons();
-                    }
-                },
-                
-                async updateRuleStatus(ruleId, completed) {
-                    try {
-                        await cloudStorage.updateTradingRuleStatus(ruleId, completed);
-                        
-                        // Update local state
-                        const rule = this.rules.find(r => r.id === ruleId);
-                        if (rule) {
-                            rule.completed = completed;
-                        }
-                        
-                        console.log('✅ Trading rule status updated successfully');
-                    } catch (error) {
-                        console.error('❌ Error updating trading rule status:', error);
-                        // Revert checkbox state on error
-                        const checkbox = document.getElementById(`rule-${ruleId}`);
-                        if (checkbox) {
-                            checkbox.checked = !completed;
-                        }
                     }
                 },
                 
@@ -11429,7 +11399,6 @@
                     try {
                         // Add creation timestamp
                         ruleData.created_at = new Date().toISOString();
-                        ruleData.completed = false;
                         
                         await cloudStorage.saveTradingRule(ruleData);
                         

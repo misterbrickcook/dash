@@ -600,20 +600,6 @@ class CloudStorage {
         }
     }
     
-    async updateTradingRuleStatus(ruleId, completed) {
-        if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.error('CloudStorage: Not authenticated - cannot update trading rule status');
-            throw new Error('Not authenticated - pure cloud mode requires authentication');
-        }
-        
-        try {
-            await supabase.update('trading_rules', { completed, updated_at: new Date().toISOString() }, ruleId);
-        } catch (error) {
-            console.error('CloudStorage: Error updating trading rule status:', error);
-            throw error;
-        }
-    }
-    
     getLocalRoutineData() {
         return {
             routineCompletionData: localStorage.getItem('routineCompletionData'),
