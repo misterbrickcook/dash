@@ -520,6 +520,40 @@
 
         /* Home todos - keine extra dark mode styles nötig */
 
+        /* === TRADING RULES STYLES === */
+        .trading-rule {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .trading-rule:hover {
+            background-color: var(--bg-secondary);
+        }
+        
+        .trading-rule-checkbox {
+            margin-right: 0.75rem;
+            transform: scale(1.1);
+            accent-color: var(--accent-primary);
+        }
+        
+        .trading-rule label {
+            cursor: pointer;
+            user-select: none;
+            font-size: var(--font-size-base);
+            line-height: 1.4;
+            color: var(--text-primary);
+            flex: 1;
+        }
+        
+        .trading-rule input[type="checkbox"]:checked + label {
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
         /* === INTELLIGENT GLOBAL SEARCH STYLES === */
         .search-shortcuts {
             display: flex;
@@ -6296,6 +6330,107 @@
             </div>
         </section>
 
+        <!-- === TRADING RULES TAB === -->
+        <section id="tab-trading-rules" class="tab-section">
+            <div class="settings-container">
+                <div class="setting-group">
+                    <h3>📊 Trading Rules</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                        Deine persönlichen Trading-Regeln für diszipliniertes und profitables Trading.
+                    </p>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>🛡️ Risk Management</h3>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-max-risk" class="trading-rule-checkbox">
+                        <label for="rule-max-risk">Nie mehr als 2% des Portfolios pro Trade riskieren</label>
+                    </div>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-stop-loss" class="trading-rule-checkbox">
+                        <label for="rule-stop-loss">Immer Stop-Loss setzen bevor der Trade eröffnet wird</label>
+                    </div>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-position-size" class="trading-rule-checkbox">
+                        <label for="rule-position-size">Positionsgröße basierend auf Stop-Loss berechnen</label>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>📈 Entry Rules</h3>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-confirmation" class="trading-rule-checkbox">
+                        <label for="rule-confirmation">Warten auf Bestätigung des Setups</label>
+                    </div>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-trend" class="trading-rule-checkbox">
+                        <label for="rule-trend">Nur in Richtung des übergeordneten Trends traden</label>
+                    </div>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-volume" class="trading-rule-checkbox">
+                        <label for="rule-volume">Volumen-Bestätigung abwarten</label>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>📉 Exit Rules</h3>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-profit-target" class="trading-rule-checkbox">
+                        <label for="rule-profit-target">Gewinnziel vor Trade-Entry festlegen</label>
+                    </div>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-trailing-stop" class="trading-rule-checkbox">
+                        <label for="rule-trailing-stop">Trailing Stop verwenden bei gewinnbringenden Trades</label>
+                    </div>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-emotional-exit" class="trading-rule-checkbox">
+                        <label for="rule-emotional-exit">Nie aus Emotion heraus Positionen schließen</label>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>🧠 Psychology & Discipline</h3>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-plan" class="trading-rule-checkbox">
+                        <label for="rule-plan">Trading-Plan vor Markteröffnung erstellen</label>
+                    </div>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-fomo" class="trading-rule-checkbox">
+                        <label for="rule-fomo">Nicht FOMO-basiert handeln</label>
+                    </div>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-revenge" class="trading-rule-checkbox">
+                        <label for="rule-revenge">Keine Revenge-Trades nach Verlusten</label>
+                    </div>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-journal" class="trading-rule-checkbox">
+                        <label for="rule-journal">Jeden Trade im Journal dokumentieren</label>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>⏰ Time Management</h3>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-market-hours" class="trading-rule-checkbox">
+                        <label for="rule-market-hours">Nur während optimaler Handelszeiten traden</label>
+                    </div>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-break" class="trading-rule-checkbox">
+                        <label for="rule-break">Pausen einhalten nach 3 aufeinanderfolgenden Trades</label>
+                    </div>
+                    <div class="trading-rule">
+                        <input type="checkbox" id="rule-daily-limit" class="trading-rule-checkbox">
+                        <label for="rule-daily-limit">Tägliches Verlustlimit respektieren</label>
+                    </div>
+                </div>
+                
+                <div class="setting-group" style="margin-top: 2rem;">
+                    <button id="reset-trading-rules" class="btn secondary">Alle Rules zurücksetzen</button>
+                    <button id="save-trading-rules" class="btn">Rules speichern</button>
+                </div>
+            </div>
+        </section>
+
         <!-- Vision Context Menu -->
         <div id="vision-context-menu" class="vision-context-menu">
             <div class="vision-context-menu-item delete" onclick="VisionManager.deleteVisionFromMenu()">
@@ -8615,6 +8750,18 @@
                         icon: '❓',
                         action: () => {
                             GlobalSearch.showHelp();
+                        }
+                    });
+                }
+                
+                if (cmd.startsWith('rules') || cmd.startsWith('trading') || cmd === 'rules' || cmd === 'trading') {
+                    commands.push({
+                        title: '/rules - Trading Rules öffnen',
+                        subtitle: 'Command • Trading Regeln & Disziplin',
+                        icon: '📊',
+                        action: () => {
+                            GlobalSearch.hide();
+                            switchTab('tab-trading-rules');
                         }
                     });
                 }
@@ -15362,6 +15509,147 @@
                     }
                 });
             }
+        });
+
+        // === TRADING RULES SYSTEM ===
+        class TradingRules {
+            constructor() {
+                this.rules = [];
+                this.init();
+            }
+            
+            init() {
+                this.loadRules();
+                this.setupEventListeners();
+            }
+            
+            async loadRules() {
+                try {
+                    if (window.supabase && window.supabase.isAuthenticated()) {
+                        const user = window.supabase.getCurrentUser();
+                        const data = await window.supabase.query(`trading_rules?user_id=eq.${user.id}&select=*`);
+                        
+                        if (data && data.length > 0) {
+                            const savedRules = JSON.parse(data[0].rules_data);
+                            this.rules = savedRules;
+                            this.updateUI();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading trading rules:', error);
+                }
+            }
+            
+            async saveRules() {
+                try {
+                    if (!window.supabase || !window.supabase.isAuthenticated()) {
+                        alert('Zum Speichern musst du eingeloggt sein.');
+                        return;
+                    }
+                    
+                    const user = window.supabase.getCurrentUser();
+                    const rulesData = {
+                        user_id: user.id,
+                        rules_data: JSON.stringify(this.rules),
+                        updated_at: new Date().toISOString()
+                    };
+                    
+                    const existing = await window.supabase.query(`trading_rules?user_id=eq.${user.id}&select=*`);
+                    
+                    if (existing && existing.length > 0) {
+                        await window.supabase.update('trading_rules', rulesData, existing[0].id);
+                    } else {
+                        await window.supabase.insert('trading_rules', [rulesData]);
+                    }
+                    
+                    alert('Trading Rules erfolgreich gespeichert!');
+                } catch (error) {
+                    console.error('Error saving trading rules:', error);
+                    alert('Fehler beim Speichern der Trading Rules.');
+                }
+            }
+            
+            updateUI() {
+                // Update all checkboxes based on saved rules
+                const checkboxes = document.querySelectorAll('.trading-rule-checkbox');
+                checkboxes.forEach(checkbox => {
+                    const ruleId = checkbox.id;
+                    const isChecked = this.rules.includes(ruleId);
+                    checkbox.checked = isChecked;
+                });
+            }
+            
+            setupEventListeners() {
+                // Save button
+                const saveBtn = document.getElementById('save-trading-rules');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', () => {
+                        this.collectRules();
+                        this.saveRules();
+                    });
+                }
+                
+                // Reset button
+                const resetBtn = document.getElementById('reset-trading-rules');
+                if (resetBtn) {
+                    resetBtn.addEventListener('click', () => {
+                        if (confirm('Alle Trading Rules zurücksetzen? Dies kann nicht rückgängig gemacht werden.')) {
+                            this.resetAllRules();
+                        }
+                    });
+                }
+                
+                // Checkbox change listeners
+                const checkboxes = document.querySelectorAll('.trading-rule-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        this.collectRules();
+                    });
+                });
+            }
+            
+            collectRules() {
+                const checkboxes = document.querySelectorAll('.trading-rule-checkbox');
+                this.rules = [];
+                
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        this.rules.push(checkbox.id);
+                    }
+                });
+            }
+            
+            resetAllRules() {
+                this.rules = [];
+                this.updateUI();
+                this.saveRules();
+            }
+            
+            getCompletedRulesCount() {
+                return this.rules.length;
+            }
+            
+            getTotalRulesCount() {
+                return document.querySelectorAll('.trading-rule-checkbox').length;
+            }
+            
+            getCompletionPercentage() {
+                const total = this.getTotalRulesCount();
+                const completed = this.getCompletedRulesCount();
+                return total > 0 ? Math.round((completed / total) * 100) : 0;
+            }
+        }
+        
+        // Initialize Trading Rules System
+        let tradingRules = null;
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                if (document.getElementById('tab-trading-rules')) {
+                    tradingRules = new TradingRules();
+                    window.TradingRules = tradingRules;
+                }
+            }, 1000);
         });
 
         // === MOTIVATIONAL QUOTES SYSTEM ===
