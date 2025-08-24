@@ -6361,225 +6361,64 @@
 
         <!-- === TRADING RULES TAB === -->
         <section id="tab-trading-rules" class="tab-section">
+            <div class="page-header">
+                <button id="add-trading-rule-btn" class="add-btn">
+                    <i data-lucide="plus"></i>
+                </button>
+            </div>
+
             <div class="resources-grid">
                 
                 <!-- Risk Management Block -->
-                <div class="resource-block">
+                <div class="resource-block" data-category="Risk Management">
                     <div class="resource-block-header">
                         <h3><i data-lucide="shield" style="width: 16px; height: 16px;"></i> Risk Management</h3>
                     </div>
                     <div class="resource-links">
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-max-risk" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-max-risk">Nie mehr als 2% des Portfolios pro Trade riskieren</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-stop-loss" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-stop-loss">Immer Stop-Loss setzen bevor der Trade eröffnet wird</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-position-size" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-position-size">Positionsgröße basierend auf Stop-Loss berechnen</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Trading rules will be loaded here -->
                     </div>
                 </div>
                 
                 <!-- Entry Rules Block -->
-                <div class="resource-block">
+                <div class="resource-block" data-category="Entry Rules">
                     <div class="resource-block-header">
                         <h3><i data-lucide="trending-up" style="width: 16px; height: 16px;"></i> Entry Rules</h3>
                     </div>
                     <div class="resource-links">
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-confirmation" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-confirmation">Warten auf Bestätigung des Setups</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-trend" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-trend">Nur in Richtung des übergeordneten Trends traden</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-volume" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-volume">Volumen-Bestätigung abwarten</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Trading rules will be loaded here -->
                     </div>
                 </div>
                 
                 <!-- Exit Rules Block -->
-                <div class="resource-block">
+                <div class="resource-block" data-category="Exit Rules">
                     <div class="resource-block-header">
                         <h3><i data-lucide="trending-down" style="width: 16px; height: 16px;"></i> Exit Rules</h3>
                     </div>
                     <div class="resource-links">
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-profit-target" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-profit-target">Gewinnziel vor Trade-Entry festlegen</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-trailing-stop" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-trailing-stop">Trailing Stop verwenden bei gewinnbringenden Trades</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-emotional-exit" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-emotional-exit">Nie aus Emotion heraus Positionen schließen</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Trading rules will be loaded here -->
                     </div>
                 </div>
                 
                 <!-- Psychology & Discipline Block -->
-                <div class="resource-block">
+                <div class="resource-block" data-category="Psychology & Discipline">
                     <div class="resource-block-header">
                         <h3><i data-lucide="brain" style="width: 16px; height: 16px;"></i> Psychology & Discipline</h3>
                     </div>
                     <div class="resource-links">
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-plan" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-plan">Trading-Plan vor Markteröffnung erstellen</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-fomo" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-fomo">Nicht FOMO-basiert handeln</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-revenge" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-revenge">Keine Revenge-Trades nach Verlusten</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-journal" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-journal">Jeden Trade im Journal dokumentieren</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Trading rules will be loaded here -->
                     </div>
                 </div>
                 
                 <!-- Time Management Block -->
-                <div class="resource-block">
+                <div class="resource-block" data-category="Time Management">
                     <div class="resource-block-header">
                         <h3><i data-lucide="clock" style="width: 16px; height: 16px;"></i> Time Management</h3>
                     </div>
                     <div class="resource-links">
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-market-hours" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-market-hours">Nur während optimaler Handelszeiten traden</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-break" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-break">Pausen einhalten nach 3 aufeinanderfolgenden Trades</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="resource-item">
-                            <input type="checkbox" id="rule-daily-limit" class="trading-rule-checkbox">
-                            <div class="resource-info">
-                                <div class="resource-details">
-                                    <div class="resource-title">
-                                        <label for="rule-daily-limit">Tägliches Verlustlimit respektieren</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Trading rules will be loaded here -->
                     </div>
                 </div>
                 
-                <!-- Trading Rules Actions Block -->
-                <div class="resource-block" style="margin-top: 2rem;">
-                    <div class="resource-block-header">
-                        <h3><i data-lucide="settings" style="width: 16px; height: 16px;"></i> Actions</h3>
-                    </div>
-                    <div class="resource-links">
-                        <div class="resource-item">
-                            <button id="reset-trading-rules" class="btn secondary" style="margin-right: 1rem;">Alle Rules zurücksetzen</button>
-                            <button id="save-trading-rules" class="btn">Rules speichern</button>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -6684,6 +6523,45 @@
                     <div class="form-actions">
                         <button type="button" class="btn secondary" onclick="ResourceManager.hideAddResourceModal()">Abbrechen</button>
                         <button type="submit" class="btn">Erstellen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Trading Rule Modal -->
+    <div id="add-trading-rule-modal" class="modal hide">
+        <div class="modal-content">
+            <button class="close" onclick="TradingRulesManager.hideAddRuleModal()">×</button>
+            <h2>Trading Rule</h2>
+            
+            <div class="modal-body">
+                <form id="add-trading-rule-form">
+                    <div class="form-group">
+                        <label for="trading-rule-title">Rule *</label>
+                        <input type="text" id="trading-rule-title" required autocomplete="off" placeholder="z.B. Immer Stop-Loss setzen">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="trading-rule-category">Category *</label>
+                        <select id="trading-rule-category" required autocomplete="off">
+                            <option value="">Choose category...</option>
+                            <option value="Risk Management">Risk Management</option>
+                            <option value="Entry Rules">Entry Rules</option>
+                            <option value="Exit Rules">Exit Rules</option>
+                            <option value="Psychology & Discipline">Psychology & Discipline</option>
+                            <option value="Time Management">Time Management</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="trading-rule-description">Description (optional)</label>
+                        <textarea id="trading-rule-description" autocomplete="off" placeholder="Weitere Details zur Regel..." rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn secondary" onclick="TradingRulesManager.hideAddRuleModal()">Abbrechen</button>
+                        <button type="submit" class="btn">Regel erstellen</button>
                     </div>
                 </form>
             </div>
@@ -7070,7 +6948,9 @@
                         // Load Wiki data if available
                         window.Wiki ? window.Wiki.loadEntries() : Promise.resolve(),
                         // Load ResourceManager data if it exists (after login)
-                        window.ResourceManager ? window.ResourceManager.loadResources() : Promise.resolve()
+                        window.ResourceManager ? window.ResourceManager.loadResources() : Promise.resolve(),
+                        // Load TradingRulesManager data if it exists (after login)
+                        window.TradingRulesManager ? window.TradingRulesManager.loadTradingRules() : Promise.resolve()
                     ]);
                     
                     // Initialize crypto widget after authentication
@@ -11409,6 +11289,191 @@
             console.log('🔄 Initializing ResourceManager after definition...');
             ResourceManager.loadResources();
 
+            // === TRADING RULES MANAGER ===
+            const TradingRulesManager = {
+                rules: [],
+                
+                async loadTradingRules() {
+                    if (!supabase?.isAuthenticated()) {
+                        console.error('❌ TradingRulesManager: Not authenticated - pure cloud mode requires authentication');
+                        this.rules = [];
+                        this.renderTradingRules();
+                        return;
+                    }
+                    
+                    try {
+                        console.log('☁️ TradingRulesManager: Loading trading rules from cloud...');
+                        this.rules = await cloudStorage.getTradingRules() || [];
+                        this.renderTradingRules();
+                        console.log('☁️ TradingRulesManager: Load completed');
+                    } catch (error) {
+                        console.error('❌ TradingRulesManager: Error loading from cloud:', error);
+                        throw error;
+                    }
+                },
+                
+                renderTradingRules() {
+                    console.log('🎨 TradingRulesManager.renderTradingRules() called with', this.rules.length, 'rules');
+                    
+                    // Render all categories
+                    this.displayRulesForCategory('Risk Management');
+                    this.displayRulesForCategory('Entry Rules');
+                    this.displayRulesForCategory('Exit Rules');
+                    this.displayRulesForCategory('Psychology & Discipline');
+                    this.displayRulesForCategory('Time Management');
+                },
+                
+                displayRulesForCategory(category) {
+                    // Find the resource-block for this category
+                    const blocks = document.querySelectorAll('.resource-block[data-category]');
+                    let container = null;
+                    
+                    blocks.forEach(block => {
+                        if (block.getAttribute('data-category') === category) {
+                            container = block.querySelector('.resource-links');
+                        }
+                    });
+                    
+                    if (!container) return;
+                    
+                    // Filter rules for this category
+                    const filteredRules = this.rules.filter(rule => rule.category === category);
+                    
+                    // Clear container
+                    container.innerHTML = '';
+                    
+                    if (filteredRules.length === 0) {
+                        container.innerHTML = '<div class="no-items">No rules yet. Click + to add one.</div>';
+                        return;
+                    }
+                    
+                    // Render each rule
+                    filteredRules.forEach(rule => {
+                        const ruleEl = document.createElement('div');
+                        ruleEl.className = 'resource-item';
+                        ruleEl.innerHTML = `
+                            <input type="checkbox" id="rule-${rule.id}" class="trading-rule-checkbox" ${rule.completed ? 'checked' : ''}>
+                            <div class="resource-info">
+                                <div class="resource-details">
+                                    <div class="resource-title">
+                                        <label for="rule-${rule.id}">${rule.title}</label>
+                                    </div>
+                                    ${rule.description ? `<div class="resource-description">${rule.description}</div>` : ''}
+                                </div>
+                                <div class="resource-actions">
+                                    <button class="btn-icon" onclick="TradingRulesManager.deleteRule(${rule.id})" title="Delete rule">
+                                        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(ruleEl);
+                        
+                        // Add event listener for checkbox
+                        const checkbox = ruleEl.querySelector(`#rule-${rule.id}`);
+                        checkbox.addEventListener('change', () => {
+                            this.updateRuleStatus(rule.id, checkbox.checked);
+                        });
+                    });
+                    
+                    // Re-render Lucide icons
+                    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                        lucide.createIcons();
+                    }
+                },
+                
+                async updateRuleStatus(ruleId, completed) {
+                    try {
+                        await cloudStorage.updateTradingRuleStatus(ruleId, completed);
+                        
+                        // Update local state
+                        const rule = this.rules.find(r => r.id === ruleId);
+                        if (rule) {
+                            rule.completed = completed;
+                        }
+                        
+                        console.log('✅ Trading rule status updated successfully');
+                    } catch (error) {
+                        console.error('❌ Error updating trading rule status:', error);
+                        // Revert checkbox state on error
+                        const checkbox = document.getElementById(`rule-${ruleId}`);
+                        if (checkbox) {
+                            checkbox.checked = !completed;
+                        }
+                    }
+                },
+                
+                showAddRuleModal(category = '') {
+                    const modal = document.getElementById('add-trading-rule-modal');
+                    const categorySelect = document.getElementById('trading-rule-category');
+                    
+                    if (category && categorySelect) {
+                        categorySelect.value = category;
+                    }
+                    
+                    modal.classList.remove('hide');
+                },
+                
+                hideAddRuleModal() {
+                    const modal = document.getElementById('add-trading-rule-modal');
+                    const form = document.getElementById('add-trading-rule-form');
+                    
+                    modal.classList.add('hide');
+                    
+                    if (form) {
+                        form.reset();
+                    }
+                },
+                
+                async createRule(ruleData) {
+                    try {
+                        // Add creation timestamp
+                        ruleData.created_at = new Date().toISOString();
+                        ruleData.completed = false;
+                        
+                        await cloudStorage.saveTradingRule(ruleData);
+                        
+                        // Add to local array
+                        this.rules.push(ruleData);
+                        
+                        // Re-render the specific category
+                        this.displayRulesForCategory(ruleData.category);
+                        
+                        console.log('✅ Trading rule created successfully');
+                        
+                        // Hide modal
+                        this.hideAddRuleModal();
+                        
+                    } catch (error) {
+                        console.error('❌ Error creating trading rule:', error);
+                        throw error;
+                    }
+                },
+                
+                async deleteRule(ruleId) {
+                    if (!confirm('Are you sure you want to delete this trading rule?')) {
+                        return;
+                    }
+                    
+                    try {
+                        await cloudStorage.deleteTradingRule(ruleId);
+                        
+                        // Remove from local array
+                        this.rules = this.rules.filter(rule => rule.id !== ruleId);
+                        
+                        // Re-render all categories
+                        this.renderTradingRules();
+                        
+                        console.log('✅ Trading rule deleted successfully');
+                    } catch (error) {
+                        console.error('❌ Error deleting trading rule:', error);
+                    }
+                }
+            };
+            
+            // Make TradingRulesManager global
+            window.TradingRulesManager = TradingRulesManager;
+
             // === VISION MANAGER ===
             const VisionManager = {
                 visions: [],
@@ -11963,6 +12028,54 @@
                     ResourceManager.hideAddResourceModal();
                 });
             }
+            
+            // === TRADING RULES EVENT LISTENERS ===
+            
+            // Add Trading Rule Button
+            const addTradingRuleBtn = document.getElementById('add-trading-rule-btn');
+            if (addTradingRuleBtn) {
+                addTradingRuleBtn.addEventListener('click', () => {
+                    TradingRulesManager.showAddRuleModal();
+                });
+            }
+            
+            // Add Trading Rule Form Submission
+            const addTradingRuleForm = document.getElementById('add-trading-rule-form');
+            if (addTradingRuleForm) {
+                addTradingRuleForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const ruleData = {
+                        title: document.getElementById('trading-rule-title').value.trim(),
+                        category: document.getElementById('trading-rule-category').value,
+                        description: document.getElementById('trading-rule-description').value.trim()
+                    };
+                    
+                    if (!ruleData.title || !ruleData.category) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+                    
+                    try {
+                        await TradingRulesManager.createRule(ruleData);
+                    } catch (error) {
+                        console.error('❌ Error creating trading rule:', error);
+                        alert('Error creating trading rule: ' + error.message);
+                    }
+                });
+            }
+            
+            // Close trading rule modal when clicking outside
+            const addTradingRuleModal = document.getElementById('add-trading-rule-modal');
+            if (addTradingRuleModal) {
+                addTradingRuleModal.addEventListener('click', (e) => {
+                    if (e.target === addTradingRuleModal) {
+                        TradingRulesManager.hideAddRuleModal();
+                    }
+                });
+            }
+            
+            // TradingRulesManager initialization handled in main authentication flow
             
             // Close resource modal when clicking outside
             const addResourceModal = document.getElementById('add-resource-modal');

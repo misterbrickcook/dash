@@ -514,6 +514,105 @@ class CloudStorage {
     deleteLocalResource(resourceId) {
         // Pure cloud mode - no localStorage operations
     }
+
+    // === TRADING RULES CLOUD STORAGE ===
+    
+    async getTradingRules() {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            console.error('CloudStorage: Not authenticated');
+            return [];
+        }
+        
+        try {
+            const user = supabase.getCurrentUser();
+            if (!user) {
+                throw new Error('No current user found');
+            }
+            
+            const data = await supabase.query(`trading_rules?user_id=eq.${user.id}&select=*`);
+            
+            if (data && Array.isArray(data)) {
+                return data;
+            } else {
+                return [];
+            }
+        } catch (error) {
+            console.error('CloudStorage: Error fetching trading rules:', error);
+            throw error;
+        }
+    }
+    
+    async saveTradingRule(rule) {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            console.error('CloudStorage: Not authenticated - cannot save trading rule');
+            throw new Error('Not authenticated - pure cloud mode requires authentication');
+        }
+        
+        try {
+            // Add user_id to rule before saving
+            const user = supabase.getCurrentUser();
+            if (user) {
+                rule.user_id = user.id;
+            } else {
+                throw new Error('No current user found');
+            }
+            
+            // Check if this is a real database ID (should be a number from BIGSERIAL)
+            const isRealDbId = rule.id && 
+                              typeof rule.id === 'number' && 
+                              Number.isInteger(rule.id) && 
+                              rule.id > 0;
+            
+            if (isRealDbId) {
+                await supabase.update('trading_rules', rule, rule.id);
+            } else {
+                // Remove any ID that's not a proper database BIGSERIAL ID
+                if (rule.id) {
+                    delete rule.id;
+                }
+                
+                const result = await supabase.insert('trading_rules', [rule]);
+                
+                if (result && result.length > 0 && result[0]) {
+                    const newId = result[0].id;
+                    rule.id = newId; // Update the passed rule object
+                } else {
+                    throw new Error('Failed to insert trading rule - unexpected response format');
+                }
+            }
+        } catch (error) {
+            console.error('CloudStorage: Error saving trading rule:', error);
+            throw error;
+        }
+    }
+    
+    async deleteTradingRule(ruleId) {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            console.error('CloudStorage: Not authenticated - cannot delete trading rule');
+            throw new Error('Not authenticated - pure cloud mode requires authentication');
+        }
+        
+        try {
+            await supabase.delete('trading_rules', ruleId);
+        } catch (error) {
+            console.error('CloudStorage: Error deleting trading rule:', error);
+            throw error;
+        }
+    }
+    
+    async updateTradingRuleStatus(ruleId, completed) {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            console.error('CloudStorage: Not authenticated - cannot update trading rule status');
+            throw new Error('Not authenticated - pure cloud mode requires authentication');
+        }
+        
+        try {
+            await supabase.update('trading_rules', { completed, updated_at: new Date().toISOString() }, ruleId);
+        } catch (error) {
+            console.error('CloudStorage: Error updating trading rule status:', error);
+            throw error;
+        }
+    }
     
     getLocalRoutineData() {
         return {
