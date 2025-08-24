@@ -7117,6 +7117,14 @@
                 }
             }
             
+            // If switching to trading rules tab, render existing rules
+            if (tabId === 'tab-trading-rules') {
+                if (window.TradingRulesManager && typeof window.TradingRulesManager.renderTradingRules === 'function') {
+                    console.log('📊 Switching to Trading Rules tab - rendering existing rules');
+                    TradingRulesManager.renderTradingRules();
+                }
+            }
+            
             // If switching to home tab, update home todos
             if (tabId === 'tab-home') {
                 TodoManager.updateHomeTodos();
@@ -11349,6 +11357,8 @@
                 rules: [],
                 
                 async loadTradingRules() {
+                    console.log('🔄 TradingRulesManager.loadTradingRules() called');
+                    
                     if (!supabase?.isAuthenticated()) {
                         console.error('❌ TradingRulesManager: Not authenticated - pure cloud mode requires authentication');
                         this.rules = [];
@@ -11359,11 +11369,15 @@
                     try {
                         console.log('☁️ TradingRulesManager: Loading trading rules from cloud...');
                         this.rules = await cloudStorage.getTradingRules() || [];
+                        console.log('☁️ TradingRulesManager: Loaded', this.rules.length, 'rules:', this.rules);
                         this.renderTradingRules();
                         console.log('☁️ TradingRulesManager: Load completed');
                     } catch (error) {
                         console.error('❌ TradingRulesManager: Error loading from cloud:', error);
-                        throw error;
+                        console.error('Error details:', error);
+                        // Don't re-throw - just show empty state
+                        this.rules = [];
+                        this.renderTradingRules();
                     }
                 },
                 
@@ -12190,6 +12204,16 @@
                     // Only render existing resources, don't reload from cloud/storage
                     ResourceManager.renderResources();
                     console.log('🎨 Resources tab clicked - rendering existing resources');
+                });
+            }
+            
+            // Render trading rules when Trading Rules tab is selected (don't reload from scratch)
+            const tradingRulesTab = document.querySelector('[data-tab="trading-rules"]');
+            if (tradingRulesTab) {
+                tradingRulesTab.addEventListener('click', () => {
+                    // Only render existing trading rules, don't reload from cloud/storage
+                    TradingRulesManager.renderTradingRules();
+                    console.log('🎨 Trading Rules tab clicked - rendering existing rules');
                 });
             }
             
