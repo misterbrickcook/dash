@@ -12374,22 +12374,17 @@
 
             openPomodoro() {
                 // PomodoroTimer is now initialized globally at startup
-                console.log('🍅 Toggling Pomodoro timer via openPomodoro()');
-                
                 if (!window.PomodoroTimer) {
                     console.error('❌ PomodoroTimer not found! Trying to initialize...');
                     try {
                         window.PomodoroTimer = new PomodoroTimer();
-                        console.log('✅ PomodoroTimer initialized successfully');
                     } catch (error) {
                         console.error('❌ Failed to initialize PomodoroTimer:', error);
                         return;
                     }
                 }
                 
-                console.log('🍅 Calling PomodoroTimer.toggle()');
                 window.PomodoroTimer.toggle();
-                console.log('✅ PomodoroTimer.toggle() completed');
                 
                 // Update dynamic buttons to show/hide the main button
                 this.updateDynamicButtons();
@@ -12441,8 +12436,6 @@
             }
             
             updateDarkModeIcon(theme) {
-                console.log('🌙 Updating dark mode icon for theme:', theme);
-                
                 // Update dynamic main button for dark mode
                 this.updateDynamicButtons();
                 
@@ -12452,27 +12445,20 @@
                     return;
                 }
                 
-                console.log('✅ Dark mode button found:', darkModeBtn);
                 
                 // Set new icon based on current theme
                 // If dark theme: show sun (to switch back to light)  
                 // If light theme: show moon (to switch to dark)
                 const newIcon = theme === 'dark' ? 'sun' : 'moon';
-                console.log('🔄 Theme is:', theme, '→ Setting icon to:', newIcon);
                 
                 // Replace the entire button innerHTML with new icon
-                const currentHTML = darkModeBtn.innerHTML;
-                console.log('📝 Current button HTML:', currentHTML);
                 
                 darkModeBtn.innerHTML = `<i data-lucide="${newIcon}"></i>`;
-                console.log('📝 New button HTML set to:', darkModeBtn.innerHTML);
                 
                 // Re-initialize Lucide for all icons
                 setTimeout(() => {
                     if (window.lucide) {
-                        console.log('🔄 Re-initializing Lucide icons...');
                         lucide.createIcons();
-                        console.log('✅ Lucide icons re-created, icon should now be:', newIcon);
                         
                         // Verify the icon changed
                         const updatedIcon = darkModeBtn.querySelector('i');
@@ -12492,10 +12478,8 @@
                 
                 if (darkModeButton) {
                     if (isDarkMode) {
-                        console.log('🌙 Showing dynamic dark mode button');
                         darkModeButton.style.display = 'block';
                     } else {
-                        console.log('☀️ Hiding dynamic dark mode button');
                         darkModeButton.style.display = 'none';
                     }
                 }
@@ -12507,7 +12491,6 @@
                 
                 if (pomodoroButton) {
                     if (isPomodoroActive) {
-                        console.log('🍅 Showing dynamic pomodoro button');
                         pomodoroButton.style.display = 'block';
                         
                         // Update pomodoro button state
@@ -12522,10 +12505,8 @@
                             pomodoroBtn.setAttribute('data-tooltip', tooltipText);
                             pomodoroBtn.classList.add('pomodoro-active');
                             
-                            console.log(`🍅 Updated dynamic Pomodoro button: ${iconType}`);
                         }
                     } else {
-                        console.log('⏹️ Hiding dynamic pomodoro button');
                         pomodoroButton.style.display = 'none';
                     }
                 }
@@ -15024,8 +15005,6 @@
                     toggleBtn.addEventListener('click', () => {
                         this.overlay.classList.toggle('collapsed');
                     });
-                } else {
-                    console.error('❌ Toggle button not found');
                 }
 
 
@@ -15049,8 +15028,6 @@
                         }
                         console.log('📋 Settings panel display:', settingsPanel.style.display);
                     });
-                } else {
-                    console.error('❌ Settings button or panel not found');
                 }
 
                 if (settingsClose && settingsPanel) {
