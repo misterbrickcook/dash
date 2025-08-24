@@ -6994,6 +6994,17 @@
                 if (supabase?.isAuthenticated()) {
                     console.log('🔄 Loading dashboard data...');
                     
+                    // Debug: Check which managers are available
+                    console.log('🔍 Available managers:', {
+                        TodoManager: !!window.TodoManager,
+                        GoalManager: !!window.GoalManager, 
+                        JournalManager: !!window.JournalManager,
+                        TerminManager: !!window.TerminManager,
+                        ResourceManager: !!window.ResourceManager,
+                        TradingRulesManager: !!window.TradingRulesManager,
+                        Wiki: !!window.Wiki
+                    });
+                    
                     // Load all data in parallel for better performance
                     await Promise.all([
                         TodoManager.loadTodos(),
