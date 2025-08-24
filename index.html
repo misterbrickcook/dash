@@ -6993,9 +6993,13 @@
             const targetSection = document.getElementById(tabId);
             const targetTab = document.querySelector(`[data-tab="${tabId}"]`);
             
-            if (targetSection && targetTab) {
+            if (targetSection) {
                 targetSection.classList.add('active');
-                targetTab.classList.add('active');
+                
+                // Add nav tab activation only if it exists (for regular tabs)
+                if (targetTab) {
+                    targetTab.classList.add('active');
+                }
                 
                 // Update URL hash
                 if (updateHash && tabHashMapping[tabId]) {
@@ -7007,6 +7011,8 @@
                     // Fallback: if no hash mapping, clear hash
                     window.history.replaceState(null, null, window.location.pathname);
                 }
+            } else {
+                console.error(`❌ Tab section not found: ${tabId}`);
             }
             
             // If switching to todos tab, load the active category
