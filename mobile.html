@@ -592,6 +592,10 @@
                     
                     const todos = await window.supabase.select('todos', '*');
                     this.todos = todos || [];
+                    
+                    // Clean up empty todos automatically
+                    await this.cleanupEmptyTodos();
+                    
                     this.renderTodos();
                     
                 } catch (error) {
@@ -600,17 +604,46 @@
                 }
             }
             
+            async cleanupEmptyTodos() {
+                const emptyTodos = this.todos.filter(todo => 
+                    !todo || !todo.title || todo.title.trim() === ''
+                );
+                
+                if (emptyTodos.length > 0) {
+                    console.log(`🧹 Cleaning up ${emptyTodos.length} empty todos...`);
+                    
+                    for (const emptyTodo of emptyTodos) {
+                        try {
+                            await window.supabase.delete('todos', emptyTodo.id);
+                            console.log(`🗑️ Deleted empty todo with ID ${emptyTodo.id}`);
+                        } catch (error) {
+                            console.error(`❌ Error deleting empty todo ${emptyTodo.id}:`, error);
+                        }
+                    }
+                    
+                    // Remove from local array
+                    this.todos = this.todos.filter(todo => 
+                        todo && todo.title && todo.title.trim() !== ''
+                    );
+                }
+            }
+            
             renderTodos() {
                 const todoList = document.getElementById('todo-list');
                 
-                if (this.todos.length === 0) {
+                // Filter out todos with empty/null titles
+                const validTodos = this.todos.filter(todo => 
+                    todo && todo.title && todo.title.trim() !== ''
+                );
+                
+                if (validTodos.length === 0) {
                     todoList.innerHTML = '<li class="loading">Keine Todos vorhanden</li>';
                     return;
                 }
                 
-                todoList.innerHTML = this.todos.map(todo => `
+                todoList.innerHTML = validTodos.map(todo => `
                     <li class="todo-item">
-                        <span class="todo-text">${this.escapeHtml(todo.title)}</span>
+                        <span class="todo-text">${this.escapeHtml(todo.title || 'Ohne Titel')}</span>
                         <button class="todo-delete" onclick="app.deleteTodo(${todo.id})">×</button>
                     </li>
                 `).join('');
