@@ -557,6 +557,8 @@ class CloudStorage {
                 throw new Error('No current user found');
             }
             
+            console.log('💾 CloudStorage: Saving trading rule:', rule);
+            
             // Check if this is a real database ID (should be a number from BIGSERIAL)
             const isRealDbId = rule.id && 
                               typeof rule.id === 'number' && 
@@ -564,22 +566,29 @@ class CloudStorage {
                               rule.id > 0;
             
             if (isRealDbId) {
+                console.log('🔄 CloudStorage: Updating existing rule with ID:', rule.id);
                 await supabase.update('trading_rules', rule, rule.id);
             } else {
                 // Remove any ID that's not a proper database BIGSERIAL ID
                 if (rule.id) {
+                    console.log('🗑️ CloudStorage: Removing invalid ID:', rule.id);
                     delete rule.id;
                 }
                 
+                console.log('➕ CloudStorage: Inserting new rule:', rule);
                 const result = await supabase.insert('trading_rules', [rule]);
+                console.log('✅ CloudStorage: Insert result:', result);
                 
                 if (result && result.length > 0 && result[0]) {
                     const newId = result[0].id;
                     rule.id = newId; // Update the passed rule object
+                    console.log('🆔 CloudStorage: New rule ID assigned:', newId);
                 } else {
+                    console.error('❌ CloudStorage: Unexpected insert response format:', result);
                     throw new Error('Failed to insert trading rule - unexpected response format');
                 }
             }
+            console.log('✅ CloudStorage: Trading rule saved successfully');
         } catch (error) {
             console.error('CloudStorage: Error saving trading rule:', error);
             throw error;
