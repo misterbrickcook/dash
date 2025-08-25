@@ -11570,8 +11570,10 @@
                     console.log('🗑️ deleteRuleFromMenu called with currentRuleId:', this.currentRuleId, typeof this.currentRuleId);
                     if (!this.currentRuleId) return;
                     
+                    // Save the ID before hiding the context menu (which sets currentRuleId to null)
+                    const ruleIdToDelete = this.currentRuleId;
                     this.hideContextMenu();
-                    await this.deleteRule(this.currentRuleId);
+                    await this.deleteRule(ruleIdToDelete);
                 },
 
                 async deleteRule(ruleId) {
