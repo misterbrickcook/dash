@@ -11388,7 +11388,8 @@
                         // If no rules exist, create sample rules for testing
                         if (this.rules.length === 0) {
                             console.log('🧪 No trading rules found, creating sample rules for testing...');
-                            await this.createSampleRules();
+                            // Comment out auto-creation for debugging
+                            // await this.createSampleRules();
                         }
                         
                         this.renderTradingRules();
@@ -11591,6 +11592,52 @@
                         console.log('✅ Sample trading rules created successfully');
                     } catch (error) {
                         console.error('❌ Error creating sample rules:', error);
+                    }
+                },
+
+                async testDatabaseConnection() {
+                    console.log('🧪 Testing database connection for trading_rules...');
+                    
+                    // Test 1: Check authentication
+                    if (!supabase?.isAuthenticated()) {
+                        console.error('❌ Test failed: Not authenticated');
+                        return;
+                    }
+                    
+                    const user = supabase.getCurrentUser();
+                    console.log('✅ User authenticated:', user?.email);
+                    
+                    // Test 2: Try to query the table
+                    try {
+                        console.log('🔍 Testing table query...');
+                        const result = await supabase.query(`trading_rules?user_id=eq.${user.id}&select=*`);
+                        console.log('✅ Table query successful:', result);
+                        console.log('📊 Found', result?.length || 0, 'existing rules');
+                    } catch (error) {
+                        console.error('❌ Table query failed:', error);
+                        console.error('❌ This likely means the trading_rules table does not exist in Supabase');
+                    }
+                    
+                    // Test 3: Try to insert a test record
+                    try {
+                        console.log('🧪 Testing insert...');
+                        const testRule = {
+                            title: 'Test Rule - Delete Me',
+                            description: 'This is a test rule',
+                            category: 'Test',
+                            user_id: user.id
+                        };
+                        
+                        const insertResult = await supabase.insert('trading_rules', [testRule]);
+                        console.log('✅ Insert test successful:', insertResult);
+                        
+                        // Clean up test record
+                        if (insertResult && insertResult[0]?.id) {
+                            await supabase.delete('trading_rules', insertResult[0].id);
+                            console.log('🧹 Test record cleaned up');
+                        }
+                    } catch (error) {
+                        console.error('❌ Insert test failed:', error);
                     }
                 }
             };

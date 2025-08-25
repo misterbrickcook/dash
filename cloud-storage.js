@@ -517,6 +517,53 @@ class CloudStorage {
 
     // === TRADING RULES CLOUD STORAGE ===
     
+    async ensureTradingRulesTable() {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            console.error('CloudStorage: Not authenticated - cannot create table');
+            return false;
+        }
+        
+        try {
+            console.log('🔧 CloudStorage: Ensuring trading_rules table exists...');
+            
+            // Try to create the table using direct SQL
+            const createTableSQL = `
+                CREATE TABLE IF NOT EXISTS public.trading_rules (
+                    id BIGSERIAL PRIMARY KEY,
+                    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+                    title TEXT NOT NULL,
+                    description TEXT,
+                    category TEXT NOT NULL DEFAULT 'General',
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+                );
+                
+                ALTER TABLE public.trading_rules ENABLE ROW LEVEL SECURITY;
+                
+                CREATE POLICY IF NOT EXISTS "Users can view own trading_rules" ON public.trading_rules
+                    FOR SELECT USING (auth.uid() = user_id);
+                
+                CREATE POLICY IF NOT EXISTS "Users can insert own trading_rules" ON public.trading_rules
+                    FOR INSERT WITH CHECK (auth.uid() = user_id);
+                
+                CREATE POLICY IF NOT EXISTS "Users can update own trading_rules" ON public.trading_rules
+                    FOR UPDATE USING (auth.uid() = user_id);
+                
+                CREATE POLICY IF NOT EXISTS "Users can delete own trading_rules" ON public.trading_rules
+                    FOR DELETE USING (auth.uid() = user_id);
+            `;
+            
+            // We can't create tables via REST API, just test if table exists
+            const user = supabase.getCurrentUser();
+            const testResult = await supabase.query(`trading_rules?user_id=eq.${user.id}&select=id&limit=1`);
+            console.log('✅ CloudStorage: Table exists and is accessible');
+            return true;
+        } catch (error) {
+            console.error('❌ CloudStorage: Error ensuring table exists:', error);
+            return false;
+        }
+    }
+    
     async getTradingRules() {
         if (!supabase || !this.isSupabaseAuthenticated()) {
             console.error('CloudStorage: Not authenticated');
@@ -529,6 +576,9 @@ class CloudStorage {
                 throw new Error('No current user found');
             }
             
+            // First try to ensure the table exists
+            await this.ensureTradingRulesTable();
+            
             const data = await supabase.query(`trading_rules?user_id=eq.${user.id}&select=*`);
             
             if (data && Array.isArray(data)) {
@@ -538,6 +588,19 @@ class CloudStorage {
             }
         } catch (error) {
             console.error('CloudStorage: Error fetching trading rules:', error);
+            // If table doesn't exist, try to create it first
+            if (error.message?.includes('relation "trading_rules" does not exist')) {
+                console.log('🔧 CloudStorage: Table does not exist, attempting to create...');
+                try {
+                    await this.ensureTradingRulesTable();
+                    // Try the query again
+                    const data = await supabase.query(`trading_rules?user_id=eq.${user.id}&select=*`);
+                    return data && Array.isArray(data) ? data : [];
+                } catch (retryError) {
+                    console.error('❌ CloudStorage: Failed to create table and retry query:', retryError);
+                    return [];
+                }
+            }
             throw error;
         }
     }
