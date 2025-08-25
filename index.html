@@ -2329,7 +2329,7 @@
         }
 
         /* === MOBILE OPTIMIZATIONS === */
-        @media (max-width: 768px) {
+        @media (max-width: 768px), (max-width: 834px) and (orientation: portrait), (max-width: 1024px) and (max-width: 1366px) and (pointer: coarse) {
             /* Better mobile viewport */
             body {
                 font-size: 16px; /* Prevents zoom on iOS */
@@ -2391,7 +2391,7 @@
         }
 
         /* === MOBILE QUICK TODO === */
-        @media (max-width: 768px) {
+        @media (max-width: 768px), (max-width: 834px) and (orientation: portrait), (max-width: 1024px) and (max-width: 1366px) and (pointer: coarse) {
             /* Quick todo button that's always visible on mobile */
             .mobile-quick-todo {
                 position: fixed;
@@ -8973,10 +8973,18 @@
                 if (!mobileBtn) return;
                 
                 const checkMobile = () => {
-                    if (window.innerWidth <= 768) {
+                    // Detect mobile devices more reliably
+                    const isMobile = window.innerWidth <= 768 || 
+                                   (window.innerWidth <= 834 && window.matchMedia('(orientation: portrait)').matches) ||
+                                   /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                                   ('ontouchstart' in window);
+                                   
+                    if (isMobile) {
                         mobileBtn.style.display = 'flex';
+                        console.log('📱 Mobile mode active - showing FAB button');
                     } else {
                         mobileBtn.style.display = 'none';
+                        console.log('💻 Desktop mode active - hiding FAB button');
                     }
                 };
                 
