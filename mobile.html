@@ -1056,11 +1056,14 @@
             }
             
             processBrainDump(text) {
-                // Default values
-                let category = 'privat';
+                // ALL mobile todos start as brain dumps
+                let category = 'braindump';
                 let priority = 2;
                 let date = null;
                 let time = '21:00';
+                
+                // Store original intended category from chips for later distribution
+                let intendedCategory = 'privat'; // default
                 
                 // Process selected chips
                 this.selectedChips.forEach(chipId => {
@@ -1085,7 +1088,7 @@
                             priority = 4;
                             break;
                         case 'chip-idee':
-                            category = 'ideen';
+                            intendedCategory = 'ideen';
                             priority = 1;
                             break;
                     }
@@ -1093,7 +1096,8 @@
                 
                 return {
                     text: text,
-                    category: category,
+                    category: category, // Always 'braindump' for mobile todos
+                    intended_category: intendedCategory, // Store for later distribution
                     priority: priority,
                     completed: false,
                     date: date,

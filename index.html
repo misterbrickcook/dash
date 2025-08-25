@@ -2305,6 +2305,17 @@
             border-color: var(--accent-primary);
         }
         
+        .brain-dump-quick-action.suggested {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            color: #1976d2;
+        }
+        
+        .brain-dump-quick-action.suggested:hover {
+            background: #bbdefb;
+            border-color: #1976d2;
+        }
+        
         .brain-dump-bulk-actions {
             display: flex;
             gap: 0.75rem;
@@ -18444,15 +18455,9 @@
                     const user = window.supabase.getCurrentUser();
                     const todos = await window.supabase.select('todos', '*');
                     
-                    // Filter for brain dumps (created on mobile or with special markers)
+                    // Filter for brain dumps (category = 'braindump')
                     this.brainDumps = (todos || []).filter(todo => {
-                        // Check if it's from mobile (has mobile-specific patterns or categories)
-                        const isMobileDump = 
-                            todo.category === 'ideen' || // Mobile idee chip
-                            todo.text?.includes('📱') || // Mobile marker
-                            (todo.created_at && this.isRecentMobileCreation(todo.created_at));
-                        
-                        return isMobileDump && !todo.distributed;
+                        return todo.category === 'braindump' && !todo.distributed;
                     });
                     
                     this.updateUI();
@@ -18509,11 +18514,14 @@
                             </div>
                         </div>
                         <div class="brain-dump-actions-area">
-                            <button class="brain-dump-quick-action" onclick="brainDumpManager.quickDistribute(${dump.id}, 'privat')" title="Zu Privat">
+                            <button class="brain-dump-quick-action ${dump.intended_category === 'privat' ? 'suggested' : ''}" onclick="brainDumpManager.quickDistribute(${dump.id}, 'privat')" title="Zu Privat">
                                 <i data-lucide="home" style="width: 14px; height: 14px;"></i>
                             </button>
-                            <button class="brain-dump-quick-action" onclick="brainDumpManager.quickDistribute(${dump.id}, 'arbeit')" title="Zu Arbeit">
+                            <button class="brain-dump-quick-action ${dump.intended_category === 'arbeit' ? 'suggested' : ''}" onclick="brainDumpManager.quickDistribute(${dump.id}, 'arbeit')" title="Zu Arbeit">
                                 <i data-lucide="briefcase" style="width: 14px; height: 14px;"></i>
+                            </button>
+                            <button class="brain-dump-quick-action ${dump.intended_category === 'uni' ? 'suggested' : ''}" onclick="brainDumpManager.quickDistribute(${dump.id}, 'uni')" title="Zu Uni">
+                                <i data-lucide="graduation-cap" style="width: 14px; height: 14px;"></i>
                             </button>
                             <button class="brain-dump-quick-action" onclick="brainDumpManager.deleteDump(${dump.id})" title="Löschen">
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
@@ -18553,8 +18561,19 @@
                     }
                 }
                 
-                if (dump.category === 'ideen') {
+                if (dump.intended_category === 'ideen') {
                     chips.push('<span class="brain-dump-chip">💡 Idee</span>');
+                }
+                
+                // Show intended category if different from default
+                if (dump.intended_category && dump.intended_category !== 'privat') {
+                    const categoryIcons = {
+                        'arbeit': '💼',
+                        'uni': '🎓',
+                        'projekte': '🚀'
+                    };
+                    const icon = categoryIcons[dump.intended_category] || '📁';
+                    chips.push(`<span class="brain-dump-chip">${icon} ${dump.intended_category}</span>`);
                 }
                 
                 return chips.join('');
