@@ -2109,14 +2109,12 @@
             color: #ffffff;
         }
         
-        /* === BRAIN DUMP CONTAINER === */
+        /* === BRAIN DUMP CONTAINER (MINIMALIST LIKE ZIELE) === */
         .brain-dump-container {
             background: var(--bg-primary);
             border: 1px solid var(--border-primary);
-            border-radius: 8px;
             margin-bottom: 2rem;
-            overflow: hidden;
-            transition: all 0.3s ease;
+            /* Removed border-radius for eckig design */
         }
         
         .brain-dump-header {
@@ -2124,7 +2122,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 1rem 1.5rem;
-            background: #f8f9fa;
+            background: var(--bg-secondary);
             border-bottom: 1px solid var(--border-primary);
             cursor: pointer;
             user-select: none;
@@ -2135,7 +2133,7 @@
             align-items: center;
             gap: 0.75rem;
             font-weight: 500;
-            font-size: 1rem;
+            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--text-primary);
@@ -2144,11 +2142,11 @@
         .brain-dump-badge {
             background: var(--accent-primary);
             color: var(--bg-primary);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            min-width: 24px;
+            padding: 0.2rem 0.5rem;
+            /* Removed border-radius for eckig design */
+            min-width: 20px;
             text-align: center;
         }
         
@@ -2158,20 +2156,19 @@
         }
         
         .brain-dump-expand {
-            background: none;
+            background: var(--bg-primary);
             border: 1px solid var(--border-primary);
             color: var(--text-secondary);
             padding: 0.5rem;
-            border-radius: 4px;
+            /* Removed border-radius for eckig design */
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: border-color 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
         .brain-dump-expand:hover {
-            background: var(--bg-secondary);
             border-color: var(--accent-primary);
         }
         
@@ -2181,24 +2178,12 @@
         
         .brain-dump-content {
             display: none;
-            padding: 1.5rem;
+            padding: 2rem;
             background: var(--bg-primary);
         }
         
         .brain-dump-content.expanded {
             display: block;
-            animation: slideDown 0.3s ease;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
         
         .brain-dump-alert {
@@ -2206,38 +2191,39 @@
             align-items: center;
             gap: 0.75rem;
             padding: 1rem;
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 6px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            /* Removed border-radius for eckig design */
             margin-bottom: 1.5rem;
-            color: #856404;
-            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         
         .brain-dump-list {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
         
         .brain-dump-item {
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1rem;
-            background: var(--bg-secondary);
+            padding: 1.5rem;
+            background: var(--bg-primary);
             border: 1px solid var(--border-primary);
-            border-radius: 6px;
-            margin-bottom: 0.75rem;
-            transition: all 0.2s ease;
+            /* Removed border-radius for eckig design */
+            margin-bottom: 1rem;
+            transition: border-color 0.2s ease;
         }
         
         .brain-dump-item:hover {
             border-color: var(--accent-primary);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .brain-dump-item.selected {
-            background: #e3f2fd;
-            border-color: #2196f3;
+            background: var(--bg-secondary);
+            border-color: var(--accent-primary);
         }
         
         .brain-dump-checkbox {
@@ -2270,17 +2256,19 @@
         .brain-dump-chips {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
         
         .brain-dump-chip {
-            padding: 0.2rem 0.5rem;
-            background: var(--bg-primary);
+            padding: 0.25rem 0.75rem;
+            background: #f0f0f0;
             border: 1px solid var(--border-primary);
-            border-radius: 12px;
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
+            /* Removed border-radius for eckig design */
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            white-space: nowrap;
         }
         
         .brain-dump-actions-area {
@@ -2290,47 +2278,39 @@
         
         .brain-dump-quick-action {
             padding: 0.5rem;
-            background: none;
+            background: var(--bg-primary);
             border: 1px solid var(--border-primary);
-            border-radius: 4px;
+            /* Removed border-radius for eckig design */
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: border-color 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: var(--text-secondary);
         }
         
         .brain-dump-quick-action:hover {
-            background: var(--bg-secondary);
             border-color: var(--accent-primary);
-        }
-        
-        .brain-dump-quick-action.suggested {
-            background: #e3f2fd;
-            border-color: #2196f3;
-            color: #1976d2;
-        }
-        
-        .brain-dump-quick-action.suggested:hover {
-            background: #bbdefb;
-            border-color: #1976d2;
         }
         
         .brain-dump-bulk-actions {
             display: flex;
-            gap: 0.75rem;
+            gap: 1rem;
             justify-content: flex-end;
-            padding-top: 1rem;
+            padding-top: 1.5rem;
             border-top: 1px solid var(--border-primary);
         }
         
         .brain-dump-bulk-actions button {
             padding: 0.75rem 1.5rem;
             border: 1px solid var(--border-primary);
-            border-radius: 4px;
-            font-size: 0.9rem;
+            /* Removed border-radius for eckig design */
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: border-color 0.2s ease;
         }
         
         .btn-primary {
@@ -2340,34 +2320,38 @@
         }
         
         .btn-primary:hover {
-            background: #333333;
+            border-color: #333333;
         }
         
         .btn-secondary {
             background: var(--bg-primary);
             color: var(--text-secondary);
+            border-color: var(--border-primary);
         }
         
         .btn-secondary:hover {
-            background: var(--bg-secondary);
             border-color: var(--accent-primary);
         }
         
         .btn-danger {
-            background: #dc3545;
-            color: var(--bg-primary);
-            border-color: #dc3545;
+            background: var(--bg-primary);
+            color: #cc0000;
+            border-color: var(--border-primary);
         }
         
         .btn-danger:hover {
-            background: #c82333;
+            border-color: #cc0000;
         }
         
         .brain-dump-empty {
             text-align: center;
-            padding: 2rem;
+            padding: 3rem;
             color: var(--text-muted);
-            font-style: italic;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid var(--border-primary);
+            background: var(--bg-secondary);
         }
 
         /* === ZIELE SPECIFIC === */
