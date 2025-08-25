@@ -619,8 +619,8 @@
                 console.log('📱 Entering demo mode');
                 this.currentUser = { email: 'demo@user.com', id: 'demo' };
                 this.todos = [
-                    { id: 1, title: 'Demo Todo 1', category: 'privat' },
-                    { id: 2, title: 'Demo Todo 2', category: 'arbeit' }
+                    { id: 1, text: 'Demo Todo 1', category: 'privat', priority: 2 },
+                    { id: 2, text: 'Demo Todo 2', category: 'arbeit', priority: 3 }
                 ];
                 this.hideError();
                 this.showDashboard();
@@ -689,7 +689,7 @@
             
             async cleanupEmptyTodos() {
                 const emptyTodos = this.todos.filter(todo => 
-                    !todo || !todo.title || todo.title.trim() === ''
+                    !todo || !(todo.text || todo.title) || (todo.text || todo.title).trim() === ''
                 );
                 
                 if (emptyTodos.length > 0) {
@@ -704,9 +704,9 @@
                         }
                     }
                     
-                    // Remove from local array
+                    // Remove from local array (support both text and title fields)
                     this.todos = this.todos.filter(todo => 
-                        todo && todo.title && todo.title.trim() !== ''
+                        todo && (todo.text || todo.title) && (todo.text || todo.title).trim() !== ''
                     );
                 }
             }
@@ -714,9 +714,9 @@
             renderTodos() {
                 const todoList = document.getElementById('todo-list');
                 
-                // Filter out todos with empty/null titles
+                // Filter out todos with empty/null text (desktop format uses 'text' field)
                 const validTodos = this.todos.filter(todo => 
-                    todo && todo.title && todo.title.trim() !== ''
+                    todo && (todo.text || todo.title) && (todo.text || todo.title).trim() !== ''
                 );
                 
                 if (validTodos.length === 0) {
@@ -726,7 +726,7 @@
                 
                 todoList.innerHTML = validTodos.map(todo => `
                     <li class="todo-item">
-                        <span class="todo-text">${this.escapeHtml(todo.title || 'Ohne Titel')}</span>
+                        <span class="todo-text">${this.escapeHtml(todo.text || todo.title || 'Ohne Titel')}</span>
                         <button class="todo-delete" onclick="app.deleteTodo(${todo.id})">×</button>
                     </li>
                 `).join('');
@@ -743,18 +743,18 @@
                 addBtn.textContent = 'Wird hinzugefügt...';
                 
                 try {
+                    // Create todo with EXACT desktop format
                     const newTodo = {
-                        title: title,
-                        category: 'privat',
-                        priority: 'mittel',
-                        completed: false,
-                        deadline: null,
-                        time: null,
-                        created_at: new Date().toISOString(),
+                        text: title,              // Desktop uses 'text' not 'title'
+                        category: 'privat',       // Valid category  
+                        priority: 2,              // Desktop uses integer: 2 = 'mittel'
+                        completed: false,         // Boolean
+                        date: null,               // Desktop uses 'date' not 'deadline'
+                        time: '21:00',           // Default time as string
                         user_id: this.currentUser?.id
                     };
                     
-                    console.log('📝 Creating todo:', newTodo);
+                    console.log('📝 Creating todo with desktop-compatible format:', newTodo);
                     
                     if (window.supabase && window.supabase.isAuthenticated()) {
                         console.log('📤 Inserting todo into database...');
