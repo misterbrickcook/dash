@@ -11449,6 +11449,8 @@
                     
                     // Render each rule
                     filteredRules.forEach(rule => {
+                        console.log('🎨 Rendering rule:', rule.title, 'with ID:', rule.id, typeof rule.id);
+                        
                         const ruleEl = document.createElement('div');
                         ruleEl.className = 'resource-item';
                         ruleEl.title = 'Rechtsklick zum Löschen';
@@ -11461,10 +11463,14 @@
                             </div>
                         `;
                         
-                        // Add right-click context menu
+                        // Add right-click context menu - capture rule.id in closure
+                        const ruleId = rule.id;
+                        console.log('📋 Setting up context menu for rule ID:', ruleId, typeof ruleId);
+                        
                         ruleEl.addEventListener('contextmenu', (e) => {
                             e.preventDefault();
-                            this.showContextMenu(e, rule.id);
+                            console.log('📋 Context menu triggered with ID:', ruleId, typeof ruleId);
+                            this.showContextMenu(e, ruleId);
                         });
                         
                         container.appendChild(ruleEl);
