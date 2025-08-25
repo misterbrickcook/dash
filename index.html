@@ -2301,46 +2301,45 @@
             border-top: 1px solid var(--border-primary);
         }
         
+        /* Dezente Buttons wie Ziele-Kategorie */
         .brain-dump-bulk-actions button {
-            padding: 0.75rem 1.5rem;
+            padding: 0.2rem 0.5rem;
             border: 1px solid var(--border-primary);
+            background: #fafafa;
             /* Removed border-radius for eckig design */
-            font-size: 0.8rem;
-            font-weight: 500;
+            font-size: 0.65rem;
+            font-weight: normal;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: border-color 0.2s ease;
+            transition: all 0.2s ease;
+            white-space: nowrap;
         }
         
-        .btn-primary {
-            background: var(--accent-primary);
-            color: var(--bg-primary);
-            border-color: var(--accent-primary);
-        }
-        
-        .btn-primary:hover {
-            border-color: #333333;
-        }
-        
-        .btn-secondary {
+        .brain-dump-bulk-actions button:hover {
             background: var(--bg-primary);
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+        }
+        
+        /* Override for all button types - keep same dezent style */
+        .btn-primary, .btn-secondary, .btn-danger {
+            background: #fafafa;
             color: var(--text-secondary);
             border-color: var(--border-primary);
         }
         
-        .btn-secondary:hover {
-            border-color: var(--accent-primary);
-        }
-        
-        .btn-danger {
+        .btn-primary:hover, .btn-secondary:hover {
             background: var(--bg-primary);
-            color: #cc0000;
-            border-color: var(--border-primary);
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
         }
         
         .btn-danger:hover {
+            background: var(--bg-primary);
             border-color: #cc0000;
+            color: #cc0000;
         }
         
         .brain-dump-empty {
