@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DashFin Mobile v2.7 - Clean Display + Auto DateTime</title>
+    <title>DashFin Mobile v2.8 - Fixed Authentication</title>
     <!-- Cache Buster für neues Brain Dump Design -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -53,7 +53,7 @@
             right: 0;
             bottom: 0;
             background: #ffffff;
-            display: none; /* Temporary: Hide login for Brain Dump testing */
+            display: flex; /* Re-enable login for proper authentication */
             align-items: center;
             justify-content: center;
             z-index: 2000;
@@ -156,7 +156,7 @@
         
         /* === DASHBOARD SCREEN === */
         .dashboard {
-            display: block; /* Temporary: Show dashboard immediately for testing */
+            display: none; /* Hide dashboard until authenticated */
             min-height: 100vh;
         }
         
