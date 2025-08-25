@@ -239,6 +239,7 @@
         }
         
         .todo-input[type="date"],
+        .todo-input[type="time"],
         .todo-input[type="select"],
         select.todo-input {
             height: 44px;
@@ -247,6 +248,58 @@
             border-radius: 6px;
             padding: 12px;
             background: white;
+        }
+        
+        /* === QUICK OPTIONS === */
+        .quick-options {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .quick-btn {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            color: #555;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 36px;
+        }
+        
+        .quick-btn:hover,
+        .quick-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .quick-btn.priority-btn.active {
+            border-color: #f59e0b;
+            background: #f59e0b;
+        }
+        
+        /* === FORM ROWS === */
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .form-row .form-group {
+            margin-bottom: 0;
         }
         
         .todo-list {
@@ -330,28 +383,46 @@
                 <div class="add-todo-form">
                     <input type="text" class="todo-input" id="todo-input" placeholder="Neues Todo eingeben...">
                     
-                    <!-- Optional Date Selection -->
+                    <!-- Quick Options (always visible) -->
+                    <div class="quick-options">
+                        <div class="quick-buttons">
+                            <button type="button" class="quick-btn" id="quick-heute">Heute</button>
+                            <button type="button" class="quick-btn" id="quick-morgen">Morgen</button>
+                            <button type="button" class="quick-btn priority-btn" id="quick-wichtig">Wichtig</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Detailed Options (expandable) -->
                     <div class="todo-options" id="todo-options" style="display: none; margin-top: 1rem;">
-                        <div class="form-group">
-                            <label for="todo-date">Deadline (optional)</label>
-                            <input type="date" class="todo-input" id="todo-date">
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 2;">
+                                <label for="todo-date">📅 Datum</label>
+                                <input type="date" class="todo-input" id="todo-date">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="todo-time">🕐 Zeit</label>
+                                <input type="time" class="todo-input" id="todo-time" value="21:00">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="todo-category">Kategorie</label>
-                            <select class="todo-input" id="todo-category">
-                                <option value="privat" selected>Privat</option>
-                                <option value="arbeit">Arbeit</option>
-                                <option value="uni">Uni</option>
-                                <option value="projekte">Projekte</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="todo-priority">Priorität</label>
-                            <select class="todo-input" id="todo-priority">
-                                <option value="2" selected>Normal</option>
-                                <option value="3">Wichtig</option>
-                                <option value="4">Dringend</option>
-                            </select>
+                        
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="todo-category">📂 Kategorie</label>
+                                <select class="todo-input" id="todo-category">
+                                    <option value="privat" selected>🏠 Privat</option>
+                                    <option value="arbeit">💼 Arbeit</option>
+                                    <option value="uni">🎓 Uni</option>
+                                    <option value="projekte">🚀 Projekte</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="todo-priority">⭐ Priorität</label>
+                                <select class="todo-input" id="todo-priority">
+                                    <option value="2" selected>🟢 Normal</option>
+                                    <option value="3">🟡 Wichtig</option>
+                                    <option value="4">🔴 Dringend</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     
@@ -620,6 +691,19 @@
                     this.toggleOptions();
                 });
                 
+                // Quick buttons
+                document.getElementById('quick-heute').addEventListener('click', () => {
+                    this.setQuickDate('today');
+                });
+                
+                document.getElementById('quick-morgen').addEventListener('click', () => {
+                    this.setQuickDate('tomorrow');
+                });
+                
+                document.getElementById('quick-wichtig').addEventListener('click', () => {
+                    this.togglePriority();
+                });
+                
                 // Enter key in todo input
                 document.getElementById('todo-input').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
@@ -761,6 +845,49 @@
                 }
             }
             
+            setQuickDate(type) {
+                const dateInput = document.getElementById('todo-date');
+                const todayBtn = document.getElementById('quick-heute');
+                const tomorrowBtn = document.getElementById('quick-morgen');
+                
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                if (type === 'today') {
+                    dateInput.value = today.toISOString().split('T')[0];
+                    todayBtn.classList.add('active');
+                    tomorrowBtn.classList.remove('active');
+                } else if (type === 'tomorrow') {
+                    dateInput.value = tomorrow.toISOString().split('T')[0];
+                    tomorrowBtn.classList.add('active');
+                    todayBtn.classList.remove('active');
+                }
+                
+                // Auto-expand options if date is set
+                const optionsDiv = document.getElementById('todo-options');
+                if (optionsDiv.style.display === 'none') {
+                    this.toggleOptions();
+                }
+            }
+            
+            togglePriority() {
+                const prioritySelect = document.getElementById('todo-priority');
+                const priorityBtn = document.getElementById('quick-wichtig');
+                
+                if (prioritySelect.value === '2') {
+                    // Switch to "Wichtig"
+                    prioritySelect.value = '3';
+                    priorityBtn.classList.add('active');
+                    priorityBtn.textContent = 'Wichtig ✓';
+                } else {
+                    // Switch back to "Normal"
+                    prioritySelect.value = '2';
+                    priorityBtn.classList.remove('active');
+                    priorityBtn.textContent = 'Wichtig';
+                }
+            }
+            
             async loadTodos() {
                 try {
                     console.log('📋 Loading todos...');
@@ -831,6 +958,7 @@
             async addTodo() {
                 const input = document.getElementById('todo-input');
                 const dateInput = document.getElementById('todo-date');
+                const timeInput = document.getElementById('todo-time');
                 const categorySelect = document.getElementById('todo-category');
                 const prioritySelect = document.getElementById('todo-priority');
                 
@@ -850,7 +978,7 @@
                         priority: parseInt(prioritySelect.value) || 2, // Use selected priority as integer
                         completed: false,                               // Boolean
                         date: dateInput.value || null,                 // Use selected date or null
-                        time: '21:00',                                 // Default time as string
+                        time: timeInput.value || '21:00',              // Use selected time or default
                         user_id: this.currentUser?.id
                     };
                     
@@ -882,8 +1010,16 @@
                     // Clear form
                     input.value = '';
                     dateInput.value = '';
+                    timeInput.value = '21:00';
                     categorySelect.value = 'privat';
                     prioritySelect.value = '2';
+                    
+                    // Reset quick buttons
+                    document.getElementById('quick-heute').classList.remove('active');
+                    document.getElementById('quick-morgen').classList.remove('active');
+                    const priorityBtn = document.getElementById('quick-wichtig');
+                    priorityBtn.classList.remove('active');
+                    priorityBtn.textContent = 'Wichtig';
                     
                     console.log('✅ Todo added successfully:', newTodo.text);
                     
