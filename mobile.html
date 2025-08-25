@@ -748,20 +748,47 @@
                         category: 'privat',
                         priority: 'mittel',
                         completed: false,
+                        deadline: null,
+                        time: null,
                         created_at: new Date().toISOString(),
                         user_id: this.currentUser?.id
                     };
                     
+                    console.log('📝 Creating todo:', newTodo);
+                    
                     if (window.supabase && window.supabase.isAuthenticated()) {
+                        console.log('📤 Inserting todo into database...');
                         const result = await window.supabase.insert('todos', [newTodo]);
+                        console.log('📥 Insert result:', result);
+                        
                         if (result && result[0]) {
                             newTodo.id = result[0].id;
+                            console.log('✅ Todo created with ID:', newTodo.id);
+                        } else {
+                            console.warn('⚠️ Insert succeeded but no ID returned');
+                            // Generate temp ID for local use
+                            newTodo.id = Date.now();
                         }
+                    } else {
+                        // Demo mode
+                        newTodo.id = Date.now();
+                        console.log('📱 Demo mode - todo created locally only');
                     }
                     
+                    // Add to local array first for immediate UI feedback
                     this.todos.push(newTodo);
                     this.renderTodos();
                     input.value = '';
+                    
+                    console.log('✅ Todo added successfully:', newTodo.title);
+                    
+                    // Reload from database to ensure sync
+                    if (window.supabase && window.supabase.isAuthenticated()) {
+                        console.log('🔄 Reloading todos from database to ensure sync...');
+                        setTimeout(async () => {
+                            await this.loadTodos();
+                        }, 1000);
+                    }
                     
                 } catch (error) {
                     console.error('❌ Error adding todo:', error);
