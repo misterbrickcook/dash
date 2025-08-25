@@ -294,7 +294,6 @@
     </div>
 
     <!-- === SUPABASE INTEGRATION === -->
-    <script src="https://unpkg.com/@supabase/supabase-js@1"></script>
     <script src="supabase-config.js"></script>
     
     <script>
@@ -310,6 +309,19 @@
             
             init() {
                 console.log('📱 SimpleMobileApp initializing...');
+                
+                // Initialize Supabase first
+                if (window.initializeSupabase) {
+                    const supabaseInitialized = window.initializeSupabase();
+                    console.log('📱 Supabase initialized:', supabaseInitialized);
+                    if (!supabaseInitialized) {
+                        console.error('❌ Failed to initialize Supabase');
+                        this.showError('Datenbankverbindung fehlgeschlagen');
+                    }
+                } else {
+                    console.error('❌ Supabase config not found');
+                    this.showError('Konfiguration nicht gefunden');
+                }
                 
                 // Bind events
                 this.bindEvents();

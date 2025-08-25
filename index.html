@@ -11,6 +11,18 @@
     
     <!-- SECURITY: Remove credentials from URL immediately -->
     <script>
+        // Redirect mobile devices to mobile.html immediately
+        (function() {
+            const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                           (window.innerWidth <= 768 && 'ontouchstart' in window);
+            
+            if (isMobile && !window.location.pathname.includes('mobile.html')) {
+                console.log('📱 Mobile device detected - redirecting to mobile.html');
+                window.location.href = 'mobile.html';
+                return;
+            }
+        })();
+        
         // Clear URL parameters with credentials immediately on load
         (function() {
             const url = new URL(window.location);
