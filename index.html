@@ -18638,10 +18638,8 @@
                     
                     this.updateUI();
                     
-                    // Reload todos to show in correct category
-                    if (window.loadTodos) {
-                        window.loadTodos();
-                    }
+                    // Force refresh of todo sections to show item in new category
+                    this.forceRefreshTodos();
                     
                     // Show success message
                     this.showToast(`✅ Brain Dump zu ${category.charAt(0).toUpperCase() + category.slice(1)} verschoben`);
@@ -18680,10 +18678,8 @@
                     
                     this.updateUI();
                     
-                    // Reload todos
-                    if (window.loadTodos) {
-                        window.loadTodos();
-                    }
+                    // Force refresh of todo sections to show items in new category
+                    this.forceRefreshTodos();
                     
                     this.showToast(`✅ ${count} Brain Dumps zu ${category.charAt(0).toUpperCase() + category.slice(1)} verschoben`);
                     
@@ -18826,6 +18822,55 @@
                         }
                     };
                 });
+            }
+            
+            forceRefreshTodos() {
+                // Try multiple methods to refresh todo sections
+                try {
+                    // Method 1: Direct function calls
+                    if (window.loadTodos) {
+                        console.log('🔄 Refreshing todos via loadTodos()');
+                        window.loadTodos();
+                    }
+                    
+                    // Method 2: Refresh specific todo containers
+                    if (window.TodoManager && window.TodoManager.loadTodos) {
+                        console.log('🔄 Refreshing todos via TodoManager');
+                        window.TodoManager.loadTodos();
+                    }
+                    
+                    // Method 3: Trigger refresh events
+                    const refreshEvent = new CustomEvent('todoRefresh', { 
+                        detail: { source: 'brainDumpDistribution' } 
+                    });
+                    document.dispatchEvent(refreshEvent);
+                    
+                    // Method 4: Force reload of todo grids
+                    const todoGrids = document.querySelectorAll('.todos-grid, .todo-grid, [id*="todo"]');
+                    if (todoGrids.length > 0) {
+                        console.log(`🔄 Found ${todoGrids.length} todo containers to refresh`);
+                    }
+                    
+                    // Method 5: Small delay then page refresh as fallback (only if other methods fail)
+                    setTimeout(() => {
+                        if (!this.todoRefreshSuccess) {
+                            console.log('🔄 Fallback: Triggering page refresh for todo sync');
+                            // Force a gentle page refresh to sync todos
+                            const currentHash = window.location.hash;
+                            window.location.href = window.location.href.split('#')[0] + '#refresh-todos';
+                            setTimeout(() => {
+                                if (currentHash) {
+                                    window.location.hash = currentHash;
+                                } else {
+                                    window.location.hash = '';
+                                }
+                            }, 100);
+                        }
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error('❌ Error in forceRefreshTodos:', error);
+                }
             }
             
             showToast(message) {
