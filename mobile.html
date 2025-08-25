@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DashFin Mobile v2.2 - Brain Dump Direct</title>
+    <title>DashFin Mobile v2.3 - Icon Tags Only</title>
     <!-- Cache Buster für neues Brain Dump Design -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -531,7 +531,6 @@
             <div class="todo-block">
                 <div class="todo-block-header">
                     <h3>Brain Dump</h3>
-                    <button id="brain-dump-toggle" class="add-btn">+</button>
                 </div>
                 
                 <!-- Brain Dump Input (immer sichtbar für schnelle Eingabe) -->
@@ -544,14 +543,12 @@
                         autofocus
                     ></textarea>
                     
-                    <!-- Smart Action Chips -->
+                    <!-- Icon Tags -->
                     <div class="action-chips">
-                        <button class="chip" id="chip-jetzt" data-time="now">⚡</button>
-                        <button class="chip" id="chip-heute" data-date="today">📅</button>
-                        <button class="chip" id="chip-morgen" data-date="tomorrow">🌅</button>
-                        <button class="chip" id="chip-wichtig" data-priority="high">❗</button>
-                        <button class="chip" id="chip-dringend" data-category="urgent">🔥</button>
-                        <button class="chip" id="chip-idee" data-category="idee">💡</button>
+                        <button class="chip" id="chip-ausruf" data-tag="ausruf">❗</button>
+                        <button class="chip" id="chip-bitcoin" data-tag="bitcoin">₿</button>
+                        <button class="chip" id="chip-idee" data-tag="idee">💡</button>
+                        <button class="chip" id="chip-arbeit" data-tag="arbeit">💼</button>
                     </div>
                     
                     <!-- Instant Add Button -->
@@ -910,12 +907,10 @@
             
             bindSmartChips() {
                 const chips = {
-                    'chip-jetzt': { type: 'priority', value: 'jetzt', icon: '⚡' },
-                    'chip-heute': { type: 'date', value: 'heute', icon: '📅' },
-                    'chip-morgen': { type: 'date', value: 'morgen', icon: '🌅' },
-                    'chip-wichtig': { type: 'priority', value: 'wichtig', icon: '❗' },
-                    'chip-dringend': { type: 'priority', value: 'dringend', icon: '🔥' },
-                    'chip-idee': { type: 'category', value: 'idee', icon: '💡' }
+                    'chip-ausruf': { type: 'tag', value: 'ausruf', icon: '❗' },
+                    'chip-bitcoin': { type: 'tag', value: 'bitcoin', icon: '₿' },
+                    'chip-idee': { type: 'tag', value: 'idee', icon: '💡' },
+                    'chip-arbeit': { type: 'tag', value: 'arbeit', icon: '💼' }
                 };
                 
                 Object.keys(chips).forEach(chipId => {
@@ -936,23 +931,7 @@
                     this.selectedChips.delete(chipId);
                     chip.classList.remove('active');
                 } else {
-                    // Clear other chips of same type
-                    this.selectedChips.forEach(selectedId => {
-                        const selectedChip = document.getElementById(selectedId);
-                        if (selectedChip && selectedId !== chipId) {
-                            const isDateChip = selectedId.includes('heute') || selectedId.includes('morgen');
-                            const isCurrentDate = chipId.includes('heute') || chipId.includes('morgen');
-                            const isPriorityChip = selectedId.includes('jetzt') || selectedId.includes('wichtig') || selectedId.includes('dringend');
-                            const isCurrentPriority = chipId.includes('jetzt') || chipId.includes('wichtig') || chipId.includes('dringend');
-                            
-                            if ((isDateChip && isCurrentDate) || (isPriorityChip && isCurrentPriority)) {
-                                this.selectedChips.delete(selectedId);
-                                selectedChip.classList.remove('active');
-                            }
-                        }
-                    });
-                    
-                    // Select new chip
+                    // Multiple icon tags can be selected (no clearing)
                     this.selectedChips.add(chipId);
                     chip.classList.add('active');
                 }
@@ -1054,51 +1033,40 @@
             }
             
             processBrainDump(text) {
-                // ALL mobile todos start as brain dumps
-                let category = 'braindump';
-                let priority = 2;
-                let date = null;
-                let time = '21:00';
+                // Collect selected icon tags
+                let iconTags = [];
                 
-                // Store original intended category from chips for later distribution
-                let intendedCategory = 'privat'; // default
-                
-                // Process selected chips
+                // Process selected chips - just collect the icons
                 this.selectedChips.forEach(chipId => {
                     switch (chipId) {
-                        case 'chip-jetzt':
-                            priority = 4;
-                            date = new Date().toISOString().split('T')[0];
-                            time = new Date().toTimeString().split(' ')[0].slice(0, 5);
+                        case 'chip-ausruf':
+                            iconTags.push('❗');
                             break;
-                        case 'chip-heute':
-                            date = new Date().toISOString().split('T')[0];
-                            break;
-                        case 'chip-morgen':
-                            const tomorrow = new Date();
-                            tomorrow.setDate(tomorrow.getDate() + 1);
-                            date = tomorrow.toISOString().split('T')[0];
-                            break;
-                        case 'chip-wichtig':
-                            priority = 3;
-                            break;
-                        case 'chip-dringend':
-                            priority = 4;
+                        case 'chip-bitcoin':
+                            iconTags.push('₿');
                             break;
                         case 'chip-idee':
-                            intendedCategory = 'ideen';
-                            priority = 1;
+                            iconTags.push('💡');
+                            break;
+                        case 'chip-arbeit':
+                            iconTags.push('💼');
                             break;
                     }
                 });
                 
+                // Create brain dump text with only icons as tags
+                let brainDumpText = text;
+                if (iconTags.length > 0) {
+                    brainDumpText = `${text} ${iconTags.join(' ')}`;
+                }
+                
                 return {
-                    text: text,
-                    category: category, // Always 'braindump' for mobile todos
-                    priority: priority,
+                    text: brainDumpText, // Text with icon tags appended
+                    category: 'braindump', // Always 'braindump' for mobile todos
+                    priority: 2, // Default priority
                     completed: false,
-                    date: date,
-                    time: time,
+                    date: null, // No date by default
+                    time: '21:00', // Default time
                     user_id: this.currentUser?.id
                 };
             }
@@ -1280,24 +1248,25 @@
             }
             
             renderTodos() {
-                const todoList = document.getElementById('todo-list');
+                const list = document.getElementById('brain-dump-list');
                 
-                // Filter out todos with empty/null text (desktop format uses 'text' field)
-                const validTodos = this.todos.filter(todo => 
-                    todo && (todo.text || todo.title) && (todo.text || todo.title).trim() !== ''
-                );
-                
-                if (validTodos.length === 0) {
-                    todoList.innerHTML = '<li class="loading">Keine Todos vorhanden</li>';
+                if (this.todos.length === 0) {
+                    list.innerHTML = `
+                        <div class="todo-empty-state">
+                            <p>Brain Dump bereit</p>
+                            <small>Ideen mit Icon-Tags sammeln</small>
+                        </div>
+                    `;
                     return;
                 }
                 
-                todoList.innerHTML = validTodos.map(todo => `
-                    <li class="todo-item">
-                        <span class="todo-text">${this.escapeHtml(todo.text || todo.title || 'Ohne Titel')}</span>
-                        <button class="todo-delete" onclick="app.deleteTodo(${todo.id})">×</button>
-                    </li>
+                const todosHTML = this.todos.map(todo => `
+                    <div class="brain-dump-item" data-id="${todo.id}">
+                        <div class="brain-dump-text">${this.escapeHtml(todo.text)}</div>
+                    </div>
                 `).join('');
+                
+                list.innerHTML = todosHTML;
             }
             
             // Old addTodo method removed - replaced with instantAddTodo()
