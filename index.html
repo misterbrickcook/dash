@@ -18391,8 +18391,8 @@
                 this.setupEventListeners();
                 this.loadBrainDumps();
                 
-                // Check for brain dumps every 30 seconds
-                setInterval(() => this.loadBrainDumps(), 30000);
+                // Check for brain dumps every 10 seconds (faster sync for mobile)
+                setInterval(() => this.loadBrainDumps(), 10000);
             }
             
             setupEventListeners() {
@@ -18986,6 +18986,34 @@
                     brainDumpManager.loadBrainDumps();
                 }
             }, 2000);
+        });
+        
+        // Global function to force brain dump refresh (for mobile sync)
+        window.forceBrainDumpRefresh = function() {
+            if (window.brainDumpManager) {
+                console.log('🔄 Force refreshing brain dumps...');
+                window.brainDumpManager.loadBrainDumps();
+            }
+        };
+        
+        // Force refresh when window becomes visible (user switches back from mobile)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && window.brainDumpManager) {
+                setTimeout(() => {
+                    console.log('🔄 Window focus: Force refreshing brain dumps...');
+                    window.brainDumpManager.loadBrainDumps();
+                }, 500);
+            }
+        });
+        
+        // Also refresh on window focus
+        window.addEventListener('focus', () => {
+            if (window.brainDumpManager) {
+                setTimeout(() => {
+                    console.log('🔄 Window focus: Force refreshing brain dumps...');  
+                    window.brainDumpManager.loadBrainDumps();
+                }, 500);
+            }
         });
         
         // Add toast animations to document
