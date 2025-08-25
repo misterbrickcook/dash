@@ -11577,19 +11577,15 @@
                 },
 
                 async deleteRule(ruleId) {
-                    console.log('🗑️ Attempting to delete rule with ID:', ruleId, typeof ruleId);
+                    console.log('🗑️ Deleting trading rule with ID:', ruleId);
                     
                     // Check for invalid ID
                     if (!ruleId || ruleId === null || ruleId === 'null' || ruleId === undefined) {
                         console.error('❌ Cannot delete rule: Invalid ID:', ruleId);
-                        alert('Fehler: Ungültige Rule-ID. Diese Rule kann nicht gelöscht werden.');
                         return;
                     }
                     
-                    if (!confirm('Are you sure you want to delete this trading rule?')) {
-                        return;
-                    }
-                    
+                    // Pure cloud mode - no confirmation popup, immediate delete
                     try {
                         await cloudStorage.deleteTradingRule(ruleId);
                         
@@ -11602,7 +11598,6 @@
                         console.log('✅ Trading rule deleted successfully');
                     } catch (error) {
                         console.error('❌ Error deleting trading rule:', error);
-                        alert('Fehler beim Löschen der Rule: ' + error.message);
                     }
                 },
 
