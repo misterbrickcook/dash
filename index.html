@@ -2327,6 +2327,157 @@
         [data-theme="dark"] .autocomplete-description {
             color: #9ca3af;
         }
+
+        /* === MOBILE OPTIMIZATIONS === */
+        @media (max-width: 768px) {
+            /* Better mobile viewport */
+            body {
+                font-size: 16px; /* Prevents zoom on iOS */
+                -webkit-text-size-adjust: 100%;
+            }
+            
+            /* Mobile-friendly modal */
+            .modal-content {
+                margin: 1rem;
+                padding: 1.5rem;
+                min-height: auto;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            /* Larger touch targets for mobile */
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                min-height: 44px; /* iOS recommended touch target */
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 12px;
+                border-radius: 8px;
+            }
+            
+            /* Mobile-friendly buttons */
+            .btn {
+                min-height: 44px;
+                padding: 12px 24px;
+                font-size: 16px;
+                border-radius: 8px;
+            }
+            
+            /* Hide complex elements on mobile */
+            .crypto-ticker,
+            .quickbar {
+                display: none !important;
+            }
+            
+            /* Simplify navigation for mobile */
+            .nav-container {
+                padding: 0.5rem;
+            }
+            
+            .nav-tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                display: flex;
+                gap: 0.5rem;
+                padding: 0.5rem 0;
+            }
+            
+            .nav-tab {
+                min-width: auto;
+                white-space: nowrap;
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+
+        /* === MOBILE QUICK TODO === */
+        @media (max-width: 768px) {
+            /* Quick todo button that's always visible on mobile */
+            .mobile-quick-todo {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 56px;
+                height: 56px;
+                background: var(--accent-primary);
+                color: var(--bg-primary);
+                border: none;
+                border-radius: 50%;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            
+            .mobile-quick-todo:hover {
+                transform: scale(1.1);
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+            }
+            
+            /* Simplified mobile modal */
+            .mobile-todo-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 1100;
+                display: none;
+                align-items: flex-end;
+            }
+            
+            .mobile-todo-modal.show {
+                display: flex;
+            }
+            
+            .mobile-todo-form {
+                background: var(--bg-primary);
+                width: 100%;
+                border-radius: 20px 20px 0 0;
+                padding: 1.5rem;
+                max-height: 80vh;
+                overflow-y: auto;
+                animation: slideUp 0.3s ease-out;
+            }
+            
+            @keyframes slideUp {
+                from {
+                    transform: translateY(100%);
+                }
+                to {
+                    transform: translateY(0);
+                }
+            }
+            
+            .mobile-todo-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid var(--border-primary);
+            }
+            
+            .mobile-todo-title {
+                font-size: 1.2rem;
+                font-weight: 600;
+                margin: 0;
+            }
+            
+            .mobile-close-btn {
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                color: var(--text-secondary);
+                cursor: pointer;
+                padding: 4px;
+            }
+        }
         .journal-entry-meta {
             display: flex;
             justify-content: space-between;
@@ -5544,6 +5695,63 @@
         </div>
     </div>
 
+    <!-- === MOBILE QUICK TODO === -->
+    <button class="mobile-quick-todo" id="mobile-quick-todo-btn" style="display: none;">
+        <i data-lucide="plus"></i>
+    </button>
+
+    <!-- === MOBILE TODO MODAL === -->
+    <div class="mobile-todo-modal" id="mobile-todo-modal">
+        <div class="mobile-todo-form">
+            <div class="mobile-todo-header">
+                <h3 class="mobile-todo-title">Todo hinzufügen</h3>
+                <button class="mobile-close-btn" id="mobile-todo-close">&times;</button>
+            </div>
+            
+            <form id="mobile-todo-form">
+                <div class="form-group">
+                    <label for="mobile-todo-title">Aufgabe</label>
+                    <input type="text" id="mobile-todo-title" placeholder="Was möchtest du erledigen?" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mobile-todo-category">Kategorie</label>
+                    <select id="mobile-todo-category" required>
+                        <option value="">Kategorie wählen</option>
+                        <option value="privat">Privat</option>
+                        <option value="uni">Uni</option>
+                        <option value="arbeit">Arbeit</option>
+                        <option value="projekte">Projekte</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mobile-todo-priority">Priorität</label>
+                    <select id="mobile-todo-priority" required>
+                        <option value="mittel" selected>Normal</option>
+                        <option value="wichtig">Wichtig</option>
+                        <option value="dringend">Dringend</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mobile-todo-deadline">Deadline</label>
+                    <input type="date" id="mobile-todo-deadline">
+                </div>
+                
+                <div class="form-group">
+                    <label for="mobile-todo-time">Uhrzeit</label>
+                    <input type="time" id="mobile-todo-time" value="21:00">
+                </div>
+                
+                <div class="form-actions" style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="button" id="mobile-todo-cancel" class="btn secondary" style="flex: 1;">Abbrechen</button>
+                    <button type="submit" class="btn" style="flex: 1;">Erstellen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- === ADD GOAL MODAL === -->
     <div id="add-goal-modal" class="modal hide">
         <div class="modal-content">
@@ -8665,6 +8873,124 @@
         // Make TodoManager globally available
         window.TodoManager = TodoManager;
 
+        // === MOBILE TODO MANAGER ===
+        const MobileTodoManager = {
+            showModal() {
+                console.log('📱 Opening mobile todo modal');
+                const modal = document.getElementById('mobile-todo-modal');
+                if (modal) {
+                    modal.classList.add('show');
+                    
+                    // Set today's date as default
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('mobile-todo-deadline').value = today;
+                    
+                    // Focus the title input
+                    setTimeout(() => {
+                        const titleInput = document.getElementById('mobile-todo-title');
+                        if (titleInput) titleInput.focus();
+                    }, 100);
+                }
+            },
+            
+            hideModal() {
+                console.log('📱 Closing mobile todo modal');
+                const modal = document.getElementById('mobile-todo-modal');
+                if (modal) {
+                    modal.classList.remove('show');
+                    this.resetForm();
+                }
+            },
+            
+            resetForm() {
+                const form = document.getElementById('mobile-todo-form');
+                if (form) {
+                    form.reset();
+                    document.getElementById('mobile-todo-priority').value = 'mittel';
+                    document.getElementById('mobile-todo-time').value = '21:00';
+                }
+            },
+            
+            async submitTodo() {
+                try {
+                    const todoData = {
+                        title: document.getElementById('mobile-todo-title').value,
+                        category: document.getElementById('mobile-todo-category').value,
+                        priority: document.getElementById('mobile-todo-priority').value,
+                        deadline: document.getElementById('mobile-todo-deadline').value,
+                        time: document.getElementById('mobile-todo-time').value
+                    };
+                    
+                    console.log('📱 Mobile todo data:', todoData);
+                    
+                    if (!todoData.title.trim()) {
+                        alert('Bitte gib eine Aufgabe ein!');
+                        return;
+                    }
+                    
+                    if (!todoData.category) {
+                        alert('Bitte wähle eine Kategorie!');
+                        return;
+                    }
+                    
+                    // Use the existing TodoManager to add the todo
+                    await TodoManager.addTodo(todoData);
+                    
+                    // Close modal and show success
+                    this.hideModal();
+                    this.showSuccessMessage();
+                    
+                    console.log('✅ Mobile todo added successfully');
+                    
+                } catch (error) {
+                    console.error('❌ Error adding mobile todo:', error);
+                    alert('Fehler beim Hinzufügen des Todos: ' + error.message);
+                }
+            },
+            
+            showSuccessMessage() {
+                // Simple success feedback
+                const btn = document.getElementById('mobile-quick-todo-btn');
+                if (btn) {
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<i data-lucide="check"></i>';
+                    btn.style.background = '#22c55e';
+                    
+                    // Reinitialize Lucide icons for the check icon
+                    if (window.lucide) lucide.createIcons();
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.style.background = 'var(--accent-primary)';
+                        if (window.lucide) lucide.createIcons();
+                    }, 2000);
+                }
+            },
+            
+            // Show/hide mobile button based on screen size
+            initMobileDetection() {
+                const mobileBtn = document.getElementById('mobile-quick-todo-btn');
+                if (!mobileBtn) return;
+                
+                const checkMobile = () => {
+                    if (window.innerWidth <= 768) {
+                        mobileBtn.style.display = 'flex';
+                    } else {
+                        mobileBtn.style.display = 'none';
+                    }
+                };
+                
+                // Check on load
+                checkMobile();
+                
+                // Check on resize
+                window.addEventListener('resize', checkMobile);
+            }
+        };
+        
+        // Make MobileTodoManager globally available
+        window.MobileTodoManager = MobileTodoManager;
+
         // === INTELLIGENT GLOBAL SEARCH COMMAND CENTER ===
         const GlobalSearch = {
             isOpen: false,
@@ -11045,6 +11371,12 @@
                 console.log('🔧 @ autocomplete setup completed for journal');
             }
             
+            // Initialize mobile todo system
+            if (window.MobileTodoManager) {
+                MobileTodoManager.initMobileDetection();
+                console.log('📱 Mobile todo system initialized');
+            }
+            
             // Hide QuickBar initially until authentication is confirmed
             const quickbar = document.getElementById('quickbar');
             if (quickbar) {
@@ -11146,6 +11478,51 @@
                 addTodoModal.addEventListener('click', (e) => {
                     if (e.target === addTodoModal) {
                         TodoManager.hideAddTodoModal();
+                    }
+                });
+            }
+
+            // === MOBILE TODO EVENT LISTENERS ===
+            
+            // Mobile quick todo button
+            const mobileQuickTodoBtn = document.getElementById('mobile-quick-todo-btn');
+            if (mobileQuickTodoBtn) {
+                mobileQuickTodoBtn.addEventListener('click', () => {
+                    MobileTodoManager.showModal();
+                });
+            }
+            
+            // Mobile todo form submission
+            const mobileTodoForm = document.getElementById('mobile-todo-form');
+            if (mobileTodoForm) {
+                mobileTodoForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await MobileTodoManager.submitTodo();
+                });
+            }
+            
+            // Mobile todo close buttons
+            const mobileCloseBtn = document.getElementById('mobile-todo-close');
+            const mobileCancelBtn = document.getElementById('mobile-todo-cancel');
+            
+            if (mobileCloseBtn) {
+                mobileCloseBtn.addEventListener('click', () => {
+                    MobileTodoManager.hideModal();
+                });
+            }
+            
+            if (mobileCancelBtn) {
+                mobileCancelBtn.addEventListener('click', () => {
+                    MobileTodoManager.hideModal();
+                });
+            }
+            
+            // Close mobile modal when clicking outside
+            const mobileTodoModal = document.getElementById('mobile-todo-modal');
+            if (mobileTodoModal) {
+                mobileTodoModal.addEventListener('click', (e) => {
+                    if (e.target === mobileTodoModal) {
+                        MobileTodoManager.hideModal();
                     }
                 });
             }
