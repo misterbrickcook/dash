@@ -18621,9 +18621,12 @@
                     const dump = this.brainDumps.find(d => d.id === dumpId);
                     if (!dump) return;
                     
-                    // Update the todo with new category
+                    // Update the todo with new category, date and time for proper sorting
+                    const now = new Date();
                     await window.supabase.update('todos', {
-                        category: category
+                        category: category,
+                        date: now.toISOString().split('T')[0], // Today's date
+                        time: now.toTimeString().split(' ')[0].slice(0, 5) // Current time HH:MM
                     }, dumpId);
                     
                     // Remove from brain dumps
@@ -18657,10 +18660,13 @@
                 if (!category) return;
                 
                 try {
-                    // Update all selected brain dumps
+                    // Update all selected brain dumps with category, date and time
+                    const now = new Date();
                     for (const dumpId of this.selectedDumps) {
                         await window.supabase.update('todos', {
-                            category: category
+                            category: category,
+                            date: now.toISOString().split('T')[0], // Today's date
+                            time: now.toTimeString().split(' ')[0].slice(0, 5) // Current time HH:MM
                         }, dumpId);
                     }
                     
