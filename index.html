@@ -11683,6 +11683,39 @@
                     }
                 },
 
+                async checkDatabaseSchema() {
+                    console.log('🔍 Checking database schema for trading_rules table...');
+                    
+                    if (!supabase?.isAuthenticated()) {
+                        console.error('❌ Not authenticated');
+                        return;
+                    }
+                    
+                    const user = supabase.getCurrentUser();
+                    
+                    try {
+                        // Get a sample record to see the structure
+                        const result = await supabase.query(`trading_rules?user_id=eq.${user.id}&select=*&limit=1`);
+                        console.log('📊 Sample record from database:', result);
+                        
+                        if (result && result[0]) {
+                            console.log('🔍 Record structure:');
+                            Object.keys(result[0]).forEach(key => {
+                                console.log(`  - ${key}: ${result[0][key]} (${typeof result[0][key]})`);
+                            });
+                            
+                            if (!result[0].id) {
+                                console.error('❌ PROBLEM FOUND: Database records have NO id column!');
+                                console.error('❌ This explains why rules show as having null IDs');
+                            } else {
+                                console.log('✅ Database records have id column:', result[0].id);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('❌ Error checking schema:', error);
+                    }
+                },
+
                 async cleanupInvalidRules() {
                     console.log('🧹 Cleaning up rules with invalid IDs...');
                     
