@@ -6390,7 +6390,7 @@
             </div>
 
             <!-- === BRAIN DUMP CONTAINER === -->
-            <div id="brain-dump-container" class="brain-dump-container" style="display: none;">
+            <div id="brain-dump-container" class="brain-dump-container">
                 <div class="brain-dump-header">
                     <div class="brain-dump-title">
                         <i data-lucide="brain-circuit" style="width: 20px; height: 20px;"></i>
@@ -18448,6 +18448,9 @@
             async loadBrainDumps() {
                 try {
                     if (!window.supabase || !window.supabase.isAuthenticated()) {
+                        console.log('🧠 Brain Dump Manager: Not authenticated, showing empty state');
+                        this.brainDumps = [];
+                        this.updateUI();
                         return;
                     }
                     
@@ -18485,12 +18488,14 @@
                 // Update badge count
                 badge.textContent = this.brainDumps.length;
                 
-                // Show/hide container
+                // Container is always visible
+                container.style.display = 'block';
+                
+                // Update badge visibility
                 if (this.brainDumps.length > 0) {
-                    container.style.display = 'block';
+                    badge.style.display = 'inline';
                 } else {
-                    container.style.display = 'none';
-                    return;
+                    badge.style.display = 'none';
                 }
                 
                 // Render brain dumps
@@ -18779,15 +18784,19 @@
         // Initialize Brain Dump Manager
         let brainDumpManager;
         
-        // Wait for authentication before initializing
+        // Initialize immediately
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize after a short delay to ensure supabase is ready
+            console.log('🧠 Initializing Brain Dump Manager...');
+            brainDumpManager = new BrainDumpManager();
+            window.brainDumpManager = brainDumpManager;
+            
+            // Also try to initialize after auth is ready
             setTimeout(() => {
-                if (window.supabase && window.supabase.isAuthenticated()) {
-                    brainDumpManager = new BrainDumpManager();
-                    window.brainDumpManager = brainDumpManager;
+                if (window.supabase && window.supabase.isAuthenticated() && brainDumpManager) {
+                    console.log('🧠 Brain Dump Manager: Auth ready, loading data...');
+                    brainDumpManager.loadBrainDumps();
                 }
-            }, 1000);
+            }, 2000);
         });
         
         // Add toast animations to document
