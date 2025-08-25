@@ -20,7 +20,7 @@
             min-height: 100vh;
         }
         
-        /* === DESIGN SYSTEM (like desktop) === */
+        /* === DESIGN SYSTEM (EXACT DESKTOP MATCH) === */
         :root {
             /* Colors */
             --bg-primary: #ffffff;
@@ -400,144 +400,216 @@
             color: #666;
         }
         
-        /* === BRAIN DUMP INTERFACE === */
-        .brain-dump-container {
+        /* === DESKTOP-STYLE TODO BLOCK === */
+        .todo-block {
             background: var(--bg-primary);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             border: 1px solid var(--border-primary);
+            margin-bottom: 2rem;
         }
         
-        .main-input-area {
-            position: relative;
-        }
-        
-        .brain-input {
-            width: 100%;
-            min-height: 80px;
-            padding: 16px;
-            font-size: 16px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            border: 2px solid var(--border-primary);
-            border-radius: 8px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            resize: none;
-            outline: none;
-            transition: border-color 0.2s ease;
-            line-height: 1.4;
-        }
-        
-        .brain-input:focus {
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
-        }
-        
-        .brain-input::placeholder {
-            color: var(--text-muted);
-            font-style: italic;
-        }
-        
-        .smart-actions {
-            margin-top: 1rem;
-        }
-        
-        .action-chips {
+        .todo-block-header {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
         }
         
-        .chip {
-            padding: 8px 12px;
-            border: 2px solid var(--border-primary);
+        .todo-block-header h3 {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .add-btn {
+            width: 32px;
+            height: 32px;
             background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
             color: var(--text-secondary);
-            border-radius: 20px;
-            font-size: 18px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            min-height: 44px;
-            min-width: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 18px;
+            line-height: 1;
+            transition: border-color 0.2s ease;
         }
         
-        .chip:hover,
+        .add-btn:hover {
+            border-color: var(--accent-primary);
+        }
+        
+        .brain-input-container {
+            padding: 1.5rem;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-primary);
+        }
+        
+        /* === BRAIN DUMP CHIPS === */
+        .action-chips {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .chip {
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--border-primary);
+            background: var(--bg-primary);
+            border-radius: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        
+        .chip:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-secondary);
+        }
+        
         .chip.active {
             border-color: var(--accent-primary);
             background: var(--accent-primary);
-            color: var(--bg-primary);
-            transform: scale(1.05);
+            color: white;
         }
         
-        .instant-add {
+        .brain-add-btn {
             width: 100%;
-            height: 50px;
+            padding: 1rem;
             background: var(--accent-primary);
-            color: var(--bg-primary);
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            color: white;
+            border: 1px solid var(--accent-primary);
+            border-radius: 6px;
+            font-size: var(--font-size-base);
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
         }
         
-        .instant-add:hover {
-            background: #333333;
-            transform: translateY(-1px);
+        .brain-add-btn:hover {
+            background: #222;
+            border-color: #222;
         }
         
-        .instant-add:disabled {
-            background: var(--text-muted);
-            cursor: not-allowed;
-            transform: none;
+        .brain-add-btn:active {
+            transform: translateY(1px);
         }
         
         .smart-suggestions {
             margin-top: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+        }
+        
+        .brain-textarea {
+            width: 100%;
+            min-height: 100px;
             padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid var(--border-secondary);
-        }
-        
-        .suggestion-header {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .suggestions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .suggestion-chip {
-            padding: 6px 12px;
-            background: var(--bg-primary);
             border: 1px solid var(--border-primary);
-            border-radius: 16px;
-            font-size: 13px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-base);
+            resize: vertical;
+            outline: none;
+        }
+        
+        .brain-textarea:focus {
+            border-color: var(--accent-primary);
+        }
+        
+        .brain-textarea::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .brain-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: flex-end;
+        }
+        
+        .brain-save-btn, .brain-cancel-btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--border-primary);
+            background: var(--bg-primary);
             color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: border-color 0.2s ease;
         }
         
-        .suggestion-chip:hover {
+        .brain-save-btn:hover, .brain-cancel-btn:hover {
+            border-color: var(--accent-primary);
+        }
+        
+        .brain-save-btn {
             background: var(--accent-primary);
             color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+        
+        .todo-links {
+            min-height: 100px;
+            padding: 1.5rem;
+        }
+        
+        .todo-empty-state {
+            text-align: center;
+            color: var(--text-muted);
+        }
+        
+        .todo-empty-state p {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .todo-empty-state small {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        .brain-dump-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-primary);
+            background: var(--bg-primary);
+        }
+        
+        .brain-dump-item:last-child {
+            border-bottom: none;
+        }
+        
+        .brain-dump-text {
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-base);
+            color: var(--text-primary);
+        }
+        
+        .brain-dump-meta {
+            margin-top: 0.5rem;
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         
         /* === HIDDEN BY DEFAULT === */
@@ -577,50 +649,51 @@
         
         <div class="dashboard-content">
             <!-- === TODO SECTION === -->
-            <div class="todo-section">
-                <h2 class="section-title">Todos</h2>
+            <!-- === BRAIN DUMP BLOCK (WIE DESKTOP DASHBOARD) === -->
+            <div class="todo-block">
+                <div class="todo-block-header">
+                    <h3>Brain Dump</h3>
+                    <button id="add-todo-btn" class="add-btn">+</button>
+                </div>
                 
-                <!-- BRAIN DUMP INPUT - Ultra minimalistisch -->
-                <div class="brain-dump-container">
-                    <div class="main-input-area">
-                        <textarea 
-                            class="brain-input" 
-                            id="brain-input" 
-                            placeholder="Idee, Aufgabe, Gedanke..."
-                            rows="3"
-                            autofocus
-                        ></textarea>
-                        
-                        <!-- Smart Quick Actions (immer sichtbar) -->
-                        <div class="smart-actions">
-                            <div class="action-chips">
-                                <button class="chip" id="chip-jetzt" title="Sofort erledigen">⚡</button>
-                                <button class="chip" id="chip-heute" title="Heute">📅</button>
-                                <button class="chip" id="chip-morgen" title="Morgen">🌅</button>
-                                <button class="chip" id="chip-wichtig" title="Wichtig">❗</button>
-                                <button class="chip" id="chip-dringend" title="Dringend">🔥</button>
-                                <button class="chip" id="chip-idee" title="Idee für später">💡</button>
-                            </div>
-                            
-                            <!-- Instant Add Button -->
-                            <button class="instant-add" id="instant-add-btn">
-                                <span id="add-text">HINZUFÜGEN</span>
-                                <span id="add-loading" style="display: none;">⚡</span>
-                            </button>
-                        </div>
+                <!-- Brain Dump Input (immer sichtbar für schnelle Eingabe) -->
+                <div id="brain-input-container" class="brain-input-container">
+                    <textarea 
+                        id="brain-input" 
+                        class="brain-textarea"
+                        placeholder="Idee, Aufgabe, Gedanke..."
+                        rows="3"
+                        autofocus
+                    ></textarea>
+                    
+                    <!-- Smart Action Chips -->
+                    <div class="action-chips">
+                        <button class="chip" id="chip-jetzt" data-time="now">⚡</button>
+                        <button class="chip" id="chip-heute" data-date="today">📅</button>
+                        <button class="chip" id="chip-morgen" data-date="tomorrow">🌅</button>
+                        <button class="chip" id="chip-wichtig" data-priority="high">❗</button>
+                        <button class="chip" id="chip-dringend" data-category="urgent">🔥</button>
+                        <button class="chip" id="chip-idee" data-category="idee">💡</button>
                     </div>
                     
-                    <!-- AI-powered Smart Parsing (erscheint bei Bedarf) -->
-                    <div class="smart-suggestions" id="smart-suggestions" style="display: none;">
-                        <div class="suggestion-header">Smart erkannt:</div>
-                        <div class="suggestions" id="suggestions-list"></div>
+                    <!-- Instant Add Button -->
+                    <div class="brain-actions">
+                        <button id="brain-add-btn" class="brain-add-btn">Hinzufügen</button>
+                    </div>
+                    
+                    <!-- Smart Suggestions Area -->
+                    <div id="smart-suggestions" class="smart-suggestions hidden">
+                        <small>Smart-Vorschläge werden hier angezeigt...</small>
                     </div>
                 </div>
                 
-                <!-- Todo List -->
-                <ul class="todo-list" id="todo-list">
-                    <li class="loading">Todos werden geladen...</li>
-                </ul>
+                <!-- Brain Dump List -->
+                <div class="todo-links" id="brain-dump-list">
+                    <div class="todo-empty-state">
+                        <p>Schnelle Notizen</p>
+                        <small>Ideen sammeln für spätere Bearbeitung</small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -925,7 +998,7 @@
                 
                 // Brain input
                 const brainInput = document.getElementById('brain-input');
-                const instantAddBtn = document.getElementById('instant-add-btn');
+                const instantAddBtn = document.getElementById('brain-add-btn');
                 
                 // Auto-resize textarea
                 brainInput.addEventListener('input', () => {
@@ -1040,17 +1113,15 @@
             
             async instantAddTodo() {
                 const brainInput = document.getElementById('brain-input');
-                const instantAddBtn = document.getElementById('instant-add-btn');
-                const addText = document.getElementById('add-text');
-                const addLoading = document.getElementById('add-loading');
+                const instantAddBtn = document.getElementById('brain-add-btn');
                 
                 const text = brainInput.value.trim();
                 if (!text) return;
                 
                 // Show loading state
-                addText.style.display = 'none';
-                addLoading.style.display = 'inline';
+                instantAddBtn.textContent = 'Wird hinzugefügt...';
                 instantAddBtn.disabled = true;
+                
                 
                 try {
                     // Process selected chips
@@ -1076,8 +1147,9 @@
                     brainInput.style.height = 'auto';
                     this.clearSelectedChips();
                     
-                    // Hide suggestions
-                    document.getElementById('smart-suggestions').style.display = 'none';
+                    // Hide suggestions (if exists)
+                    const suggestions = document.getElementById('smart-suggestions');
+                    if (suggestions) suggestions.classList.add('hidden');
                     
                     // Flash success
                     instantAddBtn.style.background = '#28a745';
@@ -1095,8 +1167,7 @@
                     }, 1000);
                 } finally {
                     // Reset button state
-                    addText.style.display = 'inline';
-                    addLoading.style.display = 'none';
+                    instantAddBtn.textContent = 'Hinzufügen';
                     instantAddBtn.disabled = false;
                     
                     // Focus back to input for next entry
