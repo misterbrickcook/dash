@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DashFin Mobile v2.0</title>
+    <title>DashFin Mobile v2.1 - Brain Dump Clean</title>
     <!-- Cache Buster für neues Brain Dump Design -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -211,55 +211,13 @@
             padding: 1rem;
         }
         
-        /* === TODO SECTION === */
-        .todo-section {
-            margin-bottom: 2rem;
-        }
-        
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
-            color: #000000;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            border-bottom: 1px solid var(--border-primary);
-            padding-bottom: 0.5rem;
-        }
-        
-        .add-todo-form {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-        
-        .todo-input {
-            width: 100%;
-            height: 44px;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-        }
+        /* === OLD TODO SECTION REMOVED === */
         
         .todo-actions {
             display: flex;
             gap: 0.5rem;
         }
         
-        .add-btn {
-            flex: 2;
-            height: 44px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
         
         .add-btn:disabled {
             background: #ccc;
@@ -303,106 +261,7 @@
             color: #555;
         }
         
-        .todo-input[type="date"],
-        .todo-input[type="time"],
-        .todo-input[type="select"],
-        select.todo-input {
-            height: 44px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 12px;
-            background: white;
-        }
-        
-        /* === QUICK OPTIONS === */
-        .quick-options {
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .quick-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .quick-btn {
-            padding: 8px 16px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            color: #555;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-height: 36px;
-        }
-        
-        .quick-btn:hover,
-        .quick-btn.active {
-            border-color: #667eea;
-            background: #667eea;
-            color: white;
-        }
-        
-        .quick-btn.priority-btn.active {
-            border-color: #f59e0b;
-            background: #f59e0b;
-        }
-        
-        /* === FORM ROWS === */
-        .form-row {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .form-row:last-child {
-            margin-bottom: 0;
-        }
-        
-        .form-row .form-group {
-            margin-bottom: 0;
-        }
-        
-        .todo-list {
-            list-style: none;
-        }
-        
-        .todo-item {
-            background: white;
-            border: 1px solid #eee;
-            border-radius: 6px;
-            padding: 1rem;
-            margin-bottom: 0.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .todo-text {
-            flex: 1;
-            font-size: 16px;
-        }
-        
-        .todo-delete {
-            background: #dc3545;
-            color: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
-        }
+        /* === OLD TODO STYLES REMOVED === */
         
         /* === DESKTOP-STYLE TODO BLOCK === */
         .todo-block {
@@ -446,6 +305,21 @@
         
         .add-btn:hover {
             border-color: var(--accent-primary);
+        }
+        
+        .add-btn {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            line-height: 1;
+            transition: border-color 0.2s ease;
         }
         
         .brain-input-container {
@@ -657,7 +531,7 @@
             <div class="todo-block">
                 <div class="todo-block-header">
                     <h3>Brain Dump</h3>
-                    <button id="add-todo-btn" class="add-btn">+</button>
+                    <button id="brain-dump-toggle" class="add-btn">+</button>
                 </div>
                 
                 <!-- Brain Dump Input (immer sichtbar für schnelle Eingabe) -->
