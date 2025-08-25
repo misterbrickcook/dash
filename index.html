@@ -2109,6 +2109,255 @@
             color: #ffffff;
         }
         
+        /* === BRAIN DUMP CONTAINER === */
+        .brain-dump-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .brain-dump-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border-primary);
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .brain-dump-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+        }
+        
+        .brain-dump-badge {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            min-width: 24px;
+            text-align: center;
+        }
+        
+        .brain-dump-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .brain-dump-expand {
+            background: none;
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .brain-dump-expand:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-primary);
+        }
+        
+        .brain-dump-expand.expanded {
+            transform: rotate(180deg);
+        }
+        
+        .brain-dump-content {
+            display: none;
+            padding: 1.5rem;
+            background: var(--bg-primary);
+        }
+        
+        .brain-dump-content.expanded {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .brain-dump-alert {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            color: #856404;
+            font-size: 0.9rem;
+        }
+        
+        .brain-dump-list {
+            margin-bottom: 1.5rem;
+        }
+        
+        .brain-dump-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        
+        .brain-dump-item:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .brain-dump-item.selected {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+        
+        .brain-dump-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .brain-dump-content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .brain-dump-text {
+            font-size: 1rem;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+        
+        .brain-dump-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .brain-dump-chips {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .brain-dump-chip {
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .brain-dump-actions-area {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .brain-dump-quick-action {
+            padding: 0.5rem;
+            background: none;
+            border: 1px solid var(--border-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .brain-dump-quick-action:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-primary);
+        }
+        
+        .brain-dump-bulk-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-primary);
+        }
+        
+        .brain-dump-bulk-actions button {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--border-primary);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+        
+        .btn-primary:hover {
+            background: #333333;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-primary);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: var(--bg-primary);
+            border-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .brain-dump-empty {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
 
         /* === ZIELE SPECIFIC === */
         .ziel-card {
@@ -6127,6 +6376,39 @@
                 <button id="add-todo-btn" class="add-btn">
                     <i data-lucide="plus"></i>
                 </button>
+            </div>
+
+            <!-- === BRAIN DUMP CONTAINER === -->
+            <div id="brain-dump-container" class="brain-dump-container" style="display: none;">
+                <div class="brain-dump-header">
+                    <div class="brain-dump-title">
+                        <i data-lucide="brain-circuit" style="width: 20px; height: 20px;"></i>
+                        <span>Brain Dumps</span>
+                        <div class="brain-dump-badge" id="brain-dump-badge">0</div>
+                    </div>
+                    <div class="brain-dump-actions">
+                        <button class="brain-dump-expand" id="brain-dump-expand" title="Expand/Collapse">
+                            <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="brain-dump-content" id="brain-dump-content">
+                    <div class="brain-dump-alert">
+                        <i data-lucide="smartphone" style="width: 16px; height: 16px;"></i>
+                        <span>📱 Neue Brain Dumps vom Handy - Zeit zum Verteilen!</span>
+                    </div>
+                    
+                    <div class="brain-dump-list" id="brain-dump-list">
+                        <!-- Brain dumps will be loaded here -->
+                    </div>
+                    
+                    <div class="brain-dump-bulk-actions">
+                        <button class="btn-secondary" id="brain-dump-select-all">Alle auswählen</button>
+                        <button class="btn-primary" id="brain-dump-distribute">Verteilen</button>
+                        <button class="btn-danger" id="brain-dump-clear-all">Alle löschen</button>
+                    </div>
+                </div>
             </div>
 
             <div class="todos-grid">
@@ -18100,6 +18382,409 @@
         </div>
         
     </div>
+
+    <!-- === BRAIN DUMP MANAGER === -->
+    <script>
+        class BrainDumpManager {
+            constructor() {
+                this.brainDumps = [];
+                this.selectedDumps = new Set();
+                this.isExpanded = false;
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.loadBrainDumps();
+                
+                // Check for brain dumps every 30 seconds
+                setInterval(() => this.loadBrainDumps(), 30000);
+            }
+            
+            setupEventListeners() {
+                // Header click to expand/collapse
+                const header = document.querySelector('.brain-dump-header');
+                if (header) {
+                    header.addEventListener('click', () => this.toggleExpanded());
+                }
+                
+                // Expand button
+                const expandBtn = document.getElementById('brain-dump-expand');
+                if (expandBtn) {
+                    expandBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleExpanded();
+                    });
+                }
+                
+                // Bulk actions
+                const selectAllBtn = document.getElementById('brain-dump-select-all');
+                if (selectAllBtn) {
+                    selectAllBtn.addEventListener('click', () => this.selectAll());
+                }
+                
+                const distributeBtn = document.getElementById('brain-dump-distribute');
+                if (distributeBtn) {
+                    distributeBtn.addEventListener('click', () => this.distributeSelected());
+                }
+                
+                const clearAllBtn = document.getElementById('brain-dump-clear-all');
+                if (clearAllBtn) {
+                    clearAllBtn.addEventListener('click', () => this.clearAll());
+                }
+            }
+            
+            async loadBrainDumps() {
+                try {
+                    if (!window.supabase || !window.supabase.isAuthenticated()) {
+                        return;
+                    }
+                    
+                    // Load todos that are brain dumps (category = 'braindump' or created via mobile)
+                    const user = window.supabase.getCurrentUser();
+                    const todos = await window.supabase.select('todos', '*');
+                    
+                    // Filter for brain dumps (created on mobile or with special markers)
+                    this.brainDumps = (todos || []).filter(todo => {
+                        // Check if it's from mobile (has mobile-specific patterns or categories)
+                        const isMobileDump = 
+                            todo.category === 'ideen' || // Mobile idee chip
+                            todo.text?.includes('📱') || // Mobile marker
+                            (todo.created_at && this.isRecentMobileCreation(todo.created_at));
+                        
+                        return isMobileDump && !todo.distributed;
+                    });
+                    
+                    this.updateUI();
+                    
+                } catch (error) {
+                    console.error('❌ Error loading brain dumps:', error);
+                }
+            }
+            
+            isRecentMobileCreation(createdAt) {
+                // Consider todos created in the last 24 hours as potential brain dumps
+                const now = new Date();
+                const created = new Date(createdAt);
+                const hoursDiff = (now - created) / (1000 * 60 * 60);
+                return hoursDiff <= 24;
+            }
+            
+            updateUI() {
+                const container = document.getElementById('brain-dump-container');
+                const badge = document.getElementById('brain-dump-badge');
+                const list = document.getElementById('brain-dump-list');
+                
+                if (!container || !badge || !list) return;
+                
+                // Update badge count
+                badge.textContent = this.brainDumps.length;
+                
+                // Show/hide container
+                if (this.brainDumps.length > 0) {
+                    container.style.display = 'block';
+                } else {
+                    container.style.display = 'none';
+                    return;
+                }
+                
+                // Render brain dumps
+                if (this.brainDumps.length === 0) {
+                    list.innerHTML = '<div class="brain-dump-empty">Keine Brain Dumps vorhanden</div>';
+                    return;
+                }
+                
+                list.innerHTML = this.brainDumps.map(dump => `
+                    <div class="brain-dump-item ${this.selectedDumps.has(dump.id) ? 'selected' : ''}">
+                        <input type="checkbox" class="brain-dump-checkbox" 
+                               data-id="${dump.id}" 
+                               ${this.selectedDumps.has(dump.id) ? 'checked' : ''}>
+                        <div class="brain-dump-content-area">
+                            <div class="brain-dump-text">${this.escapeHtml(dump.text)}</div>
+                            <div class="brain-dump-meta">
+                                <div class="brain-dump-chips">
+                                    ${this.renderChips(dump)}
+                                </div>
+                                <span>• ${this.formatRelativeTime(dump.created_at)}</span>
+                            </div>
+                        </div>
+                        <div class="brain-dump-actions-area">
+                            <button class="brain-dump-quick-action" onclick="brainDumpManager.quickDistribute(${dump.id}, 'privat')" title="Zu Privat">
+                                <i data-lucide="home" style="width: 14px; height: 14px;"></i>
+                            </button>
+                            <button class="brain-dump-quick-action" onclick="brainDumpManager.quickDistribute(${dump.id}, 'arbeit')" title="Zu Arbeit">
+                                <i data-lucide="briefcase" style="width: 14px; height: 14px;"></i>
+                            </button>
+                            <button class="brain-dump-quick-action" onclick="brainDumpManager.deleteDump(${dump.id})" title="Löschen">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Re-initialize checkboxes
+                list.querySelectorAll('.brain-dump-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', () => this.toggleSelection(parseInt(checkbox.dataset.id)));
+                });
+                
+                // Re-initialize Lucide icons
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+            
+            renderChips(dump) {
+                const chips = [];
+                
+                if (dump.priority === 4) {
+                    chips.push('<span class="brain-dump-chip">⚙️ Jetzt</span>');
+                } else if (dump.priority === 3) {
+                    chips.push('<span class="brain-dump-chip">❗ Wichtig</span>');
+                }
+                
+                if (dump.date) {
+                    const today = new Date().toISOString().split('T')[0];
+                    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+                    
+                    if (dump.date === today) {
+                        chips.push('<span class="brain-dump-chip">📅 Heute</span>');
+                    } else if (dump.date === tomorrow) {
+                        chips.push('<span class="brain-dump-chip">🌅 Morgen</span>');
+                    }
+                }
+                
+                if (dump.category === 'ideen') {
+                    chips.push('<span class="brain-dump-chip">💡 Idee</span>');
+                }
+                
+                return chips.join('');
+            }
+            
+            formatRelativeTime(dateStr) {
+                const now = new Date();
+                const created = new Date(dateStr);
+                const diffMs = now - created;
+                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffMins = Math.floor(diffMs / (1000 * 60));
+                
+                if (diffMins < 5) return 'gerade eben';
+                if (diffMins < 60) return `vor ${diffMins}m`;
+                if (diffHours < 24) return `vor ${diffHours}h`;
+                return created.toLocaleDateString('de-DE');
+            }
+            
+            toggleExpanded() {
+                this.isExpanded = !this.isExpanded;
+                
+                const content = document.getElementById('brain-dump-content');
+                const expandBtn = document.getElementById('brain-dump-expand');
+                
+                if (this.isExpanded) {
+                    content.classList.add('expanded');
+                    content.style.display = 'block';
+                    expandBtn.classList.add('expanded');
+                } else {
+                    content.classList.remove('expanded');
+                    content.style.display = 'none';
+                    expandBtn.classList.remove('expanded');
+                }
+            }
+            
+            toggleSelection(dumpId) {
+                if (this.selectedDumps.has(dumpId)) {
+                    this.selectedDumps.delete(dumpId);
+                } else {
+                    this.selectedDumps.add(dumpId);
+                }
+                this.updateUI();
+            }
+            
+            selectAll() {
+                if (this.selectedDumps.size === this.brainDumps.length) {
+                    // Deselect all
+                    this.selectedDumps.clear();
+                } else {
+                    // Select all
+                    this.brainDumps.forEach(dump => this.selectedDumps.add(dump.id));
+                }
+                this.updateUI();
+            }
+            
+            async quickDistribute(dumpId, category) {
+                try {
+                    const dump = this.brainDumps.find(d => d.id === dumpId);
+                    if (!dump) return;
+                    
+                    // Update the todo with new category and mark as distributed
+                    await window.supabase.update('todos', {
+                        category: category,
+                        distributed: true
+                    }, dumpId);
+                    
+                    // Remove from brain dumps
+                    this.brainDumps = this.brainDumps.filter(d => d.id !== dumpId);
+                    this.selectedDumps.delete(dumpId);
+                    
+                    this.updateUI();
+                    
+                    // Reload todos to show in correct category
+                    if (window.loadTodos) {
+                        window.loadTodos();
+                    }
+                    
+                    // Show success message
+                    this.showToast(`✅ Brain Dump zu ${category.charAt(0).toUpperCase() + category.slice(1)} verschoben`);
+                    
+                } catch (error) {
+                    console.error('❌ Error distributing brain dump:', error);
+                    this.showToast('❌ Fehler beim Verschieben');
+                }
+            }
+            
+            async distributeSelected() {
+                if (this.selectedDumps.size === 0) {
+                    alert('Bitte wähle Brain Dumps zum Verteilen aus.');
+                    return;
+                }
+                
+                const category = prompt('In welche Kategorie sollen die ausgewählten Brain Dumps verschoben werden?\n\nOptionen: privat, arbeit, uni, projekte', 'privat');
+                
+                if (!category) return;
+                
+                try {
+                    // Update all selected brain dumps
+                    for (const dumpId of this.selectedDumps) {
+                        await window.supabase.update('todos', {
+                            category: category,
+                            distributed: true
+                        }, dumpId);
+                    }
+                    
+                    const count = this.selectedDumps.size;
+                    
+                    // Remove from brain dumps
+                    this.brainDumps = this.brainDumps.filter(d => !this.selectedDumps.has(d.id));
+                    this.selectedDumps.clear();
+                    
+                    this.updateUI();
+                    
+                    // Reload todos
+                    if (window.loadTodos) {
+                        window.loadTodos();
+                    }
+                    
+                    this.showToast(`✅ ${count} Brain Dumps zu ${category.charAt(0).toUpperCase() + category.slice(1)} verschoben`);
+                    
+                } catch (error) {
+                    console.error('❌ Error distributing brain dumps:', error);
+                    alert('Fehler beim Verteilen der Brain Dumps.');
+                }
+            }
+            
+            async deleteDump(dumpId) {
+                if (!confirm('Brain Dump wirklich löschen?')) return;
+                
+                try {
+                    await window.supabase.delete('todos', dumpId);
+                    
+                    this.brainDumps = this.brainDumps.filter(d => d.id !== dumpId);
+                    this.selectedDumps.delete(dumpId);
+                    
+                    this.updateUI();
+                    
+                    this.showToast('✅ Brain Dump gelöscht');
+                    
+                } catch (error) {
+                    console.error('❌ Error deleting brain dump:', error);
+                    this.showToast('❌ Fehler beim Löschen');
+                }
+            }
+            
+            async clearAll() {
+                if (!confirm(`Alle ${this.brainDumps.length} Brain Dumps löschen?`)) return;
+                
+                try {
+                    // Delete all brain dumps
+                    for (const dump of this.brainDumps) {
+                        await window.supabase.delete('todos', dump.id);
+                    }
+                    
+                    const count = this.brainDumps.length;
+                    this.brainDumps = [];
+                    this.selectedDumps.clear();
+                    
+                    this.updateUI();
+                    
+                    this.showToast(`✅ ${count} Brain Dumps gelöscht`);
+                    
+                } catch (error) {
+                    console.error('❌ Error clearing brain dumps:', error);
+                    alert('Fehler beim Löschen der Brain Dumps.');
+                }
+            }
+            
+            showToast(message) {
+                // Simple toast notification
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: var(--accent-primary);
+                    color: var(--bg-primary);
+                    padding: 1rem 1.5rem;
+                    border-radius: 6px;
+                    z-index: 10000;
+                    font-size: 0.9rem;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                    animation: slideIn 0.3s ease;
+                `;
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+        
+        // Initialize Brain Dump Manager
+        let brainDumpManager;
+        
+        // Wait for authentication before initializing
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize after a short delay to ensure supabase is ready
+            setTimeout(() => {
+                if (window.supabase && window.supabase.isAuthenticated()) {
+                    brainDumpManager = new BrainDumpManager();
+                    window.brainDumpManager = brainDumpManager;
+                }
+            }, 1000);
+        });
+        
+        // Add toast animations to document
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 
 </body>
 </html>
