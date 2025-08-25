@@ -18460,8 +18460,10 @@
                     
                     // Filter for brain dumps (category = 'braindump')
                     this.brainDumps = (todos || []).filter(todo => {
-                        return todo.category === 'braindump' && !todo.distributed;
+                        return todo.category === 'braindump';
                     });
+                    
+                    console.log(`🧠 Found ${this.brainDumps.length} brain dumps:`, this.brainDumps);
                     
                     this.updateUI();
                     
@@ -18519,13 +18521,13 @@
                             </div>
                         </div>
                         <div class="brain-dump-actions-area">
-                            <button class="brain-dump-quick-action ${dump.intended_category === 'privat' ? 'suggested' : ''}" onclick="brainDumpManager.quickDistribute(${dump.id}, 'privat')" title="Zu Privat">
+                            <button class="brain-dump-quick-action" onclick="brainDumpManager.quickDistribute(${dump.id}, 'privat')" title="Zu Privat">
                                 <i data-lucide="home" style="width: 14px; height: 14px;"></i>
                             </button>
-                            <button class="brain-dump-quick-action ${dump.intended_category === 'arbeit' ? 'suggested' : ''}" onclick="brainDumpManager.quickDistribute(${dump.id}, 'arbeit')" title="Zu Arbeit">
+                            <button class="brain-dump-quick-action" onclick="brainDumpManager.quickDistribute(${dump.id}, 'arbeit')" title="Zu Arbeit">
                                 <i data-lucide="briefcase" style="width: 14px; height: 14px;"></i>
                             </button>
-                            <button class="brain-dump-quick-action ${dump.intended_category === 'uni' ? 'suggested' : ''}" onclick="brainDumpManager.quickDistribute(${dump.id}, 'uni')" title="Zu Uni">
+                            <button class="brain-dump-quick-action" onclick="brainDumpManager.quickDistribute(${dump.id}, 'uni')" title="Zu Uni">
                                 <i data-lucide="graduation-cap" style="width: 14px; height: 14px;"></i>
                             </button>
                             <button class="brain-dump-quick-action" onclick="brainDumpManager.deleteDump(${dump.id})" title="Löschen">
@@ -18549,12 +18551,16 @@
             renderChips(dump) {
                 const chips = [];
                 
+                // Priority chips
                 if (dump.priority === 4) {
-                    chips.push('<span class="brain-dump-chip">⚙️ Jetzt</span>');
+                    chips.push('<span class="brain-dump-chip">⚡ Dringend</span>');
                 } else if (dump.priority === 3) {
                     chips.push('<span class="brain-dump-chip">❗ Wichtig</span>');
+                } else if (dump.priority === 1) {
+                    chips.push('<span class="brain-dump-chip">💡 Idee</span>');
                 }
                 
+                // Date chips
                 if (dump.date) {
                     const today = new Date().toISOString().split('T')[0];
                     const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
@@ -18563,23 +18569,13 @@
                         chips.push('<span class="brain-dump-chip">📅 Heute</span>');
                     } else if (dump.date === tomorrow) {
                         chips.push('<span class="brain-dump-chip">🌅 Morgen</span>');
+                    } else {
+                        chips.push(`<span class="brain-dump-chip">📅 ${dump.date}</span>`);
                     }
                 }
                 
-                if (dump.intended_category === 'ideen') {
-                    chips.push('<span class="brain-dump-chip">💡 Idee</span>');
-                }
-                
-                // Show intended category if different from default
-                if (dump.intended_category && dump.intended_category !== 'privat') {
-                    const categoryIcons = {
-                        'arbeit': '💼',
-                        'uni': '🎓',
-                        'projekte': '🚀'
-                    };
-                    const icon = categoryIcons[dump.intended_category] || '📁';
-                    chips.push(`<span class="brain-dump-chip">${icon} ${dump.intended_category}</span>`);
-                }
+                // Mobile indicator
+                chips.push('<span class="brain-dump-chip">📱 Mobile</span>');
                 
                 return chips.join('');
             }
@@ -18639,10 +18635,9 @@
                     const dump = this.brainDumps.find(d => d.id === dumpId);
                     if (!dump) return;
                     
-                    // Update the todo with new category and mark as distributed
+                    // Update the todo with new category
                     await window.supabase.update('todos', {
-                        category: category,
-                        distributed: true
+                        category: category
                     }, dumpId);
                     
                     // Remove from brain dumps
@@ -18679,8 +18674,7 @@
                     // Update all selected brain dumps
                     for (const dumpId of this.selectedDumps) {
                         await window.supabase.update('todos', {
-                            category: category,
-                            distributed: true
+                            category: category
                         }, dumpId);
                     }
                     
