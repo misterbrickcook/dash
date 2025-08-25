@@ -5071,45 +5071,6 @@
             background: #e5e7eb;
         }
 
-        @media (max-width: 768px) {
-            /* MOBILE: Under Construction */
-            
-            /* Hide everything */
-            body > *:not(.mobile-construction) {
-                display: none !important;
-            }
-            
-            /* Show construction page */
-            body {
-                margin: 0;
-                padding: 0;
-                background: var(--bg-primary);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            }
-            
-            .mobile-construction {
-                text-align: center;
-                color: #000000;
-            }
-            
-            .mobile-construction h1 {
-                font-size: 2rem;
-                margin: 0;
-                font-weight: 400;
-                letter-spacing: 0.05em;
-            }
-        }
-        
-        /* Desktop: Hide mobile construction */
-        @media (min-width: 769px) {
-            .mobile-construction {
-                display: none;
-            }
-        }
 
 
         /* === CRYPTO TICKER BAR === */
@@ -17926,14 +17887,10 @@
             }
         });
 
-        // === MOBILE: No JavaScript needed - Under Construction ===
+        // === MOBILE: Fully functional mobile todo system ===
 
     </script>
 
-    <!-- === MOBILE UNDER CONSTRUCTION === -->
-    <div class="mobile-construction">
-        <h1>Under Construction</h1>
-    </div>
 
     <!-- Login Effects -->
     <div class="login-effects">
