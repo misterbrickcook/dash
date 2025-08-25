@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DashFin Mobile v2.5 - Icons as Categories</title>
+    <title>DashFin Mobile v2.6 - Icons as Brain Dump Tags</title>
     <!-- Cache Buster für neues Brain Dump Design -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -1081,31 +1081,32 @@
             }
             
             processBrainDump(text) {
-                // Determine category from selected icon
-                let category = 'braindump'; // Default fallback
+                // Always use 'braindump' category for desktop Brain Dump Container
+                let category = 'braindump';
+                let iconTag = '';
                 
-                // Use first selected chip as category (single category per todo)
+                // Add selected icon as tag to text for desktop display
                 if (this.selectedChips.size > 0) {
                     const firstChip = Array.from(this.selectedChips)[0];
                     switch (firstChip) {
                         case 'chip-ausruf':
-                            category = '❗'; // Important category
+                            iconTag = ' ❗';
                             break;
                         case 'chip-bitcoin':
-                            category = '₿'; // Bitcoin/Finance category
+                            iconTag = ' ₿';
                             break;
                         case 'chip-idee':
-                            category = '💡'; // Ideas category
+                            iconTag = ' 💡';
                             break;
                         case 'chip-arbeit':
-                            category = '💼'; // Work category
+                            iconTag = ' 💼';
                             break;
                     }
                 }
                 
                 return {
-                    text: text, // Clean text without icon tags
-                    category: category, // Icon as category
+                    text: text + iconTag, // Text with icon tag for desktop
+                    category: category, // Always 'braindump' for Brain Dump Container
                     priority: 2, // Default priority
                     completed: false,
                     date: null, // No date by default
@@ -1303,15 +1304,22 @@
                     return;
                 }
                 
-                const todosHTML = this.todos.map(todo => `
-                    <div class="brain-dump-item" data-id="${todo.id}">
-                        <div class="brain-dump-content">
-                            <div class="brain-dump-text">${this.escapeHtml(todo.text)}</div>
-                            <div class="brain-dump-category">${todo.category}</div>
+                const todosHTML = this.todos.map(todo => {
+                    // Extract icon tag from text for mobile display
+                    const iconMatch = todo.text.match(/\s([❗₿💡💼])$/);
+                    const cleanText = iconMatch ? todo.text.replace(/\s[❗₿💡💼]$/, '') : todo.text;
+                    const iconTag = iconMatch ? iconMatch[1] : '';
+                    
+                    return `
+                        <div class="brain-dump-item" data-id="${todo.id}">
+                            <div class="brain-dump-content">
+                                <div class="brain-dump-text">${this.escapeHtml(cleanText)}</div>
+                                ${iconTag ? `<div class="brain-dump-category">${iconTag}</div>` : ''}
+                            </div>
+                            <button class="brain-dump-delete" onclick="app.deleteTodo(${todo.id})">×</button>
                         </div>
-                        <button class="brain-dump-delete" onclick="app.deleteTodo(${todo.id})">×</button>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
                 
                 list.innerHTML = todosHTML;
             }
