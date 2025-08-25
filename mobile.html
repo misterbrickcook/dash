@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DashFin Mobile v3.0 - Perfect Sync Filter</title>
+    <title>DashFin Mobile v4.0 - Brain Dump Interface</title>
     <!-- Cache Buster für neues Brain Dump Design -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -395,6 +395,32 @@
             color: var(--text-muted);
         }
         
+        .suggestions-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .suggestion-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .suggestion-chip:hover {
+            border-color: var(--accent-primary);
+            background: var(--accent-primary);
+            color: white;
+        }
+        
         .brain-textarea {
             width: 100%;
             min-height: 100px;
@@ -597,12 +623,13 @@
                     
                     <!-- Instant Add Button -->
                     <div class="brain-actions">
-                        <button id="brain-add-btn" class="brain-add-btn">Hinzufügen</button>
+                        <button id="brain-add-btn" class="brain-add-btn">⚡ Schnell hinzufügen</button>
                     </div>
                     
                     <!-- Smart Suggestions Area -->
                     <div id="smart-suggestions" class="smart-suggestions hidden">
-                        <small>Smart-Vorschläge werden hier angezeigt...</small>
+                        <small>Smart-Vorschläge:</small>
+                        <div id="suggestions-list" class="suggestions-list"></div>
                     </div>
                 </div>
                 
@@ -996,7 +1023,7 @@
                 const suggestionsList = document.getElementById('suggestions-list');
                 
                 if (text.length < 3) {
-                    suggestions.style.display = 'none';
+                    suggestions.classList.add('hidden');
                     return;
                 }
                 
@@ -1011,13 +1038,13 @@
                 if (/\b(email|mail|schreiben)\b/i.test(text)) smartTags.push('📧 Kommunikation');
                 if (/\b(termin|meeting|call)\b/i.test(text)) smartTags.push('🗓️ Termin');
                 
-                if (smartTags.length > 0) {
+                if (smartTags.length > 0 && suggestionsList) {
                     suggestionsList.innerHTML = smartTags.map(tag => 
                         `<span class="suggestion-chip">${tag}</span>`
                     ).join('');
-                    suggestions.style.display = 'block';
+                    suggestions.classList.remove('hidden');
                 } else {
-                    suggestions.style.display = 'none';
+                    suggestions.classList.add('hidden');
                 }
             }
             
@@ -1077,7 +1104,7 @@
                     }, 1000);
                 } finally {
                     // Reset button state
-                    instantAddBtn.textContent = 'Hinzufügen';
+                    instantAddBtn.textContent = '⚡ Schnell hinzufügen';
                     instantAddBtn.disabled = false;
                     
                     // Focus back to input for next entry
@@ -1358,6 +1385,13 @@
             
             async deleteTodo(todoId) {
                 try {
+                    // Extra security: Only delete if todo is actually a braindump
+                    const todoToDelete = this.todos.find(todo => todo.id === todoId);
+                    if (!todoToDelete || todoToDelete.category !== 'braindump') {
+                        console.warn('🚫 Mobile: Attempted to delete non-braindump todo, blocked for security');
+                        return;
+                    }
+                    
                     if (window.supabase && window.supabase.isAuthenticated()) {
                         await window.supabase.delete('todos', todoId);
                     }
