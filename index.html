@@ -2226,6 +2226,36 @@
             margin-bottom: 1.5rem;
             white-space: pre-wrap;
         }
+        
+        /* Internal link styles */
+        .internal-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.2s ease;
+        }
+        
+        .internal-link:hover {
+            background-color: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        /* Dark mode internal links */
+        [data-theme="dark"] .internal-link {
+            color: #60a5fa;
+            background-color: rgba(96, 165, 250, 0.15);
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+        
+        [data-theme="dark"] .internal-link:hover {
+            background-color: rgba(96, 165, 250, 0.25);
+            border-color: rgba(96, 165, 250, 0.5);
+        }
         .journal-entry-meta {
             display: flex;
             justify-content: space-between;
@@ -9620,7 +9650,7 @@
                     <div class="ziel-kategorie">${goal.category}</div>
                     ${formattedDeadline ? `<div class="termin-date">🎯 ${formattedDeadline}</div>` : ''}
                     <div class="termin-title">${goal.name}</div>
-                    <div class="termin-description">${goal.description}</div>
+                    <div class="termin-description">${InternalLinkParser.parseInternalLinks(goal.description)}</div>
                     ${progressSection}
                     <div class="termin-edit-icon" onclick="GoalManager.showEditGoalValueModal('${goal.id}')">✎</div>
                     <div class="termin-delete-icon" onclick="GoalManager.deleteGoal('${goal.id}')">🗑</div>
@@ -10032,6 +10062,47 @@
         // Make GoalManager globally available
         window.GoalManager = GoalManager;
 
+        // === INTERNAL LINK PARSER ===
+        const InternalLinkParser = {
+            // Map of @-links to tab IDs
+            linkMapping: {
+                'trading-rules': 'tab-trading-rules',
+                'goals': 'tab-ziele', 
+                'todos': 'tab-home',
+                'journal': 'tab-journal',
+                'resources': 'tab-ressourcen',
+                'wiki': 'tab-wiki',
+                'vision': 'tab-vision',
+                'termine': 'tab-home', // termine are on home tab
+                'settings': 'tab-settings'
+            },
+            
+            parseInternalLinks(text) {
+                if (!text) return text;
+                
+                // Replace @link-name with clickable links
+                return text.replace(/@([a-zA-Z-]+)/g, (match, linkName) => {
+                    const tabId = this.linkMapping[linkName.toLowerCase()];
+                    if (tabId) {
+                        return `<a href="#" class="internal-link" data-tab="${tabId}" onclick="InternalLinkParser.navigateToTab('${tabId}'); return false;">@${linkName}</a>`;
+                    }
+                    return match; // Return original if no mapping found
+                });
+            },
+            
+            navigateToTab(tabId) {
+                console.log('🔗 Internal link navigation to:', tabId);
+                if (typeof switchTab === 'function') {
+                    switchTab(tabId);
+                } else {
+                    console.error('❌ switchTab function not available');
+                }
+            }
+        };
+        
+        // Make InternalLinkParser global
+        window.InternalLinkParser = InternalLinkParser;
+
         // === JOURNAL MANAGEMENT ===
         const JournalManager = {
             entries: [], // In-memory storage for demo
@@ -10200,7 +10271,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="journal-entry-content">${entry.content}</div>
+                            <div class="journal-entry-content">${InternalLinkParser.parseInternalLinks(entry.content)}</div>
                             <div class="journal-entry-meta">
                                 <div class="journal-entry-tags">
                                     ${tagsHtml}
@@ -11458,7 +11529,7 @@
                             <div class="resource-info">
                                 <div class="resource-details">
                                     <div class="resource-title">${rule.title}</div>
-                                    ${rule.description ? `<div class="resource-description">${rule.description}</div>` : ''}
+                                    ${rule.description ? `<div class="resource-description">${InternalLinkParser.parseInternalLinks(rule.description)}</div>` : ''}
                                 </div>
                             </div>
                         `;
