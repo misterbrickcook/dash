@@ -2390,8 +2390,16 @@
             }
         }
 
+        /* === HIDE MOBILE ELEMENTS ON DESKTOP === */
+        @media (min-width: 769px) {
+            .mobile-quick-todo,
+            .mobile-todo-modal {
+                display: none !important;
+            }
+        }
+
         /* === MOBILE QUICK TODO === */
-        @media (max-width: 768px), (max-width: 834px) and (orientation: portrait), (max-width: 1024px) and (max-width: 1366px) and (pointer: coarse) {
+        @media (max-width: 768px) {
             /* Quick todo button that's always visible on mobile */
             .mobile-quick-todo {
                 position: fixed;
@@ -7116,20 +7124,14 @@
                 const loginForm = document.getElementById('login-form');
                 const logoutBtn = document.getElementById('logout-btn');
                 
-                alert(`DEBUG: Login form found: ${!!loginForm}`);
-                
                 // Only use form submit event to avoid double firing on mobile
                 if (loginForm) {
-                    alert('DEBUG: Adding submit event listener to login form');
                     loginForm.addEventListener('submit', (e) => {
                         e.preventDefault();
-                        alert('DEBUG: Form submit event fired!');
                         if (!this.isLoggingIn) { // Prevent multiple simultaneous logins
                             this.handleLogin();
                         }
                     });
-                } else {
-                    alert('ERROR: Login form not found!');
                 }
                 
                 if (logoutBtn) {
@@ -7138,13 +7140,9 @@
             },
             
             async handleLogin() {
-                // EMERGENCY DEBUG MODE FOR MOBILE
-                alert('🚨 DEBUG: handleLogin() called');
-                
                 // Prevent multiple simultaneous login attempts
                 if (this.isLoggingIn) {
                     console.log('🔐 Login already in progress, ignoring...');
-                    alert('🔐 Login already in progress');
                     return;
                 }
                 
@@ -7155,7 +7153,6 @@
                 const errorEl = document.getElementById('login-error');
                 const loginBtn = document.getElementById('login-btn');
                 
-                alert(`📱 Email: ${email ? 'YES' : 'NO'}, Password: ${password ? 'YES' : 'NO'}`);
                 console.log('📱 Mobile login attempt starting...', { email: email ? 'provided' : 'missing', password: password ? 'provided' : 'missing' });
                 
                 if (!email || !password) {
@@ -7171,12 +7168,10 @@
                 }
                 
                 try {
-                    alert('📱 About to call supabase.signIn...');
                     console.log('📱 Attempting Supabase login...');
                     const { user, error } = await supabase.signIn(email, password);
                     
                     if (error) {
-                        alert(`❌ Login error: ${error}`);
                         console.error('❌ Login error:', error);
                         this.showError(error);
                         this.isLoggingIn = false;
@@ -7190,13 +7185,10 @@
                     }
                     
                     if (user) {
-                        alert('✅ Login successful! About to show dashboard...');
                         console.log('✅ Login successful, showing dashboard...');
                         this.currentUser = user;
                         this.isAuthenticated = true;
                         await this.showDashboard();
-                    } else {
-                        alert('❌ No user returned from supabase.signIn');
                     }
                 } catch (error) {
                     console.error('❌ Login exception:', error);
@@ -7294,9 +7286,7 @@
             },
             
             async showDashboard() {
-                alert('🎯 DEBUG: showDashboard() called!');
                 console.log('🔹 DASHBOARD: Hiding login effects');
-                console.trace('🔹 DASHBOARD: Call stack for showDashboard()');
                 
                 // Reset login state first
                 this.isLoggingIn = false;
@@ -7307,17 +7297,12 @@
                 }
                 
                 document.body.classList.add('authenticated');
-                alert('✅ Body class authenticated added');
                 
                 // NUCLEAR OPTION: Completely remove auth screen from DOM on mobile
                 const authScreen = document.getElementById('auth-screen');
                 if (authScreen) {
-                    alert('🗑️ Found auth screen - about to remove it from DOM!');
                     console.log('📱 DASHBOARD: Removing auth screen from DOM completely');
                     authScreen.remove(); // Complete DOM removal - no CSS can override this
-                    alert('💥 AUTH SCREEN REMOVED FROM DOM!');
-                } else {
-                    alert('❓ No auth screen found to remove');
                 }
                 
                 const loginEffects = document.querySelector('.login-effects');
