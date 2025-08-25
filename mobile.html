@@ -294,7 +294,152 @@
     </div>
 
     <!-- === SUPABASE INTEGRATION === -->
-    <script src="supabase-config.js"></script>
+    <script>
+        // Inline Supabase configuration (no external dependencies)
+        const SUPABASE_URL = 'https://aotuakgnudtiigbbzkkf.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvdHVha2dudWR0aWlnYmJ6a2tmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Mzk1MTYsImV4cCI6MjA3MDMxNTUxNn0.xC6i5Kphk-H3pGUwFj0ko7_YZTguast3hK5fprsJfZI';
+
+        // Simple Supabase client for mobile
+        class MobileSupabaseClient {
+            constructor() {
+                this.url = SUPABASE_URL;
+                this.key = SUPABASE_ANON_KEY;
+                this.user = null;
+                this.session = null;
+                this.headers = {
+                    'apikey': this.key,
+                    'Authorization': `Bearer ${this.key}`,
+                    'Content-Type': 'application/json'
+                };
+                
+                console.log('📱 MobileSupabaseClient created with URL:', this.url);
+            }
+            
+            async signIn(email, password) {
+                try {
+                    console.log('📱 Attempting login to:', `${this.url}/auth/v1/token`);
+                    
+                    const response = await fetch(`${this.url}/auth/v1/token?grant_type=password`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': this.key,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            password: password
+                        })
+                    });
+                    
+                    console.log('📱 Login response status:', response.status);
+                    
+                    const data = await response.json();
+                    console.log('📱 Login response data:', data);
+                    
+                    if (!response.ok) {
+                        return { user: null, error: data.error_description || `HTTP ${response.status}` };
+                    }
+                    
+                    if (data.access_token && data.user) {
+                        this.session = {
+                            access_token: data.access_token,
+                            refresh_token: data.refresh_token,
+                            user: data.user
+                        };
+                        this.user = data.user;
+                        this.headers.Authorization = `Bearer ${data.access_token}`;
+                        
+                        // Store in localStorage
+                        localStorage.setItem('mobile_supabase_session', JSON.stringify(this.session));
+                        
+                        return { user: data.user, error: null };
+                    }
+                    
+                    return { user: null, error: 'Login failed' };
+                } catch (error) {
+                    console.error('📱 Login error:', error);
+                    return { user: null, error: error.message };
+                }
+            }
+            
+            async signOut() {
+                this.session = null;
+                this.user = null;
+                this.headers.Authorization = `Bearer ${this.key}`;
+                localStorage.removeItem('mobile_supabase_session');
+                return { error: null };
+            }
+            
+            getCurrentUser() {
+                return this.user;
+            }
+            
+            isAuthenticated() {
+                return !!(this.user && this.session);
+            }
+            
+            async select(table, columns = '*') {
+                try {
+                    const response = await fetch(`${this.url}/rest/v1/${table}?select=${columns}`, {
+                        method: 'GET',
+                        headers: this.headers
+                    });
+                    
+                    if (!response.ok) {
+                        console.error('Select error:', response.status);
+                        return [];
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('Select error:', error);
+                    return [];
+                }
+            }
+            
+            async insert(table, data) {
+                try {
+                    const response = await fetch(`${this.url}/rest/v1/${table}`, {
+                        method: 'POST',
+                        headers: {
+                            ...this.headers,
+                            'Prefer': 'return=representation'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (!response.ok) {
+                        console.error('Insert error:', response.status);
+                        return null;
+                    }
+                    
+                    const result = await response.json();
+                    return result;
+                } catch (error) {
+                    console.error('Insert error:', error);
+                    return null;
+                }
+            }
+            
+            async delete(table, id) {
+                try {
+                    const response = await fetch(`${this.url}/rest/v1/${table}?id=eq.${id}`, {
+                        method: 'DELETE',
+                        headers: this.headers
+                    });
+                    
+                    return response.ok;
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    return false;
+                }
+            }
+        }
+
+        // Initialize global Supabase instance
+        window.supabase = new MobileSupabaseClient();
+        console.log('📱 Global supabase initialized:', !!window.supabase);
+    </script>
     
     <script>
         // === SUPER SIMPLE MOBILE APP ===
@@ -309,27 +454,17 @@
             
             init() {
                 console.log('📱 SimpleMobileApp initializing...');
-                
-                // Initialize Supabase first
-                if (window.initializeSupabase) {
-                    const supabaseInitialized = window.initializeSupabase();
-                    console.log('📱 Supabase initialized:', supabaseInitialized);
-                    if (!supabaseInitialized) {
-                        console.error('❌ Failed to initialize Supabase');
-                        this.showError('Datenbankverbindung fehlgeschlagen');
-                    }
-                } else {
-                    console.error('❌ Supabase config not found');
-                    this.showError('Konfiguration nicht gefunden');
-                }
+                console.log('📱 Supabase available:', !!window.supabase);
                 
                 // Bind events
                 this.bindEvents();
                 
                 // Check if already logged in
                 if (window.supabase && window.supabase.isAuthenticated()) {
+                    console.log('📱 User already authenticated');
                     this.showDashboard();
                 } else {
+                    console.log('📱 No authentication found, showing login');
                     this.showLogin();
                 }
             }
@@ -376,24 +511,26 @@
                 loginBtn.disabled = true;
                 
                 try {
-                    console.log('📱 Attempting login...');
+                    console.log('📱 Attempting login with email:', email);
                     
                     if (!window.supabase) {
-                        throw new Error('Supabase nicht verfügbar');
+                        throw new Error('Datenbankverbindung nicht verfügbar');
                     }
                     
                     const { user, error } = await window.supabase.signIn(email, password);
+                    
+                    console.log('📱 Login result - User:', !!user, 'Error:', error);
                     
                     if (error) {
                         throw new Error(error);
                     }
                     
                     if (user) {
-                        console.log('✅ Login successful');
+                        console.log('✅ Login successful, user:', user.email);
                         this.currentUser = user;
                         this.showDashboard();
                     } else {
-                        throw new Error('Anmeldung fehlgeschlagen');
+                        throw new Error('Anmeldung fehlgeschlagen - kein Benutzer zurückgegeben');
                     }
                     
                 } catch (error) {
