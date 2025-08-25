@@ -2227,34 +2227,37 @@
             white-space: pre-wrap;
         }
         
-        /* Internal link styles */
+        /* Internal link styles - subtle and dashboard-native */
         .internal-link {
-            color: #3b82f6;
+            color: var(--text-secondary);
             text-decoration: none;
             font-weight: 500;
             padding: 2px 6px;
             border-radius: 4px;
-            background-color: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
             transition: all 0.2s ease;
+            font-size: 0.9em;
         }
         
         .internal-link:hover {
-            background-color: rgba(59, 130, 246, 0.2);
-            border-color: rgba(59, 130, 246, 0.4);
+            color: var(--accent-primary);
+            background-color: var(--bg-primary);
+            border-color: var(--accent-primary);
             transform: translateY(-1px);
         }
         
         /* Dark mode internal links */
         [data-theme="dark"] .internal-link {
-            color: #60a5fa;
-            background-color: rgba(96, 165, 250, 0.15);
-            border-color: rgba(96, 165, 250, 0.3);
+            color: var(--text-secondary);
+            background-color: var(--bg-secondary);
+            border-color: var(--border-primary);
         }
         
         [data-theme="dark"] .internal-link:hover {
-            background-color: rgba(96, 165, 250, 0.25);
-            border-color: rgba(96, 165, 250, 0.5);
+            color: var(--accent-primary);
+            background-color: var(--bg-primary);
+            border-color: var(--accent-primary);
         }
 
         /* Autocomplete dropdown styles */
