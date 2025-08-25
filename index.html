@@ -7291,14 +7291,51 @@
                 
                 document.body.classList.add('authenticated');
                 document.getElementById('auth-screen').classList.add('hide');
+                
                 const loginEffects = document.querySelector('.login-effects');
                 if (loginEffects) {
                     loginEffects.style.display = 'none';
                     console.log('🔹 DASHBOARD: Set display to none for login effects');
                 }
+                
+                // Show main dashboard elements
                 document.getElementById('crypto-overlay').style.display = 'block';
-                // Show QuickBar when authenticated
-                document.getElementById('quickbar').style.display = 'flex';
+                
+                // Show main content areas
+                const homeSection = document.querySelector('.home-section');
+                const tabsContainer = document.querySelector('.tabs-container');
+                const tabContent = document.querySelectorAll('.tab-content');
+                
+                if (homeSection) {
+                    homeSection.style.display = 'block';
+                    console.log('📱 DASHBOARD: Showing home section');
+                }
+                
+                if (tabsContainer) {
+                    tabsContainer.style.display = 'block';
+                    console.log('📱 DASHBOARD: Showing tabs container');
+                }
+                
+                tabContent.forEach(content => {
+                    content.style.display = 'block';
+                });
+                
+                // Mobile-specific: Hide QuickBar on mobile, show on desktop
+                const quickbar = document.getElementById('quickbar');
+                if (quickbar) {
+                    // Check if mobile
+                    const isMobile = window.innerWidth <= 768 || 
+                                   /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                                   ('ontouchstart' in window);
+                                   
+                    if (isMobile) {
+                        console.log('📱 DASHBOARD: Mobile detected - hiding QuickBar');
+                        quickbar.style.display = 'none';
+                    } else {
+                        console.log('💻 DASHBOARD: Desktop detected - showing QuickBar');
+                        quickbar.style.display = 'flex';
+                    }
+                }
                 
                 // Load all data after successful login
                 if (supabase?.isAuthenticated()) {
