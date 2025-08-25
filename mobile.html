@@ -645,6 +645,37 @@
                 };
                 
                 console.log('📱 MobileSupabaseClient created with URL:', this.url);
+                
+                // Immediately try to restore session from localStorage
+                this.loadStoredSession();
+            }
+            
+            loadStoredSession() {
+                try {
+                    const storedSession = localStorage.getItem('mobile_supabase_session');
+                    if (storedSession) {
+                        const session = JSON.parse(storedSession);
+                        
+                        // Check if session is not too old (7 days max)
+                        const sessionAge = Date.now() - (session.created_at || 0);
+                        const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+                        
+                        if (sessionAge < maxAge && session.access_token && session.user) {
+                            console.log('📱 Restoring stored session for user:', session.user.email);
+                            this.session = session;
+                            this.user = session.user;
+                            this.headers.Authorization = `Bearer ${session.access_token}`;
+                            return true;
+                        } else {
+                            console.log('📱 Stored session expired or invalid, removing...');
+                            localStorage.removeItem('mobile_supabase_session');
+                        }
+                    }
+                } catch (error) {
+                    console.error('📱 Error loading stored session:', error);
+                    localStorage.removeItem('mobile_supabase_session');
+                }
+                return false;
             }
             
             async signIn(email, password) {
@@ -717,13 +748,15 @@
                                 this.session = {
                                     access_token: data.access_token,
                                     refresh_token: data.refresh_token,
-                                    user: data.user
+                                    user: data.user,
+                                    created_at: Date.now() // Add timestamp for expiration check
                                 };
                                 this.user = data.user;
                                 this.headers.Authorization = `Bearer ${data.access_token}`;
                                 
-                                // Store in localStorage
+                                // Store in localStorage with timestamp
                                 localStorage.setItem('mobile_supabase_session', JSON.stringify(this.session));
+                                console.log('📱 Session stored with timestamp:', new Date(this.session.created_at).toLocaleString());
                                 
                                 console.log('✅ Login successful for:', data.user.email);
                                 return { user: data.user, error: null };
@@ -770,6 +803,12 @@
                         headers: this.headers
                     });
                     
+                    if (response.status === 401) {
+                        console.log('📱 Session expired, clearing stored session...');
+                        this.signOut(); // This will clear localStorage and reload
+                        return [];
+                    }
+                    
                     if (!response.ok) {
                         console.error('Select error:', response.status);
                         return [];
@@ -792,6 +831,12 @@
                         },
                         body: JSON.stringify(data)
                     });
+                    
+                    if (response.status === 401) {
+                        console.log('📱 Session expired during insert, clearing stored session...');
+                        this.signOut(); // This will clear localStorage and reload
+                        return null;
+                    }
                     
                     if (!response.ok) {
                         console.error('Insert error:', response.status);
@@ -844,14 +889,18 @@
                 // Bind events
                 this.bindEvents();
                 
-                // Check if already logged in
-                if (window.supabase && window.supabase.isAuthenticated()) {
-                    console.log('📱 User already authenticated');
-                    this.showDashboard();
-                } else {
-                    console.log('📱 No authentication found, showing login');
-                    this.showLogin();
-                }
+                // Give Supabase a moment to load stored session
+                setTimeout(() => {
+                    // Check if already logged in after session restore
+                    if (window.supabase && window.supabase.isAuthenticated()) {
+                        console.log('📱 User already authenticated via stored session');
+                        this.currentUser = window.supabase.getCurrentUser();
+                        this.showDashboard();
+                    } else {
+                        console.log('📱 No valid session found, showing login');
+                        this.showLogin();
+                    }
+                }, 100); // Small delay to let session restoration complete
             }
             
             bindEvents() {
