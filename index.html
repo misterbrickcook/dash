@@ -7128,11 +7128,18 @@
                 }
             }
             
-            // If switching to trading rules tab, render existing rules
+            // If switching to trading rules tab, load and render rules
             if (tabId === 'tab-trading-rules') {
-                if (window.TradingRulesManager && typeof window.TradingRulesManager.renderTradingRules === 'function') {
-                    console.log('📊 Switching to Trading Rules tab - rendering existing rules');
-                    TradingRulesManager.renderTradingRules();
+                if (window.TradingRulesManager) {
+                    console.log('📊 Switching to Trading Rules tab - loading rules from database');
+                    if (typeof window.TradingRulesManager.loadTradingRules === 'function') {
+                        TradingRulesManager.loadTradingRules();
+                    } else {
+                        console.log('📊 loadTradingRules not available, just rendering existing rules');
+                        if (typeof window.TradingRulesManager.renderTradingRules === 'function') {
+                            TradingRulesManager.renderTradingRules();
+                        }
+                    }
                 }
             }
             
@@ -11381,16 +11388,18 @@
                         console.log('☁️ TradingRulesManager: Loading trading rules from cloud...');
                         const cloudRules = await cloudStorage.getTradingRules();
                         console.log('☁️ TradingRulesManager: Cloud storage returned:', cloudRules);
+                        console.log('☁️ TradingRulesManager: Type of cloudRules:', typeof cloudRules, Array.isArray(cloudRules));
                         
-                        this.rules = cloudRules || [];
-                        console.log('☁️ TradingRulesManager: Loaded', this.rules.length, 'rules:', this.rules);
-                        
-                        // If no rules exist, create sample rules for testing
-                        if (this.rules.length === 0) {
+                        if (cloudRules && Array.isArray(cloudRules) && cloudRules.length > 0) {
+                            this.rules = cloudRules;
+                            console.log('✅ TradingRulesManager: Successfully loaded', this.rules.length, 'rules from database');
+                        } else {
+                            this.rules = [];
                             console.log('🧪 No trading rules found, creating sample rules for testing...');
                             await this.createSampleRules();
                         }
                         
+                        console.log('📊 TradingRulesManager: Final rules array:', this.rules);
                         this.renderTradingRules();
                         console.log('☁️ TradingRulesManager: Load completed');
                     } catch (error) {
