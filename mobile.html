@@ -185,7 +185,7 @@
         }
         
         .add-btn {
-            flex: 1;
+            flex: 2;
             height: 44px;
             background: #28a745;
             color: white;
@@ -198,6 +198,55 @@
         
         .add-btn:disabled {
             background: #ccc;
+        }
+        
+        .options-btn {
+            flex: 1;
+            height: 44px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .options-btn.active {
+            background: #495057;
+        }
+        
+        .todo-options {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1rem;
+            background: white;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .todo-input[type="date"],
+        .todo-input[type="select"],
+        select.todo-input {
+            height: 44px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            background: white;
         }
         
         .todo-list {
@@ -280,7 +329,34 @@
                 <!-- Add Todo Form -->
                 <div class="add-todo-form">
                     <input type="text" class="todo-input" id="todo-input" placeholder="Neues Todo eingeben...">
+                    
+                    <!-- Optional Date Selection -->
+                    <div class="todo-options" id="todo-options" style="display: none; margin-top: 1rem;">
+                        <div class="form-group">
+                            <label for="todo-date">Deadline (optional)</label>
+                            <input type="date" class="todo-input" id="todo-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="todo-category">Kategorie</label>
+                            <select class="todo-input" id="todo-category">
+                                <option value="privat" selected>Privat</option>
+                                <option value="arbeit">Arbeit</option>
+                                <option value="uni">Uni</option>
+                                <option value="projekte">Projekte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="todo-priority">Priorität</label>
+                            <select class="todo-input" id="todo-priority">
+                                <option value="2" selected>Normal</option>
+                                <option value="3">Wichtig</option>
+                                <option value="4">Dringend</option>
+                            </select>
+                        </div>
+                    </div>
+                    
                     <div class="todo-actions">
+                        <button type="button" class="options-btn" id="options-btn">Optionen</button>
                         <button class="add-btn" id="add-todo-btn">Hinzufügen</button>
                     </div>
                 </div>
@@ -539,6 +615,11 @@
                     this.addTodo();
                 });
                 
+                // Toggle options
+                document.getElementById('options-btn').addEventListener('click', () => {
+                    this.toggleOptions();
+                });
+                
                 // Enter key in todo input
                 document.getElementById('todo-input').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
@@ -665,6 +746,21 @@
                 document.getElementById('error-msg').classList.add('hidden');
             }
             
+            toggleOptions() {
+                const optionsDiv = document.getElementById('todo-options');
+                const optionsBtn = document.getElementById('options-btn');
+                
+                if (optionsDiv.style.display === 'none') {
+                    optionsDiv.style.display = 'block';
+                    optionsBtn.textContent = 'Weniger';
+                    optionsBtn.classList.add('active');
+                } else {
+                    optionsDiv.style.display = 'none';
+                    optionsBtn.textContent = 'Optionen';
+                    optionsBtn.classList.remove('active');
+                }
+            }
+            
             async loadTodos() {
                 try {
                     console.log('📋 Loading todos...');
@@ -734,6 +830,10 @@
             
             async addTodo() {
                 const input = document.getElementById('todo-input');
+                const dateInput = document.getElementById('todo-date');
+                const categorySelect = document.getElementById('todo-category');
+                const prioritySelect = document.getElementById('todo-priority');
+                
                 const title = input.value.trim();
                 
                 if (!title) return;
@@ -743,18 +843,18 @@
                 addBtn.textContent = 'Wird hinzugefügt...';
                 
                 try {
-                    // Create todo with EXACT desktop format
+                    // Create todo with values from form or defaults
                     const newTodo = {
-                        text: title,              // Desktop uses 'text' not 'title'
-                        category: 'privat',       // Valid category  
-                        priority: 2,              // Desktop uses integer: 2 = 'mittel'
-                        completed: false,         // Boolean
-                        date: null,               // Desktop uses 'date' not 'deadline'
-                        time: '21:00',           // Default time as string
+                        text: title,                                    // Desktop uses 'text' not 'title'
+                        category: categorySelect.value || 'privat',     // Use selected category
+                        priority: parseInt(prioritySelect.value) || 2, // Use selected priority as integer
+                        completed: false,                               // Boolean
+                        date: dateInput.value || null,                 // Use selected date or null
+                        time: '21:00',                                 // Default time as string
                         user_id: this.currentUser?.id
                     };
                     
-                    console.log('📝 Creating todo with desktop-compatible format:', newTodo);
+                    console.log('📝 Creating todo with options:', newTodo);
                     
                     if (window.supabase && window.supabase.isAuthenticated()) {
                         console.log('📤 Inserting todo into database...');
@@ -778,9 +878,14 @@
                     // Add to local array first for immediate UI feedback
                     this.todos.push(newTodo);
                     this.renderTodos();
-                    input.value = '';
                     
-                    console.log('✅ Todo added successfully:', newTodo.title);
+                    // Clear form
+                    input.value = '';
+                    dateInput.value = '';
+                    categorySelect.value = 'privat';
+                    prioritySelect.value = '2';
+                    
+                    console.log('✅ Todo added successfully:', newTodo.text);
                     
                     // Reload from database to ensure sync
                     if (window.supabase && window.supabase.isAuthenticated()) {
