@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DashFin Mobile v2.4 - With Delete Button</title>
+    <title>DashFin Mobile v2.5 - Icons as Categories</title>
     <!-- Cache Buster für neues Brain Dump Design -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -479,11 +479,26 @@
             border-bottom: none;
         }
         
+        .brain-dump-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
         .brain-dump-text {
             font-size: var(--font-size-base);
             line-height: var(--line-height-base);
             color: var(--text-primary);
             flex: 1;
+        }
+        
+        .brain-dump-category {
+            font-size: 18px;
+            background: var(--bg-secondary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-primary);
         }
         
         .brain-dump-delete {
@@ -951,11 +966,20 @@
                 const chip = document.getElementById(chipId);
                 
                 if (this.selectedChips.has(chipId)) {
-                    // Deselect
+                    // Deselect current chip
                     this.selectedChips.delete(chipId);
                     chip.classList.remove('active');
                 } else {
-                    // Multiple icon tags can be selected (no clearing)
+                    // Clear all other chips (only one category allowed)
+                    this.selectedChips.forEach(selectedId => {
+                        const selectedChip = document.getElementById(selectedId);
+                        if (selectedChip) {
+                            selectedChip.classList.remove('active');
+                        }
+                    });
+                    this.selectedChips.clear();
+                    
+                    // Select new chip
                     this.selectedChips.add(chipId);
                     chip.classList.add('active');
                 }
@@ -1057,36 +1081,31 @@
             }
             
             processBrainDump(text) {
-                // Collect selected icon tags
-                let iconTags = [];
+                // Determine category from selected icon
+                let category = 'braindump'; // Default fallback
                 
-                // Process selected chips - just collect the icons
-                this.selectedChips.forEach(chipId => {
-                    switch (chipId) {
+                // Use first selected chip as category (single category per todo)
+                if (this.selectedChips.size > 0) {
+                    const firstChip = Array.from(this.selectedChips)[0];
+                    switch (firstChip) {
                         case 'chip-ausruf':
-                            iconTags.push('❗');
+                            category = '❗'; // Important category
                             break;
                         case 'chip-bitcoin':
-                            iconTags.push('₿');
+                            category = '₿'; // Bitcoin/Finance category
                             break;
                         case 'chip-idee':
-                            iconTags.push('💡');
+                            category = '💡'; // Ideas category
                             break;
                         case 'chip-arbeit':
-                            iconTags.push('💼');
+                            category = '💼'; // Work category
                             break;
                     }
-                });
-                
-                // Create brain dump text with only icons as tags
-                let brainDumpText = text;
-                if (iconTags.length > 0) {
-                    brainDumpText = `${text} ${iconTags.join(' ')}`;
                 }
                 
                 return {
-                    text: brainDumpText, // Text with icon tags appended
-                    category: 'braindump', // Always 'braindump' for mobile todos
+                    text: text, // Clean text without icon tags
+                    category: category, // Icon as category
                     priority: 2, // Default priority
                     completed: false,
                     date: null, // No date by default
@@ -1286,7 +1305,10 @@
                 
                 const todosHTML = this.todos.map(todo => `
                     <div class="brain-dump-item" data-id="${todo.id}">
-                        <div class="brain-dump-text">${this.escapeHtml(todo.text)}</div>
+                        <div class="brain-dump-content">
+                            <div class="brain-dump-text">${this.escapeHtml(todo.text)}</div>
+                            <div class="brain-dump-category">${todo.category}</div>
+                        </div>
                         <button class="brain-dump-delete" onclick="app.deleteTodo(${todo.id})">×</button>
                     </div>
                 `).join('');
