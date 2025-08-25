@@ -11379,13 +11379,24 @@
                     
                     try {
                         console.log('☁️ TradingRulesManager: Loading trading rules from cloud...');
-                        this.rules = await cloudStorage.getTradingRules() || [];
+                        const cloudRules = await cloudStorage.getTradingRules();
+                        console.log('☁️ TradingRulesManager: Cloud storage returned:', cloudRules);
+                        
+                        this.rules = cloudRules || [];
                         console.log('☁️ TradingRulesManager: Loaded', this.rules.length, 'rules:', this.rules);
+                        
+                        // If no rules exist, create sample rules for testing
+                        if (this.rules.length === 0) {
+                            console.log('🧪 No trading rules found, creating sample rules for testing...');
+                            await this.createSampleRules();
+                        }
+                        
                         this.renderTradingRules();
                         console.log('☁️ TradingRulesManager: Load completed');
                     } catch (error) {
                         console.error('❌ TradingRulesManager: Error loading from cloud:', error);
-                        console.error('Error details:', error);
+                        console.error('Error details:', error.message);
+                        console.error('Error stack:', error.stack);
                         // Don't re-throw - just show empty state
                         this.rules = [];
                         this.renderTradingRules();
@@ -11550,6 +11561,36 @@
                         console.log('✅ Trading rule deleted successfully');
                     } catch (error) {
                         console.error('❌ Error deleting trading rule:', error);
+                    }
+                },
+
+                async createSampleRules() {
+                    const sampleRules = [
+                        {
+                            title: "Never risk more than 2% per trade",
+                            category: "Risk Management",
+                            description: "Protect capital by limiting risk per position"
+                        },
+                        {
+                            title: "Always set stop loss before entry",
+                            category: "Entry Rules",
+                            description: "Plan exit strategy before entering position"
+                        },
+                        {
+                            title: "Take profits at resistance levels",
+                            category: "Exit Rules",
+                            description: "Use technical analysis to identify exit points"
+                        }
+                    ];
+
+                    try {
+                        for (const ruleData of sampleRules) {
+                            await cloudStorage.saveTradingRule(ruleData);
+                            this.rules.push(ruleData);
+                        }
+                        console.log('✅ Sample trading rules created successfully');
+                    } catch (error) {
+                        console.error('❌ Error creating sample rules:', error);
                     }
                 }
             };
