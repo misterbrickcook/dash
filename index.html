@@ -7114,20 +7114,15 @@
             
             setupEventListeners() {
                 const loginForm = document.getElementById('login-form');
-                const loginBtn = document.getElementById('login-btn');
                 const logoutBtn = document.getElementById('logout-btn');
                 
+                // Only use form submit event to avoid double firing on mobile
                 if (loginForm) {
                     loginForm.addEventListener('submit', (e) => {
                         e.preventDefault();
-                        this.handleLogin();
-                    });
-                }
-                
-                if (loginBtn) {
-                    loginBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        this.handleLogin();
+                        if (!this.isLoggingIn) { // Prevent multiple simultaneous logins
+                            this.handleLogin();
+                        }
                     });
                 }
                 
@@ -7137,30 +7132,66 @@
             },
             
             async handleLogin() {
-                const email = document.getElementById('login-email').value;
-                const password = document.getElementById('login-password').value;
-                const errorEl = document.getElementById('login-error');
-                
-                if (!email || !password) {
-                    this.showError('Please enter email and password');
+                // Prevent multiple simultaneous login attempts
+                if (this.isLoggingIn) {
+                    console.log('🔐 Login already in progress, ignoring...');
                     return;
                 }
                 
+                this.isLoggingIn = true;
+                
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                const errorEl = document.getElementById('login-error');
+                const loginBtn = document.getElementById('login-btn');
+                
+                console.log('📱 Mobile login attempt starting...', { email: email ? 'provided' : 'missing', password: password ? 'provided' : 'missing' });
+                
+                if (!email || !password) {
+                    this.showError('Please enter email and password');
+                    this.isLoggingIn = false;
+                    return;
+                }
+                
+                // Show loading state
+                if (loginBtn) {
+                    loginBtn.textContent = 'Logging in...';
+                    loginBtn.disabled = true;
+                }
+                
                 try {
+                    console.log('📱 Attempting Supabase login...');
                     const { user, error } = await supabase.signIn(email, password);
                     
                     if (error) {
+                        console.error('❌ Login error:', error);
                         this.showError(error);
+                        this.isLoggingIn = false;
+                        
+                        // Reset button
+                        if (loginBtn) {
+                            loginBtn.textContent = 'Login';
+                            loginBtn.disabled = false;
+                        }
                         return;
                     }
                     
                     if (user) {
+                        console.log('✅ Login successful, showing dashboard...');
                         this.currentUser = user;
                         this.isAuthenticated = true;
                         await this.showDashboard();
                     }
                 } catch (error) {
+                    console.error('❌ Login exception:', error);
                     this.showError(error.message);
+                    this.isLoggingIn = false;
+                    
+                    // Reset button
+                    if (loginBtn) {
+                        loginBtn.textContent = 'Login';
+                        loginBtn.disabled = false;
+                    }
                 }
             },
             
@@ -7249,6 +7280,15 @@
             async showDashboard() {
                 console.log('🔹 DASHBOARD: Hiding login effects');
                 console.trace('🔹 DASHBOARD: Call stack for showDashboard()');
+                
+                // Reset login state first
+                this.isLoggingIn = false;
+                const loginBtn = document.getElementById('login-btn');
+                if (loginBtn) {
+                    loginBtn.textContent = 'Login';
+                    loginBtn.disabled = false;
+                }
+                
                 document.body.classList.add('authenticated');
                 document.getElementById('auth-screen').classList.add('hide');
                 const loginEffects = document.querySelector('.login-effects');
