@@ -18824,53 +18824,116 @@
                 });
             }
             
-            forceRefreshTodos() {
-                // Try multiple methods to refresh todo sections
+            async forceRefreshTodos() {
+                console.log('🔄 Force refreshing all todos after distribution...');
+                
                 try {
-                    // Method 1: Direct function calls
-                    if (window.loadTodos) {
-                        console.log('🔄 Refreshing todos via loadTodos()');
-                        window.loadTodos();
-                    }
-                    
-                    // Method 2: Refresh specific todo containers
-                    if (window.TodoManager && window.TodoManager.loadTodos) {
-                        console.log('🔄 Refreshing todos via TodoManager');
-                        window.TodoManager.loadTodos();
-                    }
-                    
-                    // Method 3: Trigger refresh events
-                    const refreshEvent = new CustomEvent('todoRefresh', { 
-                        detail: { source: 'brainDumpDistribution' } 
-                    });
-                    document.dispatchEvent(refreshEvent);
-                    
-                    // Method 4: Force reload of todo grids
-                    const todoGrids = document.querySelectorAll('.todos-grid, .todo-grid, [id*="todo"]');
-                    if (todoGrids.length > 0) {
-                        console.log(`🔄 Found ${todoGrids.length} todo containers to refresh`);
-                    }
-                    
-                    // Method 5: Small delay then page refresh as fallback (only if other methods fail)
-                    setTimeout(() => {
-                        if (!this.todoRefreshSuccess) {
-                            console.log('🔄 Fallback: Triggering page refresh for todo sync');
-                            // Force a gentle page refresh to sync todos
-                            const currentHash = window.location.hash;
-                            window.location.href = window.location.href.split('#')[0] + '#refresh-todos';
-                            setTimeout(() => {
-                                if (currentHash) {
-                                    window.location.hash = currentHash;
-                                } else {
-                                    window.location.hash = '';
+                    // Direct approach: Reload and redistribute todos to their containers
+                    if (window.supabase && window.supabase.isAuthenticated()) {
+                        console.log('🔄 Loading todos from database...');
+                        const todos = await window.supabase.select('todos', '*');
+                        
+                        if (todos) {
+                            console.log(`🔄 Found ${todos.length} todos, redistributing to containers...`);
+                            
+                            // Clear all todo containers
+                            const containers = ['todo-privat', 'todo-uni', 'todo-arbeit', 'todo-projekte'];
+                            containers.forEach(containerId => {
+                                const container = document.getElementById(containerId);
+                                if (container) {
+                                    container.innerHTML = '<div class="todo-empty-state"><p>Loading...</p></div>';
                                 }
-                            }, 100);
+                            });
+                            
+                            // Group todos by category
+                            const todosByCategory = {
+                                'privat': [],
+                                'uni': [],
+                                'arbeit': [], 
+                                'projekte': []
+                            };
+                            
+                            todos.forEach(todo => {
+                                if (todo.category && todosByCategory[todo.category]) {
+                                    todosByCategory[todo.category].push(todo);
+                                }
+                            });
+                            
+                            // Render todos in each container
+                            Object.keys(todosByCategory).forEach(category => {
+                                const container = document.getElementById(`todo-${category}`);
+                                if (container) {
+                                    const categoryTodos = todosByCategory[category];
+                                    
+                                    if (categoryTodos.length === 0) {
+                                        container.innerHTML = `
+                                            <div class="todo-empty-state">
+                                                <p>${this.getCategoryDisplayName(category)}</p>
+                                                <small>No todos yet</small>
+                                            </div>
+                                        `;
+                                    } else {
+                                        const todosHTML = categoryTodos
+                                            .sort((a, b) => {
+                                                // Sort by date, then by time, then by priority
+                                                if (a.date && b.date) {
+                                                    const dateCompare = new Date(a.date) - new Date(b.date);
+                                                    if (dateCompare !== 0) return dateCompare;
+                                                    
+                                                    if (a.time && b.time) {
+                                                        return a.time.localeCompare(b.time);
+                                                    }
+                                                }
+                                                return (b.priority || 0) - (a.priority || 0);
+                                            })
+                                            .map(todo => `
+                                                <div class="todo-item" data-id="${todo.id}">
+                                                    <div class="todo-content">
+                                                        <div class="todo-text">${this.escapeHtml(todo.text)}</div>
+                                                        <div class="todo-meta">
+                                                            Priority: ${todo.priority || 'None'}
+                                                            ${todo.date ? ` • ${todo.date}` : ''}
+                                                            ${todo.time ? ` • ${todo.time}` : ''}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `).join('');
+                                        
+                                        container.innerHTML = todosHTML;
+                                    }
+                                }
+                            });
+                            
+                            console.log('✅ Todo containers refreshed successfully');
+                            this.todoRefreshSuccess = true;
                         }
-                    }, 2000);
+                    }
                     
                 } catch (error) {
                     console.error('❌ Error in forceRefreshTodos:', error);
+                    
+                    // Fallback: Force page refresh
+                    setTimeout(() => {
+                        console.log('🔄 Fallback: Full page refresh');
+                        window.location.reload();
+                    }, 1000);
                 }
+            }
+            
+            getCategoryDisplayName(category) {
+                const names = {
+                    'privat': 'Personal',
+                    'uni': 'Education', 
+                    'arbeit': 'Work',
+                    'projekte': 'Projects'
+                };
+                return names[category] || category;
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
             }
             
             showToast(message) {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DashFin Mobile v2.8 - Fixed Authentication</title>
+    <title>DashFin Mobile v2.9 - Real-time Sync</title>
     <!-- Cache Buster für neues Brain Dump Design -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -1236,6 +1236,25 @@
                 
                 // Load todos
                 await this.loadTodos();
+                
+                // Start periodic sync to catch desktop changes
+                this.startPeriodicSync();
+            }
+            
+            startPeriodicSync() {
+                // Sync every 10 seconds to catch desktop changes
+                if (this.syncInterval) {
+                    clearInterval(this.syncInterval);
+                }
+                
+                this.syncInterval = setInterval(async () => {
+                    if (window.supabase && window.supabase.isAuthenticated()) {
+                        console.log('🔄 Mobile: Syncing with server...');
+                        await this.loadTodos();
+                    }
+                }, 10000); // 10 seconds
+                
+                console.log('📱 Mobile: Started periodic sync (every 10s)');
             }
             
             showError(message) {
