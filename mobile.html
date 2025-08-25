@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DashFin Mobile v2.3 - Icon Tags Only</title>
+    <title>DashFin Mobile v2.4 - With Delete Button</title>
     <!-- Cache Buster für neues Brain Dump Design -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -470,6 +470,9 @@
             padding: 1rem;
             border-bottom: 1px solid var(--border-primary);
             background: var(--bg-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         .brain-dump-item:last-child {
@@ -480,6 +483,27 @@
             font-size: var(--font-size-base);
             line-height: var(--line-height-base);
             color: var(--text-primary);
+            flex: 1;
+        }
+        
+        .brain-dump-delete {
+            width: 32px;
+            height: 32px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1rem;
+        }
+        
+        .brain-dump-delete:hover {
+            background: #c82333;
         }
         
         .brain-dump-meta {
@@ -1263,6 +1287,7 @@
                 const todosHTML = this.todos.map(todo => `
                     <div class="brain-dump-item" data-id="${todo.id}">
                         <div class="brain-dump-text">${this.escapeHtml(todo.text)}</div>
+                        <button class="brain-dump-delete" onclick="app.deleteTodo(${todo.id})">×</button>
                     </div>
                 `).join('');
                 
