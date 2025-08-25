@@ -11539,6 +11539,7 @@
                     event.preventDefault();
                     event.stopPropagation();
                     
+                    console.log('📋 Context menu shown for rule ID:', ruleId, typeof ruleId);
                     this.currentRuleId = ruleId;
                     const contextMenu = document.getElementById('trading-rules-context-menu');
                     
@@ -11560,6 +11561,7 @@
                 },
                 
                 async deleteRuleFromMenu() {
+                    console.log('🗑️ deleteRuleFromMenu called with currentRuleId:', this.currentRuleId, typeof this.currentRuleId);
                     if (!this.currentRuleId) return;
                     
                     this.hideContextMenu();
