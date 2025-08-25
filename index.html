@@ -10512,7 +10512,17 @@
                     let tags = [];
                     if (entry.tags) {
                         if (typeof entry.tags === 'string') {
-                            tags = entry.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+                            // Handle both comma-separated and JSON array strings
+                            if (entry.tags.startsWith('[') && entry.tags.endsWith(']')) {
+                                try {
+                                    tags = JSON.parse(entry.tags);
+                                } catch (e) {
+                                    console.warn('Failed to parse JSON tags, using as string:', entry.tags);
+                                    tags = [entry.tags];
+                                }
+                            } else {
+                                tags = entry.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+                            }
                         } else if (Array.isArray(entry.tags)) {
                             tags = entry.tags;
                         }
