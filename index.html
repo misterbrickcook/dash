@@ -11388,8 +11388,7 @@
                         // If no rules exist, create sample rules for testing
                         if (this.rules.length === 0) {
                             console.log('🧪 No trading rules found, creating sample rules for testing...');
-                            // Comment out auto-creation for debugging
-                            // await this.createSampleRules();
+                            await this.createSampleRules();
                         }
                         
                         this.renderTradingRules();
@@ -11609,12 +11608,21 @@
 
                     try {
                         for (const ruleData of sampleRules) {
+                            console.log('📝 Creating sample rule:', ruleData.title);
                             await cloudStorage.saveTradingRule(ruleData);
-                            this.rules.push(ruleData);
+                            console.log('✅ Sample rule saved with ID:', ruleData.id);
+                            
+                            // Only push to local array if it has a valid ID
+                            if (ruleData.id) {
+                                this.rules.push(ruleData);
+                            } else {
+                                console.error('❌ Sample rule created but has no ID:', ruleData);
+                            }
                         }
-                        console.log('✅ Sample trading rules created successfully');
+                        console.log('✅ Sample trading rules creation completed. Total rules:', this.rules.length);
                     } catch (error) {
                         console.error('❌ Error creating sample rules:', error);
+                        console.error('❌ Error details:', error.message);
                     }
                 },
 
