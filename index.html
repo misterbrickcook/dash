@@ -2256,6 +2256,74 @@
             background-color: rgba(96, 165, 250, 0.25);
             border-color: rgba(96, 165, 250, 0.5);
         }
+
+        /* Autocomplete dropdown styles */
+        .autocomplete-dropdown {
+            position: fixed;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 9999;
+            display: none;
+        }
+
+        .autocomplete-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.15s ease;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background-color: #f8f9fa;
+        }
+
+        .autocomplete-command {
+            font-weight: 600;
+            color: #3b82f6;
+            display: block;
+            font-size: 14px;
+        }
+
+        .autocomplete-description {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+            display: block;
+        }
+
+        /* Dark mode autocomplete */
+        [data-theme="dark"] .autocomplete-dropdown {
+            background: #1a1a2e;
+            border-color: #374151;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="dark"] .autocomplete-item {
+            border-bottom-color: #374151;
+        }
+
+        [data-theme="dark"] .autocomplete-item:hover,
+        [data-theme="dark"] .autocomplete-item.selected {
+            background-color: #374151;
+        }
+
+        [data-theme="dark"] .autocomplete-command {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] .autocomplete-description {
+            color: #9ca3af;
+        }
         .journal-entry-meta {
             display: flex;
             justify-content: space-between;
@@ -10064,17 +10132,27 @@
 
         // === INTERNAL LINK PARSER ===
         const InternalLinkParser = {
-            // Map of @-links to tab IDs
+            // Map of @-links to tab IDs with descriptions
             linkMapping: {
-                'trading-rules': 'tab-trading-rules',
-                'goals': 'tab-ziele', 
-                'todos': 'tab-home',
-                'journal': 'tab-journal',
-                'resources': 'tab-ressourcen',
-                'wiki': 'tab-wiki',
-                'vision': 'tab-vision',
-                'termine': 'tab-home', // termine are on home tab
-                'settings': 'tab-settings'
+                'trading-rules': { tab: 'tab-trading-rules', description: 'Trading Rules & Disziplin' },
+                'goals': { tab: 'tab-ziele', description: 'Ziele & Fortschritt' }, 
+                'todos': { tab: 'tab-home', description: 'Todos & Aufgaben' },
+                'journal': { tab: 'tab-journal', description: 'Journal & Reflexion' },
+                'resources': { tab: 'tab-ressourcen', description: 'Ressourcen & Links' },
+                'wiki': { tab: 'tab-wiki', description: 'Wiki & Notizen' },
+                'vision': { tab: 'tab-vision', description: 'Vision Board' },
+                'termine': { tab: 'tab-home', description: 'Termine & Deadlines' },
+                'settings': { tab: 'tab-settings', description: 'Einstellungen' }
+            },
+            
+            // Current autocomplete state
+            autocompleteState: {
+                isActive: false,
+                currentTextarea: null,
+                dropdown: null,
+                selectedIndex: -1,
+                suggestions: [],
+                currentAtPosition: -1
             },
             
             parseInternalLinks(text) {
@@ -10082,9 +10160,9 @@
                 
                 // Replace @link-name with clickable links
                 return text.replace(/@([a-zA-Z-]+)/g, (match, linkName) => {
-                    const tabId = this.linkMapping[linkName.toLowerCase()];
-                    if (tabId) {
-                        return `<a href="#" class="internal-link" data-tab="${tabId}" onclick="InternalLinkParser.navigateToTab('${tabId}'); return false;">@${linkName}</a>`;
+                    const linkData = this.linkMapping[linkName.toLowerCase()];
+                    if (linkData) {
+                        return `<a href="#" class="internal-link" data-tab="${linkData.tab}" onclick="InternalLinkParser.navigateToTab('${linkData.tab}'); return false;">@${linkName}</a>`;
                     }
                     return match; // Return original if no mapping found
                 });
@@ -10096,6 +10174,190 @@
                     switchTab(tabId);
                 } else {
                     console.error('❌ switchTab function not available');
+                }
+            },
+            
+            // Setup autocomplete for a textarea
+            setupAutocomplete(textarea) {
+                if (!textarea) return;
+                
+                console.log('🔧 Setting up @ autocomplete for textarea');
+                
+                // Remove existing listeners to prevent duplicates
+                textarea.removeEventListener('input', this.handleInput.bind(this));
+                textarea.removeEventListener('keydown', this.handleKeydown.bind(this));
+                
+                // Add event listeners
+                textarea.addEventListener('input', this.handleInput.bind(this));
+                textarea.addEventListener('keydown', this.handleKeydown.bind(this));
+            },
+            
+            handleInput(event) {
+                const textarea = event.target;
+                const cursorPos = textarea.selectionStart;
+                const text = textarea.value;
+                
+                // Find @ symbol before cursor
+                const textBeforeCursor = text.substring(0, cursorPos);
+                const atMatch = textBeforeCursor.match(/@([a-zA-Z-]*)$/);
+                
+                if (atMatch) {
+                    const query = atMatch[1].toLowerCase();
+                    const atPosition = textBeforeCursor.lastIndexOf('@');
+                    
+                    this.autocompleteState.currentAtPosition = atPosition;
+                    this.autocompleteState.currentTextarea = textarea;
+                    
+                    // Filter suggestions based on query
+                    const suggestions = Object.keys(this.linkMapping).filter(key => 
+                        key.startsWith(query)
+                    );
+                    
+                    if (suggestions.length > 0) {
+                        this.showAutocomplete(textarea, suggestions, atPosition, cursorPos);
+                    } else {
+                        this.hideAutocomplete();
+                    }
+                } else {
+                    this.hideAutocomplete();
+                }
+            },
+            
+            handleKeydown(event) {
+                if (!this.autocompleteState.isActive) return;
+                
+                const { suggestions, selectedIndex } = this.autocompleteState;
+                
+                switch (event.key) {
+                    case 'ArrowDown':
+                        event.preventDefault();
+                        this.autocompleteState.selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+                        this.updateSelection();
+                        break;
+                        
+                    case 'ArrowUp':
+                        event.preventDefault();
+                        this.autocompleteState.selectedIndex = Math.max(selectedIndex - 1, -1);
+                        this.updateSelection();
+                        break;
+                        
+                    case 'Enter':
+                    case 'Tab':
+                        event.preventDefault();
+                        if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+                            this.selectSuggestion(suggestions[selectedIndex]);
+                        }
+                        break;
+                        
+                    case 'Escape':
+                        this.hideAutocomplete();
+                        break;
+                }
+            },
+            
+            showAutocomplete(textarea, suggestions, atPosition, cursorPos) {
+                this.autocompleteState.isActive = true;
+                this.autocompleteState.suggestions = suggestions;
+                this.autocompleteState.selectedIndex = 0;
+                
+                if (!this.autocompleteState.dropdown) {
+                    this.createDropdown();
+                }
+                
+                const dropdown = this.autocompleteState.dropdown;
+                
+                // Clear and populate dropdown
+                dropdown.innerHTML = '';
+                suggestions.forEach((suggestion, index) => {
+                    const linkData = this.linkMapping[suggestion];
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerHTML = `
+                        <span class="autocomplete-command">@${suggestion}</span>
+                        <span class="autocomplete-description">${linkData.description}</span>
+                    `;
+                    
+                    item.addEventListener('click', () => {
+                        this.selectSuggestion(suggestion);
+                    });
+                    
+                    dropdown.appendChild(item);
+                });
+                
+                // Position dropdown near cursor
+                this.positionDropdown(textarea, atPosition);
+                this.updateSelection();
+            },
+            
+            createDropdown() {
+                const dropdown = document.createElement('div');
+                dropdown.className = 'autocomplete-dropdown';
+                dropdown.id = 'internal-link-autocomplete';
+                document.body.appendChild(dropdown);
+                this.autocompleteState.dropdown = dropdown;
+            },
+            
+            positionDropdown(textarea, atPosition) {
+                const dropdown = this.autocompleteState.dropdown;
+                
+                // Get textarea position
+                const textareaRect = textarea.getBoundingClientRect();
+                
+                // Rough estimate of cursor position (not perfect but good enough)
+                const lineHeight = 20;
+                const charWidth = 8;
+                
+                // Calculate approximate cursor position
+                const textBeforeAt = textarea.value.substring(0, atPosition);
+                const lines = textBeforeAt.split('\n');
+                const currentLine = lines.length - 1;
+                const currentColumn = lines[lines.length - 1].length;
+                
+                const left = textareaRect.left + (currentColumn * charWidth);
+                const top = textareaRect.top + ((currentLine + 1) * lineHeight);
+                
+                dropdown.style.left = Math.min(left, window.innerWidth - 300) + 'px';
+                dropdown.style.top = Math.min(top, window.innerHeight - 200) + 'px';
+                dropdown.style.display = 'block';
+            },
+            
+            updateSelection() {
+                const items = this.autocompleteState.dropdown.querySelectorAll('.autocomplete-item');
+                items.forEach((item, index) => {
+                    item.classList.toggle('selected', index === this.autocompleteState.selectedIndex);
+                });
+            },
+            
+            selectSuggestion(suggestion) {
+                const textarea = this.autocompleteState.currentTextarea;
+                const atPosition = this.autocompleteState.currentAtPosition;
+                
+                if (textarea && atPosition >= 0) {
+                    const value = textarea.value;
+                    const cursorPos = textarea.selectionStart;
+                    
+                    // Replace from @ to cursor position
+                    const beforeAt = value.substring(0, atPosition);
+                    const afterCursor = value.substring(cursorPos);
+                    
+                    const newValue = beforeAt + '@' + suggestion + ' ' + afterCursor;
+                    textarea.value = newValue;
+                    
+                    // Set cursor after the inserted text
+                    const newCursorPos = atPosition + suggestion.length + 2; // +2 for @ and space
+                    textarea.setSelectionRange(newCursorPos, newCursorPos);
+                    
+                    this.hideAutocomplete();
+                    textarea.focus();
+                }
+            },
+            
+            hideAutocomplete() {
+                this.autocompleteState.isActive = false;
+                this.autocompleteState.selectedIndex = -1;
+                
+                if (this.autocompleteState.dropdown) {
+                    this.autocompleteState.dropdown.style.display = 'none';
                 }
             }
         };
@@ -10762,6 +11024,13 @@
             }
             
             console.log('✅ DOM loaded');
+            
+            // Setup @ autocomplete for journal textarea
+            const journalTextarea = document.getElementById('journal-content');
+            if (journalTextarea) {
+                InternalLinkParser.setupAutocomplete(journalTextarea);
+                console.log('🔧 @ autocomplete setup completed for journal');
+            }
             
             // Hide QuickBar initially until authentication is confirmed
             const quickbar = document.getElementById('quickbar');
