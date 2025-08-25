@@ -18621,12 +18621,15 @@
                     const dump = this.brainDumps.find(d => d.id === dumpId);
                     if (!dump) return;
                     
-                    // Update the todo with new category, date and time for proper sorting
-                    const now = new Date();
+                    // Show distribution dialog with optional date/time editing
+                    const distributionData = await this.showDistributionDialog(category, 1);
+                    if (!distributionData) return; // User cancelled
+                    
+                    // Update the todo with new category, date and time
                     await window.supabase.update('todos', {
-                        category: category,
-                        date: now.toISOString().split('T')[0], // Today's date
-                        time: now.toTimeString().split(' ')[0].slice(0, 5) // Current time HH:MM
+                        category: distributionData.category,
+                        date: distributionData.date,
+                        time: distributionData.time
                     }, dumpId);
                     
                     // Remove from brain dumps
@@ -18655,18 +18658,17 @@
                     return;
                 }
                 
-                const category = prompt('In welche Kategorie sollen die ausgewählten Brain Dumps verschoben werden?\n\nOptionen: privat, arbeit, uni, projekte', 'privat');
-                
-                if (!category) return;
+                // Show distribution dialog with optional date/time editing
+                const distributionData = await this.showDistributionDialog('privat', this.selectedDumps.size);
+                if (!distributionData) return; // User cancelled
                 
                 try {
-                    // Update all selected brain dumps with category, date and time
-                    const now = new Date();
+                    // Update all selected brain dumps with same category, date and time
                     for (const dumpId of this.selectedDumps) {
                         await window.supabase.update('todos', {
-                            category: category,
-                            date: now.toISOString().split('T')[0], // Today's date
-                            time: now.toTimeString().split(' ')[0].slice(0, 5) // Current time HH:MM
+                            category: distributionData.category,
+                            date: distributionData.date,
+                            time: distributionData.time
                         }, dumpId);
                     }
                     
@@ -18731,6 +18733,99 @@
                     console.error('❌ Error clearing brain dumps:', error);
                     alert('Fehler beim Löschen der Brain Dumps.');
                 }
+            }
+            
+            async showDistributionDialog(defaultCategory, itemCount) {
+                return new Promise((resolve) => {
+                    // Create modal dialog
+                    const modal = document.createElement('div');
+                    modal.className = 'brain-dump-modal-overlay';
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0, 0, 0, 0.5);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 10000;
+                    `;
+                    
+                    const now = new Date();
+                    const todayDate = now.toISOString().split('T')[0];
+                    const currentTime = now.toTimeString().split(' ')[0].slice(0, 5);
+                    
+                    modal.innerHTML = `
+                        <div class="brain-dump-dialog" style="
+                            background: white;
+                            padding: 2rem;
+                            border-radius: 8px;
+                            width: 90%;
+                            max-width: 400px;
+                            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                        ">
+                            <h3 style="margin: 0 0 1.5rem 0; font-size: 1.2rem;">
+                                ${itemCount} Brain Dump${itemCount > 1 ? 's' : ''} verteilen
+                            </h3>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Kategorie:</label>
+                                <select id="dist-category" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="privat" ${defaultCategory === 'privat' ? 'selected' : ''}>Privat</option>
+                                    <option value="arbeit" ${defaultCategory === 'arbeit' ? 'selected' : ''}>Arbeit</option>
+                                    <option value="uni" ${defaultCategory === 'uni' ? 'selected' : ''}>Uni</option>
+                                    <option value="projekte" ${defaultCategory === 'projekte' ? 'selected' : ''}>Projekte</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Datum:</label>
+                                <input type="date" id="dist-date" value="${todayDate}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            
+                            <div style="margin-bottom: 2rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Zeit:</label>
+                                <input type="time" id="dist-time" value="${currentTime}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            
+                            <div style="display: flex; gap: 1rem;">
+                                <button id="dist-cancel" style="flex: 1; padding: 0.75rem; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+                                    Abbrechen
+                                </button>
+                                <button id="dist-confirm" style="flex: 1; padding: 0.75rem; background: #000; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Verteilen
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(modal);
+                    
+                    // Event handlers
+                    modal.querySelector('#dist-cancel').onclick = () => {
+                        document.body.removeChild(modal);
+                        resolve(null);
+                    };
+                    
+                    modal.querySelector('#dist-confirm').onclick = () => {
+                        const category = modal.querySelector('#dist-category').value;
+                        const date = modal.querySelector('#dist-date').value;
+                        const time = modal.querySelector('#dist-time').value;
+                        
+                        document.body.removeChild(modal);
+                        resolve({ category, date, time });
+                    };
+                    
+                    // Close on overlay click
+                    modal.onclick = (e) => {
+                        if (e.target === modal) {
+                            document.body.removeChild(modal);
+                            resolve(null);
+                        }
+                    };
+                });
             }
             
             showToast(message) {
