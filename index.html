@@ -7291,14 +7291,11 @@
                 
                 document.body.classList.add('authenticated');
                 
-                // Force hide auth screen with multiple methods for mobile compatibility
+                // NUCLEAR OPTION: Completely remove auth screen from DOM on mobile
                 const authScreen = document.getElementById('auth-screen');
                 if (authScreen) {
-                    authScreen.classList.add('hide');
-                    authScreen.style.display = 'none';
-                    authScreen.style.visibility = 'hidden';
-                    authScreen.style.zIndex = '-1000';
-                    console.log('📱 DASHBOARD: Auth screen hidden with multiple methods');
+                    console.log('📱 DASHBOARD: Removing auth screen from DOM completely');
+                    authScreen.remove(); // Complete DOM removal - no CSS can override this
                 }
                 
                 const loginEffects = document.querySelector('.login-effects');
@@ -7311,7 +7308,6 @@
                 const cryptoOverlay = document.getElementById('crypto-overlay');
                 if (cryptoOverlay) {
                     cryptoOverlay.style.display = 'block';
-                    cryptoOverlay.style.zIndex = '1';
                 }
                 
                 // Show main content areas  
@@ -7321,20 +7317,19 @@
                 
                 if (homeSection) {
                     homeSection.style.display = 'block';
-                    homeSection.style.zIndex = '1';
                     console.log('📱 DASHBOARD: Showing home section');
                 }
                 
                 if (tabsContainer) {
                     tabsContainer.style.display = 'block';
-                    tabsContainer.style.zIndex = '1';
                     console.log('📱 DASHBOARD: Showing tabs container');
                 }
                 
                 tabContent.forEach(content => {
                     content.style.display = 'block';
-                    content.style.zIndex = '1';
                 });
+                
+                console.log('🎯 DASHBOARD: All elements should now be visible - auth screen completely removed from DOM');
                 
                 // Mobile-specific: Hide QuickBar on mobile, show on desktop
                 const quickbar = document.getElementById('quickbar');
