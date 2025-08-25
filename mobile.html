@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DashFin Mobile v2.9 - Real-time Sync</title>
+    <title>DashFin Mobile v3.0 - Perfect Sync Filter</title>
     <!-- Cache Buster für neues Brain Dump Design -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -1271,16 +1271,22 @@
             
             async loadTodos() {
                 try {
-                    console.log('📋 Loading todos...');
+                    console.log('📋 Loading brain dump todos...');
                     
                     if (!window.supabase || !window.supabase.isAuthenticated()) {
                         throw new Error('Not authenticated');
                     }
                     
-                    const todos = await window.supabase.select('todos', '*');
-                    this.todos = todos || [];
+                    const allTodos = await window.supabase.select('todos', '*');
                     
-                    // Clean up empty todos automatically
+                    // Only show brain dump todos (not distributed ones)
+                    this.todos = (allTodos || []).filter(todo => 
+                        todo.category === 'braindump'
+                    );
+                    
+                    console.log(`📋 Found ${this.todos.length} brain dump todos (filtered from ${allTodos?.length || 0} total)`);
+                    
+                    // Clean up empty brain dump todos automatically
                     await this.cleanupEmptyTodos();
                     
                     this.renderTodos();
