@@ -318,47 +318,100 @@
             async signIn(email, password) {
                 try {
                     console.log('📱 Attempting login to:', `${this.url}/auth/v1/token`);
-                    
-                    const response = await fetch(`${this.url}/auth/v1/token?grant_type=password`, {
-                        method: 'POST',
-                        headers: {
-                            'apikey': this.key,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            email: email,
-                            password: password
-                        })
+                    console.log('📱 Using headers:', { 
+                        'apikey': this.key.substring(0, 20) + '...',
+                        'Content-Type': 'application/json'
                     });
                     
-                    console.log('📱 Login response status:', response.status);
+                    // Try multiple endpoints in case one fails
+                    const endpoints = [
+                        `${this.url}/auth/v1/token?grant_type=password`,
+                        `${this.url}/auth/v1/signin`
+                    ];
                     
-                    const data = await response.json();
-                    console.log('📱 Login response data:', data);
+                    let lastError = null;
                     
-                    if (!response.ok) {
-                        return { user: null, error: data.error_description || `HTTP ${response.status}` };
+                    for (const endpoint of endpoints) {
+                        try {
+                            console.log('📱 Trying endpoint:', endpoint);
+                            
+                            // Add timeout to prevent "load failed" errors
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                            
+                            const response = await fetch(endpoint, {
+                                method: 'POST',
+                                headers: {
+                                    'apikey': this.key,
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${this.key}`
+                                },
+                                body: JSON.stringify({
+                                    email: email,
+                                    password: password
+                                }),
+                                signal: controller.signal
+                            });
+                            
+                            clearTimeout(timeoutId);
+                            
+                            console.log('📱 Response status:', response.status);
+                            console.log('📱 Response headers:', Object.fromEntries(response.headers.entries()));
+                            
+                            if (!response.ok) {
+                                const errorText = await response.text();
+                                console.log('📱 Error response text:', errorText);
+                                
+                                try {
+                                    const errorData = JSON.parse(errorText);
+                                    lastError = errorData.error_description || errorData.message || `HTTP ${response.status}`;
+                                } catch {
+                                    lastError = `HTTP ${response.status}: ${errorText}`;
+                                }
+                                continue; // Try next endpoint
+                            }
+                            
+                            const responseText = await response.text();
+                            console.log('📱 Success response text:', responseText);
+                            
+                            const data = JSON.parse(responseText);
+                            console.log('📱 Parsed login data:', {
+                                has_access_token: !!data.access_token,
+                                has_user: !!data.user,
+                                user_email: data.user?.email
+                            });
+                            
+                            if (data.access_token && data.user) {
+                                this.session = {
+                                    access_token: data.access_token,
+                                    refresh_token: data.refresh_token,
+                                    user: data.user
+                                };
+                                this.user = data.user;
+                                this.headers.Authorization = `Bearer ${data.access_token}`;
+                                
+                                // Store in localStorage
+                                localStorage.setItem('mobile_supabase_session', JSON.stringify(this.session));
+                                
+                                console.log('✅ Login successful for:', data.user.email);
+                                return { user: data.user, error: null };
+                            }
+                            
+                            lastError = 'Login successful but missing user data';
+                            break;
+                            
+                        } catch (fetchError) {
+                            console.error('📱 Fetch error for endpoint', endpoint, ':', fetchError);
+                            lastError = `Network error: ${fetchError.message}`;
+                            continue;
+                        }
                     }
                     
-                    if (data.access_token && data.user) {
-                        this.session = {
-                            access_token: data.access_token,
-                            refresh_token: data.refresh_token,
-                            user: data.user
-                        };
-                        this.user = data.user;
-                        this.headers.Authorization = `Bearer ${data.access_token}`;
-                        
-                        // Store in localStorage
-                        localStorage.setItem('mobile_supabase_session', JSON.stringify(this.session));
-                        
-                        return { user: data.user, error: null };
-                    }
+                    return { user: null, error: lastError || 'All login methods failed' };
                     
-                    return { user: null, error: 'Login failed' };
                 } catch (error) {
-                    console.error('📱 Login error:', error);
-                    return { user: null, error: error.message };
+                    console.error('📱 Outer login error:', error);
+                    return { user: null, error: `Login error: ${error.message}` };
                 }
             }
             
@@ -535,12 +588,42 @@
                     
                 } catch (error) {
                     console.error('❌ Login error:', error);
-                    this.showError(error.message || 'Anmeldung fehlgeschlagen');
+                    
+                    // If it's a network error, offer demo mode
+                    if (error.message?.includes('Network error') || error.message?.includes('Load failed')) {
+                        this.showError('Netzwerkverbindung fehlgeschlagen. Versuche es mit deiner mobilen Daten oder WLAN.');
+                        
+                        // Add demo mode button after 3 seconds
+                        setTimeout(() => {
+                            const errorEl = document.getElementById('error-msg');
+                            if (errorEl && !errorEl.classList.contains('hidden')) {
+                                errorEl.innerHTML = `
+                                    <div>Netzwerkverbindung fehlgeschlagen.</div>
+                                    <button onclick="app.enterDemoMode()" style="margin-top: 10px; padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px;">
+                                        Demo-Modus starten
+                                    </button>
+                                `;
+                            }
+                        }, 3000);
+                    } else {
+                        this.showError(error.message || 'Anmeldung fehlgeschlagen');
+                    }
                 } finally {
                     this.isLoading = false;
                     loginBtn.textContent = 'Login';
                     loginBtn.disabled = false;
                 }
+            }
+            
+            enterDemoMode() {
+                console.log('📱 Entering demo mode');
+                this.currentUser = { email: 'demo@user.com', id: 'demo' };
+                this.todos = [
+                    { id: 1, title: 'Demo Todo 1', category: 'privat' },
+                    { id: 2, title: 'Demo Todo 2', category: 'arbeit' }
+                ];
+                this.hideError();
+                this.showDashboard();
             }
             
             async handleLogout() {
