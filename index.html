@@ -14985,15 +14985,23 @@
                         }
                         break;
                     case 'add-wiki':
-                        const wikiModal = document.getElementById('wiki-modal');
-                        if (wikiModal) {
-                            wikiModal.style.display = 'flex';
+                        if (window.WikiManager) {
+                            WikiManager.showAddWikiModal();
+                        } else {
+                            const wikiModal = document.getElementById('add-wiki-modal');
+                            if (wikiModal) {
+                                wikiModal.classList.remove('hide');
+                            }
                         }
                         break;
                     case 'add-journal':
-                        const journalModal = document.getElementById('journal-modal');
-                        if (journalModal) {
-                            journalModal.style.display = 'flex';
+                        if (window.JournalManager) {
+                            JournalManager.showAddJournalModal();
+                        } else {
+                            const journalModal = document.getElementById('add-journal-modal');
+                            if (journalModal) {
+                                journalModal.classList.remove('hide');
+                            }
                         }
                         break;
                     
