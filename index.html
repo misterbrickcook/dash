@@ -6109,15 +6109,8 @@
                 
                 <div class="form-group">
                     <label for="journal-category">Kategorie</label>
-                    <select id="journal-category" required>
-                        <option value="trading">Trading</option>
-                        <option value="crypto">Crypto</option>
-                        <option value="privat">Privat</option>
-                        <option value="arbeit">Arbeit</option>
-                        <option value="uni">Uni</option>
-                        <option value="reflexion">Reflexion</option>
-                        <option value="goals">Goals</option>
-                    </select>
+                    <input type="text" id="journal-category" placeholder="z.B. trading, crypto, privat, arbeit..." value="trading" autocomplete="off">
+                    <small style="color: var(--text-muted); font-size: 0.8rem;">Wird automatisch als Filter-Option in Analytics verfügbar</small>
                 </div>
                 
                     <div class="form-actions">
@@ -6921,10 +6914,7 @@
                                     <button class="period-btn" data-period="quarter" onclick="window.JournalTagAnalytics?.updatePeriod('quarter')">Quartal</button>
                                 </div>
                                 <div class="category-filter-buttons">
-                                    <button class="category-btn active" data-category="all" onclick="window.JournalTagAnalytics?.updateCategory('all')">Alle</button>
-                                    <button class="category-btn" data-category="trading" onclick="window.JournalTagAnalytics?.updateCategory('trading')">Trading</button>
-                                    <button class="category-btn" data-category="crypto" onclick="window.JournalTagAnalytics?.updateCategory('crypto')">Crypto</button>
-                                    <button class="category-btn" data-category="privat" onclick="window.JournalTagAnalytics?.updateCategory('privat')">Privat</button>
+                                    <!-- Dynamic buttons will be loaded here -->
                                 </div>
                                 <div class="chart-info">
                                     <span id="tag-stats">Loading...</span>
@@ -19304,6 +19294,7 @@
                     await window.cloudStorage.processExistingJournalEntries();
                 }
                 
+                await this.updateCategoryButtons();
                 await this.loadAndDisplayAnalytics();
                 this.isInitialized = true;
             }
@@ -19330,6 +19321,30 @@
                 document.querySelector(`[data-category="${category}"]`)?.classList.add('active');
                 
                 await this.loadAndDisplayAnalytics();
+            }
+            
+            async updateCategoryButtons() {
+                if (!window.cloudStorage) return;
+                
+                try {
+                    const categories = await window.cloudStorage.getAvailableJournalCategories();
+                    const container = document.querySelector('.category-filter-buttons');
+                    if (!container) return;
+                    
+                    // Always start with "Alle" button
+                    let buttonsHTML = '<button class="category-btn active" data-category="all" onclick="window.JournalTagAnalytics?.updateCategory(\'all\')">Alle</button>';
+                    
+                    // Add dynamic category buttons
+                    categories.forEach(category => {
+                        const capitalizedCategory = category.charAt(0).toUpperCase() + category.slice(1);
+                        buttonsHTML += `<button class="category-btn" data-category="${category}" onclick="window.JournalTagAnalytics?.updateCategory('${category}')">${capitalizedCategory}</button>`;
+                    });
+                    
+                    container.innerHTML = buttonsHTML;
+                    console.log('📊 Updated category buttons:', categories);
+                } catch (error) {
+                    console.error('Error updating category buttons:', error);
+                }
             }
             
             async loadAndDisplayAnalytics() {

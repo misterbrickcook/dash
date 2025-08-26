@@ -541,6 +541,29 @@ class CloudStorage {
             return { tagFrequency: {}, tagTimeline: {}, tagCorrelations: [] };
         }
     }
+    
+    async getAvailableJournalCategories() {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            return [];
+        }
+        
+        try {
+            const user = supabase.getCurrentUser();
+            if (!user) return [];
+            
+            // Get distinct categories from journal_tags
+            const categories = await supabase.query(`journal_tags?user_id=eq.${user.id}&select=category`);
+            if (!categories) return [];
+            
+            // Extract unique categories
+            const uniqueCategories = [...new Set(categories.map(tag => tag.category))].filter(cat => cat);
+            console.log('📊 Available categories:', uniqueCategories);
+            return uniqueCategories;
+        } catch (error) {
+            console.error('Error getting available categories:', error);
+            return [];
+        }
+    }
 
     // === DIRECT CLOUD MODE - NO LOCAL STORAGE FALLBACKS ===
     
