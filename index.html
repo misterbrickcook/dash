@@ -18838,11 +18838,9 @@
                     }
                     
                     // Show success message
-                    this.showToast(`✅ Brain Dump zu ${category.charAt(0).toUpperCase() + category.slice(1)} verschoben`);
                     
                 } catch (error) {
                     console.error('❌ Error distributing brain dump:', error);
-                    this.showToast('❌ Fehler beim Verschieben');
                 }
             }
             
@@ -18884,7 +18882,6 @@
                         }, 100);
                     }
                     
-                    this.showToast(`✅ ${count} Brain Dumps zu ${distributionData.category.charAt(0).toUpperCase() + distributionData.category.slice(1)} verschoben`);
                     
                 } catch (error) {
                     console.error('❌ Error distributing brain dumps:', error);
@@ -18921,7 +18918,6 @@
                     
                     this.updateUI();
                     
-                    this.showToast(`✅ ${count} Brain Dumps gelöscht`);
                     
                 } catch (error) {
                     console.error('❌ Error clearing brain dumps:', error);
