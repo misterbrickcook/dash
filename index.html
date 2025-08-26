@@ -14741,7 +14741,7 @@
                             console.log(`🔄 Dynamic button clicked: ${action}`);
                             console.log(`🔄 Button element:`, btn);
                             console.log(`🔄 Event target:`, e.target);
-                            this.handleAction(action);
+                            this.handleAction(action, e);
                             return;
                         }
                         
@@ -14764,7 +14764,7 @@
                     if (e.target.closest('.quickbar-sub-btn')) {
                         const subBtn = e.target.closest('.quickbar-sub-btn');
                         const action = subBtn.dataset.action;
-                        this.handleAction(action);
+                        this.handleAction(action, e);
                     }
 
                     // Tab clicks - fix dark mode after tab switch
@@ -14856,7 +14856,7 @@
                 this.activeCategory = null;
             }
 
-            handleAction(action) {
+            handleAction(action, event = null) {
                 this.closeAllSubMenus();
                 
                 // Reset active category to allow immediate re-opening
@@ -14940,8 +14940,10 @@
                         break;
                     case 'braindump-toggle':
                         console.log('🧠 Dynamic Brain Dump button clicked');
-                        console.log('🧠 Button element:', e.target);
-                        console.log('🧠 Button visibility:', getComputedStyle(e.target.closest('#dynamic-braindump')).display);
+                        if (event) {
+                            console.log('🧠 Button element:', event.target);
+                            console.log('🧠 Button visibility:', getComputedStyle(event.target.closest('#dynamic-braindump')).display);
+                        }
                         this.toggleBrainDumpContainer();
                         break;
                     case 'settings':
