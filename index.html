@@ -18581,6 +18581,11 @@
                     
                     console.log(`🧠 Found ${this.brainDumps.length} brain dumps:`, this.brainDumps);
                     
+                    // DEBUG: Show all todos to see what categories exist
+                    if (todos && todos.length > 0) {
+                        console.log('🔍 All todos in database:', todos.map(t => ({id: t.id, category: t.category, text: t.text?.substring(0, 20)})));
+                    }
+                    
                     this.updateUI();
                     
                     // INSTANT UPDATE: Always update quickbar toggle after loading brain dumps
