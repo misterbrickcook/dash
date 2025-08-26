@@ -15062,22 +15062,27 @@
             toggleBrainDumpContainer() {
                 console.log('🧠 toggleBrainDumpContainer called');
                 
-                // Simply navigate to todos tab and show container
+                // Navigate to todos tab
                 const todosTabButton = document.querySelector('[data-tab="tab-todos"]');
                 
                 if (todosTabButton) {
                     console.log('🧠 Clicking todos tab button...');
                     todosTabButton.click();
                     
-                    // Show container after tab switch
+                    // Force scroll to top after tab switch and show container
                     setTimeout(() => {
+                        // Force scroll to top
+                        window.scrollTo({ top: 0, behavior: 'instant' });
+                        document.documentElement.scrollTop = 0;
+                        document.body.scrollTop = 0;
+                        
                         const container = document.getElementById('brain-dump-container');
                         if (container) {
                             container.style.display = 'block';
                             container.style.visibility = 'visible';
-                            console.log('🧠 Brain Dump container shown');
+                            console.log('🧠 Brain Dump container shown at top');
                         }
-                    }, 100);
+                    }, 150);
                 }
             }
             
