@@ -15060,31 +15060,50 @@
             }
             
             toggleBrainDumpContainer() {
+                console.log('🧠 toggleBrainDumpContainer called');
+                
                 const container = document.getElementById('brain-dump-container');
+                console.log('🧠 Container found:', !!container);
+                console.log('🧠 Container current display:', container?.style.display);
+                console.log('🧠 Container computed display:', container ? getComputedStyle(container).display : 'N/A');
+                
                 if (container) {
-                    if (container.style.display === 'none' || !container.style.display) {
-                        // Show brain dump container
-                        container.style.display = 'block';
-                        console.log('🧠 Brain Dump container shown');
-                        
-                        // Navigate to todos tab if not already there
-                        const todosTab = document.getElementById('tab-todos');
-                        if (todosTab && !todosTab.classList.contains('active')) {
+                    // Always show container and navigate to todos tab
+                    container.style.display = 'block';
+                    console.log('🧠 Brain Dump container display set to block');
+                    
+                    // Navigate to todos tab
+                    const todosTab = document.getElementById('tab-todos');
+                    console.log('🧠 Todos tab found:', !!todosTab);
+                    console.log('🧠 Todos tab active:', todosTab?.classList.contains('active'));
+                    
+                    if (todosTab) {
+                        if (!todosTab.classList.contains('active')) {
+                            console.log('🧠 Clicking todos tab...');
                             todosTab.click();
                         }
                         
-                        // Scroll to brain dump container
+                        // Force show todos content
                         setTimeout(() => {
+                            const todosContent = document.getElementById('todos');
+                            console.log('🧠 Todos content found:', !!todosContent);
+                            console.log('🧠 Todos content display:', todosContent ? getComputedStyle(todosContent).display : 'N/A');
+                            
+                            if (todosContent) {
+                                todosContent.style.display = 'block';
+                                console.log('🧠 Todos content display set to block');
+                            }
+                            
+                            // Scroll to brain dump container
+                            console.log('🧠 Scrolling to container...');
                             container.scrollIntoView({ 
                                 behavior: 'smooth', 
                                 block: 'start' 
                             });
-                        }, 100);
-                    } else {
-                        // Hide brain dump container
-                        container.style.display = 'none';
-                        console.log('🧠 Brain Dump container hidden');
+                        }, 200);
                     }
+                } else {
+                    console.error('🧠 Brain dump container not found!');
                 }
             }
             
