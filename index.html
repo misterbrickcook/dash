@@ -18487,10 +18487,37 @@
             init() {
                 this.setupEventListeners();
                 this.setupInstantSync();
+                this.setupAggressiveSync();
                 this.loadBrainDumps();
                 
                 // Check for brain dumps every 10 seconds (backup sync)
                 setInterval(() => this.loadBrainDumps(), 10000);
+            }
+            
+            setupAggressiveSync() {
+                // Fast polling when user returns to tab
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        console.log('🔄 Desktop: Tab became visible, fast syncing...');
+                        this.loadBrainDumps();
+                        
+                        // Extra fast sync for 5 seconds
+                        let fastSyncCount = 0;
+                        const fastSync = setInterval(() => {
+                            this.loadBrainDumps();
+                            fastSyncCount++;
+                            if (fastSyncCount >= 5) {
+                                clearInterval(fastSync);
+                            }
+                        }, 1000); // Every 1 second for 5 times
+                    }
+                });
+                
+                // Window focus sync
+                window.addEventListener('focus', () => {
+                    console.log('🔄 Desktop: Window focused, syncing...');
+                    this.loadBrainDumps();
+                });
             }
             
             setupEventListeners() {

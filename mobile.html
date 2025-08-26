@@ -1298,14 +1298,21 @@
                         source: 'mobile'
                     };
                     
-                    localStorage.setItem('brain_dump_sync', JSON.stringify(notification));
+                    // Set and remove multiple times to ensure trigger
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            localStorage.setItem('brain_dump_sync', JSON.stringify({
+                                ...notification,
+                                attempt: i + 1
+                            }));
+                            
+                            setTimeout(() => {
+                                localStorage.removeItem('brain_dump_sync');
+                            }, 50);
+                        }, i * 100);
+                    }
                     
-                    // Remove the item immediately to trigger storage event on desktop
-                    setTimeout(() => {
-                        localStorage.removeItem('brain_dump_sync');
-                    }, 100);
-                    
-                    console.log('📱 Mobile: Notified desktop of new brain dump');
+                    console.log('📱 Mobile: Notified desktop of new brain dump (3 attempts)');
                     
                     // Method 2: BroadcastChannel (modern browsers, same origin)
                     if (typeof BroadcastChannel !== 'undefined') {
@@ -1314,6 +1321,9 @@
                         channel.close();
                         console.log('📱 Mobile: Sent BroadcastChannel notification');
                     }
+                    
+                    // Method 3: Simple timestamp trigger
+                    localStorage.setItem('brain_dump_timestamp', Date.now().toString());
                     
                 } catch (error) {
                     console.error('❌ Error notifying desktop:', error);
