@@ -384,8 +384,12 @@ class CloudStorage {
     
     async extractTagsFromText(text) {
         // Extract hashtags from text
+        console.log('🔍 Extracting tags from text:', text.substring(0, 100) + '...');
         const tagMatches = text.match(/#[\w-]+/g) || [];
-        return tagMatches.map(tag => tag.substring(1).toLowerCase()); // Remove # and lowercase
+        console.log('🔍 Found hashtag matches:', tagMatches);
+        const tags = tagMatches.map(tag => tag.substring(1).toLowerCase()); // Remove # and lowercase
+        console.log('🔍 Extracted tags:', tags);
+        return tags;
     }
     
     async saveJournalTags(journalEntryId, journalDate, content, category = 'general') {
