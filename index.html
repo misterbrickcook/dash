@@ -18632,12 +18632,12 @@
                     
                     // INSTANT UPDATE: Always update quickbar toggle after loading brain dumps
                     console.log('🔄 Checking QuickBarManager availability...');
-                    console.log('🔄 window.QuickBarManager exists:', !!window.QuickBarManager);
+                    console.log('🔄 window.QuickBar exists:', !!window.QuickBar);
                     console.log('🔄 Brain dumps count for toggle:', this.brainDumps.length);
                     
-                    if (window.QuickBarManager) {
+                    if (window.QuickBar) {
                         console.log('🔄 Updating quickbar toggle after brain dump load');
-                        window.QuickBarManager.updateDynamicButtons();
+                        window.QuickBar.updateDynamicButtons();
                         
                         // Force debug the toggle state
                         setTimeout(() => {
@@ -18688,8 +18688,8 @@
                 }
                 
                 // Update quickbar dynamic button
-                if (window.QuickBarManager) {
-                    window.QuickBarManager.updateDynamicButtons();
+                if (window.QuickBar) {
+                    window.QuickBar.updateDynamicButtons();
                 }
                 
                 // Render brain dumps
@@ -18851,9 +18851,9 @@
                     this.forceRefreshTodos();
                     
                     // INSTANT UPDATE: Force quickbar toggle update immediately
-                    if (window.QuickBarManager) {
+                    if (window.QuickBar) {
                         setTimeout(() => {
-                            window.QuickBarManager.updateDynamicButtons();
+                            window.QuickBar.updateDynamicButtons();
                         }, 100);
                     }
                     
@@ -18898,9 +18898,9 @@
                     this.forceRefreshTodos();
                     
                     // INSTANT UPDATE: Force quickbar toggle update immediately
-                    if (window.QuickBarManager) {
+                    if (window.QuickBar) {
                         setTimeout(() => {
-                            window.QuickBarManager.updateDynamicButtons();
+                            window.QuickBar.updateDynamicButtons();
                         }, 100);
                     }
                     
