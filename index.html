@@ -16974,13 +16974,13 @@
                     const endDateStr = new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
                     
                     const completedTodos = await window.supabase.query(
-                        `todos?user_id=eq.${user.id}&completed=eq.true&updated_at=gte.${startDateStr}&updated_at=lt.${endDateStr}&select=updated_at,text`
+                        `todos?user_id=eq.${user.id}&completed=eq.true&created_at=gte.${startDateStr}&created_at=lt.${endDateStr}&select=created_at,text`
                     );
                     
                     console.log('📊 DEBUG: Completed todos for heatmap:', completedTodos?.length || 0);
                     console.log('📊 DEBUG: Date range:', startDateStr, 'to', endDateStr);
                     if (completedTodos && completedTodos.length > 0) {
-                        console.log('📊 DEBUG: Sample todo dates:', completedTodos.slice(0, 3).map(t => t.updated_at));
+                        console.log('📊 DEBUG: Sample todo dates:', completedTodos.slice(0, 3).map(t => t.created_at));
                     }
                     
                     // Group todos by date (convert UTC to local date)
@@ -16988,7 +16988,7 @@
                     if (completedTodos) {
                         completedTodos.forEach(todo => {
                             // Convert UTC timestamp to local date string
-                            const utcDate = new Date(todo.updated_at);
+                            const utcDate = new Date(todo.created_at);
                             const localDate = new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
                             const date = localDate.toISOString().split('T')[0];
                             todosByDate[date] = (todosByDate[date] || 0) + 1;
