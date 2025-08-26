@@ -19447,18 +19447,34 @@
             }
         });
         
-        // Debug function to test tag extraction
-        window.debugTagExtraction = async function() {
-            const testText = "Heute war ein schlechter Trading Tag. #greed #einsatzzuhoch #fomo haben mich wieder erwischt. Lesson: #stoplosskleiner setzen und #emotionskontrolle üben.";
-            console.log('🧪 Testing tag extraction with:', testText);
+        // Debug function to clear all journal tags
+        window.clearAllJournalTags = async function() {
+            if (!window.supabase || !window.supabase.isAuthenticated()) {
+                console.log('Not authenticated');
+                return;
+            }
             
-            if (window.cloudStorage) {
-                const tags = await window.cloudStorage.extractTagsFromText(testText);
-                console.log('🧪 Extracted tags:', tags);
+            try {
+                const user = window.supabase.getCurrentUser();
+                const allTags = await window.supabase.query(`journal_tags?user_id=eq.${user.id}&select=id`);
+                console.log(`🗑️ Found ${allTags?.length || 0} tags to delete`);
                 
-                // Try saving test tags
-                await window.cloudStorage.saveJournalTags(999, '2025-08-26', testText, 'trading');
-                console.log('🧪 Test tags saved');
+                if (allTags && allTags.length > 0) {
+                    for (const tag of allTags) {
+                        await window.supabase.delete('journal_tags', tag.id);
+                    }
+                    console.log('✅ All journal tags cleared');
+                    
+                    // Refresh analytics
+                    if (window.JournalTagAnalytics) {
+                        window.JournalTagAnalytics.isInitialized = false;
+                        await window.JournalTagAnalytics.initialize();
+                    }
+                } else {
+                    console.log('No tags to delete');
+                }
+            } catch (error) {
+                console.error('Error clearing tags:', error);
             }
         };
     </script>
