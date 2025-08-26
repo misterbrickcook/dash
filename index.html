@@ -18786,6 +18786,13 @@
                     // Force refresh of todo sections to show item in new category
                     this.forceRefreshTodos();
                     
+                    // INSTANT UPDATE: Force quickbar toggle update immediately
+                    if (window.QuickBarManager) {
+                        setTimeout(() => {
+                            window.QuickBarManager.updateDynamicButtons();
+                        }, 100);
+                    }
+                    
                     // Show success message
                     this.showToast(`✅ Brain Dump zu ${category.charAt(0).toUpperCase() + category.slice(1)} verschoben`);
                     
@@ -18826,7 +18833,14 @@
                     // Force refresh of todo sections to show items in new category
                     this.forceRefreshTodos();
                     
-                    this.showToast(`✅ ${count} Brain Dumps zu ${category.charAt(0).toUpperCase() + category.slice(1)} verschoben`);
+                    // INSTANT UPDATE: Force quickbar toggle update immediately
+                    if (window.QuickBarManager) {
+                        setTimeout(() => {
+                            window.QuickBarManager.updateDynamicButtons();
+                        }, 100);
+                    }
+                    
+                    this.showToast(`✅ ${count} Brain Dumps zu ${distributionData.category.charAt(0).toUpperCase() + distributionData.category.slice(1)} verschoben`);
                     
                 } catch (error) {
                     console.error('❌ Error distributing brain dumps:', error);
