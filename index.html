@@ -15062,53 +15062,23 @@
             toggleBrainDumpContainer() {
                 console.log('🧠 toggleBrainDumpContainer called');
                 
-                // Navigate to todos tab first
+                // Simply navigate to todos tab and show container
                 const todosTabButton = document.querySelector('[data-tab="tab-todos"]');
-                console.log('🧠 Todos tab button found:', !!todosTabButton);
                 
                 if (todosTabButton) {
                     console.log('🧠 Clicking todos tab button...');
                     todosTabButton.click();
-                } else {
-                    // Fallback: direct tab click
-                    const todosTab = document.getElementById('tab-todos');
-                    if (todosTab) {
-                        console.log('🧠 Using fallback tab click...');
-                        todosTab.click();
-                    }
-                }
-                
-                // Wait for tab switch, then show container
-                setTimeout(() => {
-                    const container = document.getElementById('brain-dump-container');
-                    console.log('🧠 Container found after tab switch:', !!container);
                     
-                    if (container) {
-                        container.style.display = 'block';
-                        container.style.visibility = 'visible';
-                        console.log('🧠 Brain Dump container shown');
-                        
-                        // Scroll to top first, then to container
-                        setTimeout(() => {
-                            // First scroll to top of page
-                            window.scrollTo({ 
-                                top: 0, 
-                                behavior: 'instant' 
-                            });
-                            
-                            // Then scroll to brain dump container
-                            setTimeout(() => {
-                                console.log('🧠 Scrolling to brain dump container...');
-                                container.scrollIntoView({ 
-                                    behavior: 'smooth', 
-                                    block: 'start' 
-                                });
-                            }, 100);
-                        }, 100);
-                    } else {
-                        console.error('🧠 Brain dump container still not found after tab switch!');
-                    }
-                }, 300);
+                    // Show container after tab switch
+                    setTimeout(() => {
+                        const container = document.getElementById('brain-dump-container');
+                        if (container) {
+                            container.style.display = 'block';
+                            container.style.visibility = 'visible';
+                            console.log('🧠 Brain Dump container shown');
+                        }
+                    }, 100);
+                }
             }
             
             updateDynamicButtons() {
