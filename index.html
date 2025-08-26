@@ -18631,9 +18631,12 @@
                     this.updateUI();
                     
                     // INSTANT UPDATE: Always update quickbar toggle after loading brain dumps
+                    console.log('🔄 Checking QuickBarManager availability...');
+                    console.log('🔄 window.QuickBarManager exists:', !!window.QuickBarManager);
+                    console.log('🔄 Brain dumps count for toggle:', this.brainDumps.length);
+                    
                     if (window.QuickBarManager) {
                         console.log('🔄 Updating quickbar toggle after brain dump load');
-                        console.log('🔄 Brain dumps count for toggle:', this.brainDumps.length);
                         window.QuickBarManager.updateDynamicButtons();
                         
                         // Force debug the toggle state
