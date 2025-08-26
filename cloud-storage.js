@@ -425,6 +425,44 @@ class CloudStorage {
         }
     }
     
+    async processExistingJournalEntries() {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            console.log('Journal tags: Not authenticated, skipping existing entries');
+            return;
+        }
+        
+        try {
+            const user = supabase.getCurrentUser();
+            if (!user) return;
+            
+            console.log('🔄 Processing existing journal entries for tags...');
+            
+            // Get all journal entries
+            const entries = await supabase.query('journal_entries?select=id,title,content,entry_date');
+            if (!entries || entries.length === 0) {
+                console.log('📝 No existing journal entries found');
+                return;
+            }
+            
+            console.log(`📝 Found ${entries.length} journal entries to process`);
+            
+            // Process each entry
+            for (const entry of entries) {
+                const fullContent = `${entry.title || ''} ${entry.content || ''}`;
+                await this.saveJournalTags(
+                    entry.id,
+                    entry.entry_date || new Date().toISOString().split('T')[0],
+                    fullContent,
+                    'trading'
+                );
+            }
+            
+            console.log(`✅ Processed ${entries.length} existing journal entries for tags`);
+        } catch (error) {
+            console.error('Error processing existing journal entries:', error);
+        }
+    }
+    
     async getJournalTagAnalytics(dateRange = 30) {
         if (!supabase || !this.isSupabaseAuthenticated()) {
             return { tagFrequency: {}, tagTimeline: {}, tagCorrelations: [] };

@@ -19279,6 +19279,12 @@
                 if (this.isInitialized) return;
                 
                 console.log('🏷️ Initializing Journal Tag Analytics...');
+                
+                // Process existing journal entries first
+                if (window.cloudStorage) {
+                    await window.cloudStorage.processExistingJournalEntries();
+                }
+                
                 await this.loadAndDisplayAnalytics();
                 this.isInitialized = true;
             }
