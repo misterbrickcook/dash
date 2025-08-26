@@ -19037,13 +19037,12 @@
             }
         });
         
-        // Debug function to clear all journal tags
-        return;
-            }
-            
+        // Clear all journal tags functionality
+        window.clearAllTags = async function() {
             try {
                 const user = window.supabase.getCurrentUser();
-                const allTags = await window.supabase.query(`journal_tags?user_id=eq.${user.id}&select=id`);if (allTags && allTags.length > 0) {
+                const allTags = await window.supabase.query(`journal_tags?user_id=eq.${user.id}&select=id`);
+                if (allTags && allTags.length > 0) {
                     for (const tag of allTags) {
                         await window.supabase.delete('journal_tags', tag.id);
                     }

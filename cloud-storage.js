@@ -439,7 +439,9 @@ class CloudStorage {
             const entries = await supabase.query('journal_entries?select=id,title,content,entry_date');
             if (!entries || entries.length === 0) {
                 return;
-            }// Process each entry
+            }
+            
+            // Process each entry
             for (const entry of entries) {
                 const fullContent = `${entry.title || ''} ${entry.content || ''}`;
                 await this.saveJournalTags(
@@ -448,7 +450,8 @@ class CloudStorage {
                     fullContent,
                     'trading'
                 );
-            }} catch (error) {
+            }
+        } catch (error) {
             console.error('Error processing existing journal entries:', error);
         }
     }
@@ -693,7 +696,8 @@ class CloudStorage {
             return false;
         }
         
-        try {// Try to create the table using direct SQL
+        try {
+            // Try to create the table using direct SQL
             const createTableSQL = `
                 CREATE TABLE IF NOT EXISTS public.trading_rules (
                     id BIGSERIAL PRIMARY KEY,
@@ -755,7 +759,8 @@ class CloudStorage {
         } catch (error) {
             console.error('CloudStorage: Error fetching trading rules:', error);
             // If table doesn't exist, try to create it first
-            if (error.message?.includes('relation "trading_rules" does not exist')) {try {
+            if (error.message?.includes('relation "trading_rules" does not exist')) {
+                try {
                     await this.ensureTradingRulesTable();
                     // Try the query again
                     const data = await supabase.query(`trading_rules?user_id=eq.${user.id}&select=*`);
@@ -794,16 +799,19 @@ class CloudStorage {
                 await supabase.update('trading_rules', rule, rule.id);
             } else {
                 // Remove any ID that's not a proper database BIGSERIAL ID
-                if (rule.id) {delete rule.id;
-                }const result = await supabase.insert('trading_rules', [rule]);
+                if (rule.id) {
+                    delete rule.id;
+                }
+                const result = await supabase.insert('trading_rules', [rule]);
                 if (result && result.length > 0 && result[0]) {
                     const newId = result[0].id;
-                    rule.id = newId; // Update the passed rule object} else {
+                    rule.id = newId; // Update the passed rule object
+                } else {
                     console.error('❌ CloudStorage: Unexpected insert response format:', result);
                     throw new Error('Failed to insert trading rule - unexpected response format');
                 }
             }
-            } catch (error) {
+        } catch (error) {
             console.error('CloudStorage: Error saving trading rule:', error);
             throw error;
         }
