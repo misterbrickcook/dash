@@ -18913,8 +18913,6 @@
             }
             
             async deleteDump(dumpId) {
-                if (!confirm('Brain Dump wirklich löschen?')) return;
-                
                 try {
                     await window.supabase.delete('todos', dumpId);
                     
@@ -18923,11 +18921,8 @@
                     
                     this.updateUI();
                     
-                    this.showToast('✅ Brain Dump gelöscht');
-                    
                 } catch (error) {
                     console.error('❌ Error deleting brain dump:', error);
-                    this.showToast('❌ Fehler beim Löschen');
                 }
             }
             
