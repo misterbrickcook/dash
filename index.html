@@ -19446,6 +19446,21 @@
                 }, 100);
             }
         });
+        
+        // Debug function to test tag extraction
+        window.debugTagExtraction = async function() {
+            const testText = "Heute war ein schlechter Trading Tag. #greed #einsatzzuhoch #fomo haben mich wieder erwischt. Lesson: #stoplosskleiner setzen und #emotionskontrolle üben.";
+            console.log('🧪 Testing tag extraction with:', testText);
+            
+            if (window.cloudStorage) {
+                const tags = await window.cloudStorage.extractTagsFromText(testText);
+                console.log('🧪 Extracted tags:', tags);
+                
+                // Try saving test tags
+                await window.cloudStorage.saveJournalTags(999, '2025-08-26', testText, 'trading');
+                console.log('🧪 Test tags saved');
+            }
+        };
     </script>
 
 </body>
