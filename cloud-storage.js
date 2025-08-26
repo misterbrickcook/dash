@@ -890,23 +890,3 @@ window.cloudStorage = new CloudStorage();
 // Direct cloud mode - no periodic sync needed
 cloudStorage.startPeriodicSync();
 
-// Add global debug functions for resources
-try {
-        await cloudStorage.saveResource(testResource);
-        
-        // Reload ResourceManager to see updated list
-        if (window.ResourceManager && window.ResourceManager.loadResources) {
-            await window.ResourceManager.loadResources();
-        }
-    } catch (error) {
-        console.error('Test resource save failed:', error);
-    }
-};
-
-if (window.ResourceManager && window.ResourceManager.resources.length > 0) {
-        console.log('Sample IDs:', 
-            window.ResourceManager.resources.slice(0, 3).map(r => r.id));
-    }
-};
-
-// Debug functions: debugResources(), forceSyncResources(), testResourceSave(), checkResourceState()
