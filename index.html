@@ -19313,6 +19313,19 @@
                     
                     const analytics = await window.cloudStorage.getJournalTagAnalytics(dateRange);
                     console.log('📊 Tag analytics loaded:', analytics);
+                    console.log('📊 DEBUG: TagFrequency keys:', Object.keys(analytics.tagFrequency));
+                    console.log('📊 DEBUG: Total entries in database check...');
+                    
+                    // Debug: Check if we have any tags in database
+                    if (window.supabase && window.supabase.isAuthenticated()) {
+                        try {
+                            const user = window.supabase.getCurrentUser();
+                            const allTags = await window.supabase.query(`journal_tags?user_id=eq.${user.id}&select=*`);
+                            console.log('📊 DEBUG: All tags in database:', allTags);
+                        } catch (error) {
+                            console.log('📊 DEBUG: Error checking tags:', error);
+                        }
+                    }
                     
                     this.displayTagFrequency(analytics.tagFrequency);
                     this.displayTagCorrelations(analytics.tagCorrelations);
