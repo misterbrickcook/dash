@@ -380,6 +380,120 @@ class CloudStorage {
         }
     }
 
+    // === JOURNAL TAGS CLOUD STORAGE ===
+    
+    async extractTagsFromText(text) {
+        // Extract hashtags from text
+        const tagMatches = text.match(/#[\w-]+/g) || [];
+        return tagMatches.map(tag => tag.substring(1).toLowerCase()); // Remove # and lowercase
+    }
+    
+    async saveJournalTags(journalEntryId, journalDate, content, category = 'general') {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            console.log('Journal tags: Not authenticated, skipping tag extraction');
+            return;
+        }
+        
+        try {
+            const user = supabase.getCurrentUser();
+            if (!user) return;
+            
+            // Extract tags from content
+            const tags = await this.extractTagsFromText(content);
+            if (tags.length === 0) return;
+            
+            // Delete existing tags for this entry
+            if (journalEntryId) {
+                await supabase.delete('journal_tags', `journal_entry_id=eq.${journalEntryId}`);
+            }
+            
+            // Insert new tags
+            const tagRecords = tags.map(tag => ({
+                user_id: user.id,
+                tag: tag,
+                journal_entry_id: journalEntryId,
+                journal_date: journalDate,
+                category: category
+            }));
+            
+            if (tagRecords.length > 0) {
+                await supabase.insert('journal_tags', tagRecords);
+                console.log(`💾 Saved ${tagRecords.length} journal tags:`, tags);
+            }
+        } catch (error) {
+            console.error('Error saving journal tags:', error);
+        }
+    }
+    
+    async getJournalTagAnalytics(dateRange = 30) {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            return { tagFrequency: {}, tagTimeline: {}, tagCorrelations: [] };
+        }
+        
+        try {
+            const user = supabase.getCurrentUser();
+            if (!user) return { tagFrequency: {}, tagTimeline: {}, tagCorrelations: [] };
+            
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - dateRange);
+            const dateStr = cutoffDate.toISOString().split('T')[0];
+            
+            // Get all tags within date range
+            const tags = await supabase.query(`journal_tags?user_id=eq.${user.id}&journal_date=gte.${dateStr}&select=tag,journal_date,journal_entry_id`);
+            
+            if (!tags) return { tagFrequency: {}, tagTimeline: {}, tagCorrelations: [] };
+            
+            // Calculate frequency
+            const tagFrequency = {};
+            tags.forEach(entry => {
+                tagFrequency[entry.tag] = (tagFrequency[entry.tag] || 0) + 1;
+            });
+            
+            // Calculate timeline (tags per day)
+            const tagTimeline = {};
+            tags.forEach(entry => {
+                const date = entry.journal_date;
+                if (!tagTimeline[date]) tagTimeline[date] = {};
+                tagTimeline[date][entry.tag] = (tagTimeline[date][entry.tag] || 0) + 1;
+            });
+            
+            // Calculate correlations (tags that appear together)
+            const tagCorrelations = [];
+            const entriesByDate = {};
+            tags.forEach(entry => {
+                if (!entriesByDate[entry.journal_entry_id]) {
+                    entriesByDate[entry.journal_entry_id] = [];
+                }
+                entriesByDate[entry.journal_entry_id].push(entry.tag);
+            });
+            
+            // Find tag pairs that occur together
+            const correlations = {};
+            Object.values(entriesByDate).forEach(entryTags => {
+                if (entryTags.length > 1) {
+                    for (let i = 0; i < entryTags.length; i++) {
+                        for (let j = i + 1; j < entryTags.length; j++) {
+                            const pair = [entryTags[i], entryTags[j]].sort().join('|');
+                            correlations[pair] = (correlations[pair] || 0) + 1;
+                        }
+                    }
+                }
+            });
+            
+            // Convert to array and sort by frequency
+            Object.entries(correlations).forEach(([pair, count]) => {
+                const [tag1, tag2] = pair.split('|');
+                tagCorrelations.push({ tag1, tag2, count });
+            });
+            tagCorrelations.sort((a, b) => b.count - a.count);
+            
+            return { tagFrequency, tagTimeline, tagCorrelations };
+        } catch (error) {
+            console.error('Error getting journal tag analytics:', error);
+            return { tagFrequency: {}, tagTimeline: {}, tagCorrelations: [] };
+        }
+    }
+
     // === DIRECT CLOUD MODE - NO LOCAL STORAGE FALLBACKS ===
     
     getLocalTodos() {

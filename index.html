@@ -4847,6 +4847,45 @@
         .heatmap-square.performance-loss {
             background-color: #ef4444; /* Red for loss */
         }
+        
+        /* Tag Correlations List */
+        .correlations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 0.5rem 0;
+        }
+        
+        .correlation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            font-size: var(--font-size-sm);
+        }
+        
+        .correlation-tags {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .correlation-tag {
+            padding: 0.2rem 0.4rem;
+            background: var(--accent-primary);
+            color: white;
+            border-radius: 12px;
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+        }
+        
+        .correlation-count {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
 
         .heatmap-square.performance-neutral {
             background-color: #f97316; /* Orange for same */
@@ -6850,6 +6889,44 @@
                                     <div class="legend-square performance-gain" title="Gain vs previous day"></div>
                                 </div>
                                 <span>Gain</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Journal Tag Analytics Section -->
+                <div class="analytics-charts-grid">
+                    <!-- Tag Frequency Chart -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h3>Journal Tag Häufigkeit</h3>
+                            <div class="chart-controls">
+                                <div class="time-period-buttons">
+                                    <button class="period-btn active" data-period="week" onclick="window.JournalTagAnalytics?.updatePeriod('week')">Woche</button>
+                                    <button class="period-btn" data-period="month" onclick="window.JournalTagAnalytics?.updatePeriod('month')">Monat</button>
+                                    <button class="period-btn" data-period="quarter" onclick="window.JournalTagAnalytics?.updatePeriod('quarter')">Quartal</button>
+                                </div>
+                                <div class="chart-info">
+                                    <span id="tag-stats">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="tagFrequencyChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Tag Correlations -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h3>Tag Korrelationen</h3>
+                            <div class="chart-info">
+                                <span id="correlation-stats">Welche Tags treten zusammen auf</span>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div id="tag-correlations-list" class="correlations-list">
+                                <!-- Tag correlations will be loaded here -->
                             </div>
                         </div>
                     </div>
@@ -11158,6 +11235,18 @@
                     if (result && result.length > 0) {
                         this.entries.push(result[0]);
                         console.log('☁️ JournalManager: Entry saved to cloud with ID:', result[0].id);
+                        
+                        // AUTOMATICALLY EXTRACT AND SAVE TAGS
+                        if (window.cloudStorage && result[0].id) {
+                            const fullContent = `${entryData.title} ${entryData.content}`;
+                            await window.cloudStorage.saveJournalTags(
+                                result[0].id, 
+                                entryData.date, 
+                                fullContent, 
+                                'trading'
+                            );
+                            console.log('🏷️ Journal tags extracted and saved');
+                        }
                     } else {
                         throw new Error('Insert did not return data');
                     }
@@ -19168,6 +19257,168 @@
             }
         `;
         document.head.appendChild(style);
+        
+        // === JOURNAL TAG ANALYTICS SYSTEM ===
+        
+        class JournalTagAnalytics {
+            constructor() {
+                this.currentPeriod = 'month';
+                this.chart = null;
+                this.isInitialized = false;
+            }
+            
+            async initialize() {
+                if (this.isInitialized) return;
+                
+                console.log('🏷️ Initializing Journal Tag Analytics...');
+                await this.loadAndDisplayAnalytics();
+                this.isInitialized = true;
+            }
+            
+            async updatePeriod(period) {
+                this.currentPeriod = period;
+                
+                // Update active button
+                document.querySelectorAll('.period-btn[onclick*="JournalTagAnalytics"]').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-period="${period}"][onclick*="JournalTagAnalytics"]`)?.classList.add('active');
+                
+                await this.loadAndDisplayAnalytics();
+            }
+            
+            async loadAndDisplayAnalytics() {
+                if (!window.cloudStorage) {
+                    console.error('CloudStorage not available');
+                    return;
+                }
+                
+                try {
+                    const dateRange = this.getPeriodDays();
+                    console.log(`📊 Loading tag analytics for ${dateRange} days...`);
+                    
+                    const analytics = await window.cloudStorage.getJournalTagAnalytics(dateRange);
+                    console.log('📊 Tag analytics loaded:', analytics);
+                    
+                    this.displayTagFrequency(analytics.tagFrequency);
+                    this.displayTagCorrelations(analytics.tagCorrelations);
+                    this.updateStats(analytics);
+                } catch (error) {
+                    console.error('Error loading tag analytics:', error);
+                }
+            }
+            
+            getPeriodDays() {
+                switch(this.currentPeriod) {
+                    case 'week': return 7;
+                    case 'month': return 30;
+                    case 'quarter': return 90;
+                    default: return 30;
+                }
+            }
+            
+            displayTagFrequency(tagFrequency) {
+                const ctx = document.getElementById('tagFrequencyChart');
+                if (!ctx) return;
+                
+                // Destroy existing chart
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+                
+                const tags = Object.keys(tagFrequency);
+                const frequencies = Object.values(tagFrequency);
+                
+                if (tags.length === 0) {
+                    ctx.style.display = 'none';
+                    return;
+                }
+                
+                ctx.style.display = 'block';
+                
+                // Sort by frequency (descending) and take top 10
+                const sorted = tags.map((tag, i) => ({ tag, count: frequencies[i] }))
+                                  .sort((a, b) => b.count - a.count)
+                                  .slice(0, 10);
+                
+                this.chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sorted.map(item => '#' + item.tag),
+                        datasets: [{
+                            label: 'Häufigkeit',
+                            data: sorted.map(item => item.count),
+                            backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                            borderColor: 'rgba(34, 197, 94, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            displayTagCorrelations(correlations) {
+                const container = document.getElementById('tag-correlations-list');
+                if (!container) return;
+                
+                if (correlations.length === 0) {
+                    container.innerHTML = '<div class="correlation-item">Keine Tag-Korrelationen gefunden</div>';
+                    return;
+                }
+                
+                const html = correlations.slice(0, 10).map(corr => `
+                    <div class="correlation-item">
+                        <div class="correlation-tags">
+                            <span class="correlation-tag">#${corr.tag1}</span>
+                            <span class="correlation-tag">#${corr.tag2}</span>
+                        </div>
+                        <div class="correlation-count">${corr.count}x</div>
+                    </div>
+                `).join('');
+                
+                container.innerHTML = html;
+            }
+            
+            updateStats(analytics) {
+                const tagStatsEl = document.getElementById('tag-stats');
+                const correlationStatsEl = document.getElementById('correlation-stats');
+                
+                const totalTags = Object.values(analytics.tagFrequency).reduce((sum, count) => sum + count, 0);
+                const uniqueTags = Object.keys(analytics.tagFrequency).length;
+                
+                if (tagStatsEl) {
+                    tagStatsEl.textContent = `${totalTags} Tags, ${uniqueTags} unique`;
+                }
+                
+                if (correlationStatsEl) {
+                    correlationStatsEl.textContent = `${analytics.tagCorrelations.length} Korrelationen gefunden`;
+                }
+            }
+        }
+        
+        // Initialize Journal Tag Analytics when analytics tab is opened
+        window.JournalTagAnalytics = new JournalTagAnalytics();
+        
+        // Add tab switch listener to initialize analytics
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('[data-tab="tab-analytics"]')) {
+                setTimeout(() => {
+                    window.JournalTagAnalytics.initialize();
+                }, 100);
+            }
+        });
     </script>
 
 </body>
