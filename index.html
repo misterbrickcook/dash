@@ -12103,7 +12103,8 @@
                     const entryData = {
                         title: document.getElementById('journal-title').value,
                         content: document.getElementById('journal-content').value,
-                        tags: tags
+                        tags: tags,
+                        date: new Date().toISOString().split('T')[0] // Add current date
                     };
                     
                     await JournalManager.addEntry(entryData);
