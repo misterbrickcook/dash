@@ -1079,6 +1079,9 @@
                     this.todos.push(todoData);
                     this.renderTodos();
                     
+                    // INSTANT SYNC: Notify desktop about new brain dump
+                    this.notifyDesktopOfNewBrainDump();
+                    
                     // Clear input and chips
                     brainInput.value = '';
                     brainInput.style.height = 'auto';
@@ -1282,6 +1285,37 @@
                 }, 3000); // 3 seconds for faster sync
                 
                 console.log('📱 Mobile: Started periodic sync (every 3s)');
+            }
+            
+            notifyDesktopOfNewBrainDump() {
+                try {
+                    // Method 1: localStorage event (works across tabs)
+                    const notification = {
+                        type: 'NEW_BRAIN_DUMP',
+                        timestamp: Date.now(),
+                        source: 'mobile'
+                    };
+                    
+                    localStorage.setItem('brain_dump_sync', JSON.stringify(notification));
+                    
+                    // Remove the item immediately to trigger storage event on desktop
+                    setTimeout(() => {
+                        localStorage.removeItem('brain_dump_sync');
+                    }, 100);
+                    
+                    console.log('📱 Mobile: Notified desktop of new brain dump');
+                    
+                    // Method 2: BroadcastChannel (modern browsers, same origin)
+                    if (typeof BroadcastChannel !== 'undefined') {
+                        const channel = new BroadcastChannel('brain_dump_updates');
+                        channel.postMessage(notification);
+                        channel.close();
+                        console.log('📱 Mobile: Sent BroadcastChannel notification');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error notifying desktop:', error);
+                }
             }
             
             showError(message) {
