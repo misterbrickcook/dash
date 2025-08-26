@@ -3632,6 +3632,7 @@
             font-size: 11px;
             font-weight: 600;
             z-index: 3001;
+            pointer-events: none; /* Allow clicks to pass through */
         }
 
         /* Responsive - hide on mobile */
@@ -14738,6 +14739,8 @@
                         // Handle dynamic buttons with data-action
                         if (action && !category) {
                             console.log(`🔄 Dynamic button clicked: ${action}`);
+                            console.log(`🔄 Button element:`, btn);
+                            console.log(`🔄 Event target:`, e.target);
                             this.handleAction(action);
                             return;
                         }
@@ -14937,6 +14940,8 @@
                         break;
                     case 'braindump-toggle':
                         console.log('🧠 Dynamic Brain Dump button clicked');
+                        console.log('🧠 Button element:', e.target);
+                        console.log('🧠 Button visibility:', getComputedStyle(e.target.closest('#dynamic-braindump')).display);
                         this.toggleBrainDumpContainer();
                         break;
                     case 'settings':
