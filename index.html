@@ -15363,8 +15363,8 @@
                     // Clear any local auth data
                     localStorage.removeItem('supabase.auth.token');
                     
-                    // Force page reload to show auth screen
-                    location.reload();
+                    // Redirect to clean URL without hash
+                    window.location.href = window.location.origin;
                 } catch (error) {
                     console.error('Logout error:', error);
                     // Force reload anyway to clear state
