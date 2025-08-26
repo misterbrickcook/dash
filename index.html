@@ -15062,49 +15062,44 @@
             toggleBrainDumpContainer() {
                 console.log('🧠 toggleBrainDumpContainer called');
                 
-                const container = document.getElementById('brain-dump-container');
-                console.log('🧠 Container found:', !!container);
-                console.log('🧠 Container current display:', container?.style.display);
-                console.log('🧠 Container computed display:', container ? getComputedStyle(container).display : 'N/A');
+                // Navigate to todos tab first
+                const todosTabButton = document.querySelector('[data-tab="todos"]');
+                console.log('🧠 Todos tab button found:', !!todosTabButton);
                 
-                if (container) {
-                    // Always show container and navigate to todos tab
-                    container.style.display = 'block';
-                    console.log('🧠 Brain Dump container display set to block');
-                    
-                    // Navigate to todos tab
+                if (todosTabButton) {
+                    console.log('🧠 Clicking todos tab button...');
+                    todosTabButton.click();
+                } else {
+                    // Fallback: direct tab click
                     const todosTab = document.getElementById('tab-todos');
-                    console.log('🧠 Todos tab found:', !!todosTab);
-                    console.log('🧠 Todos tab active:', todosTab?.classList.contains('active'));
-                    
                     if (todosTab) {
-                        if (!todosTab.classList.contains('active')) {
-                            console.log('🧠 Clicking todos tab...');
-                            todosTab.click();
-                        }
+                        console.log('🧠 Using fallback tab click...');
+                        todosTab.click();
+                    }
+                }
+                
+                // Wait for tab switch, then show container
+                setTimeout(() => {
+                    const container = document.getElementById('brain-dump-container');
+                    console.log('🧠 Container found after tab switch:', !!container);
+                    
+                    if (container) {
+                        container.style.display = 'block';
+                        container.style.visibility = 'visible';
+                        console.log('🧠 Brain Dump container shown');
                         
-                        // Force show todos content
+                        // Scroll to container
                         setTimeout(() => {
-                            const todosContent = document.getElementById('todos');
-                            console.log('🧠 Todos content found:', !!todosContent);
-                            console.log('🧠 Todos content display:', todosContent ? getComputedStyle(todosContent).display : 'N/A');
-                            
-                            if (todosContent) {
-                                todosContent.style.display = 'block';
-                                console.log('🧠 Todos content display set to block');
-                            }
-                            
-                            // Scroll to brain dump container
                             console.log('🧠 Scrolling to container...');
                             container.scrollIntoView({ 
                                 behavior: 'smooth', 
                                 block: 'start' 
                             });
-                        }, 200);
+                        }, 100);
+                    } else {
+                        console.error('🧠 Brain dump container still not found after tab switch!');
                     }
-                } else {
-                    console.error('🧠 Brain dump container not found!');
-                }
+                }, 300);
             }
             
             updateDynamicButtons() {
