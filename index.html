@@ -18787,7 +18787,7 @@
                     
                     const now = new Date();
                     const todayDate = now.toISOString().split('T')[0];
-                    const currentTime = now.toTimeString().split(' ')[0].slice(0, 5);
+                    const currentTime = '21:00';  // Default to 21:00 (9 PM)
                     
                     modal.innerHTML = `
                         <div class="brain-dump-dialog" style="
