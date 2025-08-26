@@ -18864,89 +18864,30 @@
                 console.log('🔄 Force refreshing all todos after distribution...');
                 
                 try {
-                    // Direct approach: Reload and redistribute todos to their containers
-                    if (window.supabase && window.supabase.isAuthenticated()) {
-                        console.log('🔄 Loading todos from database...');
-                        const todos = await window.supabase.select('todos', '*');
+                    // Use the proper TodoManager system instead of custom rendering
+                    if (window.supabase && window.supabase.isAuthenticated() && window.TodoManager) {
+                        console.log('🔄 Using TodoManager to reload todos...');
                         
-                        if (todos) {
-                            console.log(`🔄 Found ${todos.length} todos, redistributing to containers...`);
-                            
-                            // Clear all todo containers
-                            const containers = ['todo-privat', 'todo-uni', 'todo-arbeit', 'todo-projekte'];
-                            containers.forEach(containerId => {
-                                const container = document.getElementById(containerId);
-                                if (container) {
-                                    container.innerHTML = '<div class="todo-empty-state"><p>Loading...</p></div>';
-                                }
-                            });
-                            
-                            // Group todos by category
-                            const todosByCategory = {
-                                'privat': [],
-                                'uni': [],
-                                'arbeit': [], 
-                                'projekte': []
-                            };
-                            
-                            todos.forEach(todo => {
-                                if (todo.category && todosByCategory[todo.category]) {
-                                    todosByCategory[todo.category].push(todo);
-                                }
-                            });
-                            
-                            // Render todos in each container
-                            Object.keys(todosByCategory).forEach(category => {
-                                const container = document.getElementById(`todo-${category}`);
-                                if (container) {
-                                    const categoryTodos = todosByCategory[category];
-                                    
-                                    if (categoryTodos.length === 0) {
-                                        container.innerHTML = `
-                                            <div class="todo-empty-state">
-                                                <p>${this.getCategoryDisplayName(category)}</p>
-                                                <small>No todos yet</small>
-                                            </div>
-                                        `;
-                                    } else {
-                                        const todosHTML = categoryTodos
-                                            .sort((a, b) => {
-                                                // Sort by date, then by time, then by priority
-                                                if (a.date && b.date) {
-                                                    const dateCompare = new Date(a.date) - new Date(b.date);
-                                                    if (dateCompare !== 0) return dateCompare;
-                                                    
-                                                    if (a.time && b.time) {
-                                                        return a.time.localeCompare(b.time);
-                                                    }
-                                                }
-                                                return (b.priority || 0) - (a.priority || 0);
-                                            })
-                                            .map(todo => `
-                                                <div class="todo-item" data-id="${todo.id}">
-                                                    <div class="todo-content">
-                                                        <div class="todo-text">${this.escapeHtml(todo.text)}</div>
-                                                        <div class="todo-meta">
-                                                            Priority: ${todo.priority || 'None'}
-                                                            ${todo.date ? ` • ${todo.date}` : ''}
-                                                            ${todo.time ? ` • ${todo.time}` : ''}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            `).join('');
-                                        
-                                        container.innerHTML = todosHTML;
-                                    }
-                                }
-                            });
-                            
-                            console.log('✅ Todo containers refreshed successfully');
-                            this.todoRefreshSuccess = true;
-                            
-                            // CRITICAL FIX: Also refresh the brain dump container to remove distributed items
-                            console.log('🧠 Refreshing brain dump container...');
-                            await this.loadBrainDumps();
-                        }
+                        // Reload todos from database using TodoManager
+                        await window.TodoManager.loadTodos();
+                        
+                        // Refresh all category containers with proper filtering and checkboxes
+                        const categories = ['privat', 'uni', 'arbeit', 'projekte'];
+                        categories.forEach(category => {
+                            console.log(`🔄 Refreshing category: ${category}`);
+                            window.TodoManager.displayTodosForCategory(category);
+                        });
+                        
+                        console.log('✅ Todo containers refreshed successfully with proper TodoManager');
+                        this.todoRefreshSuccess = true;
+                        
+                        // CRITICAL FIX: Also refresh the brain dump container to remove distributed items
+                        console.log('🧠 Refreshing brain dump container...');
+                        await this.loadBrainDumps();
+                        
+                    } else {
+                        console.warn('⚠️ TodoManager not available, falling back to page refresh');
+                        window.location.reload();
                     }
                     
                 } catch (error) {
