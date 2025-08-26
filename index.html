@@ -18583,6 +18583,12 @@
                     
                     this.updateUI();
                     
+                    // INSTANT UPDATE: Always update quickbar toggle after loading brain dumps
+                    if (window.QuickBarManager) {
+                        console.log('🔄 Updating quickbar toggle after brain dump load');
+                        window.QuickBarManager.updateDynamicButtons();
+                    }
+                    
                 } catch (error) {
                     console.error('❌ Error loading brain dumps:', error);
                 }
