@@ -15148,17 +15148,30 @@
                 const brainDumpButton = document.getElementById('dynamic-braindump');
                 const brainDumpBadge = document.getElementById('braindump-quickbar-badge');
                 
-                if (brainDumpButton && window.brainDumpManager) {
-                    const count = window.brainDumpManager.brainDumps.length;
+                console.log('🔍 updateDynamicButtons: brainDumpButton found:', !!brainDumpButton);
+                console.log('🔍 updateDynamicButtons: window.brainDumpManager found:', !!window.brainDumpManager);
+                console.log('🔍 updateDynamicButtons: brainDumpManager found:', !!(typeof brainDumpManager !== 'undefined' && brainDumpManager));
+                
+                // Try both window.brainDumpManager and global brainDumpManager
+                const manager = window.brainDumpManager || (typeof brainDumpManager !== 'undefined' ? brainDumpManager : null);
+                
+                if (brainDumpButton && manager) {
+                    const count = manager.brainDumps.length;
+                    console.log('🔍 updateDynamicButtons: brain dump count:', count);
                     
                     if (count > 0) {
                         brainDumpButton.style.display = 'block';
+                        console.log('🔍 updateDynamicButtons: Toggle shown');
                         if (brainDumpBadge) {
                             brainDumpBadge.textContent = count;
+                            console.log('🔍 updateDynamicButtons: Badge updated to:', count);
                         }
                     } else {
                         brainDumpButton.style.display = 'none';
+                        console.log('🔍 updateDynamicButtons: Toggle hidden');
                     }
+                } else {
+                    console.warn('🔍 updateDynamicButtons: Missing button or manager');
                 }
                 
                 // Re-initialize Lucide icons for dynamic buttons
@@ -18620,7 +18633,15 @@
                     // INSTANT UPDATE: Always update quickbar toggle after loading brain dumps
                     if (window.QuickBarManager) {
                         console.log('🔄 Updating quickbar toggle after brain dump load');
+                        console.log('🔄 Brain dumps count for toggle:', this.brainDumps.length);
                         window.QuickBarManager.updateDynamicButtons();
+                        
+                        // Force debug the toggle state
+                        setTimeout(() => {
+                            const toggleButton = document.getElementById('dynamic-braindump');
+                            console.log('🔍 Toggle button found:', !!toggleButton);
+                            console.log('🔍 Toggle display:', toggleButton ? getComputedStyle(toggleButton).display : 'N/A');
+                        }, 100);
                     }
                     
                 } catch (error) {
