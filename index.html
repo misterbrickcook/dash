@@ -4684,17 +4684,18 @@
             border: 1px solid var(--border-primary);
             border-radius: 8px;
             padding: 1.5rem;
-            height: 400px;
-            max-height: 400px;
+            height: 450px;
+            max-height: 450px;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: visible;
         }
 
         .chart-container {
-            height: 280px;
+            height: 300px;
             position: relative;
             flex: none;
+            padding: 10px;
         }
 
         .chart-container canvas {
@@ -19454,13 +19455,29 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        layout: {
+                            padding: {
+                                bottom: 20,
+                                left: 10,
+                                right: 10
+                            }
+                        },
                         plugins: {
                             legend: { display: false }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                ticks: { stepSize: 1 }
+                                ticks: { 
+                                    stepSize: 1,
+                                    padding: 10
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    padding: 10
+                                }
                             }
                         }
                     }
