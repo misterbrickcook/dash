@@ -18906,6 +18906,10 @@
                             
                             console.log('✅ Todo containers refreshed successfully');
                             this.todoRefreshSuccess = true;
+                            
+                            // CRITICAL FIX: Also refresh the brain dump container to remove distributed items
+                            console.log('🧠 Refreshing brain dump container...');
+                            await this.loadBrainDumps();
                         }
                     }
                     

@@ -1269,7 +1269,7 @@
             }
             
             startPeriodicSync() {
-                // Sync every 10 seconds to catch desktop changes
+                // Sync every 3 seconds to catch desktop changes quickly
                 if (this.syncInterval) {
                     clearInterval(this.syncInterval);
                 }
@@ -1279,9 +1279,9 @@
                         console.log('🔄 Mobile: Syncing with server...');
                         await this.loadTodos();
                     }
-                }, 10000); // 10 seconds
+                }, 3000); // 3 seconds for faster sync
                 
-                console.log('📱 Mobile: Started periodic sync (every 10s)');
+                console.log('📱 Mobile: Started periodic sync (every 3s)');
             }
             
             showError(message) {
