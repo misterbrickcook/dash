@@ -15088,13 +15088,22 @@
                         container.style.visibility = 'visible';
                         console.log('🧠 Brain Dump container shown');
                         
-                        // Scroll to container
+                        // Scroll to top first, then to container
                         setTimeout(() => {
-                            console.log('🧠 Scrolling to container...');
-                            container.scrollIntoView({ 
-                                behavior: 'smooth', 
-                                block: 'start' 
+                            // First scroll to top of page
+                            window.scrollTo({ 
+                                top: 0, 
+                                behavior: 'instant' 
                             });
+                            
+                            // Then scroll to brain dump container
+                            setTimeout(() => {
+                                console.log('🧠 Scrolling to brain dump container...');
+                                container.scrollIntoView({ 
+                                    behavior: 'smooth', 
+                                    block: 'start' 
+                                });
+                            }, 100);
                         }, 100);
                     } else {
                         console.error('🧠 Brain dump container still not found after tab switch!');
