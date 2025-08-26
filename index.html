@@ -18531,9 +18531,11 @@
                 
                 // Method 1: localStorage event listener (cross-tab communication)
                 window.addEventListener('storage', (event) => {
+                    console.log('🔍 Desktop: Storage event received:', event.key, event.newValue);
                     if (event.key === 'brain_dump_sync' && event.newValue) {
                         try {
                             const notification = JSON.parse(event.newValue);
+                            console.log('🔍 Desktop: Parsed notification:', notification);
                             if (notification.type === 'NEW_BRAIN_DUMP' && notification.source === 'mobile') {
                                 console.log('🔄 Desktop: Received localStorage notification from mobile');
                                 this.loadBrainDumps();
