@@ -467,7 +467,7 @@ class CloudStorage {
         }
     }
     
-    async getJournalTagAnalytics(dateRange = 30) {
+    async getJournalTagAnalytics(dateRange = 30, categoryFilter = 'all') {
         if (!supabase || !this.isSupabaseAuthenticated()) {
             return { tagFrequency: {}, tagTimeline: {}, tagCorrelations: [] };
         }
@@ -480,8 +480,14 @@ class CloudStorage {
             cutoffDate.setDate(cutoffDate.getDate() - dateRange);
             const dateStr = cutoffDate.toISOString().split('T')[0];
             
-            // Get all tags within date range
-            const tags = await supabase.query(`journal_tags?user_id=eq.${user.id}&journal_date=gte.${dateStr}&select=tag,journal_date,journal_entry_id`);
+            // Build query with optional category filter
+            let query = `journal_tags?user_id=eq.${user.id}&journal_date=gte.${dateStr}&select=tag,journal_date,journal_entry_id,category`;
+            if (categoryFilter !== 'all') {
+                query += `&category=eq.${categoryFilter}`;
+            }
+            
+            // Get all tags within date range and category
+            const tags = await supabase.query(query);
             
             if (!tags) return { tagFrequency: {}, tagTimeline: {}, tagCorrelations: [] };
             

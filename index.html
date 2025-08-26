@@ -4724,7 +4724,7 @@
             gap: 0.25rem;
         }
 
-        .period-btn {
+        .period-btn, .category-btn {
             padding: 0.4rem 0.8rem;
             border: 1px solid var(--border-primary);
             background: var(--bg-primary);
@@ -4735,14 +4735,20 @@
             transition: all 0.2s ease;
         }
 
-        .period-btn:hover {
+        .period-btn:hover, .category-btn:hover {
             background: #f5f5f5;
         }
 
-        .period-btn.active {
+        .period-btn.active, .category-btn.active {
             background: #000000;
             color: #ffffff;
             border-color: #000000;
+        }
+        
+        .category-filter-buttons {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
         }
 
         .chart-header h3 {
@@ -6102,8 +6108,16 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="journal-tags">Tags (kommagetrennt):</label>
-                    <input type="text" id="journal-tags" placeholder="z.B. persönlich, reflektion, arbeit">
+                    <label for="journal-category">Kategorie</label>
+                    <select id="journal-category" required>
+                        <option value="trading">Trading</option>
+                        <option value="crypto">Crypto</option>
+                        <option value="privat">Privat</option>
+                        <option value="arbeit">Arbeit</option>
+                        <option value="uni">Uni</option>
+                        <option value="reflexion">Reflexion</option>
+                        <option value="goals">Goals</option>
+                    </select>
                 </div>
                 
                     <div class="form-actions">
@@ -6905,6 +6919,12 @@
                                     <button class="period-btn active" data-period="week" onclick="window.JournalTagAnalytics?.updatePeriod('week')">Woche</button>
                                     <button class="period-btn" data-period="month" onclick="window.JournalTagAnalytics?.updatePeriod('month')">Monat</button>
                                     <button class="period-btn" data-period="quarter" onclick="window.JournalTagAnalytics?.updatePeriod('quarter')">Quartal</button>
+                                </div>
+                                <div class="category-filter-buttons">
+                                    <button class="category-btn active" data-category="all" onclick="window.JournalTagAnalytics?.updateCategory('all')">Alle</button>
+                                    <button class="category-btn" data-category="trading" onclick="window.JournalTagAnalytics?.updateCategory('trading')">Trading</button>
+                                    <button class="category-btn" data-category="crypto" onclick="window.JournalTagAnalytics?.updateCategory('crypto')">Crypto</button>
+                                    <button class="category-btn" data-category="privat" onclick="window.JournalTagAnalytics?.updateCategory('privat')">Privat</button>
                                 </div>
                                 <div class="chart-info">
                                     <span id="tag-stats">Loading...</span>
@@ -11218,7 +11238,7 @@
                 const entry = {
                     title: entryData.title,
                     content: entryData.content,
-                    tags: entryData.tags || [], // Array of tags
+                    category: entryData.category || 'general',
                     date: entryData.date, // Keep date for local use
                     entry_date: entryData.date, // Use entry_date for database
                     user_id: supabase?.user?.id,
@@ -11243,7 +11263,7 @@
                                 result[0].id, 
                                 entryData.date, 
                                 fullContent, 
-                                'trading'
+                                entryData.category || 'general'
                             );
                             console.log('🏷️ Journal tags extracted and saved');
                         }
@@ -12097,13 +12117,10 @@
                 addJournalForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     
-                    const tagsInput = document.getElementById('journal-tags').value.trim();
-                    const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag) : ['allgemein'];
-                    
                     const entryData = {
                         title: document.getElementById('journal-title').value,
                         content: document.getElementById('journal-content').value,
-                        tags: tags,
+                        category: document.getElementById('journal-category').value,
                         date: new Date().toISOString().split('T')[0] // Add current date
                     };
                     
@@ -19272,6 +19289,7 @@
         class JournalTagAnalytics {
             constructor() {
                 this.currentPeriod = 'month';
+                this.currentCategory = 'all';
                 this.chart = null;
                 this.isInitialized = false;
             }
@@ -19302,6 +19320,18 @@
                 await this.loadAndDisplayAnalytics();
             }
             
+            async updateCategory(category) {
+                this.currentCategory = category;
+                
+                // Update active button
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-category="${category}"]`)?.classList.add('active');
+                
+                await this.loadAndDisplayAnalytics();
+            }
+            
             async loadAndDisplayAnalytics() {
                 if (!window.cloudStorage) {
                     console.error('CloudStorage not available');
@@ -19312,7 +19342,7 @@
                     const dateRange = this.getPeriodDays();
                     console.log(`📊 Loading tag analytics for ${dateRange} days...`);
                     
-                    const analytics = await window.cloudStorage.getJournalTagAnalytics(dateRange);
+                    const analytics = await window.cloudStorage.getJournalTagAnalytics(dateRange, this.currentCategory);
                     console.log('📊 Tag analytics loaded:', analytics);
                     console.log('📊 DEBUG: TagFrequency keys:', Object.keys(analytics.tagFrequency));
                     console.log('📊 DEBUG: Total entries in database check...');
