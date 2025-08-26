@@ -59,6 +59,14 @@
             console.warn = function(msg, ...args) {
                 originalWarn(sanitizeMessage(msg), ...args);
             };
+            
+            // Helper function to handle authentication state messages
+            window.logAuthWarning = function(component, action = 'load data') {
+                // Only show in development mode (localhost) or when explicitly debugging
+                if (window.location.hostname === 'localhost' || window.DEBUG_AUTH) {
+                    console.warn(`${component}: Authentication required to ${action}`);
+                }
+            };
         })();
     </script>
     <style>
@@ -8246,7 +8254,7 @@
             try {
                 // STEP 1: If not authenticated, use local data only
                 if (!supabase?.isAuthenticated()) {
-                    console.log('⚠️ Not authenticated, using local data only');
+                    // Using local data when not authenticated
                     try {
                         const localData = localStorage.getItem('routine_completions_cache');
                         if (localData) {
@@ -8737,7 +8745,7 @@
             
             async loadTodos() {
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ TodoManager: Not authenticated - pure cloud mode requires authentication');
+                    window.logAuthWarning('TodoManager');
                     this.todos = [];
                     return;
                 }
@@ -10061,7 +10069,7 @@
             
             async loadGoals() {
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ GoalManager: Not authenticated - pure cloud mode requires authentication');
+                    window.logAuthWarning('GoalManager');
                     this.goals = [];
                     return;
                 }
@@ -10186,7 +10194,7 @@
                 });
                 
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ GoalManager: Not authenticated - cannot add goal in pure cloud mode');
+                    window.logAuthWarning('GoalManager', 'add goals');
                     alert('Fehler: Nicht authentifiziert. Ziel kann nicht gespeichert werden.');
                     return;
                 }
@@ -10491,7 +10499,7 @@
                 
                 // Pure cloud mode - require authentication
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ GoalManager: Not authenticated - cannot update goal value in pure cloud mode');
+                    window.logAuthWarning('GoalManager', 'update goals');
                     alert('Fehler: Nicht authentifiziert. Ziel-Wert kann nicht aktualisiert werden.');
                     return;
                 }
@@ -11006,7 +11014,7 @@
             
             async loadEntries() {
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ JournalManager: Not authenticated - pure cloud mode requires authentication');
+                    window.logAuthWarning('JournalManager');
                     this.entries = [];
                     return;
                 }
@@ -11067,7 +11075,7 @@
             
             async addEntry(entryData) {
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ JournalManager: Not authenticated - cannot add entry in pure cloud mode');
+                    window.logAuthWarning('JournalManager', 'add entries');
                     alert('Fehler: Nicht authentifiziert. Journal-Eintrag kann nicht gespeichert werden.');
                     return;
                 }
@@ -11354,7 +11362,7 @@
             
             async loadTermine(forceReload = false) {
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ TerminManager: Not authenticated - pure cloud mode requires authentication');
+                    window.logAuthWarning('TerminManager');
                     this.termine = [];
                     this.displayTermine();
                     return;
@@ -11404,7 +11412,7 @@
             
             async addTermin(terminData) {
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ TerminManager: Not authenticated - cannot add termin in pure cloud mode');
+                    window.logAuthWarning('TerminManager', 'add appointments');
                     alert('Fehler: Nicht authentifiziert. Termin kann nicht gespeichert werden.');
                     return;
                 }
@@ -11436,7 +11444,7 @@
             
             async updateTermin(terminId, terminData) {
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ TerminManager: Not authenticated - cannot update termin in pure cloud mode');
+                    window.logAuthWarning('TerminManager', 'update appointments');
                     alert('Fehler: Nicht authentifiziert. Termin kann nicht aktualisiert werden.');
                     return;
                 }
@@ -11609,7 +11617,7 @@
                 }
                 
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ TerminManager: Not authenticated - cannot delete termin in pure cloud mode');
+                    window.logAuthWarning('TerminManager', 'delete appointments');
                     alert('Fehler: Nicht authentifiziert. Termin kann nicht gelöscht werden.');
                     return;
                 }
@@ -12052,7 +12060,7 @@
                 
                 async loadResources() {
                     if (!supabase?.isAuthenticated()) {
-                        console.error('❌ ResourceManager: Not authenticated - pure cloud mode requires authentication');
+                        window.logAuthWarning('ResourceManager');
                         this.resources = [];
                         this.renderResources();
                         return;
@@ -12237,7 +12245,7 @@
                 
                 async addResource(resourceData) {
                     if (!supabase?.isAuthenticated()) {
-                        console.error('❌ ResourceManager: Not authenticated - cannot add resource in pure cloud mode');
+                        window.logAuthWarning('ResourceManager', 'add resources');
                         alert('Fehler: Nicht authentifiziert. Resource kann nicht gespeichert werden.');
                         return;
                     }
@@ -12266,7 +12274,7 @@
                 
                 async deleteResource(resourceId) {
                     if (!supabase?.isAuthenticated()) {
-                        console.error('❌ ResourceManager: Not authenticated - cannot delete resource in pure cloud mode');
+                        window.logAuthWarning('ResourceManager', 'delete resources');
                         alert('Fehler: Nicht authentifiziert. Resource kann nicht gelöscht werden.');
                         return;
                     }
@@ -12384,7 +12392,7 @@
                 
                 async loadTradingRules() {
                     if (!supabase?.isAuthenticated()) {
-                        console.error('❌ TradingRulesManager: Not authenticated - pure cloud mode requires authentication');
+                        window.logAuthWarning('TradingRulesManager');
                         this.rules = [];
                         this.renderTradingRules();
                         return;
@@ -12658,7 +12666,7 @@
 
                 async checkDatabaseSchema() {
                     if (!supabase?.isAuthenticated()) {
-                        console.error('❌ Not authenticated');
+                        window.logAuthWarning('TradingRulesManager', 'save rules');
                         return;
                     }
                     
@@ -13221,7 +13229,7 @@
                         const resource = ResourceManager.resources.find(r => r.id === editId);
                         if (resource) {
                             if (!supabase?.isAuthenticated()) {
-                                console.error('❌ ResourceManager: Not authenticated - cannot update resource in pure cloud mode');
+                                window.logAuthWarning('ResourceManager', 'update resources');
                                 alert('Fehler: Nicht authentifiziert. Resource kann nicht aktualisiert werden.');
                                 return;
                             }
@@ -13569,7 +13577,7 @@
                 // Debug function for checking todo counts
                 window.debugTodoCount = async function() {
                     if (!supabase?.isAuthenticated()) {
-                        console.log('❌ Not authenticated');
+                        // Debug: Not authenticated
                         return;
                     }
                     
@@ -13634,7 +13642,7 @@
             
             async addEntry() {
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ Wiki: Not authenticated - cannot add entry in pure cloud mode');
+                    window.logAuthWarning('Wiki', 'add entries');
                     alert('Fehler: Nicht authentifiziert. Wiki-Eintrag kann nicht gespeichert werden.');
                     return;
                 }
@@ -13692,7 +13700,7 @@
             
             async deleteEntry(id) {
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ Wiki: Not authenticated - cannot delete entry in pure cloud mode');
+                    window.logAuthWarning('Wiki', 'delete entries');
                     alert('Fehler: Nicht authentifiziert. Wiki-Eintrag kann nicht gelöscht werden.');
                     return;
                 }
@@ -13782,7 +13790,7 @@
             
             async loadEntries() {
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ Wiki: Not authenticated - pure cloud mode requires authentication');
+                    window.logAuthWarning('Wiki');
                     this.entries = [];
                     this.render();
                     return;
@@ -13799,7 +13807,7 @@
             async saveEntries() {
                 // Pure cloud mode - no localStorage saving
                 if (!supabase?.isAuthenticated()) {
-                    console.error('❌ Wiki: Not authenticated - cannot save in pure cloud mode');
+                    window.logAuthWarning('Wiki', 'save entries');
                     return;
                 }
                 
@@ -14919,7 +14927,7 @@
                         brainDumpButton.style.display = 'none';
                         }
                 } else {
-                    console.warn('🔍 updateDynamicButtons: Missing button or manager');
+                    window.logAuthWarning('BrainDump', 'update dynamic buttons');
                 }
                 
                 // Re-initialize Lucide icons for dynamic buttons
@@ -16236,7 +16244,7 @@
             async init() {
                 // Check if supabase is available and user is authenticated
                 if (!window.supabase?.isAuthenticated()) {
-                    console.warn('Analytics init skipped - not authenticated');
+                    window.logAuthWarning('Analytics', 'initialize');
                     return;
                 }
                 

@@ -274,7 +274,7 @@ class CloudStorage {
             // Pure cloud mode - no local saving needed
             
             if (!supabase || !this.isOnline || !this.isSupabaseAuthenticated()) {
-                console.error('CloudStorage: Cannot save routine completion - not authenticated or offline');
+                // Authentication required for cloud operations
                 throw new Error('Pure cloud mode requires authentication and online connection');
             }
             
@@ -593,7 +593,7 @@ class CloudStorage {
     
     async getResources() {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.error('CloudStorage: Not authenticated');
+            // Authentication required
             return [];
         }
         
@@ -618,7 +618,7 @@ class CloudStorage {
     
     async saveResource(resource) {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.error('CloudStorage: Not authenticated - cannot save resource');
+            // Authentication required
             throw new Error('Not authenticated - pure cloud mode requires authentication');
         }
         
@@ -663,7 +663,7 @@ class CloudStorage {
     
     async deleteResource(resourceId) {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.error('CloudStorage: Not authenticated - cannot delete resource');
+            // Authentication required
             throw new Error('Not authenticated - pure cloud mode requires authentication');
         }
         
@@ -692,7 +692,7 @@ class CloudStorage {
     
     async ensureTradingRulesTable() {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.error('CloudStorage: Not authenticated - cannot create table');
+            // Authentication required
             return false;
         }
         
@@ -736,7 +736,7 @@ class CloudStorage {
     
     async getTradingRules() {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.error('CloudStorage: Not authenticated');
+            // Authentication required
             return [];
         }
         
@@ -776,7 +776,7 @@ class CloudStorage {
     
     async saveTradingRule(rule) {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.error('CloudStorage: Not authenticated - cannot save trading rule');
+            // Authentication required
             throw new Error('Not authenticated - pure cloud mode requires authentication');
         }
         
@@ -819,7 +819,7 @@ class CloudStorage {
     
     async deleteTradingRule(ruleId) {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.error('CloudStorage: Not authenticated - cannot delete trading rule');
+            // Authentication required
             throw new Error('Not authenticated - pure cloud mode requires authentication');
         }
         
