@@ -11268,6 +11268,15 @@
                 
                 console.log('☁️ JournalManager: Entry added:', entry);
                 
+                // Refresh analytics if initialized
+                if (window.JournalTagAnalytics && window.JournalTagAnalytics.isInitialized) {
+                    console.log('🔄 Refreshing tag analytics after journal addition...');
+                    setTimeout(async () => {
+                        await window.JournalTagAnalytics.updateCategoryButtons();
+                        await window.JournalTagAnalytics.loadAndDisplayAnalytics();
+                    }, 200);
+                }
+                
                 // Update filtered entries and refresh view
                 this.filteredEntries = [...this.entries];
                 this.renderEntries();
@@ -11407,8 +11416,15 @@
                 try {
                     // Delete from database if authenticated
                     if (supabase?.isAuthenticated()) {
+                        // Delete journal entry
                         await supabase.delete('journal_entries', entryId);
                         console.log('✅ Journal entry deleted from database:', entryId);
+                        
+                        // Delete associated tags
+                        if (window.cloudStorage) {
+                            await supabase.delete('journal_tags', `journal_entry_id=eq.${entryId}`);
+                            console.log('✅ Associated journal tags deleted:', entryId);
+                        }
                     }
                     
                     // Remove from local entries array
@@ -11417,6 +11433,15 @@
                     
                     // Refresh current view
                     this.renderEntries();
+                    
+                    // Refresh analytics if initialized
+                    if (window.JournalTagAnalytics && window.JournalTagAnalytics.isInitialized) {
+                        console.log('🔄 Refreshing tag analytics after journal deletion...');
+                        setTimeout(async () => {
+                            await window.JournalTagAnalytics.updateCategoryButtons();
+                            await window.JournalTagAnalytics.loadAndDisplayAnalytics();
+                        }, 100);
+                    }
                     
                     console.log('✅ Journal entry deleted:', entryId);
                 } catch (error) {
