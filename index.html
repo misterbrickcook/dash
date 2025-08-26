@@ -3616,6 +3616,24 @@
         }
 
 
+        /* Badge for quickbar buttons */
+        .quickbar-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 3001;
+        }
+
         /* Responsive - hide on mobile */
         @media (max-width: 768px) {
             .quickbar {
@@ -14917,6 +14935,10 @@
                         console.log('🌙 Dynamic Dark Mode button clicked');
                         this.toggleDarkMode();
                         break;
+                    case 'braindump-toggle':
+                        console.log('🧠 Dynamic Brain Dump button clicked');
+                        this.toggleBrainDumpContainer();
+                        break;
                     case 'settings':
                         this.openSettings();
                         break;
@@ -15030,6 +15052,35 @@
                 }, 100);
             }
             
+            toggleBrainDumpContainer() {
+                const container = document.getElementById('brain-dump-container');
+                if (container) {
+                    if (container.style.display === 'none' || !container.style.display) {
+                        // Show brain dump container
+                        container.style.display = 'block';
+                        console.log('🧠 Brain Dump container shown');
+                        
+                        // Navigate to todos tab if not already there
+                        const todosTab = document.getElementById('tab-todos');
+                        if (todosTab && !todosTab.classList.contains('active')) {
+                            todosTab.click();
+                        }
+                        
+                        // Scroll to brain dump container
+                        setTimeout(() => {
+                            container.scrollIntoView({ 
+                                behavior: 'smooth', 
+                                block: 'start' 
+                            });
+                        }, 100);
+                    } else {
+                        // Hide brain dump container
+                        container.style.display = 'none';
+                        console.log('🧠 Brain Dump container hidden');
+                    }
+                }
+            }
+            
             updateDynamicButtons() {
                 console.log('🔄 Updating dynamic main buttons');
                 
@@ -15069,6 +15120,23 @@
                         }
                     } else {
                         pomodoroButton.style.display = 'none';
+                    }
+                }
+                
+                // Handle Brain Dump dynamic button
+                const brainDumpButton = document.getElementById('dynamic-braindump');
+                const brainDumpBadge = document.getElementById('braindump-quickbar-badge');
+                
+                if (brainDumpButton && window.brainDumpManager) {
+                    const count = window.brainDumpManager.brainDumps.length;
+                    
+                    if (count > 0) {
+                        brainDumpButton.style.display = 'block';
+                        if (brainDumpBadge) {
+                            brainDumpBadge.textContent = count;
+                        }
+                    } else {
+                        brainDumpButton.style.display = 'none';
                     }
                 }
                 
@@ -18312,6 +18380,14 @@
             </button>
         </div>
         
+        <!-- Dynamic Brain Dump Button (appears when brain dumps exist) -->
+        <div id="dynamic-braindump" class="quickbar-category dynamic-main-button" style="display: none;">
+            <button id="dynamic-braindump-btn" class="quickbar-main-btn braindump-active" data-action="braindump-toggle" data-tooltip="Brain Dumps verteilen">
+                <i data-lucide="brain-circuit"></i>
+                <span class="quickbar-badge" id="braindump-quickbar-badge">0</span>
+            </button>
+        </div>
+        
         <!-- ADDS Category -->
         <div class="quickbar-category" data-category="adds">
             <button id="quickbar-adds" class="quickbar-main-btn" data-category="adds" data-tooltip="Add Items">
@@ -18509,14 +18585,26 @@
                 // Update badge count
                 badge.textContent = this.brainDumps.length;
                 
-                // Container is always visible
-                container.style.display = 'block';
+                // Hide container by default - only show via quickbar toggle
+                if (this.brainDumps.length === 0) {
+                    container.style.display = 'none';
+                } else {
+                    // Keep current display state if there are brain dumps
+                    if (!container.style.display) {
+                        container.style.display = 'none';
+                    }
+                }
                 
                 // Update badge visibility
                 if (this.brainDumps.length > 0) {
                     badge.style.display = 'inline';
                 } else {
                     badge.style.display = 'none';
+                }
+                
+                // Update quickbar dynamic button
+                if (window.QuickBarManager) {
+                    window.QuickBarManager.updateDynamicButtons();
                 }
                 
                 // Render brain dumps
