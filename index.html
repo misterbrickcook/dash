@@ -839,7 +839,6 @@
             border-color: #63b3ed !important;
         }
 
-
         /* === LOGIN BLACK EFFECTS - VISIBLE ELEMENTS === */
         .login-effects {
             position: fixed;
@@ -851,7 +850,6 @@
             z-index: 99999;
         }
 
-        
         /* Simple data points */
         .login-effects .data-point {
             position: absolute;
@@ -1241,23 +1239,19 @@
             border-color: transparent !important;
             background: transparent !important;
         }
-        
-        
+
         .logout-btn:hover span, .logout-btn:active span, .logout-btn:focus span,
         .logout-btn:hover svg, .logout-btn:active svg, .logout-btn:focus svg {
             color: #dc2626 !important;
             stroke: #dc2626 !important;
         }
-        
-        
-        
+
         .settings-btn:hover span, .settings-btn:active span, .settings-btn:focus span,
         .settings-btn:hover i, .settings-btn:active i, .settings-btn:focus i {
             color: #059669 !important;
             stroke: #059669 !important;
         }
-        
-        
+
         /* Force reset any stuck hover states on mobile */
         @media (max-width: 768px) {
             .logout-btn span {
@@ -1272,9 +1266,6 @@
             font-size: 1.2rem;
             pointer-events: none !important;
         }
-
-        
-        
 
         /* === SETTINGS PAGE === */
         .settings-container {
@@ -2897,8 +2888,7 @@
             flex: 1;
             line-height: 1.2;
         }
-        
-        
+
         /* === EMOJI PALETTE === */
         .emoji-palette {
             display: grid;
@@ -2982,8 +2972,7 @@
             transition: opacity 0.2s ease;
             z-index: 10;
         }
-        
-        
+
         .resource-edit-btn,
         .resource-delete-btn {
             background: rgba(255, 255, 255, 0.9);
@@ -3000,8 +2989,7 @@
             justify-content: center;
             backdrop-filter: blur(4px);
         }
-        
-        
+
         .resource-delete-btn:hover {
             background: rgba(239, 68, 68, 0.1);
             border-color: rgba(239, 68, 68, 0.3);
@@ -3082,8 +3070,7 @@
             opacity: 0;
             transition: opacity 0.2s ease;
         }
-        
-        
+
         .resource-button .resource-edit-btn,
         .resource-button .resource-delete-btn {
             background: rgba(0, 0, 0, 0.8);
@@ -3615,7 +3602,6 @@
             transition-delay: 0.3s; 
         }
 
-
         /* Badge for quickbar buttons */
         .quickbar-badge {
             position: absolute;
@@ -3819,8 +3805,7 @@
             font-size: 0.95rem;
             background: var(--bg-primary);
         }
-        
-        
+
         .wiki-entry {
             background: #f8f9fa;
             border: 1px solid var(--border-primary);
@@ -4555,7 +4540,6 @@
             letter-spacing: 0.1em;
         }
 
-
         /* DISABLED: Trading styles
         .trading-container {
             background: var(--bg-primary);
@@ -5071,8 +5055,7 @@
         .trading-rules-sticky.minimized .sticky-content {
             display: none;
         }
-        
-        
+
         .trading-rules-sticky.minimized .sticky-header {
             border-bottom: none;
         }
@@ -5399,8 +5382,6 @@
             background: #e5e7eb;
         }
 
-
-
         /* === CRYPTO TICKER BAR === */
         .crypto-ticker-bar {
             position: fixed;
@@ -5518,7 +5499,6 @@
         body {
             padding-top: 120px; /* 40px ticker + 80px navbar */
         }
-        
 
         .crypto-overlay-header {
             display: flex;
@@ -5555,7 +5535,6 @@
             border-color: var(--accent-primary);
             color: var(--accent-primary);
         }
-
 
         .crypto-overlay-content {
             padding: var(--spacing-sm);
@@ -7021,7 +7000,6 @@
 
         </section>
 
-
         <!-- === SETTINGS TAB === -->
         <section id="tab-settings" class="tab-section">
             
@@ -7309,8 +7287,7 @@
                         <label for="vision-description">Beschreibung</label>
                         <input type="text" id="vision-description" autocomplete="off" placeholder="z.B. 2026, 70kg erreicht, Eigenes Business">
                     </div>
-                    
-                    
+
                     <div class="form-group">
                         <label for="vision-icon">Icon *</label>
                         <input type="text" id="vision-icon" required autocomplete="off" value="star" readonly>
@@ -7411,9 +7388,7 @@
                     <label for="wiki-tags">Tags (kommagetrennt):</label>
                     <input type="text" id="wiki-tags" placeholder="z.B. crypto, trading, analyse">
                 </div>
-                
-                
-                
+
                     <div class="form-actions">
                         <button type="button" id="cancel-wiki-btn" class="btn secondary">Abbrechen</button>
                         <button type="submit" class="btn">Erstellen</button>
@@ -7490,9 +7465,7 @@
             
             async init() {
                 window.Auth = this;
-                
-                
-                
+
                 if (!supabase) {
                     console.log('⚠️ Demo mode - showing login screen with effects');
                     this.showAuthScreen();
@@ -7576,7 +7549,6 @@
                     }
                     
                     if (user) {
-                        console.log('✅ Login successful, showing dashboard...');
                         this.currentUser = user;
                         this.isAuthenticated = true;
                         await this.showDashboard();
@@ -7603,8 +7575,6 @@
                     // Only clear auth-related data, preserve routine/todo data
                     localStorage.removeItem('supabase.auth.token');
                     sessionStorage.clear();
-                    console.log('✅ Logout successful, redirecting to login...');
-                    
                     // Remove authenticated class from body
                     document.body.classList.remove('authenticated');
                     
@@ -7741,26 +7711,13 @@
                         console.log('📱 DASHBOARD: Mobile detected - hiding QuickBar');
                         quickbar.style.display = 'none';
                     } else {
-                        console.log('💻 DASHBOARD: Desktop detected - showing QuickBar');
                         quickbar.style.display = 'flex';
                     }
                 }
                 
                 // Load all data after successful login
                 if (supabase?.isAuthenticated()) {
-                    console.log('🔄 Loading dashboard data...');
-                    
                     // Debug: Check which managers are available
-                    console.log('🔍 Available managers:', {
-                        TodoManager: !!window.TodoManager,
-                        GoalManager: !!window.GoalManager, 
-                        JournalManager: !!window.JournalManager,
-                        TerminManager: !!window.TerminManager,
-                        ResourceManager: !!window.ResourceManager,
-                        TradingRulesManager: !!window.TradingRulesManager,
-                        Wiki: !!window.Wiki
-                    });
-                    
                     // Load all data in parallel for better performance
                     await Promise.all([
                         TodoManager.loadTodos(),
@@ -7779,15 +7736,13 @@
                     try {
                         if (!window.cryptoPriceWidget) {
                             window.cryptoPriceWidget = new CryptoPriceWidget();
-                            console.log('✅ Crypto Widget initialized after authentication');
-                        }
+                            }
                     } catch (error) {
                         console.error('❌ Error initializing Crypto Widget:', error);
                     }
                     
                     // Initialize routine system FIRST, then counters to avoid race condition
                     if (window.simpleRoutineManager) {
-                        console.log('🔄 Re-initializing routine manager after login...');
                         await window.simpleRoutineManager.loadTodaysData();
                         window.simpleRoutineManager.restoreCheckboxes();
                         window.simpleRoutineManager.updateProgressBarsOnly();
@@ -7802,8 +7757,6 @@
                     if (window.Wiki) {
                         window.Wiki.render();
                     }
-                    
-                    console.log('✅ Dashboard data loaded');
                     
                     // After login, always go to home tab for clean UX
                     console.log('🏠 After login, redirecting to home tab');
@@ -7887,11 +7840,9 @@
             // If switching to trading rules tab, load and render rules
             if (tabId === 'tab-trading-rules') {
                 if (window.TradingRulesManager) {
-                    console.log('📊 Switching to Trading Rules tab - loading rules from database');
                     if (typeof window.TradingRulesManager.loadTradingRules === 'function') {
                         TradingRulesManager.loadTradingRules();
                     } else {
-                        console.log('📊 loadTradingRules not available, just rendering existing rules');
                         if (typeof window.TradingRulesManager.renderTradingRules === 'function') {
                             TradingRulesManager.renderTradingRules();
                         }
@@ -7984,15 +7935,11 @@
             let savedStates = {};
             
             // Pure cloud mode - no localStorage fallback needed
-            console.log('☁️ Pure cloud mode - loading routine states from cloud only');
-            
             // If authenticated, load from database
             if (supabase?.isAuthenticated()) {
                 try {
                     const routineCompletions = getRoutineCompletions();
                     if (routineCompletions && routineCompletions.length > 0) {
-                        console.log(`🔄 Loading ${routineCompletions.length} routine completions from database for ${today}`);
-                        
                         // Filter for today's completions
                         const todayCompletions = routineCompletions.filter(c => c.date === today);
                         console.log(`📅 Found ${todayCompletions.length} routine completions for today`);
@@ -8006,8 +7953,7 @@
                         });
                         
                         // Pure cloud mode - no localStorage updates needed
-                        console.log('☁️ Routine states loaded from cloud');
-                    }
+                        }
                 } catch (error) {
                     console.error('Error loading routine states from database:', error);
                     // Continue with localStorage-only states
@@ -8031,10 +7977,7 @@
                         }
                     }
                 }
-            });
-            
-            console.log(`✅ Loaded routine states for ${today}:`, savedStates);
-        }
+            });}
         
         // Save checkbox state to both localStorage and database
         async function saveCheckboxState(checkboxId, isChecked) {
@@ -8077,8 +8020,7 @@
                 if (progressFill) {
                     progressFill.style.width = percentage + '%';
                 }
-                
-                
+
                 // Update monthly streaks based on completion status (pure cloud mode)
                 const today = new Date().toISOString().split('T')[0];
                 const routineType = section.querySelector('h2').textContent.includes('Morgen') ? 'morning' : 'evening';
@@ -8210,7 +8152,6 @@
         // === SETTINGS FUNCTIONALITY ===
         function initializeSettings() {
             // Pure cloud mode - use default reset time (settings could be moved to cloud later)
-            console.log('☁️ Pure cloud mode: Using default routine reset time');
             const savedResetTime = '06:00'; // Default time, no localStorage needed
             const timeInput = document.getElementById('routine-reset-time');
             if (timeInput) {
@@ -8222,7 +8163,6 @@
             if (saveBtn) {
                 saveBtn.addEventListener('click', () => {
                     const resetTime = timeInput.value;
-                    console.log('☁️ Pure cloud mode: Settings change noted but not persisted');
                     alert(`Routine Reset Zeit auf ${resetTime} temporär gesetzt! (Pure Cloud Mode - nicht dauerhaft gespeichert)`);
                     console.log(`Routine reset time noted: ${resetTime} (not persisted in pure cloud mode)`);
                 });
@@ -8256,7 +8196,6 @@
             const today = new Date().toISOString().split('T')[0];
             
             // Pure cloud mode - no localStorage operations needed
-            console.log('☁️ Pure cloud mode: Routine reset will only affect UI, not persistent storage');
             console.log(`☁️ Resetting routines for ${today} (UI only)`);
             
             // Note: In pure cloud mode, this only resets the UI
@@ -8305,8 +8244,6 @@
         
         async function loadRoutineCompletions() {
             try {
-                console.log('🔄 Loading routine completions (Cloud-First with Migration)...');
-                
                 // STEP 1: If not authenticated, use local data only
                 if (!supabase?.isAuthenticated()) {
                     console.log('⚠️ Not authenticated, using local data only');
@@ -8334,13 +8271,11 @@
                     console.log(`☁️ Using ${cloudCompletions.length} completions from cloud`);
                 } else {
                     // Cloud is empty - try migration with new improved approach
-                    console.log('🔍 Cloud is empty, attempting migration with new schema...');
                     const migrationSuccess = await migrateLocalDataToCloudV2();
                     
                     if (migrationSuccess) {
                         // Reload after successful migration
                         const newCloudCompletions = await supabase.query('routine_completions?select=*');
-                        console.log(`🔄 After migration: ${newCloudCompletions?.length || 0} completions in cloud`);
                         globalRoutineCompletions = newCloudCompletions || [];
                     } else {
                         // Migration failed - use local data as fallback
@@ -8387,8 +8322,6 @@
                 }
                 
                 // STEP 4: Pure cloud mode - no local caching needed
-                console.log('☁️ Pure cloud mode - skipping local cache storage');
-                
                 // STEP 5: Counter updates now handled by SimpleCounters
                 
             } catch (error) {
@@ -8398,8 +8331,7 @@
                     const localData = localStorage.getItem('routine_completions_cache');
                     if (localData) {
                         globalRoutineCompletions = JSON.parse(localData);
-                        console.log('🔄 Fallback to local data due to error');
-                    } else {
+                        } else {
                         globalRoutineCompletions = [];
                     }
                 } catch (e) {
@@ -8456,8 +8388,6 @@
                     console.warn('⚠️ Could not parse legacy routine data:', e);
                 }
                 
-                console.log(`📊 Prepared ${localCompletions.length} completions for migration`);
-                
                 if (localCompletions.length === 0) {
                     console.log('📭 No local data found to migrate');
                     return true;
@@ -8475,8 +8405,6 @@
                     }
                 });
                 
-                console.log(`🔍 After deduplication: ${uniqueCompletions.length} unique completions`);
-                
                 // Upload to cloud
                 let uploadedCount = 0;
                 
@@ -8486,9 +8414,7 @@
                         
                         const result = await supabase.insert('routine_completions', [completion]);
                         if (result && result.length > 0) {
-                            uploadedCount++;
-                            console.log(`✅ Uploaded successfully`);
-                        } else {
+                            uploadedCount++;} else {
                             console.warn(`⚠️ Upload returned no result`);
                         }
                     } catch (uploadError) {
@@ -8576,8 +8502,6 @@
                     }
                 }
                 
-                console.log(`📊 Found ${allLocalCompletions.length} local completions to migrate`);
-                
                 if (allLocalCompletions.length === 0) {
                     console.log('📭 No local data found to migrate');
                     return true; // No data to migrate is considered success
@@ -8604,9 +8528,7 @@
                     try {
                         const result = await supabase.insert('routine_completions', batch);
                         if (result) {
-                            uploaded += batch.length;
-                            console.log(`✅ Uploaded batch: ${uploaded}/${cleanedCompletions.length}`);
-                        } else {
+                            uploaded += batch.length;} else {
                             console.error('❌ Batch upload returned no result');
                             hasErrors = true;
                         }
@@ -8651,7 +8573,6 @@
                 const cached = localStorage.getItem('routine_completions_cache');
                 if (cached) {
                     const parsed = JSON.parse(cached);
-                    console.log('💾 Using routine completions from localStorage fallback');
                     return parsed;
                 }
             } catch (e) {
@@ -8725,7 +8646,6 @@
         
         // Setup action button hovers after Lucide
         setTimeout(setupActionButtonHovers, 1000);
-
 
         // Todo category tabs
         document.querySelectorAll('.category-tab').forEach(tab => {
@@ -8848,7 +8768,6 @@
                         this.refreshCurrentView();
                         this.updateHomeTodos();
                     } else {
-                        console.log('☁️ TodoManager: No todos found in cloud');
                         this.todos = [];
                     }
                 } catch (error) {
@@ -8917,11 +8836,9 @@
                 
                 try {
                     const result = await supabase.insert('todos', todo);
-                    console.log('💾 Supabase insert result:', result);
                     if (result && Array.isArray(result) && result.length > 0) {
                         // Transform the database result to match UI expectations
                         const dbTodo = result[0];
-                        console.log('☁️ TodoManager: Todo saved to cloud with ID:', dbTodo.id);
                         const uiTodo = {
                             ...dbTodo,
                             title: dbTodo.text,
@@ -8929,9 +8846,7 @@
                             priority: this.priorityIntToString(dbTodo.priority || 1)
                         };
                         this.todos.push(uiTodo);
-                        console.log('✅ Todo added to local array:', uiTodo);
-                        console.log('📊 Total todos in array:', this.todos.length);
-                    } else {
+                        } else {
                         throw new Error('Insert did not return data');
                     }
                 } catch (error) {
@@ -8941,7 +8856,6 @@
                 }
                 
                 // Refresh current view immediately
-                console.log('🔄 Calling refreshCurrentView after adding todo...');
                 this.refreshCurrentView();
                 
                 // Don't trigger counter animation when creating todos
@@ -8985,9 +8899,7 @@
             },
             
             displayTodosForCategory(category) {
-                console.log('🔄 displayTodosForCategory called with category:', category);
                 const container = document.getElementById(`todo-${category}`);
-                console.log('🔍 Container found:', !!container, container ? container.id : 'NOT FOUND');
                 if (!container) {
                     console.error('❌ Container not found for category:', category);
                     return;
@@ -9035,9 +8947,6 @@
                     const timeB = b.time || '23:59';
                     return timeA.localeCompare(timeB);
                 });
-                
-                console.log('🔍 Filtered todos for category', category, ':', filteredTodos.length);
-                console.log('🔍 First few todos:', filteredTodos.slice(0, 3).map(t => ({id: t.id, title: t.title, category: t.category})));
                 
                 // Clear container
                 container.innerHTML = '';
@@ -9132,20 +9041,13 @@
                     
                     // Update counter display when todo status changes (now cloud-based)
                     if (todo.completed !== wasCompleted) {
-                        console.log('☁️ Todo status changed, will refresh cloud counter after database update...');
-                    }
+                        }
                     
                     if (supabase?.isAuthenticated()) {
                         try {
-                            console.log('💾 Updating in database - ID:', todo.id, 'Type:', typeof todo.id, 'Completed:', todo.completed);
-                            
                             // Make sure we use the right ID type
                             const updateId = Number.isInteger(Number(todo.id)) ? Number(todo.id) : todo.id;
                             const result = await supabase.update('todos', { completed: todo.completed }, updateId);
-                            
-                            console.log('💾 Database update result:', result);
-                            
-                            console.log('✅ Database update successful');
                             
                             // Trigger counter animation ONLY when todo is completed (not when uncompleted)
                             if (!wasCompleted && todo.completed) {
@@ -9154,7 +9056,6 @@
                                     window.SimpleCounters.onTodoChanged();
                                 }
                             } else if (wasCompleted && !todo.completed) {
-                                console.log('🔄 Todo uncompleted, updating counter without animation...');
                                 if (window.SimpleCounters) {
                                     window.SimpleCounters.updateAllCounters(); // Update without animation
                                 }
@@ -9188,13 +9089,8 @@
                     return;
                 }
                 
-                try {
-                    console.log('🗑️ Deleting todo with ID:', todoId);
-                    
-                    // Delete from cloud database
+                try {// Delete from cloud database
                     await supabase.delete('todos', String(todoId));
-                    console.log('✅ Todo deleted from cloud');
-                    
                     // Remove from local array
                     this.todos = this.todos.filter(todo => String(todo.id) !== String(todoId));
                     
@@ -9202,8 +9098,7 @@
                     const todoElement = document.querySelector(`[data-todo-id="${todoId}"]`);
                     if (todoElement) {
                         todoElement.remove();
-                        console.log('✅ Todo element removed from DOM immediately');
-                    }
+                        }
                     
                     // Refresh current view
                     this.refreshCurrentView();
@@ -9218,9 +9113,7 @@
             },
             
             async clearArchive() {
-                console.log('☁️ TodoManager: clearArchive() called (pure cloud mode)');
                 if (!confirm('Wirklich alle erledigten Todos dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden!')) {
-                    console.log('🔍 Archive clear cancelled by user');
                     return;
                 }
                 
@@ -9231,8 +9124,6 @@
                 }
                 
                 const completedTodos = this.todos.filter(todo => todo.completed);
-                console.log('☁️ TodoManager: Deleting', completedTodos.length, 'completed todos from cloud');
-                
                 try {
                     // Delete from cloud database
                     for (const todo of completedTodos) {
@@ -9241,11 +9132,7 @@
                             console.warn(`⚠️ Skipping todo without ID: "${todo.title}"`);
                             continue;
                         }
-                        const result = await supabase.delete('todos', String(todo.id));
-                        console.log(`✅ Delete result for ${todo.id}:`, result);
-                    }
-                    console.log('☁️ TodoManager: All completed todos deleted from cloud');
-                    
+                        const result = await supabase.delete('todos', String(todo.id));}
                     // Remove from local array
                     this.todos = this.todos.filter(todo => !todo.completed);
                     
@@ -9387,9 +9274,7 @@
                     this.hideModal();
                     this.showSuccessMessage();
                     
-                    console.log('✅ Mobile todo added successfully');
-                    
-                } catch (error) {
+                    } catch (error) {
                     console.error('❌ Error adding mobile todo:', error);
                     alert('Fehler beim Hinzufügen des Todos: ' + error.message);
                 }
@@ -9433,8 +9318,7 @@
                         console.log('📱 Mobile mode active - showing FAB button');
                     } else {
                         mobileBtn.style.display = 'none';
-                        console.log('💻 Desktop mode active - hiding FAB button');
-                    }
+                        }
                 };
                 
                 // Check on load
@@ -9599,7 +9483,6 @@
                 
                 // Search Journal entries (enhanced with tags, wiki, weather)
                 if (window.JournalManager?.entries) {
-                    console.log('🔍 GlobalSearch: Searching', window.JournalManager.entries.length, 'journal entries for:', searchTerm);
                     window.JournalManager.entries
                         .filter(entry => {
                             const titleMatch = entry.title?.toLowerCase().includes(searchTerm);
@@ -9627,7 +9510,6 @@
                             const match = titleMatch || contentMatch || tagsMatch || wikiMatch || weatherMatch || moodMatch || reflectionMatch || lessonsMatch;
                             
                             if (match) {
-                                console.log('✅ Found journal match:', entry.title);
                                 console.log('  - Title:', titleMatch ? '✓' : '✗');
                                 console.log('  - Content:', contentMatch ? '✓' : '✗');
                                 console.log('  - Tags:', tagsMatch ? '✓' : '✗', entry.tags);
@@ -10187,11 +10069,9 @@
                 try {
                     const user = supabase.getCurrentUser();
                     const data = await supabase.query(`goals?user_id=eq.${user.id}&select=*`);
-                    console.log('☁️ GoalManager: Raw goals from cloud:', data);
                     if (data && Array.isArray(data)) {
                         // Transform database data to match UI expectations
                         this.goals = data.map(goal => {
-                            console.log('🔄 Transforming goal:', goal);
                             return {
                                 ...goal,
                                 name: goal.title, // Map title to name for UI
@@ -10208,7 +10088,6 @@
                         });
                         this.refreshCurrentView();
                     } else {
-                        console.log('☁️ GoalManager: No goals found in cloud');
                         this.goals = [];
                     }
                 } catch (error) {
@@ -10343,10 +10222,7 @@
                         user_id: supabase?.user?.id
                     };
                     
-                    console.log('☁️ GoalManager: Saving goal to cloud:', dbGoal);
                     const result = await supabase.insert('goals', dbGoal);
-                    console.log('☁️ GoalManager: Cloud result:', result);
-                    
                     if (result && Array.isArray(result) && result.length > 0) {
                         // Use database result and transform back to UI format
                         const savedGoal = {
@@ -10363,8 +10239,7 @@
                             database_id: result[0].id // Store real DB ID for updates
                         };
                         this.goals.push(savedGoal);
-                        console.log('☁️ GoalManager: Goal saved to cloud with ID:', result[0].id);
-                    } else {
+                        } else {
                         throw new Error('Insert did not return data');
                     }
                 } catch (error) {
@@ -10478,8 +10353,6 @@
                 
                 // Prepare progress display  
                 const hasProgressData = goal.hasOwnProperty('startValue') && goal.hasOwnProperty('targetValue');
-                console.log('🔍 hasProgressData:', hasProgressData);
-                console.log('🔍 currentValue:', goal.currentValue, typeof goal.currentValue);
                 const progressSection = hasProgressData ? `
                     <div class="goal-progress-section" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0;">
                         <div class="goal-values" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
@@ -10496,9 +10369,6 @@
                     </div>
                 ` : '';
                 
-                console.log('🔍 progressSection generated:', hasProgressData ? 'YES' : 'NO');
-                console.log('🔍 progressSection length:', progressSection.length);
-
                 goalCard.innerHTML = `
                     ${daysUntilText ? `<div class="ziel-days-until">${daysUntilText}</div>` : ''}
                     <div class="ziel-kategorie">${goal.category}</div>
@@ -10527,13 +10397,11 @@
                     
                     if (supabase?.isAuthenticated() && dbId) {
                         try {
-                            console.log('💾 Updating goal in database with ID:', dbId);
                             const result = await supabase.update('goals', { 
                                 progress: goal.progress,
                                 completed: goal.completed
                             }, dbId);
-                            console.log('✅ Goal progress updated in cloud database:', result);
-                        } catch (error) {
+                            } catch (error) {
                             console.error('❌ Error updating goal progress:', error);
                             // Don't revert - keep local change even if DB fails
                             console.warn('⚠️ Goal updated locally only (database update failed)');
@@ -10542,7 +10410,6 @@
                         console.warn('⚠️ Goal updated locally only (no database ID or not authenticated)');
                     }
                     
-                    console.log('✅ Goal progress updated locally:', goal);
                     this.refreshCurrentView();
                 } else {
                     console.error('❌ Goal not found for ID:', goalId);
@@ -10654,17 +10521,13 @@
                 
                 if (dbId) {
                     try {
-                        console.log('💾 Updating goal in database...');
                         const updateData = { 
                             current_value: goal.currentValue, // Use DB field name
                             progress: goal.progress,
                             completed: goal.completed
                         };
-                        console.log('💾 Update data:', updateData);
-                        
                         await supabase.update('goals', updateData, dbId);
-                        console.log('✅ Goal value updated in database');
-                    } catch (error) {
+                        } catch (error) {
                         console.error('❌ Error updating goal value:', error);
                         alert('Fehler beim Speichern: ' + error.message);
                         return;
@@ -10680,8 +10543,7 @@
                 this.hideEditGoalValueModal();
                 this.refreshCurrentView();
                 
-                console.log('✅ Goal value updated:', goal.name, `${goal.currentValue}${unit}`, `${goal.progress}%`);
-            },
+                },
             
             async deleteGoal(goalId) {
                 if (!confirm('Dieses Ziel ins Archiv verschieben?\n\n(Es wird als abgeschlossen markiert und ins Archiv verschoben)')) {
@@ -10707,13 +10569,11 @@
                 
                 if (supabase?.isAuthenticated() && dbId) {
                     try {
-                        console.log('💾 Updating goal in database with ID:', dbId);
                         await supabase.update('goals', { 
                             completed: true,
                             progress: 100
                         }, dbId);
-                        console.log('✅ Goal archived in database');
-                    } catch (error) {
+                        } catch (error) {
                         console.error('❌ Error archiving goal in database:', error);
                         alert('Fehler beim Archivieren: ' + error.message);
                         // Revert on error
@@ -10725,31 +10585,24 @@
                 // Refresh current view
                 this.refreshCurrentView();
                 
-                console.log('✅ Goal archived successfully:', goal.name);
-            },
+                },
             
             async clearGoalArchive() {
                 if (!confirm('Wirklich alle erledigten Ziele dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden!')) {
                     return;
                 }
                 
-                const completedGoals = this.goals.filter(goal => goal.completed);
-                console.log('🗑️ Deleting', completedGoals.length, 'completed goals from archive');
-                
-                if (supabase?.isAuthenticated()) {
+                const completedGoals = this.goals.filter(goal => goal.completed);if (supabase?.isAuthenticated()) {
                     try {
                         // Delete from database (only goals with database IDs)
                         for (const goal of completedGoals) {
                             const hasDbId = goal.id && !isNaN(goal.id) && goal.id.toString().length < 10;
                             if (hasDbId) {
                                 await supabase.delete('goals', goal.id);
-                                console.log('💾 Deleted goal from database:', goal.name);
-                            } else {
-                                console.log('💾 Skipped local-only goal:', goal.name);
-                            }
+                                } else {
+                                }
                         }
-                        console.log('✅ All database goals deleted');
-                    } catch (error) {
+                        } catch (error) {
                         console.error('❌ Error deleting goals from database:', error);
                         alert('Fehler beim Löschen aus der Datenbank: ' + error.message);
                         return;
@@ -10773,9 +10626,7 @@
                         const hasDbId = goal.id && !isNaN(goal.id) && goal.id.toString().length < 10;
                         return hasDbId;
                     });
-                    const after = this.goals.length;
-                    console.log(`🗑️ Removed ${before - after} local-only goals`);
-                    this.refreshCurrentView();
+                    const after = this.goals.length;this.refreshCurrentView();
                     alert(`${before - after} lokale Ziele gelöscht!`);
                 }
             },
@@ -10965,11 +10816,7 @@
             
             // Setup autocomplete for a textarea
             setupAutocomplete(textarea) {
-                if (!textarea) return;
-                
-                console.log('🔧 Setting up @ autocomplete for textarea');
-                
-                // Remove existing listeners to prevent duplicates
+                if (!textarea) return;// Remove existing listeners to prevent duplicates
                 textarea.removeEventListener('input', this.handleInput.bind(this));
                 textarea.removeEventListener('keydown', this.handleKeydown.bind(this));
                 
@@ -11197,7 +11044,6 @@
                         this.filteredEntries = [...this.entries]; // Initialize filtered entries
                         this.renderEntries();
                     } else {
-                        console.log('☁️ JournalManager: No entries found in cloud');
                         this.entries = [];
                         this.filteredEntries = [];
                     }
@@ -11241,12 +11087,9 @@
                     const dbEntry = { ...entry };
                     delete dbEntry.date;
                     delete dbEntry.created_at;
-                    console.log('☁️ JournalManager: Saving entry to cloud:', dbEntry);
                     const result = await supabase.insert('journal_entries', dbEntry);
                     if (result && result.length > 0) {
                         this.entries.push(result[0]);
-                        console.log('☁️ JournalManager: Entry saved to cloud with ID:', result[0].id);
-                        
                         // AUTOMATICALLY EXTRACT AND SAVE TAGS
                         if (window.cloudStorage && result[0].id) {
                             const fullContent = `${entryData.title} ${entryData.content}`;
@@ -11256,8 +11099,7 @@
                                 fullContent, 
                                 entryData.category || 'general'
                             );
-                            console.log('🏷️ Journal tags extracted and saved');
-                        }
+                            }
                     } else {
                         throw new Error('Insert did not return data');
                     }
@@ -11267,11 +11109,8 @@
                     throw error; // Don't hide errors in pure cloud mode
                 }
                 
-                console.log('☁️ JournalManager: Entry added:', entry);
-                
                 // Refresh analytics if initialized
                 if (window.JournalTagAnalytics && window.JournalTagAnalytics.isInitialized) {
-                    console.log('🔄 Refreshing tag analytics after journal addition...');
                     setTimeout(async () => {
                         await window.JournalTagAnalytics.updateCategoryButtons();
                         await window.JournalTagAnalytics.loadAndDisplayAnalytics();
@@ -11372,7 +11211,6 @@
                 this.addDeleteHandlers();
             },
 
-            
             createEntryElement(entry) {
                 const entryCard = document.createElement('div');
                 entryCard.className = 'ziel-card';
@@ -11419,13 +11257,10 @@
                     if (supabase?.isAuthenticated()) {
                         // Delete journal entry
                         await supabase.delete('journal_entries', entryId);
-                        console.log('✅ Journal entry deleted from database:', entryId);
-                        
                         // Delete associated tags
                         if (window.cloudStorage) {
                             await supabase.delete('journal_tags', `journal_entry_id=eq.${entryId}`);
-                            console.log('✅ Associated journal tags deleted:', entryId);
-                        }
+                            }
                     }
                     
                     // Remove from local entries array
@@ -11437,15 +11272,13 @@
                     
                     // Refresh analytics if initialized
                     if (window.JournalTagAnalytics && window.JournalTagAnalytics.isInitialized) {
-                        console.log('🔄 Refreshing tag analytics after journal deletion...');
                         setTimeout(async () => {
                             await window.JournalTagAnalytics.updateCategoryButtons();
                             await window.JournalTagAnalytics.loadAndDisplayAnalytics();
                         }, 100);
                     }
                     
-                    console.log('✅ Journal entry deleted:', entryId);
-                } catch (error) {
+                    } catch (error) {
                     console.error('❌ Error deleting journal entry:', error);
                     alert('Fehler beim Löschen des Eintrags: ' + error.message);
                 }
@@ -11528,7 +11361,6 @@
                 }
                 
                 try {
-                    console.log('☁️ TerminManager: Loading termine from cloud...');
                     const user = supabase.getCurrentUser();
                     const data = await supabase.query(`termine?user_id=eq.${user.id}&select=*`);
                     
@@ -11536,7 +11368,6 @@
                         this.termine = data;
                         this.displayTermine();
                     } else {
-                        console.log('☁️ TerminManager: No termine found in cloud');
                         this.termine = [];
                         this.displayTermine();
                     }
@@ -11588,12 +11419,10 @@
                 };
                 
                 try {
-                    console.log('☁️ TerminManager: Saving termin to cloud:', termin.title);
                     const result = await supabase.insert('termine', termin);
                     if (result && result.length > 0) {
                         this.termine.push(result[0]);
-                        console.log('☁️ TerminManager: Termin saved to cloud with ID:', result[0].id);
-                    } else {
+                        } else {
                         throw new Error('Insert did not return data');
                     }
                 } catch (error) {
@@ -11602,7 +11431,6 @@
                     throw error; // Don't hide errors in pure cloud mode
                 }
                 
-                console.log('☁️ TerminManager: Termin added:', termin);
                 this.displayTermine();
             },
             
@@ -11630,31 +11458,24 @@
                 };
                 
                 try {
-                    console.log('☁️ TerminManager: Updating termin in cloud:', terminId);
                     await supabase.update('termine', updatedTermin, terminId);
                     this.termine[terminIndex] = updatedTermin;
-                    console.log('☁️ TerminManager: Termin updated in cloud');
-                } catch (error) {
+                    } catch (error) {
                     console.error('❌ TerminManager: Error updating in cloud:', error);
                     alert('Fehler beim Aktualisieren des Termins: ' + error.message);
                     throw error; // Don't hide errors in pure cloud mode
                 }
                 
-                console.log('☁️ TerminManager: Termin updated:', updatedTermin);
                 this.displayTermine();
             },
             
             displayTermine() {
                 console.log('📅 TerminManager.displayTermine() called');
-                console.log('📊 Current termine in memory:', this.termine);
-                
                 const container = document.getElementById('termine-container');
                 if (!container) {
                     console.error('❌ Termine container DOM element not found - check if #termine-container exists');
                     return;
                 }
-                
-                console.log('✅ Termine container found:', container);
                 
                 // Clear container
                 container.innerHTML = '';
@@ -11664,8 +11485,7 @@
                     container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem; grid-column: 1 / -1;">Keine Termine vorhanden</p>';
                     return;
                 }
-                
-                
+
                 // Sort by date/time (earliest first)
                 const sortedTermine = this.termine.sort((a, b) => {
                     const dateTimeA = new Date(`${a.date}T${a.time || '00:00'}`);
@@ -11673,17 +11493,13 @@
                     return dateTimeA - dateTimeB;
                 });
                 
-                console.log('🔄 Termine sorted by date:', sortedTermine.map(t => `${t.title} - ${t.date}`));
-                
                 // Add termine
                 sortedTermine.forEach((termin, index) => {
-                    console.log(`🔄 Creating element for termin ${index + 1}:`, termin.title);
                     const terminElement = this.createTerminElement(termin);
                     container.appendChild(terminElement);
                 });
                 
-                console.log('✅ All termine rendered to DOM');
-            },
+                },
             
             createTerminElement(termin) {
                 const terminCard = document.createElement('div');
@@ -11769,8 +11585,6 @@
                     return;
                 }
                 
-                console.log('✅ Found termin for editing:', termin);
-                
                 // Pre-fill the form with existing values
                 document.getElementById('termin-title').value = termin.title;
                 document.getElementById('termin-description').value = termin.description;
@@ -11784,8 +11598,6 @@
                 // Change button text
                 const submitBtn = form.querySelector('button[type="submit"]');
                 submitBtn.textContent = 'Termin aktualisieren';
-                
-                console.log('📝 Form prepared for editing, opening modal...');
                 
                 // Show modal
                 this.showAddTerminModal();
@@ -11803,10 +11615,8 @@
                 }
                 
                 try {
-                    console.log('☁️ TerminManager: Deleting termin from cloud:', terminId);
                     await supabase.delete('termine', terminId);
-                    console.log('☁️ TerminManager: Termin deleted from cloud');
-                } catch (error) {
+                    } catch (error) {
                     console.error('❌ TerminManager: Error deleting from cloud:', error);
                     alert('Fehler beim Löschen: ' + error.message);
                     throw error; // Don't hide errors in pure cloud mode
@@ -11820,8 +11630,7 @@
                 // Refresh view
                 this.displayTermine();
                 
-                console.log('☁️ TerminManager: Termin deleted successfully');
-            }
+                }
         };
 
         // Make TerminManager globally available
@@ -11856,14 +11665,10 @@
                 window.history.replaceState({}, document.title, url.toString());
             }
             
-            console.log('✅ DOM loaded');
-            
             // Setup @ autocomplete for journal textarea
             const journalTextarea = document.getElementById('journal-content');
             if (journalTextarea) {
-                InternalLinkParser.setupAutocomplete(journalTextarea);
-                console.log('🔧 @ autocomplete setup completed for journal');
-            }
+                InternalLinkParser.setupAutocomplete(journalTextarea);}
             
             // Initialize mobile todo system
             if (window.MobileTodoManager) {
@@ -11951,10 +11756,6 @@
                         deadline: document.getElementById('todo-deadline').value,
                         time: document.getElementById('todo-time').value
                     };
-                    
-                    console.log('📝 Form data being sent:', todoData);
-                    console.log('📝 Priority element value:', document.getElementById('todo-priority').value);
-                    console.log('📝 Priority element selectedIndex:', document.getElementById('todo-priority').selectedIndex);
                     
                     await TodoManager.addTodo(todoData);
                     TodoManager.hideAddTodoModal();
@@ -12109,7 +11910,6 @@
             }
             
             // === JOURNAL EVENT LISTENERS ===
-            
 
             // Journal Search Input
             const journalSearchInput = document.getElementById('journal-search');
@@ -12259,15 +12059,13 @@
                     }
                     
                     try {
-                        console.log('☁️ ResourceManager: Loading resources from cloud...');
                         this.resources = await cloudStorage.getResources() || [];
                         
                         // Migrate old emoji icons to lucide icons (one-time migration)
                         this.migrateEmojiIcons();
                         
                         this.renderResources();
-                        console.log('☁️ ResourceManager: Load completed');
-                    } catch (error) {
+                        } catch (error) {
                         console.error('❌ ResourceManager: Error loading from cloud:', error);
                         throw error; // Don't hide errors in pure cloud mode
                     }
@@ -12455,16 +12253,11 @@
                     };
                     
                     try {
-                        console.log('☁️ ResourceManager: Saving resource to cloud:', resource.title);
                         await cloudStorage.saveResource(resource);
-                        console.log('☁️ ResourceManager: Resource saved to cloud successfully');
-                        
                         // Reload resources from cloud to get updated data with proper IDs
-                        console.log('🔄 Reloading resources to get updated list...');
                         await this.loadResources();
                         
-                        console.log('☁️ ResourceManager: Resource added:', resource.title);
-                    } catch (error) {
+                        } catch (error) {
                         console.error('❌ ResourceManager: Error saving resource:', error);
                         alert('Fehler beim Speichern der Resource: ' + error.message);
                         throw error; // Don't hide errors in pure cloud mode
@@ -12479,17 +12272,13 @@
                     }
                     
                     try {
-                        console.log('☁️ ResourceManager: Deleting resource from cloud:', resourceId);
                         await cloudStorage.deleteResource(resourceId);
-                        console.log('☁️ ResourceManager: Resource deleted from cloud successfully');
-                        
                         // Pure cloud mode - no localStorage
                         
                         // Reload resources from cloud to get updated list
                         await this.loadResources();
                         
-                        console.log('☁️ ResourceManager: Resource deleted and UI updated');
-                    } catch (error) {
+                        } catch (error) {
                         console.error('❌ ResourceManager: Error deleting resource:', error);
                         alert('Fehler beim Löschen der Resource: ' + error.message);
                         throw error; // Don't hide errors in pure cloud mode
@@ -12570,14 +12359,12 @@
                     
                     this.resources.forEach(resource => {
                         if (emojiToLucideMap[resource.icon]) {
-                            console.log(`🔄 Migrating icon for "${resource.title}": ${resource.icon} → ${emojiToLucideMap[resource.icon]}`);
                             resource.icon = emojiToLucideMap[resource.icon];
                             migrationNeeded = true;
                         }
                     });
                     
                     if (migrationNeeded) {
-                        console.log('☁️ Icon migration completed, saving to cloud');
                         // Pure cloud mode - only save to cloud
                         this.resources.forEach(resource => cloudStorage.saveResource(resource));
                     }
@@ -12589,7 +12376,6 @@
             window.ResourceManager = ResourceManager;
             
             // Initialize ResourceManager now that it's properly defined
-            console.log('🔄 Initializing ResourceManager after definition...');
             ResourceManager.loadResources();
 
             // === TRADING RULES MANAGER ===
@@ -12597,8 +12383,6 @@
                 rules: [],
                 
                 async loadTradingRules() {
-                    console.log('🔄 TradingRulesManager.loadTradingRules() called');
-                    
                     if (!supabase?.isAuthenticated()) {
                         console.error('❌ TradingRulesManager: Not authenticated - pure cloud mode requires authentication');
                         this.rules = [];
@@ -12607,24 +12391,16 @@
                     }
                     
                     try {
-                        console.log('☁️ TradingRulesManager: Loading trading rules from cloud...');
                         const cloudRules = await cloudStorage.getTradingRules();
-                        console.log('☁️ TradingRulesManager: Cloud storage returned:', cloudRules);
-                        console.log('☁️ TradingRulesManager: Type of cloudRules:', typeof cloudRules, Array.isArray(cloudRules));
-                        
                         if (cloudRules && Array.isArray(cloudRules) && cloudRules.length > 0) {
                             this.rules = cloudRules;
-                            console.log('✅ TradingRulesManager: Successfully loaded', this.rules.length, 'rules from database');
-                        } else {
+                            } else {
                             this.rules = [];
-                            console.log('🧪 No trading rules found, creating sample rules for testing...');
                             await this.createSampleRules();
                         }
                         
-                        console.log('📊 TradingRulesManager: Final rules array:', this.rules);
                         this.renderTradingRules();
-                        console.log('☁️ TradingRulesManager: Load completed');
-                    } catch (error) {
+                        } catch (error) {
                         console.error('❌ TradingRulesManager: Error loading from cloud:', error);
                         console.error('Error details:', error.message);
                         console.error('Error stack:', error.stack);
@@ -12728,17 +12504,11 @@
                 
                 async createRule(ruleData) {
                     try {
-                        console.log('📝 Creating trading rule:', ruleData);
-                        
                         // Add creation timestamp
                         ruleData.created_at = new Date().toISOString();
                         
                         // Save to cloud storage - this should update ruleData.id
-                        const savedRule = await cloudStorage.saveTradingRule(ruleData);
-                        console.log('💾 Rule saved, returned data:', savedRule);
-                        console.log('🆔 Rule ID after save:', ruleData.id);
-                        
-                        // Only add to local array if not already there and has valid ID
+                        const savedRule = await cloudStorage.saveTradingRule(ruleData);// Only add to local array if not already there and has valid ID
                         if (ruleData.id) {
                             // Check if already exists in local array
                             const existingIndex = this.rules.findIndex(r => r.id === ruleData.id);
@@ -12751,8 +12521,6 @@
                         
                         // Re-render all categories to be safe
                         this.renderTradingRules();
-                        
-                        console.log('✅ Trading rule created successfully');
                         
                         // Hide modal
                         this.hideAddRuleModal();
@@ -12788,9 +12556,7 @@
                     this.currentRuleId = null;
                 },
                 
-                async deleteRuleFromMenu() {
-                    console.log('🗑️ deleteRuleFromMenu called with currentRuleId:', this.currentRuleId, typeof this.currentRuleId);
-                    if (!this.currentRuleId) return;
+                async deleteRuleFromMenu() {if (!this.currentRuleId) return;
                     
                     // Save the ID before hiding the context menu (which sets currentRuleId to null)
                     const ruleIdToDelete = this.currentRuleId;
@@ -12798,10 +12564,7 @@
                     await this.deleteRule(ruleIdToDelete);
                 },
 
-                async deleteRule(ruleId) {
-                    console.log('🗑️ Deleting trading rule with ID:', ruleId);
-                    
-                    // Check for invalid ID
+                async deleteRule(ruleId) {// Check for invalid ID
                     if (!ruleId || ruleId === null || ruleId === 'null' || ruleId === undefined) {
                         console.error('❌ Cannot delete rule: Invalid ID:', ruleId);
                         return;
@@ -12817,8 +12580,7 @@
                         // Re-render all categories
                         this.renderTradingRules();
                         
-                        console.log('✅ Trading rule deleted successfully');
-                    } catch (error) {
+                        } catch (error) {
                         console.error('❌ Error deleting trading rule:', error);
                     }
                 },
@@ -12844,10 +12606,7 @@
 
                     try {
                         for (const ruleData of sampleRules) {
-                            console.log('📝 Creating sample rule:', ruleData.title);
                             await cloudStorage.saveTradingRule(ruleData);
-                            console.log('✅ Sample rule saved with ID:', ruleData.id);
-                            
                             // Only push to local array if it has a valid ID
                             if (ruleData.id) {
                                 this.rules.push(ruleData);
@@ -12855,16 +12614,13 @@
                                 console.error('❌ Sample rule created but has no ID:', ruleData);
                             }
                         }
-                        console.log('✅ Sample trading rules creation completed. Total rules:', this.rules.length);
-                    } catch (error) {
+                        } catch (error) {
                         console.error('❌ Error creating sample rules:', error);
                         console.error('❌ Error details:', error.message);
                     }
                 },
 
                 async testDatabaseConnection() {
-                    console.log('🧪 Testing database connection for trading_rules...');
-                    
                     // Test 1: Check authentication
                     if (!supabase?.isAuthenticated()) {
                         console.error('❌ Test failed: Not authenticated');
@@ -12872,22 +12628,16 @@
                     }
                     
                     const user = supabase.getCurrentUser();
-                    console.log('✅ User authenticated:', user?.email);
-                    
                     // Test 2: Try to query the table
                     try {
-                        console.log('🔍 Testing table query...');
                         const result = await supabase.query(`trading_rules?user_id=eq.${user.id}&select=*`);
-                        console.log('✅ Table query successful:', result);
-                        console.log('📊 Found', result?.length || 0, 'existing rules');
-                    } catch (error) {
+                        } catch (error) {
                         console.error('❌ Table query failed:', error);
                         console.error('❌ This likely means the trading_rules table does not exist in Supabase');
                     }
                     
                     // Test 3: Try to insert a test record
                     try {
-                        console.log('🧪 Testing insert...');
                         const testRule = {
                             title: 'Test Rule - Delete Me',
                             description: 'This is a test rule',
@@ -12896,8 +12646,6 @@
                         };
                         
                         const insertResult = await supabase.insert('trading_rules', [testRule]);
-                        console.log('✅ Insert test successful:', insertResult);
-                        
                         // Clean up test record
                         if (insertResult && insertResult[0]?.id) {
                             await supabase.delete('trading_rules', insertResult[0].id);
@@ -12909,8 +12657,6 @@
                 },
 
                 async checkDatabaseSchema() {
-                    console.log('🔍 Checking database schema for trading_rules table...');
-                    
                     if (!supabase?.isAuthenticated()) {
                         console.error('❌ Not authenticated');
                         return;
@@ -12921,10 +12667,7 @@
                     try {
                         // Get a sample record to see the structure
                         const result = await supabase.query(`trading_rules?user_id=eq.${user.id}&select=*&limit=1`);
-                        console.log('📊 Sample record from database:', result);
-                        
                         if (result && result[0]) {
-                            console.log('🔍 Record structure:');
                             Object.keys(result[0]).forEach(key => {
                                 console.log(`  - ${key}: ${result[0][key]} (${typeof result[0][key]})`);
                             });
@@ -12933,8 +12676,7 @@
                                 console.error('❌ PROBLEM FOUND: Database records have NO id column!');
                                 console.error('❌ This explains why rules show as having null IDs');
                             } else {
-                                console.log('✅ Database records have id column:', result[0].id);
-                            }
+                                }
                         }
                     } catch (error) {
                         console.error('❌ Error checking schema:', error);
@@ -12944,19 +12686,14 @@
                 async cleanupInvalidRules() {
                     console.log('🧹 Cleaning up rules with invalid IDs...');
                     
-                    const invalidRules = this.rules.filter(rule => !rule.id || rule.id === null || rule.id === 'null');
-                    console.log('🗑️ Found', invalidRules.length, 'invalid rules:', invalidRules);
-                    
-                    if (invalidRules.length > 0) {
+                    const invalidRules = this.rules.filter(rule => !rule.id || rule.id === null || rule.id === 'null');if (invalidRules.length > 0) {
                         // Remove invalid rules from local array
                         this.rules = this.rules.filter(rule => rule.id && rule.id !== null && rule.id !== 'null');
                         
                         // Re-render
                         this.renderTradingRules();
                         
-                        console.log('✅ Removed', invalidRules.length, 'invalid rules');
-                        console.log('📊 Remaining rules:', this.rules.length);
-                    }
+                        }
                 }
             };
             
@@ -13029,8 +12766,7 @@
                     // Hide context menu when clicking elsewhere
                     document.addEventListener('click', this.hideContextMenu.bind(this));
                 },
-                
-                
+
                 showAddVisionModal() {
                     document.getElementById('add-vision-modal').classList.remove('hide');
                     // Reset form
@@ -13076,8 +12812,7 @@
                             display_order: maxOrder + 1,
                             created_at: new Date().toISOString()
                         };
-                        
-                        
+
                         // Pure cloud mode - no localStorage fallback
                         await window.supabase.upsert('visions', vision, ['user_id', 'title', 'created_at']);
                         this.hideAddVisionModal();
@@ -13086,8 +12821,7 @@
                         alert('Fehler beim Erstellen der Vision Card: ' + error.message);
                     }
                 },
-                
-                
+
                 async deleteVision(visionId) {
                     if (!confirm('Vision Card wirklich löschen?')) return;
                     
@@ -13105,8 +12839,7 @@
                         alert('Fehler beim Löschen der Vision Card: ' + error.message);
                     }
                 },
-                
-                
+
                 editVision(visionId) {
                     // Placeholder for edit functionality
                     alert('Vision bearbeiten - Coming Soon! 🎯');
@@ -13410,8 +13143,7 @@
                         
                         const content = this.textarea.value;
                         await window.cloudStorage.saveNotes('quicknotes', content);
-                        console.log('☁️ Quick notes saved to cloud');
-                    } catch (error) {
+                        } catch (error) {
                         console.error('Error saving quick notes:', error);
                     }
                 }
@@ -13426,8 +13158,7 @@
 
             // Make QuickNotes global for debugging
             window.QuickNotes = QuickNotes;
-            
-            
+
             // === JOURNAL DELETE BUTTONS ===
             document.addEventListener('click', (e) => {
                 if (e.target.classList.contains('delete-entry-btn')) {
@@ -13497,11 +13228,9 @@
                             
                             Object.assign(resource, resourceData);
                             try {
-                                console.log('☁️ ResourceManager: Updating resource in cloud:', resource.title);
                                 await cloudStorage.saveResource(resource);
                                 ResourceManager.renderResources();
-                                console.log('☁️ ResourceManager: Resource updated:', resource.title);
-                            } catch (error) {
+                                } catch (error) {
                                 console.error('❌ ResourceManager: Error updating resource:', error);
                                 alert('Fehler beim Aktualisieren der Resource: ' + error.message);
                                 throw error; // Don't hide errors in pure cloud mode
@@ -13638,8 +13367,6 @@
             window.ResourceManager = ResourceManager;
             
             // === SIMPLE LOGOUT (URL-based) ===
-            console.log('✅ Logout is now URL-based, no JavaScript needed');
-            
             // === ROUTINE RESET FUNCTIONALITY ===
             // Use event delegation to catch button clicks even if tab is loaded later
             document.addEventListener('click', async function(e) {
@@ -13656,7 +13383,6 @@
                     );
                     
                     if (confirmed) {
-                        console.log('✅ User confirmed reset');
                         const success = await resetRoutineDatabase();
                         if (success) {
                             alert('✅ Routine-Datenbank wurde komplett zurückgesetzt!\n\nBitte refreshe die Seite auf allen Geräten.');
@@ -13672,8 +13398,6 @@
             
             // Complete Routine Database Reset Function
             async function resetRoutineDatabase() {
-                console.log('🔄 Starting complete routine database reset...');
-                
                 try {
                     // 1. Clear all localStorage routine data (old and new)
                     const keysToRemove = [
@@ -13690,25 +13414,18 @@
                     
                     keysToRemove.forEach(key => {
                         if (localStorage.getItem(key)) {
-                            localStorage.removeItem(key);
-                            console.log(`🗑️ Removed localStorage: ${key}`);
-                        }
+                            localStorage.removeItem(key);}
                     });
                     
                     // 2. Clear Supabase tables if authenticated
                     if (window.supabase && window.supabase.isAuthenticated()) {
                         const user = window.supabase.getCurrentUser();
-                        console.log('🔄 Clearing cloud routine data for user:', user.email);
-                        
                         try {
                             // Delete old system data
                             await window.supabase.delete('routine_completions', `user_id=eq.${user.id}`);
-                            console.log('✅ Cleared old routine_completions table');
-                            
                             // Delete new system data
                             await window.supabase.delete('simple_routines', `user_id=eq.${user.id}`);
-                            console.log('✅ Cleared new simple_routines table');
-                        } catch (error) {
+                            } catch (error) {
                             console.warn('⚠️ Could not clear cloud data:', error);
                         }
                     }
@@ -13725,8 +13442,6 @@
                             label.style.color = 'inherit';
                         }
                     });
-                    console.log('✅ Reset all routine checkboxes');
-                    
                     // 4. Reset routine counters to 0 - DISABLED to prevent CloudCounters conflict
                     // NOTE: This code was interfering with CloudCounters by overriding the correct values
                     /*
@@ -13741,20 +13456,15 @@
                         if (morningNumber) morningNumber.textContent = '0';
                         if (eveningNumber) eveningNumber.textContent = '0';
                         
-                        console.log('✅ Reset routine counters to 0');
-                    }
+                        }
                     */
                     
                     // 5. Reset new simple routine manager if available
                     if (window.simpleRoutineManager) {
                         await window.simpleRoutineManager.reset();
-                        console.log('✅ Reset SimpleRoutineManager');
-                    }
+                        }
                     
                     console.log('🎉 Routine database reset complete!');
-                    console.log('📝 All routine data has been cleared and counters reset');
-                    console.log('🔄 Refresh the page to ensure clean state across devices');
-                    
                     return true;
                     
                 } catch (error) {
@@ -13765,7 +13475,6 @@
             
             // === DEBUG ROUTINE SYSTEM ===
             window.debugRoutineSystem = function() {
-                console.log('🔍 ROUTINE SYSTEM DEBUG');
                 console.log('======================');
                 
                 // Check localStorage
@@ -13777,8 +13486,6 @@
                 
                 // Check SimpleRoutineManager
                 if (window.simpleRoutineManager) {
-                    console.log('✅ SimpleRoutineManager exists');
-                    console.log('📊 Current data:', window.simpleRoutineManager.routineData);
                     console.log('📅 Today:', window.simpleRoutineManager.today);
                 } else {
                     console.log('❌ SimpleRoutineManager NOT FOUND');
@@ -13796,7 +13503,6 @@
                 
                 // Check counters
                 const streakTiles = document.querySelectorAll('.streak-tile');
-                console.log('📊 Counter tiles:');
                 streakTiles.forEach((tile, index) => {
                     const number = tile.querySelector('.streak-number');
                     const label = tile.querySelector('.streak-label');
@@ -13820,7 +13526,6 @@
                 );
                 
                 if (confirmed) {
-                    console.log('✅ User confirmed reset');
                     const success = await resetRoutineDatabase();
                     if (success) {
                         alert('✅ Routine-Datenbank wurde komplett zurückgesetzt!\n\nBitte refreshe die Seite auf allen Geräten.');
@@ -13856,8 +13561,6 @@
             
             // Pure cloud counter system - no force refresh needed
             setTimeout(() => {
-                console.log('☁️ Ensuring cloud counters are initialized...');
-                
                 // Only initialize cloud counters if not already done
                 if (window.CloudCounters && !window.CloudCounters.isInitialized && supabase?.isAuthenticated()) {
                     window.CloudCounters.init();
@@ -13878,17 +13581,12 @@
                     
                     const user = supabase.getCurrentUser();
                     
-                    console.log('🔍 Debug Todo Count for', `${currentMonth}/${currentYear}`);
                     console.log('📅 Date range:', startOfMonth, 'to', endOfMonth);
                     
                     // All todos this month
                     const allTodos = await supabase.query(`todos?user_id=eq.${user.id}&created_at=gte.${startOfMonth}&created_at=lt.${endOfMonth}&select=*`);
-                    console.log('📝 All todos this month:', allTodos?.length || 0, allTodos);
-                    
                     // Completed todos this month  
                     const completedTodos = await supabase.query(`todos?user_id=eq.${user.id}&completed=eq.true&created_at=gte.${startOfMonth}&created_at=lt.${endOfMonth}&select=*`);
-                    console.log('✅ Completed todos this month:', completedTodos?.length || 0, completedTodos);
-                    
                     return { all: allTodos, completed: completedTodos };
                 };
                 
@@ -13902,9 +13600,7 @@
             entries: [],
             filteredEntries: [],
             
-            init() {
-                console.log('🔧 Wiki: Initializing...');
-                this.loadEntries();
+            init() {this.loadEntries();
                 this.setupEventListeners();
                 this.render();
             },
@@ -13975,17 +13671,11 @@
                 });
                 
                 try {
-                    console.log('☁️ Wiki: Saving entry to cloud:', title);
-                    console.log('☁️ Wiki: Entry data:', entry);
-                    
                     // Use array format for insert
                     const result = await supabase.insert('crypto_wiki_entries', [entry]);
-                    console.log('☁️ Wiki: Insert result:', result);
-                    
                     if (result && result.length > 0) {
                         this.entries.push(result[0]);
-                        console.log('☁️ Wiki: Entry saved to cloud with ID:', result[0].id);
-                    } else {
+                        } else {
                         throw new Error('Insert did not return data');
                     }
                 } catch (error) {
@@ -13998,8 +13688,7 @@
                 this.hideAddModal();
                 this.render();
                 
-                console.log('☁️ Wiki: Entry added:', title);
-            },
+                },
             
             async deleteEntry(id) {
                 if (!supabase?.isAuthenticated()) {
@@ -14012,10 +13701,8 @@
                 if (!entry) return;
                 
                 try {
-                    console.log('☁️ Wiki: Deleting entry from cloud:', id);
                     await supabase.delete('crypto_wiki_entries', `id=eq.${id}`);
-                    console.log('☁️ Wiki: Entry deleted from cloud');
-                } catch (error) {
+                    } catch (error) {
                     console.error('❌ Wiki: Error deleting from cloud:', error);
                     alert('Fehler beim Löschen des Wiki-Eintrags: ' + error.message);
                     throw error; // Don't hide errors in pure cloud mode
@@ -14027,16 +13714,14 @@
                 // Pure cloud mode - no localStorage
                 
                 this.render();
-                console.log('☁️ Wiki: Entry deleted:', entry.title);
-            },
+                },
             
             search(query = '') {
                 // Search disabled - no search bar available
                 this.filteredEntries = this.entries;
                 this.render();
             },
-            
-            
+
             render() {
                 const container = document.getElementById('wiki-entries');
                 if (!container) return;
@@ -14111,7 +13796,6 @@
                 }
             },
 
-            
             async saveEntries() {
                 // Pure cloud mode - no localStorage saving
                 if (!supabase?.isAuthenticated()) {
@@ -14129,7 +13813,6 @@
             
             async loadFromCloud() {
                 try {
-                    console.log('☁️ Wiki: Loading from cloud...');
                     const user = supabase.getCurrentUser();
                     if (!user) {
                         throw new Error('No user found');
@@ -14141,7 +13824,6 @@
                         this.entries = data;
                         this.render();
                     } else {
-                        console.log('☁️ Wiki: No entries found in cloud');
                         this.entries = [];
                         this.render();
                     }
@@ -14190,7 +13872,6 @@
             
             async saveToCloud() {
                 try {
-                    console.log('🔄 Wiki: Saving to Supabase...');
                     const user = supabase.getCurrentUser();
                     if (!user) {
                         console.log('❌ Wiki: No user found');
@@ -14198,8 +13879,7 @@
                     }
 
                     // We'll save entries individually when they're created/updated
-                    console.log('✅ Wiki: Cloud sync ready');
-                } catch (error) {
+                    } catch (error) {
                     console.error('❌ Wiki: Error saving to cloud:', error);
                 }
             },
@@ -14222,7 +13902,6 @@
                         throw new Error('Insert did not return data');
                     }
 
-                    console.log('☁️ Wiki: Entry saved to cloud:', entry.title);
                     return true;
                 } catch (error) {
                     console.error('❌ Wiki: Error in saveEntryToCloud:', error);
@@ -14239,7 +13918,6 @@
 
                     const result = await supabase.delete('crypto_wiki_entries', `id=eq.${entryId}`);
                     
-                    console.log('☁️ Wiki: Entry deleted from cloud');
                     return true;
                 } catch (error) {
                     console.error('❌ Wiki: Error in deleteEntryFromCloud:', error);
@@ -14250,8 +13928,7 @@
 
         // Make Wiki globally available
         window.Wiki = Wiki;
-        
-        
+
         // === QUICK ADD CLASS ===
         class QuickAdd {
             constructor() {
@@ -14428,18 +14105,14 @@
                     // Save using CloudStorage directly for more reliability
                     if (window.cloudStorage) {
                         await window.cloudStorage.saveTodo(todo);
-                        console.log('✅ QuickAdd: Todo saved successfully via CloudStorage');
-                    } else if (window.TodoManager) {
+                        } else if (window.TodoManager) {
                         await window.TodoManager.saveTodo(todo);
-                        console.log('✅ QuickAdd: Todo saved successfully via TodoManager');
-                    } else {
+                        } else {
                         throw new Error('No todo saving mechanism available');
                     }
                     
                     // Refresh todo display immediately after saving
                     if (window.TodoManager) {
-                        console.log('🔄 QuickAdd: Refreshing todo display...');
-                        
                         // Load todos from database first
                         await window.TodoManager.loadTodos();
                         
@@ -14453,12 +14126,10 @@
                             window.TodoManager.updateHomeTodos();
                         }
                         
-                        console.log('✅ QuickAdd: Todo display refreshed');
-                    } else {
+                        } else {
                         console.log('⚠️ QuickAdd: TodoManager not available');
                     }
                     
-                    console.log('✅ QuickAdd: All done, hiding modal');
                     this.hide();
                 } catch (error) {
                     console.error('❌ QuickAdd: Error saving todo:', error);
@@ -14581,8 +14252,7 @@
                 this.timeLeft = this.duration;
                 this.updateDisplay();
                 this.updateButtonState();
-                console.log('🔄 Pomodoro reset');
-            }
+                }
 
             complete() {
                 this.stop();
@@ -14601,8 +14271,7 @@
                 // Auto-reset after completion
                 setTimeout(() => this.reset(), 2000);
                 
-                console.log('✅ Pomodoro completed!');
-            }
+                }
 
             updateDisplay() {
                 const minutes = Math.floor(this.timeLeft / 60);
@@ -14752,7 +14421,6 @@
                         });
                         
                         if (shouldFix) {
-                            console.log('🔄 Dynamic content detected, fixing white elements...');
                             setTimeout(() => {
                                 this.fixWhiteElementsInDarkMode();
                             }, 100);
@@ -14781,8 +14449,7 @@
                         }
                     });
                     addTodoBtn.setAttribute('data-listener-added', 'true');
-                    console.log('✅ Todo button listener added');
-                }
+                    }
 
                 // Add Goal Button  
                 const addGoalBtn = document.getElementById('add-goal-btn');
@@ -14793,8 +14460,7 @@
                         }
                     });
                     addGoalBtn.setAttribute('data-listener-added', 'true');
-                    console.log('✅ Goal button listener added');
-                }
+                    }
 
                 // Add Journal Button
                 const addJournalBtn = document.getElementById('add-journal-btn');
@@ -14806,8 +14472,7 @@
                         }
                     });
                     addJournalBtn.setAttribute('data-listener-added', 'true');
-                    console.log('✅ Journal button listener added');
-                }
+                    }
 
                 // Add Resource Button
                 const addResourceBtn = document.getElementById('add-resource-btn');
@@ -14818,8 +14483,7 @@
                         }
                     });
                     addResourceBtn.setAttribute('data-listener-added', 'true');
-                    console.log('✅ Resource button listener added');
-                }
+                    }
 
                 // Add Wiki Button
                 const addWikiBtn = document.getElementById('add-wiki-btn');
@@ -14831,8 +14495,7 @@
                         }
                     });
                     addWikiBtn.setAttribute('data-listener-added', 'true');
-                    console.log('✅ Wiki button listener added');
-                }
+                    }
 
                 // Add Termin Button
                 const addTerminBtn = document.getElementById('add-termin-btn');
@@ -14843,8 +14506,7 @@
                         }
                     });
                     addTerminBtn.setAttribute('data-listener-added', 'true');
-                    console.log('✅ Termin button listener added');
-                }
+                    }
             }
 
             setupEventListeners() {
@@ -14857,9 +14519,6 @@
                         
                         // Handle dynamic buttons with data-action
                         if (action && !category) {
-                            console.log(`🔄 Dynamic button clicked: ${action}`);
-                            console.log(`🔄 Button element:`, btn);
-                            console.log(`🔄 Event target:`, e.target);
                             this.handleAction(action, e);
                             return;
                         }
@@ -15066,11 +14725,8 @@
                         this.toggleDarkMode();
                         break;
                     case 'braindump-toggle':
-                        console.log('🧠 Dynamic Brain Dump button clicked');
                         if (event) {
-                            console.log('🧠 Button element:', event.target);
-                            console.log('🧠 Button visibility:', getComputedStyle(event.target.closest('#dynamic-braindump')).display);
-                        }
+                            }
                         this.toggleBrainDumpContainer();
                         break;
                     case 'settings':
@@ -15107,7 +14763,6 @@
             }
 
             openTradingRules() {
-                console.log('📊 Opening Trading Rules via QuickBar');
                 switchTab('tab-trading-rules');
                 this.closeAllSubMenus();
             }
@@ -15147,8 +14802,7 @@
                 if (window.getComputedStyle) {
                     window.getComputedStyle(document.body).getPropertyValue('background-color');
                 }
-                
-                
+
                 this.closeAllSubMenus();
             }
             
@@ -15161,8 +14815,7 @@
                     console.error('❌ Dark mode button not found');
                     return;
                 }
-                
-                
+
                 // Set new icon based on current theme
                 // If dark theme: show sun (to switch back to light)  
                 // If light theme: show moon (to switch to dark)
@@ -15180,20 +14833,16 @@
                         // Verify the icon changed
                         const updatedIcon = darkModeBtn.querySelector('i');
                         if (updatedIcon) {
-                            console.log('🔍 Icon verification - data-lucide attr:', updatedIcon.getAttribute('data-lucide'));
-                        }
+                            }
                     }
                 }, 100);
             }
             
             toggleBrainDumpContainer() {
-                console.log('🧠 toggleBrainDumpContainer called');
-                
                 // Navigate to todos tab
                 const todosTabButton = document.querySelector('[data-tab="tab-todos"]');
                 
                 if (todosTabButton) {
-                    console.log('🧠 Clicking todos tab button...');
                     todosTabButton.click();
                     
                     // Force scroll to top after tab switch and show container
@@ -15207,15 +14856,12 @@
                         if (container) {
                             container.style.display = 'block';
                             container.style.visibility = 'visible';
-                            console.log('🧠 Brain Dump container shown at top');
-                        }
+                            }
                     }, 150);
                 }
             }
             
             updateDynamicButtons() {
-                console.log('🔄 Updating dynamic main buttons');
-                
                 // Handle Dark Mode dynamic button
                 const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
                 const darkModeButton = document.getElementById('dynamic-darkmode');
@@ -15259,28 +14905,19 @@
                 const brainDumpButton = document.getElementById('dynamic-braindump');
                 const brainDumpBadge = document.getElementById('braindump-quickbar-badge');
                 
-                console.log('🔍 updateDynamicButtons: brainDumpButton found:', !!brainDumpButton);
-                console.log('🔍 updateDynamicButtons: window.brainDumpManager found:', !!window.brainDumpManager);
-                console.log('🔍 updateDynamicButtons: brainDumpManager found:', !!(typeof brainDumpManager !== 'undefined' && brainDumpManager));
-                
                 // Try both window.brainDumpManager and global brainDumpManager
                 const manager = window.brainDumpManager || (typeof brainDumpManager !== 'undefined' ? brainDumpManager : null);
                 
                 if (brainDumpButton && manager) {
                     const count = manager.brainDumps.length;
-                    console.log('🔍 updateDynamicButtons: brain dump count:', count);
-                    
                     if (count > 0) {
                         brainDumpButton.style.display = 'block';
-                        console.log('🔍 updateDynamicButtons: Toggle shown');
                         if (brainDumpBadge) {
                             brainDumpBadge.textContent = count;
-                            console.log('🔍 updateDynamicButtons: Badge updated to:', count);
-                        }
+                            }
                     } else {
                         brainDumpButton.style.display = 'none';
-                        console.log('🔍 updateDynamicButtons: Toggle hidden');
-                    }
+                        }
                 } else {
                     console.warn('🔍 updateDynamicButtons: Missing button or manager');
                 }
@@ -15293,10 +14930,7 @@
                 }, 50);
             }
 
-            fixWhiteElementsInDarkMode() {
-                console.log('🔧 Starting aggressive white element fix...');
-                
-                // Force fix specific known problematic elements
+            fixWhiteElementsInDarkMode() {// Force fix specific known problematic elements
                 const specificSelectors = [
                     '.termin-days-until',
                     '.ziel-days-until', 
@@ -15356,18 +14990,11 @@
                             el.style.setProperty('background-color', '#1a1a2e', 'important');
                             el.style.setProperty('color', '#e2e8f0', 'important');
                         }
-                        fixedCount++;
-                        console.log('🔧 Fixed white element:', el.tagName, el.className, bgColor);
-                    }
-                });
-                
-                console.log(`✅ Fixed ${fixedCount} white elements for dark mode`);
-                
-                // Run once more after a delay to catch dynamically loaded content
+                        fixedCount++;}
+                });// Run once more after a delay to catch dynamically loaded content
                 if (!this.hasRunSecondFix) {
                     this.hasRunSecondFix = true;
                     setTimeout(() => {
-                        console.log('🔄 Running second pass for dynamic content...');
                         const allElements2 = document.querySelectorAll('*');
                         allElements2.forEach(el => {
                             const styles = window.getComputedStyle(el);
@@ -15403,8 +15030,7 @@
                     });
                     
                     chart.update();
-                    console.log('📊 Updated charts for dark mode');
-                }
+                    }
             }
 
             resetLightModeStyles() {
@@ -15425,8 +15051,7 @@
                 // Reset hasRunSecondFix flag
                 this.hasRunSecondFix = false;
                 
-                console.log('🔄 Reset light mode styles');
-            }
+                }
 
             updateChartsForLightMode() {
                 // Update Chart.js charts for light mode
@@ -15450,8 +15075,7 @@
                     });
                     
                     chart.update();
-                    console.log('📊 Updated charts for light mode');
-                }
+                    }
             }
 
             openSettings() {
@@ -15473,8 +15097,7 @@
                 // Update page title
                 document.title = 'Settings - Dash v4.1';
                 
-                console.log('✅ Switched to Settings page');
-            }
+                }
 
             async handleLogout() {
                 // Direct logout without confirmation popup
@@ -15574,9 +15197,6 @@
                 if (lockBtn) {
                     lockBtn.addEventListener('click', () => this.handleLockButton());
                 }
-
-
-
 
                 // Close trade modal buttons
                 const closeModal = document.getElementById('close-trade-modal');
@@ -15696,7 +15316,6 @@
                     this.solPrice = 200; // Fallback
                 }
             }
-
 
             async addTrade() {
                 const token = document.getElementById('modal-trade-token').value.trim().toUpperCase();
@@ -15940,14 +15559,6 @@
             }
 
             getBadgeIconForClosedTrade(trade) {
-                console.log(`🔍 Badge check for ${trade.token} (${trade.sol_amount} SOL):`, {
-                    cost_basis: trade._cost_basis || trade.cost_basis,
-                    final_pnl: trade.final_pnl,
-                    _initials_recovered: trade._initials_recovered,
-                    _is_free_ride_trade: trade._is_free_ride_trade,
-                    exit_date: trade.exit_date
-                });
-                
                 // Use the persisted flags from the database
                 if (trade._initials_recovered === true) {
                     console.log(`→ Showing Initials Raus icon`);
@@ -16555,7 +16166,6 @@
                 }
             }
 
-
             async refreshPrices() {
                 await this.updateSolPrice();
                 // Would update all current market caps here
@@ -16658,8 +16268,7 @@
                     );
 
                     this.balanceHistory = data || [];
-                    console.log(`📊 Loaded ${this.balanceHistory.length} balance history records from cloud`);
-                } catch (error) {
+                    } catch (error) {
                     console.error('Error loading balance history:', error);
                     this.balanceHistory = [];
                 }
@@ -16714,7 +16323,6 @@
                 const msUntilTarget = targetTime.getTime() - now.getTime();
                 
                 if (msUntilTarget > 0) {
-                    console.log(`📊 Next SOL balance recording scheduled for ${targetTime.toLocaleTimeString('de-DE')}`);
                     setTimeout(() => {
                         this.recordDailyBalance();
                     }, msUntilTarget);
@@ -16724,7 +16332,6 @@
             async recordDailyBalance() {
                 try {
                     if (!window.supabase?.isAuthenticated()) {
-                        console.log('📊 Not authenticated, skipping balance recording');
                         return;
                     }
 
@@ -16749,8 +16356,6 @@
                     };
 
                     await window.supabase.insert('analytics_balance_history', [balanceRecord]);
-                    console.log(`📊 Saved balance record to cloud: ${balance} SOL for ${today}`);
-                    
                     // Add to local array
                     this.balanceHistory.push({
                         date: today,
@@ -16761,8 +16366,6 @@
                     if (this.balanceHistory.length > 365) {
                         this.balanceHistory = this.balanceHistory.slice(-365);
                     }
-                    
-                    console.log(`📊 Recorded daily SOL balance: ${balance} SOL for ${today}`);
                     
                     // Update chart if it exists
                     if (this.chart) {
@@ -16977,11 +16580,8 @@
                         `todos?user_id=eq.${user.id}&completed=eq.true&created_at=gte.${startDateStr}&created_at=lt.${endDateStr}&select=created_at,text`
                     );
                     
-                    console.log('📊 DEBUG: Completed todos for heatmap:', completedTodos?.length || 0);
-                    console.log('📊 DEBUG: Date range:', startDateStr, 'to', endDateStr);
                     if (completedTodos && completedTodos.length > 0) {
-                        console.log('📊 DEBUG: Sample todo dates:', completedTodos.slice(0, 3).map(t => t.created_at));
-                    }
+                        }
                     
                     // Group todos by date (convert UTC to local date)
                     const todosByDate = {};
@@ -17013,13 +16613,11 @@
                         });
                     }
                     
-                    console.log(`📊 Generated heatmap data for ${this.heatmapData.length} days with ${completedTodos?.length || 0} completed todos`);
-                } catch (error) {
+                    } catch (error) {
                     console.error('Error generating heatmap data:', error);
                     this.heatmapData = [];
                 }
             }
-
 
             getIntensityLevel(count) {
                 if (count === 0) return 0;
@@ -17174,8 +16772,7 @@
                         }
                     }
                     
-                    console.log(`📊 Generated performance heatmap data for ${this.performanceHeatmapData.length} days`);
-                } catch (error) {
+                    } catch (error) {
                     console.error('❌ Error generating performance heatmap data:', error);
                     this.performanceHeatmapData = [];
                 }
@@ -17472,12 +17069,8 @@
                     { name: 'SimpleRoutineManager', obj: window.simpleRoutineManager }
                 ];
                 
-                console.log('🔍 Validating all managers for Cloud-First compliance...');
-                
                 managers.forEach(({ name, obj }) => {
-                    if (obj) {
-                        console.log(`✅ ${name}: Available and cloud-compliant`);
-                    } else {
+                    if (obj) {} else {
                         console.warn(`⚠️ ${name}: Not found`);
                     }
                 });
@@ -17515,11 +17108,9 @@
                     
                     if (result && result.length > 0) {
                         const coins = JSON.parse(result[0].coins);
-                        console.log('☁️ Loaded coins from cloud:', coins);
                         return coins;
                     }
                     
-                    console.log('☁️ No saved coins found in cloud');
                     return null;
                 } catch (e) {
                     console.error('❌ Error loading saved coins from cloud:', e);
@@ -17534,8 +17125,6 @@
                         return;
                     }
 
-                    console.log('☁️ Saving coins to cloud:', this.overlaySymbols);
-                    
                     const user = window.supabase.getCurrentUser();
                     const dataToSave = {
                         user_id: user.id,
@@ -17549,15 +17138,12 @@
                     if (existing && existing.length > 0) {
                         // Update existing
                         await window.supabase.update('crypto_watchlist', dataToSave, existing[0].id);
-                        console.log('☁️ Updated existing watchlist in cloud');
-                    } else {
+                        } else {
                         // Create new
                         await window.supabase.insert('crypto_watchlist', [dataToSave]);
-                        console.log('☁️ Created new watchlist in cloud');
-                    }
+                        }
                     
-                    console.log('☁️ Successfully saved coins to cloud');
-                } catch (e) {
+                    } catch (e) {
                     console.error('❌ Could not save crypto coins to cloud:', e);
                 }
             }
@@ -17587,8 +17173,7 @@
                     // Update watchlist if we have saved coins
                     if (savedCoins && savedCoins.length > 0) {
                         this.overlaySymbols = savedCoins;
-                        console.log('☁️ Loaded watchlist from cloud:', this.overlaySymbols);
-                    } else {
+                        } else {
                         console.log('📋 Using default coins:', this.overlaySymbols);
                     }
                     
@@ -17633,8 +17218,6 @@
             }
 
             async loadAllCoinsFromHyperliquid() {
-                console.log('🔄 Loading all coins from Hyperliquid...');
-                
                 try {
                     // Run meta and prices requests in parallel
                     const [metaResponse, pricesResponse] = await Promise.all([
@@ -17663,11 +17246,7 @@
                         .map(coin => coin.name)
                         .sort();
 
-                    this.currentPrices = pricesData;
-
-                    console.log(`✅ Loaded ${this.allSymbols.length} coins and ${Object.keys(pricesData).length} prices from Hyperliquid`);
-                    
-                } catch (error) {
+                    this.currentPrices = pricesData;} catch (error) {
                     console.error('❌ Error loading coins:', error);
                     // Fallback to basic coins if API fails
                     this.allSymbols = ['BTC', 'ETH', 'SOL', 'ENA', 'PENGU', 'kBONK', 'FARTCOIN'];
@@ -17694,8 +17273,7 @@
                     const data = await response.json();
                     this.currentPrices = data;
                     
-                    console.log(`🔄 Updated current prices for ${Object.keys(data).length} coins`);
-                } catch (error) {
+                    } catch (error) {
                     console.error('❌ Error loading current prices:', error);
                 }
             }
@@ -17772,9 +17350,7 @@
                 // Remove ANY crypto-overlay-item that doesn't have the dynamic-coin-item class
                 const allItems = document.querySelectorAll('.crypto-overlay-item:not(.dynamic-coin-item)');
                 console.log(`🧹 Clearing ${allItems.length} static coin items...`);
-                allItems.forEach((item, index) => {
-                    console.log(`🗑️ Removing static item ${index + 1}:`, item);
-                    item.remove();
+                allItems.forEach((item, index) => {item.remove();
                 });
             }
 
@@ -17787,17 +17363,10 @@
                     });
                 }
 
-
                 // Settings toggle
                 const settingsBtn = document.querySelector('.crypto-settings-btn');
                 const settingsPanel = document.querySelector('.crypto-settings-panel');
-                const settingsClose = document.querySelector('.crypto-settings-close');
-                
-                console.log('🔧 Settings button found:', settingsBtn);
-                console.log('🔧 Settings panel found:', settingsPanel);
-                console.log('🔧 Settings close found:', settingsClose);
-                
-                if (settingsBtn && settingsPanel) {
+                const settingsClose = document.querySelector('.crypto-settings-close');if (settingsBtn && settingsPanel) {
                     settingsBtn.addEventListener('click', () => {
                         console.log('⚙️ Settings button clicked!');
                         const isVisible = settingsPanel.style.display !== 'none';
@@ -17833,16 +17402,11 @@
 
             }
 
-            setupSettingsEventListeners() {
-                console.log('🔧 Setting up crypto settings event listeners...');
-                
-                // Settings search functionality
+            setupSettingsEventListeners() {// Settings search functionality
                 const settingsSearchInput = document.getElementById('settings-crypto-search');
                 if (settingsSearchInput) {
-                    console.log('✅ Found settings crypto search input');
                     settingsSearchInput.addEventListener('input', (e) => {
                         const query = e.target.value;
-                        console.log('🔍 Settings search query:', query);
                         this.renderCoinsInSettings(query);
                     });
                     
@@ -17871,7 +17435,6 @@
                     return;
                 }
 
-                console.log('🔄 Rendering coins:', this.overlaySymbols);
                 container.innerHTML = '';
                 
                 // Render all coins immediately without waiting for data
@@ -17891,11 +17454,7 @@
                     `;
                     
                     container.appendChild(item);
-                }
-                
-                console.log(`✅ Rendered ${this.overlaySymbols.length} coin items instantly`);
-                
-                // Check if we need scrolling or centering
+                }// Check if we need scrolling or centering
                 this.updateTickerDisplay(container);
                 
                 // Load charts and price changes in background (non-blocking)
@@ -17931,8 +17490,7 @@
                     } else {
                         // Many coins - use scrolling animation
                         tickerContent.classList.remove('center-static');
-                        console.log('🔄 Using scrolling animation');
-                    }
+                        }
                 }, 100);
             }
 
@@ -17952,8 +17510,7 @@
                 
                 // Wait for all to complete (but don't block the main render)
                 await Promise.all(promises);
-                console.log('📊 All charts and price changes loaded');
-            }
+                }
 
             async loadAndRenderMiniChart(symbol) {
                 const canvas = document.querySelector(`canvas[data-symbol="${symbol}"]`);
@@ -18016,8 +17573,6 @@
                 changeElement.textContent = `${sign}${changePercent.toFixed(2)}%`;
                 changeElement.className = `crypto-overlay-change ${isPositive ? 'positive' : 'negative'}`;
             }
-
-
 
             async fetchPrices() {
                 try {
@@ -18165,9 +17720,7 @@
                     console.log(`➖ Removed ${symbol} from overlay`);
                 } else {
                     // Add coin
-                    this.overlaySymbols.push(symbol);
-                    console.log(`➕ Added ${symbol} to overlay`);
-                }
+                    this.overlaySymbols.push(symbol);}
 
                 await this.saveCoins();
                 this.renderCoinItems();
@@ -18183,7 +17736,6 @@
                     return;
                 }
 
-                console.log('🔄 Rendering coins in settings tab with query:', query);
                 container.innerHTML = '';
 
                 const filteredCoins = this.allSymbols
@@ -18215,14 +17767,9 @@
                     });
 
                     container.appendChild(coinItem);
-                });
-
-                console.log(`✅ Rendered ${filteredCoins.length} coins in settings tab`);
-            }
+                });}
 
             async updatePricesAndCharts() {
-                console.log('🔄 Updating crypto prices and charts...');
-                
                 try {
                     await this.loadCurrentPrices();
                     
@@ -18240,8 +17787,7 @@
                         }
                     }
 
-                    console.log('✅ Crypto prices and charts updated successfully');
-                } catch (error) {
+                    } catch (error) {
                     console.error('❌ Error updating prices:', error);
                 }
             }
@@ -18346,8 +17892,6 @@
 
         // DEBUG: Add button to test loading states
         window.testLoadingStates = function() {
-            console.log('🧪 Testing loading states...');
-            
             // Test watchlist skeleton
             if (window.SmartLoading) {
                 window.SmartLoading.showSkeleton('crypto-overlay-items', 'watchlist', 3);
@@ -18403,7 +17947,6 @@
             
             const cancelEditGoalBtn = document.getElementById('cancel-edit-goal-value-btn');
             if (cancelEditGoalBtn) {
-                console.log('✅ GLOBAL: Found cancel-edit-goal-value-btn, adding event listener');
                 // Remove existing listeners first
                 const newCancelBtn = cancelEditGoalBtn.cloneNode(true);
                 cancelEditGoalBtn.parentNode.replaceChild(newCancelBtn, cancelEditGoalBtn);
@@ -18422,7 +17965,6 @@
 
             const editGoalForm = document.getElementById('edit-goal-value-form');
             if (editGoalForm) {
-                console.log('✅ GLOBAL: Found edit-goal-value-form, adding event listener');
                 // Remove existing listeners first
                 const newForm = editGoalForm.cloneNode(true);
                 editGoalForm.parentNode.replaceChild(newForm, editGoalForm);
@@ -18458,7 +18000,6 @@
         // Event listeners are initialized when DOM is ready and when modal opens
         // No need for redundant retries
 
-        
         // === CRYPTO TICKER CONTROLLER ===
         class CryptoTicker {
             static openSettings() {
@@ -18494,7 +18035,6 @@
         // === MOBILE: Fully functional mobile todo system ===
 
     </script>
-
 
     <!-- Login Effects -->
     <div class="login-effects">
@@ -18628,7 +18168,6 @@
                 // Fast polling when user returns to tab
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden) {
-                        console.log('🔄 Desktop: Tab became visible, fast syncing...');
                         this.loadBrainDumps();
                         
                         // Extra fast sync for 5 seconds
@@ -18645,7 +18184,6 @@
                 
                 // Window focus sync
                 window.addEventListener('focus', () => {
-                    console.log('🔄 Desktop: Window focused, syncing...');
                     this.loadBrainDumps();
                 });
             }
@@ -18684,17 +18222,12 @@
             }
             
             setupInstantSync() {
-                console.log('🔄 Desktop: Setting up instant sync listeners...');
-                
                 // Method 1: localStorage event listener (cross-tab communication)
                 window.addEventListener('storage', (event) => {
-                    console.log('🔍 Desktop: Storage event received:', event.key, event.newValue);
                     if (event.key === 'brain_dump_sync' && event.newValue) {
                         try {
                             const notification = JSON.parse(event.newValue);
-                            console.log('🔍 Desktop: Parsed notification:', notification);
                             if (notification.type === 'NEW_BRAIN_DUMP' && notification.source === 'mobile') {
-                                console.log('🔄 Desktop: Received localStorage notification from mobile');
                                 this.loadBrainDumps();
                             }
                         } catch (error) {
@@ -18708,7 +18241,6 @@
                     const channel = new BroadcastChannel('brain_dump_updates');
                     channel.onmessage = (event) => {
                         if (event.data.type === 'NEW_BRAIN_DUMP' && event.data.source === 'mobile') {
-                            console.log('🔄 Desktop: Received BroadcastChannel notification from mobile');
                             this.loadBrainDumps();
                         }
                     };
@@ -18717,13 +18249,11 @@
                     this.syncChannel = channel;
                 }
                 
-                console.log('✅ Desktop: Instant sync listeners active');
-            }
+                }
             
             async loadBrainDumps() {
                 try {
                     if (!window.supabase || !window.supabase.isAuthenticated()) {
-                        console.log('🧠 Brain Dump Manager: Not authenticated, showing empty state');
                         this.brainDumps = [];
                         this.updateUI();
                         return;
@@ -18742,26 +18272,18 @@
                     
                     // DEBUG: Show all todos to see what categories exist
                     if (todos && todos.length > 0) {
-                        console.log('🔍 All todos in database:', todos.map(t => ({id: t.id, category: t.category, text: t.text?.substring(0, 20)})));
-                    }
+                        }
                     
                     this.updateUI();
                     
                     // INSTANT UPDATE: Always update quickbar toggle after loading brain dumps
-                    console.log('🔄 Checking QuickBarManager availability...');
-                    console.log('🔄 window.QuickBar exists:', !!window.QuickBar);
-                    console.log('🔄 Brain dumps count for toggle:', this.brainDumps.length);
-                    
                     if (window.QuickBar) {
-                        console.log('🔄 Updating quickbar toggle after brain dump load');
                         window.QuickBar.updateDynamicButtons();
                         
                         // Force debug the toggle state
                         setTimeout(() => {
                             const toggleButton = document.getElementById('dynamic-braindump');
-                            console.log('🔍 Toggle button found:', !!toggleButton);
-                            console.log('🔍 Toggle display:', toggleButton ? getComputedStyle(toggleButton).display : 'N/A');
-                        }, 100);
+                            }, 100);
                     }
                     
                 } catch (error) {
@@ -19018,8 +18540,7 @@
                             window.QuickBar.updateDynamicButtons();
                         }, 100);
                     }
-                    
-                    
+
                 } catch (error) {
                     console.error('❌ Error distributing brain dumps:', error);
                     alert('Fehler beim Verteilen der Brain Dumps.');
@@ -19054,8 +18575,7 @@
                     this.selectedDumps.clear();
                     
                     this.updateUI();
-                    
-                    
+
                 } catch (error) {
                     console.error('❌ Error clearing brain dumps:', error);
                     alert('Fehler beim Löschen der Brain Dumps.');
@@ -19156,28 +18676,21 @@
             }
             
             async forceRefreshTodos() {
-                console.log('🔄 Force refreshing all todos after distribution...');
-                
                 try {
                     // Use the proper TodoManager system instead of custom rendering
                     if (window.supabase && window.supabase.isAuthenticated() && window.TodoManager) {
-                        console.log('🔄 Using TodoManager to reload todos...');
-                        
                         // Reload todos from database using TodoManager
                         await window.TodoManager.loadTodos();
                         
                         // Refresh all category containers with proper filtering and checkboxes
                         const categories = ['privat', 'uni', 'arbeit', 'projekte'];
                         categories.forEach(category => {
-                            console.log(`🔄 Refreshing category: ${category}`);
                             window.TodoManager.displayTodosForCategory(category);
                         });
                         
-                        console.log('✅ Todo containers refreshed successfully with proper TodoManager');
                         this.todoRefreshSuccess = true;
                         
                         // CRITICAL FIX: Also refresh the brain dump container to remove distributed items
-                        console.log('🧠 Refreshing brain dump container...');
                         await this.loadBrainDumps();
                         
                     } else {
@@ -19190,7 +18703,6 @@
                     
                     // Fallback: Force page refresh
                     setTimeout(() => {
-                        console.log('🔄 Fallback: Full page refresh');
                         window.location.reload();
                     }, 1000);
                 }
@@ -19251,14 +18763,12 @@
         
         // Initialize immediately
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🧠 Initializing Brain Dump Manager...');
             brainDumpManager = new BrainDumpManager();
             window.brainDumpManager = brainDumpManager;
             
             // Also try to initialize after auth is ready
             setTimeout(() => {
                 if (window.supabase && window.supabase.isAuthenticated() && brainDumpManager) {
-                    console.log('🧠 Brain Dump Manager: Auth ready, loading data...');
                     brainDumpManager.loadBrainDumps();
                 }
             }, 2000);
@@ -19267,7 +18777,6 @@
         // Global function to force brain dump refresh (for mobile sync)
         window.forceBrainDumpRefresh = function() {
             if (window.brainDumpManager) {
-                console.log('🔄 Force refreshing brain dumps...');
                 window.brainDumpManager.loadBrainDumps();
             }
         };
@@ -19276,7 +18785,6 @@
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && window.brainDumpManager) {
                 setTimeout(() => {
-                    console.log('🔄 Window focus: Force refreshing brain dumps...');
                     window.brainDumpManager.loadBrainDumps();
                 }, 500);
             }
@@ -19286,7 +18794,6 @@
         window.addEventListener('focus', () => {
             if (window.brainDumpManager) {
                 setTimeout(() => {
-                    console.log('🔄 Window focus: Force refreshing brain dumps...');  
                     window.brainDumpManager.loadBrainDumps();
                 }, 500);
             }
@@ -19318,8 +18825,6 @@
             
             async initialize() {
                 if (this.isInitialized) return;
-                
-                console.log('🏷️ Initializing Journal Tag Analytics...');
                 
                 // Process existing journal entries first
                 if (window.cloudStorage) {
@@ -19373,8 +18878,7 @@
                     });
                     
                     container.innerHTML = buttonsHTML;
-                    console.log('📊 Updated category buttons:', categories);
-                } catch (error) {
+                    } catch (error) {
                     console.error('Error updating category buttons:', error);
                 }
             }
@@ -19387,22 +18891,14 @@
                 
                 try {
                     const dateRange = this.getPeriodDays();
-                    console.log(`📊 Loading tag analytics for ${dateRange} days...`);
-                    
                     const analytics = await window.cloudStorage.getJournalTagAnalytics(dateRange, this.currentCategory);
-                    console.log('📊 Tag analytics loaded:', analytics);
-                    console.log('📊 DEBUG: TagFrequency keys:', Object.keys(analytics.tagFrequency));
-                    console.log('📊 DEBUG: Total entries in database check...');
-                    
                     // Debug: Check if we have any tags in database
                     if (window.supabase && window.supabase.isAuthenticated()) {
                         try {
                             const user = window.supabase.getCurrentUser();
                             const allTags = await window.supabase.query(`journal_tags?user_id=eq.${user.id}&select=*`);
-                            console.log('📊 DEBUG: All tags in database:', allTags);
-                        } catch (error) {
-                            console.log('📊 DEBUG: Error checking tags:', error);
-                        }
+                            } catch (error) {
+                            }
                     }
                     
                     this.displayTagFrequency(analytics.tagFrequency);
@@ -19542,23 +19038,15 @@
         });
         
         // Debug function to clear all journal tags
-        window.clearAllJournalTags = async function() {
-            if (!window.supabase || !window.supabase.isAuthenticated()) {
-                console.log('Not authenticated');
-                return;
+        return;
             }
             
             try {
                 const user = window.supabase.getCurrentUser();
-                const allTags = await window.supabase.query(`journal_tags?user_id=eq.${user.id}&select=id`);
-                console.log(`🗑️ Found ${allTags?.length || 0} tags to delete`);
-                
-                if (allTags && allTags.length > 0) {
+                const allTags = await window.supabase.query(`journal_tags?user_id=eq.${user.id}&select=id`);if (allTags && allTags.length > 0) {
                     for (const tag of allTags) {
                         await window.supabase.delete('journal_tags', tag.id);
                     }
-                    console.log('✅ All journal tags cleared');
-                    
                     // Refresh analytics
                     if (window.JournalTagAnalytics) {
                         window.JournalTagAnalytics.isInitialized = false;

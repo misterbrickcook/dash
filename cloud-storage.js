@@ -384,17 +384,13 @@ class CloudStorage {
     
     async extractTagsFromText(text) {
         // Extract hashtags from text
-        console.log('🔍 Extracting tags from text:', text.substring(0, 100) + '...');
         const tagMatches = text.match(/#[\w-]+/g) || [];
-        console.log('🔍 Found hashtag matches:', tagMatches);
         const tags = tagMatches.map(tag => tag.substring(1).toLowerCase()); // Remove # and lowercase
-        console.log('🔍 Extracted tags:', tags);
         return tags;
     }
     
     async saveJournalTags(journalEntryId, journalDate, content, category = 'general') {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.log('Journal tags: Not authenticated, skipping tag extraction');
             return;
         }
         
@@ -422,8 +418,9 @@ class CloudStorage {
             
             if (tagRecords.length > 0) {
                 await supabase.insert('journal_tags', tagRecords);
-                console.log(`💾 Saved ${tagRecords.length} journal tags:`, tags);
             }
+            
+        
         } catch (error) {
             console.error('Error saving journal tags:', error);
         }
@@ -431,7 +428,6 @@ class CloudStorage {
     
     async processExistingJournalEntries() {
         if (!supabase || !this.isSupabaseAuthenticated()) {
-            console.log('Journal tags: Not authenticated, skipping existing entries');
             return;
         }
         
@@ -439,18 +435,11 @@ class CloudStorage {
             const user = supabase.getCurrentUser();
             if (!user) return;
             
-            console.log('🔄 Processing existing journal entries for tags...');
-            
             // Get all journal entries
             const entries = await supabase.query('journal_entries?select=id,title,content,entry_date');
             if (!entries || entries.length === 0) {
-                console.log('📝 No existing journal entries found');
                 return;
-            }
-            
-            console.log(`📝 Found ${entries.length} journal entries to process`);
-            
-            // Process each entry
+            }// Process each entry
             for (const entry of entries) {
                 const fullContent = `${entry.title || ''} ${entry.content || ''}`;
                 await this.saveJournalTags(
@@ -459,10 +448,7 @@ class CloudStorage {
                     fullContent,
                     'trading'
                 );
-            }
-            
-            console.log(`✅ Processed ${entries.length} existing journal entries for tags`);
-        } catch (error) {
+            }} catch (error) {
             console.error('Error processing existing journal entries:', error);
         }
     }
@@ -557,7 +543,6 @@ class CloudStorage {
             
             // Extract unique categories
             const uniqueCategories = [...new Set(categories.map(tag => tag.category))].filter(cat => cat);
-            console.log('📊 Available categories:', uniqueCategories);
             return uniqueCategories;
         } catch (error) {
             console.error('Error getting available categories:', error);
@@ -708,10 +693,7 @@ class CloudStorage {
             return false;
         }
         
-        try {
-            console.log('🔧 CloudStorage: Ensuring trading_rules table exists...');
-            
-            // Try to create the table using direct SQL
+        try {// Try to create the table using direct SQL
             const createTableSQL = `
                 CREATE TABLE IF NOT EXISTS public.trading_rules (
                     id BIGSERIAL PRIMARY KEY,
@@ -741,7 +723,6 @@ class CloudStorage {
             // We can't create tables via REST API, just test if table exists
             const user = supabase.getCurrentUser();
             const testResult = await supabase.query(`trading_rules?user_id=eq.${user.id}&select=id&limit=1`);
-            console.log('✅ CloudStorage: Table exists and is accessible');
             return true;
         } catch (error) {
             console.error('❌ CloudStorage: Error ensuring table exists:', error);
@@ -774,9 +755,7 @@ class CloudStorage {
         } catch (error) {
             console.error('CloudStorage: Error fetching trading rules:', error);
             // If table doesn't exist, try to create it first
-            if (error.message?.includes('relation "trading_rules" does not exist')) {
-                console.log('🔧 CloudStorage: Table does not exist, attempting to create...');
-                try {
+            if (error.message?.includes('relation "trading_rules" does not exist')) {try {
                     await this.ensureTradingRulesTable();
                     // Try the query again
                     const data = await supabase.query(`trading_rules?user_id=eq.${user.id}&select=*`);
@@ -805,8 +784,6 @@ class CloudStorage {
                 throw new Error('No current user found');
             }
             
-            console.log('💾 CloudStorage: Saving trading rule:', rule);
-            
             // Check if this is a real database ID (should be a number from BIGSERIAL)
             const isRealDbId = rule.id && 
                               typeof rule.id === 'number' && 
@@ -814,30 +791,19 @@ class CloudStorage {
                               rule.id > 0;
             
             if (isRealDbId) {
-                console.log('🔄 CloudStorage: Updating existing rule with ID:', rule.id);
                 await supabase.update('trading_rules', rule, rule.id);
             } else {
                 // Remove any ID that's not a proper database BIGSERIAL ID
-                if (rule.id) {
-                    console.log('🗑️ CloudStorage: Removing invalid ID:', rule.id);
-                    delete rule.id;
-                }
-                
-                console.log('➕ CloudStorage: Inserting new rule:', rule);
-                const result = await supabase.insert('trading_rules', [rule]);
-                console.log('✅ CloudStorage: Insert result:', result);
-                
+                if (rule.id) {delete rule.id;
+                }const result = await supabase.insert('trading_rules', [rule]);
                 if (result && result.length > 0 && result[0]) {
                     const newId = result[0].id;
-                    rule.id = newId; // Update the passed rule object
-                    console.log('🆔 CloudStorage: New rule ID assigned:', newId);
-                } else {
+                    rule.id = newId; // Update the passed rule object} else {
                     console.error('❌ CloudStorage: Unexpected insert response format:', result);
                     throw new Error('Failed to insert trading rule - unexpected response format');
                 }
             }
-            console.log('✅ CloudStorage: Trading rule saved successfully');
-        } catch (error) {
+            } catch (error) {
             console.error('CloudStorage: Error saving trading rule:', error);
             throw error;
         }
@@ -925,27 +891,7 @@ window.cloudStorage = new CloudStorage();
 cloudStorage.startPeriodicSync();
 
 // Add global debug functions for resources
-window.debugResources = function() {
-    console.log('Auth:', cloudStorage.isSupabaseAuthenticated() ? 'OK' : 'NO');
-    console.log('Resources:', window.ResourceManager?.resources?.length || 0);
-};
-
-window.forceSyncResources = async function() {
-    // Direct cloud mode - no sync needed
-};
-
-window.testResourceSave = async function() {
-    const testResource = {
-        // No manual ID - let database auto-generate
-        title: 'Test Resource ' + Date.now(),
-        category: 'Privat',
-        url: 'https://example.com',
-        description: 'Debug test resource - no manual ID',
-        icon: '🧪',
-        created_at: new Date().toISOString()
-    };
-    
-    try {
+try {
         await cloudStorage.saveResource(testResource);
         
         // Reload ResourceManager to see updated list
@@ -957,10 +903,7 @@ window.testResourceSave = async function() {
     }
 };
 
-window.checkResourceState = function() {
-    console.log('Resources:', window.ResourceManager?.resources?.length || 0);
-    
-    if (window.ResourceManager && window.ResourceManager.resources.length > 0) {
+if (window.ResourceManager && window.ResourceManager.resources.length > 0) {
         console.log('Sample IDs:', 
             window.ResourceManager.resources.slice(0, 3).map(r => r.id));
     }
