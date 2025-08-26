@@ -17,7 +17,7 @@
                            (window.innerWidth <= 768 && 'ontouchstart' in window);
             
             if (isMobile && !window.location.pathname.includes('mobile.html')) {
-                console.log('📱 Mobile device detected - redirecting to mobile.html');
+                // Mobile device detected - redirecting to mobile.html
                 window.location.href = 'mobile.html';
                 return;
             }
@@ -66,6 +66,26 @@
                 if (window.location.hostname === 'localhost' || window.DEBUG_AUTH) {
                     console.warn(`${component}: Authentication required to ${action}`);
                 }
+            };
+            
+            // Production-ready logging system - only log after authentication
+            window.SILENT_MODE = true; // Start in silent mode for login/logout pages
+            
+            window.devLog = function(message, ...args) {
+                if (!window.SILENT_MODE && (window.location.hostname === 'localhost' || window.DEBUG_MODE)) {
+                    console.log(message, ...args);
+                }
+            };
+            
+            window.devWarn = function(message, ...args) {
+                if (!window.SILENT_MODE && (window.location.hostname === 'localhost' || window.DEBUG_MODE)) {
+                    console.warn(message, ...args);
+                }
+            };
+            
+            // Function to enable logging after successful authentication
+            window.enableLogging = function() {
+                window.SILENT_MODE = false;
             };
         })();
     </script>
@@ -7610,19 +7630,19 @@
             },
             
             showAuthScreen() {
-                console.log('🔹 LOGIN: Showing login effects');
-                console.trace('🔹 LOGIN: Call stack for showAuthScreen()');
+                // Showing login effects
+                // Call stack for showAuthScreen()
                 document.body.classList.remove('authenticated');
                 document.getElementById('auth-screen').classList.remove('hide');
                 const loginEffects = document.querySelector('.login-effects');
                 if (loginEffects) {
                     loginEffects.style.display = 'block';
-                    console.log('🔹 LOGIN: Set display to block for login effects');
+                    // Set display to block for login effects
                     
                     // Debug: Check if it stays visible
                     setTimeout(() => {
                         const currentDisplay = loginEffects.style.display;
-                        console.log('🔹 LOGIN: After 2 seconds, display is:', currentDisplay);
+                        // After 2 seconds, display set
                         if (currentDisplay === 'none') {
                             console.log('❌ LOGIN: Effects were hidden after showAuthScreen!');
                             console.trace('❌ LOGIN: Something hid the effects!');
@@ -7655,7 +7675,9 @@
             },
             
             async showDashboard() {
-                console.log('🔹 DASHBOARD: Hiding login effects');
+                // Enable logging after successful authentication
+                window.enableLogging();
+                window.devLog('🔹 DASHBOARD: Hiding login effects');
                 
                 // Reset login state first
                 this.isLoggingIn = false;
@@ -7670,7 +7692,7 @@
                 // NUCLEAR OPTION: Completely remove auth screen from DOM on mobile
                 const authScreen = document.getElementById('auth-screen');
                 if (authScreen) {
-                    console.log('📱 DASHBOARD: Removing auth screen from DOM completely');
+                    window.devLog('📱 DASHBOARD: Removing auth screen from DOM completely');
                     authScreen.remove(); // Complete DOM removal - no CSS can override this
                 }
                 
@@ -7821,7 +7843,7 @@
                     const hash = tabHashMapping[tabId];
                     
                     window.history.replaceState(null, null, `#${hash}`);
-                    console.log(`🔗 Tab switched to ${tabId}, URL updated to #${hash}`);
+                    window.devLog(`🔗 Tab switched to ${tabId}, URL updated to #${hash}`);
                 } else if (updateHash) {
                     // Fallback: if no hash mapping, clear hash
                     window.history.replaceState(null, null, window.location.pathname);
@@ -7914,11 +7936,11 @@
         function handleHashChange() {
             const hash = window.location.hash.slice(1); // Remove the '#'
             if (hash && hashTabMapping[hash]) {
-                console.log(`🔗 Hash changed to #${hash}, switching to ${hashTabMapping[hash]}`);
+                window.devLog(`🔗 Hash changed to #${hash}, switching to ${hashTabMapping[hash]}`);
                 switchTab(hashTabMapping[hash], false); // Don't update hash again
             } else if (!hash && supabase?.isAuthenticated()) {
                 // Only default to home if authenticated (not on login screen)
-                console.log('🔗 No hash found, defaulting to home (authenticated user)');
+                window.devLog('🔗 No hash found, defaulting to home (authenticated user)');
                 switchTab('tab-home', false);
             }
             // If not authenticated and no hash, do nothing (stay on login screen)
@@ -10814,7 +10836,7 @@
             },
             
             navigateToTab(tabId) {
-                console.log('🔗 Internal link navigation to:', tabId);
+                window.devLog('🔗 Internal link navigation to:', tabId);
                 if (typeof switchTab === 'function') {
                     switchTab(tabId);
                 } else {
@@ -11681,7 +11703,7 @@
             // Initialize mobile todo system
             if (window.MobileTodoManager) {
                 MobileTodoManager.initMobileDetection();
-                console.log('📱 Mobile todo system initialized');
+                window.devLog('📱 Mobile todo system initialized');
             }
             
             // Hide QuickBar initially until authentication is confirmed
@@ -12080,7 +12102,7 @@
                 },
                 
                 renderResources() {
-                    console.log('🎨 ResourceManager.renderResources() called with', this.resources.length, 'resources');
+                    window.devLog('🎨 ResourceManager.renderResources() called with', this.resources.length, 'resources');
                     // Render all categories at once in block layout
                     this.displayResourcesForCategory('privat');
                     this.displayResourcesForCategory('crypto'); 
@@ -13561,7 +13583,7 @@
                         if (tabId && tabHashMapping[tabId]) {
                             const hash = tabHashMapping[tabId];
                             window.history.replaceState(null, null, `#${hash}`);
-                            console.log(`🔗 Initial tab loaded: ${tabId}, URL set to #${hash}`);
+                            window.devLog(`🔗 Initial tab loaded: ${tabId}, URL set to #${hash}`);
                         }
                     }
                 }
@@ -13943,7 +13965,7 @@
                 this.isVisible = false;
                 this.overlay = null;
                 this.modal = null;
-                console.log('⚡ QuickAdd initialized');
+                window.devLog('⚡ QuickAdd initialized');
             }
             
             show() {
@@ -14380,7 +14402,7 @@
                 // Default to light mode (no localStorage dependency)
                 const defaultTheme = 'light';
                 document.documentElement.setAttribute('data-theme', defaultTheme);
-                console.log('🎨 Initializing theme to:', defaultTheme);
+                window.devLog('🎨 Initializing theme to:', defaultTheme);
                 
                 // Update button icon using the clean method
                 setTimeout(() => {
@@ -14446,7 +14468,7 @@
             }
 
             initializePageLevelButtons() {
-                console.log('🔗 Re-initializing page-level add button listeners...');
+                window.devLog('🔗 Re-initializing page-level add button listeners...');
                 
                 // Add Todo Button
                 const addTodoBtn = document.getElementById('add-todo-btn');
@@ -15140,7 +15162,7 @@
         
         // Initialize PomodoroTimer globally so it's always available
         window.PomodoroTimer = new PomodoroTimer();
-        console.log('🍅 PomodoroTimer initialized globally on startup');
+        window.devLog('🍅 PomodoroTimer initialized globally on startup');
         
         // Wiki and Lucide icons initialization moved to main DOMContentLoaded listener
     </script>
@@ -17063,7 +17085,7 @@
     <script>
         // Aktiviere Cloud-Policy für alle Manager
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🛡️ Activating Cloud-First Policy enforcement...');
+            window.devLog('🛡️ Activating Cloud-First Policy enforcement...');
             
             // Validiere alle existierenden Manager
             setTimeout(() => {
@@ -17083,7 +17105,7 @@
                     }
                 });
                 
-                console.log('📋 All future implementations must follow CLOUD_POLICY.js guidelines');
+                window.devLog('📋 All future implementations must follow CLOUD_POLICY.js guidelines');
                 
             }, 2000);
         });
@@ -17157,7 +17179,7 @@
             }
 
             async init() {
-                console.log('🔗 Initializing New Crypto Price Widget...');
+                window.devLog('🔗 Initializing New Crypto Price Widget...');
                 console.log('📋 Default overlay symbols:', this.overlaySymbols);
                 
                 // Immediate render with defaults - no delay
@@ -17931,11 +17953,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Wait a bit for other components to load, especially for Lucide icons
             setTimeout(() => {
-                console.log('🚀 Starting Crypto Widget Initialization...');
+                window.devLog('🚀 Starting Crypto Widget Initialization...');
                 
                 // Initialize Lucide icons first
                 if (window.lucide) {
-                    console.log('🎨 Initializing Lucide icons...');
+                    window.devLog('🎨 Initializing Lucide icons...');
                     lucide.createIcons();
                 } else {
                     console.warn('⚠️ Lucide not loaded yet');
@@ -17947,11 +17969,11 @@
         
         // === GLOBAL GOAL EDIT MODAL EVENT LISTENERS SETUP ===
         // This needs to be outside of DOMContentLoaded to ensure it runs
-        console.log('🎯 GLOBAL: Setting up goal edit modal event listeners...');
+        window.devLog('🎯 GLOBAL: Setting up goal edit modal event listeners...');
         
         // Make event listener initialization globally available
         window.initGoalEditModalEventListeners = function() {
-            console.log('🎯 GLOBAL: Initializing goal edit modal event listeners...');
+            window.devLog('🎯 GLOBAL: Initializing goal edit modal event listeners...');
             
             const cancelEditGoalBtn = document.getElementById('cancel-edit-goal-value-btn');
             if (cancelEditGoalBtn) {
