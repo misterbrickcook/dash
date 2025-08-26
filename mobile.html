@@ -1080,7 +1080,9 @@
                     this.renderTodos();
                     
                     // INSTANT SYNC: Notify desktop about new brain dump
+                    console.log('📱 Mobile: About to notify desktop of new brain dump');
                     this.notifyDesktopOfNewBrainDump();
+                    console.log('📱 Mobile: Desktop notification sent');
                     
                     // Clear input and chips
                     brainInput.value = '';
