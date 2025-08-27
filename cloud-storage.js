@@ -435,24 +435,71 @@ class CloudStorage {
             const user = supabase.getCurrentUser();
             if (!user) return;
             
-            // Get all journal entries
-            const entries = await supabase.query('journal_entries?select=id,title,content,entry_date');
+            // Get all journal entries with category
+            const entries = await supabase.query('journal_entries?select=id,title,content,entry_date,category');
             if (!entries || entries.length === 0) {
                 return;
             }
             
-            // Process each entry
+            // Check which entries already have tags to avoid reprocessing
+            const existingTags = await supabase.query('journal_tags?select=entry_id');
+            const processedEntryIds = new Set(existingTags?.map(tag => tag.entry_id) || []);
+            
+            // Process each entry (but skip already processed ones)
             for (const entry of entries) {
+                // Skip if already processed
+                if (processedEntryIds.has(entry.id)) {
+                    continue;
+                }
                 const fullContent = `${entry.title || ''} ${entry.content || ''}`;
                 await this.saveJournalTags(
                     entry.id,
                     entry.entry_date || new Date().toISOString().split('T')[0],
                     fullContent,
-                    'trading'
+                    entry.category || 'general'
                 );
             }
         } catch (error) {
             console.error('Error processing existing journal entries:', error);
+        }
+    },
+
+    // Fix corrupted categories in journal_tags table
+    async fixCorruptedJournalCategories() {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            return;
+        }
+        
+        try {
+            const user = supabase.getCurrentUser();
+            if (!user) return;
+            
+            // Get all journal entries with their correct categories
+            const entries = await supabase.query('journal_entries?select=id,category');
+            if (!entries || entries.length === 0) {
+                return;
+            }
+            
+            console.log('🔧 Fixing corrupted journal categories...');
+            
+            // Update journal_tags with correct categories
+            for (const entry of entries) {
+                const correctCategory = entry.category || 'general';
+                
+                // Update all tags for this entry with the correct category
+                await supabase.query(
+                    `journal_tags?entry_id=eq.${entry.id}`, 
+                    {
+                        method: 'PATCH',
+                        body: { category: correctCategory }
+                    }
+                );
+            }
+            
+            console.log('✅ Journal categories fixed!');
+            
+        } catch (error) {
+            console.error('Error fixing journal categories:', error);
         }
     }
     
