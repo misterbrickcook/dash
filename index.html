@@ -17319,18 +17319,24 @@
                         `simple_routines?user_id=eq.${user.id}&select=date,routine_data`
                     );
                     console.log('🔍 Morning routine raw data:', result);
+                    console.log('🔍 Result keys:', Object.keys(result || {}));
                     console.log('🔍 Result has data?', !!result?.data);
+                    console.log('🔍 Result type:', typeof result);
+                    console.log('🔍 Is result an array?', Array.isArray(result));
+                    console.log('🔍 Result length if array:', Array.isArray(result) ? result.length : 'not array');
                     console.log('🔍 Data length:', result?.data?.length);
-                    if (result?.data && result.data.length > 0) {
-                        console.log('🔍 First entry sample:', result.data[0]);
-                    }
 
                     const routineData = {};
-                    if (result?.data) {
-                        console.log('📊 Total entries to process:', result.data.length);
+                    const dataArray = result?.data || result; // Handle both formats
+                    console.log('🔧 Using data array:', dataArray);
+                    console.log('🔧 Data array is array?', Array.isArray(dataArray));
+                    console.log('🔧 Data array length:', dataArray?.length);
+                    
+                    if (dataArray && Array.isArray(dataArray)) {
+                        console.log('📊 Total entries to process:', dataArray.length);
                         
-                        for (let i = 0; i < result.data.length; i++) {
-                            const entry = result.data[i];
+                        for (let i = 0; i < dataArray.length; i++) {
+                            const entry = dataArray[i];
                             console.log(`🔍 Processing entry ${i}:`, entry);
                             
                             if (!entry.routine_data) {
@@ -17396,9 +17402,10 @@
                     console.log('🔍 Evening routine raw data:', result);
 
                     const routineData = {};
-                    if (result?.data) {
-                        console.log('📊 Total entries to process:', result.data.length);
-                        result.data.forEach((entry, index) => {
+                    const dataArray = result?.data || result; // Handle both formats
+                    if (dataArray && Array.isArray(dataArray)) {
+                        console.log('📊 Total entries to process:', dataArray.length);
+                        dataArray.forEach((entry, index) => {
                             console.log(`🔍 Processing entry ${index}:`, entry);
                             try {
                                 const data = typeof entry.routine_data === 'string' 
