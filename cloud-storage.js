@@ -402,12 +402,14 @@ class CloudStorage {
             const tags = await this.extractTagsFromText(content);
             if (tags.length === 0) return;
             
-            // Delete existing tags for this entry
-            if (journalEntryId) {
-                await supabase.delete('journal_tags', `journal_entry_id=eq.${journalEntryId}`);
+            // Check if tags already exist for this entry to avoid reprocessing
+            const existingTags = await supabase.query(`journal_tags?journal_entry_id=eq.${journalEntryId}&select=id`);
+            if (existingTags && existingTags.length > 0) {
+                console.log(`⚠️ Tags already exist for journal entry ${journalEntryId}, skipping to preserve data integrity`);
+                return;
             }
             
-            // Insert new tags
+            // Insert new tags (no deletion needed since we checked above)
             const tagRecords = tags.map(tag => ({
                 user_id: user.id,
                 tag: tag,
@@ -418,9 +420,9 @@ class CloudStorage {
             
             if (tagRecords.length > 0) {
                 await supabase.insert('journal_tags', tagRecords);
+                console.log(`✅ Saved ${tagRecords.length} tags for journal entry ${journalEntryId} with category: ${category}`);
             }
             
-        
         } catch (error) {
             console.error('Error saving journal tags:', error);
         }
@@ -442,8 +444,8 @@ class CloudStorage {
             }
             
             // Check which entries already have tags to avoid reprocessing
-            const existingTags = await supabase.query('journal_tags?select=entry_id');
-            const processedEntryIds = new Set(existingTags?.map(tag => tag.entry_id) || []);
+            const existingTags = await supabase.query('journal_tags?select=journal_entry_id');
+            const processedEntryIds = new Set(existingTags?.map(tag => tag.journal_entry_id) || []);
             
             // Process each entry (but skip already processed ones)
             for (const entry of entries) {
@@ -462,7 +464,7 @@ class CloudStorage {
         } catch (error) {
             console.error('Error processing existing journal entries:', error);
         }
-    },
+    }
 
     // Fix corrupted categories in journal_tags table
     async fixCorruptedJournalCategories() {
@@ -477,29 +479,93 @@ class CloudStorage {
             // Get all journal entries with their correct categories
             const entries = await supabase.query('journal_entries?select=id,category');
             if (!entries || entries.length === 0) {
+                console.log('No journal entries found to fix');
                 return;
             }
             
-            console.log('🔧 Fixing corrupted journal categories...');
+            console.log(`🔧 Fixing corrupted journal categories for ${entries.length} entries...`);
+            let fixedCount = 0;
             
             // Update journal_tags with correct categories
             for (const entry of entries) {
                 const correctCategory = entry.category || 'general';
                 
-                // Update all tags for this entry with the correct category
-                await supabase.query(
-                    `journal_tags?entry_id=eq.${entry.id}`, 
-                    {
-                        method: 'PATCH',
-                        body: { category: correctCategory }
+                // Get current tags for this entry to see if they need fixing
+                const currentTags = await supabase.query(`journal_tags?journal_entry_id=eq.${entry.id}&select=category`);
+                if (currentTags && currentTags.length > 0) {
+                    const needsFixing = currentTags.some(tag => tag.category !== correctCategory);
+                    if (needsFixing) {
+                        // Update all tags for this entry with the correct category
+                        await supabase.query(
+                            `journal_tags?journal_entry_id=eq.${entry.id}`, 
+                            {
+                                method: 'PATCH',
+                                body: { category: correctCategory }
+                            }
+                        );
+                        fixedCount++;
+                        console.log(`✅ Fixed category for entry ${entry.id}: ${correctCategory}`);
                     }
-                );
+                }
             }
             
-            console.log('✅ Journal categories fixed!');
+            console.log(`✅ Journal categories fix complete! Fixed ${fixedCount} entries.`);
             
         } catch (error) {
             console.error('Error fixing journal categories:', error);
+        }
+    }
+    
+    // Debug function to check category consistency
+    async debugCategoryConsistency() {
+        if (!supabase || !this.isSupabaseAuthenticated()) {
+            console.log('❌ Not authenticated');
+            return;
+        }
+        
+        try {
+            const user = supabase.getCurrentUser();
+            if (!user) return;
+            
+            // Get all journal entries
+            const entries = await supabase.query('journal_entries?select=id,category,title,created_at');
+            // Get all journal tags  
+            const tags = await supabase.query('journal_tags?select=journal_entry_id,category,tag');
+            
+            console.log('🔍 CATEGORY CONSISTENCY DEBUG');
+            console.log(`Found ${entries?.length || 0} journal entries`);
+            console.log(`Found ${tags?.length || 0} journal tags`);
+            
+            if (entries && tags) {
+                const inconsistencies = [];
+                entries.forEach(entry => {
+                    const entryTags = tags.filter(tag => tag.journal_entry_id === entry.id);
+                    if (entryTags.length > 0) {
+                        const tagCategories = [...new Set(entryTags.map(t => t.category))];
+                        if (tagCategories.length > 1 || tagCategories[0] !== entry.category) {
+                            inconsistencies.push({
+                                entryId: entry.id,
+                                entryTitle: entry.title,
+                                entryCategory: entry.category,
+                                tagCategories: tagCategories,
+                                created: entry.created_at
+                            });
+                        }
+                    }
+                });
+                
+                if (inconsistencies.length > 0) {
+                    console.log(`❌ Found ${inconsistencies.length} inconsistencies:`);
+                    inconsistencies.forEach(inc => {
+                        console.log(`Entry ${inc.entryId} (${inc.entryTitle}): entry=${inc.entryCategory}, tags=[${inc.tagCategories.join(',')}]`);
+                    });
+                } else {
+                    console.log('✅ No category inconsistencies found!');
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error debugging category consistency:', error);
         }
     }
     
