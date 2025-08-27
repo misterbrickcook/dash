@@ -7303,6 +7303,24 @@
                 </div>
                 
                 <div class="setting-group">
+                    <h3>Sport Container</h3>
+                    <div class="setting-item">
+                        <label for="sport-reset-time">Sport Reset Zeit:</label>
+                        <input type="time" id="sport-reset-time" value="06:00">
+                        <span class="setting-description">Zeit, zu der die Sport-Frage täglich zurückgesetzt wird</span>
+                    </div>
+                    <div class="setting-item">
+                        <label for="sport-visibility">Container Sichtbarkeit:</label>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="sport-visibility" checked>
+                            <label for="sport-visibility">Sport Container anzeigen</label>
+                        </div>
+                        <span class="setting-description">Sport Container auf dem Dashboard anzeigen/verstecken</span>
+                    </div>
+                    <button id="save-sport-settings" class="btn">Speichern</button>
+                </div>
+                
+                <div class="setting-group">
                     <h3>Kryptowährung Ticker</h3>
                     <div class="setting-item">
                         <div class="crypto-management">
@@ -17650,6 +17668,13 @@
                 });
             }
             
+            // Load sport settings when page loads
+            setTimeout(() => {
+                if (window.SportManager) {
+                    window.SportManager.updateSettingsUI();
+                }
+            }, 2000);
+            
             // Save analytics settings
             const saveAnalyticsBtn = document.getElementById('save-analytics-settings');
             if (saveAnalyticsBtn) {
@@ -17711,6 +17736,51 @@
                                 alert(`Pomodoro Einstellungen gespeichert! Timer Dauer: ${minutes} Minuten.`);
                             } catch (error) {
                                 console.error('Error saving Pomodoro settings:', error);
+                                alert('Fehler beim Speichern der Einstellungen.');
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Save sport settings
+            const saveSportBtn = document.getElementById('save-sport-settings');
+            if (saveSportBtn) {
+                saveSportBtn.addEventListener('click', async () => {
+                    const timeInput = document.getElementById('sport-reset-time');
+                    const visibilityInput = document.getElementById('sport-visibility');
+                    
+                    if (window.supabase?.isAuthenticated()) {
+                        const user = window.supabase.getCurrentUser();
+                        if (user) {
+                            try {
+                                // Save reset time
+                                const timeSetting = {
+                                    user_id: user.id,
+                                    setting_key: 'sportResetTime',
+                                    setting_value: timeInput.value,
+                                    updated_at: new Date().toISOString()
+                                };
+                                
+                                // Save visibility
+                                const visibilitySetting = {
+                                    user_id: user.id,
+                                    setting_key: 'sportContainerVisibility',
+                                    setting_value: visibilityInput.checked.toString(),
+                                    updated_at: new Date().toISOString()
+                                };
+                                
+                                await window.supabase.upsert('user_settings', timeSetting, ['user_id', 'setting_key']);
+                                await window.supabase.upsert('user_settings', visibilitySetting, ['user_id', 'setting_key']);
+                                
+                                // Apply settings immediately
+                                if (window.SportManager) {
+                                    window.SportManager.applySettings();
+                                }
+                                
+                                alert(`Sport Einstellungen gespeichert! Reset Zeit: ${timeInput.value}, Sichtbarkeit: ${visibilityInput.checked ? 'An' : 'Aus'}`);
+                            } catch (error) {
+                                console.error('Error saving sport settings:', error);
                                 alert('Fehler beim Speichern der Einstellungen.');
                             }
                         }
@@ -19511,17 +19581,88 @@
         // === SPORT MANAGER ===
         class SportManager {
             constructor() {
+                this.resetTime = '06:00';
+                this.containerVisible = true;
                 this.init();
             }
             
             async init() {
+                await this.loadSettings();
                 await this.checkTodayStatus();
             }
             
-            async checkTodayStatus() {
-                const today = new Date().toISOString().split('T')[0];
-                
+            async loadSettings() {
                 try {
+                    if (!window.supabase?.isAuthenticated()) return;
+                    
+                    const user = window.supabase.getCurrentUser();
+                    if (!user) return;
+                    
+                    // Load reset time
+                    const timeSettings = await window.supabase.query(
+                        `user_settings?user_id=eq.${user.id}&setting_key=eq.sportResetTime&select=setting_value`
+                    );
+                    this.resetTime = timeSettings && timeSettings.length > 0 ? timeSettings[0].setting_value : '06:00';
+                    
+                    // Load visibility
+                    const visibilitySettings = await window.supabase.query(
+                        `user_settings?user_id=eq.${user.id}&setting_key=eq.sportContainerVisibility&select=setting_value`
+                    );
+                    this.containerVisible = visibilitySettings && visibilitySettings.length > 0 
+                        ? visibilitySettings[0].setting_value === 'true' 
+                        : true;
+                        
+                    // Update settings UI if on settings page
+                    this.updateSettingsUI();
+                    
+                } catch (error) {
+                    console.error('Error loading sport settings:', error);
+                }
+            }
+            
+            updateSettingsUI() {
+                const timeInput = document.getElementById('sport-reset-time');
+                if (timeInput) timeInput.value = this.resetTime;
+                
+                const visibilityInput = document.getElementById('sport-visibility');
+                if (visibilityInput) visibilityInput.checked = this.containerVisible;
+            }
+            
+            applySettings() {
+                if (!this.containerVisible) {
+                    this.hideContainer();
+                } else if (this.shouldShowToday()) {
+                    this.showContainer();
+                } else {
+                    this.hideContainer();
+                }
+            }
+            
+            shouldShowToday() {
+                // Check if it's past the reset time today
+                // If yes, show container (unless already answered)
+                // If no, don't show yet
+                const now = new Date();
+                const [resetHour, resetMinute] = this.resetTime.split(':').map(Number);
+                const resetToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), resetHour, resetMinute);
+                
+                return now >= resetToday;
+            }
+
+            async checkTodayStatus() {
+                try {
+                    // First check if container should be visible at all
+                    if (!this.containerVisible) {
+                        this.hideContainer();
+                        return;
+                    }
+                    
+                    // Check if it's past reset time
+                    if (!this.shouldShowToday()) {
+                        this.hideContainer();
+                        return;
+                    }
+                    
                     if (!window.supabase?.isAuthenticated()) {
                         this.showContainer();
                         return;
@@ -19532,6 +19673,8 @@
                         this.showContainer();
                         return;
                     }
+                    
+                    const today = new Date().toISOString().split('T')[0];
                     
                     // Check if sport was already logged today
                     const result = await window.supabase.query(
@@ -19550,8 +19693,12 @@
                     }
                 } catch (error) {
                     console.warn('⚠️ Sport tracking table not found or error:', error.message);
-                    // Show container anyway - user can still click but will get error on save
-                    this.showContainer();
+                    // Show container anyway if visible and past reset time
+                    if (this.containerVisible && this.shouldShowToday()) {
+                        this.showContainer();
+                    } else {
+                        this.hideContainer();
+                    }
                 }
             }
             
