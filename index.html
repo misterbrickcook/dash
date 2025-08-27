@@ -12617,9 +12617,12 @@
                 },
                 
                 async deleteTextSnippet(id) {
-                    if (!confirm('Text Snippet wirklich löschen?')) return;
-                    
                     try {
+                        // Hide all delete buttons first
+                        document.querySelectorAll('.textsnippet-item .delete-icon').forEach(icon => {
+                            icon.classList.remove('show');
+                        });
+                        
                         await cloudStorage.deleteResource(id);
                         this.textsnippets = this.textsnippets.filter(s => s.id !== id);
                         this.renderTextSnippets();
