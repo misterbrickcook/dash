@@ -6976,6 +6976,50 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Morning Routine Heatmap -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h3>Morning Routine</h3>
+                            <div class="heatmap-info">
+                                <span id="morning-routine-heatmap-stats">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="heatmap-container">
+                            <div class="heatmap-months" id="morning-routine-heatmap-months"></div>
+                            <div class="heatmap-grid" id="morning-routine-heatmap-grid"></div>
+                            <div class="heatmap-legend">
+                                <span>Incomplete</span>
+                                <div class="legend-colors">
+                                    <div class="legend-square level-0" title="Not completed"></div>
+                                    <div class="legend-square level-4" title="Completed"></div>
+                                </div>
+                                <span>Complete</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Evening Routine Heatmap -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h3>Evening Routine</h3>
+                            <div class="heatmap-info">
+                                <span id="evening-routine-heatmap-stats">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="heatmap-container">
+                            <div class="heatmap-months" id="evening-routine-heatmap-months"></div>
+                            <div class="heatmap-grid" id="evening-routine-heatmap-grid"></div>
+                            <div class="heatmap-legend">
+                                <span>Incomplete</span>
+                                <div class="legend-colors">
+                                    <div class="legend-square level-0" title="Not completed"></div>
+                                    <div class="legend-square level-4" title="Completed"></div>
+                                </div>
+                                <span>Complete</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Journal Tag Analytics Section -->
@@ -16593,6 +16637,8 @@
                 await this.updateCurrentBalance();
                 await this.setupHeatmap();
                 await this.setupPerformanceHeatmap();
+                await this.setupMorningRoutineHeatmap();
+                await this.setupEveningRoutineHeatmap();
             }
 
             async loadBalanceHistory() {
@@ -17219,6 +17265,188 @@
                 
                 // Remove the stats text - user doesn't want it
                 statsElement.textContent = '';
+            }
+
+            async setupMorningRoutineHeatmap() {
+                const gridElement = document.getElementById('morning-routine-heatmap-grid');
+                const monthsElement = document.getElementById('morning-routine-heatmap-months');
+                if (!gridElement || !monthsElement) return;
+
+                try {
+                    const routineData = await this.generateMorningRoutineHeatmapData();
+                    this.renderRoutineHeatmap('morning', gridElement, monthsElement, routineData);
+                    this.updateMorningRoutineHeatmapStats(routineData);
+                } catch (error) {
+                    console.error('❌ Error setting up morning routine heatmap:', error);
+                }
+            }
+
+            async setupEveningRoutineHeatmap() {
+                const gridElement = document.getElementById('evening-routine-heatmap-grid');
+                const monthsElement = document.getElementById('evening-routine-heatmap-months');
+                if (!gridElement || !monthsElement) return;
+
+                try {
+                    const routineData = await this.generateEveningRoutineHeatmapData();
+                    this.renderRoutineHeatmap('evening', gridElement, monthsElement, routineData);
+                    this.updateEveningRoutineHeatmapStats(routineData);
+                } catch (error) {
+                    console.error('❌ Error setting up evening routine heatmap:', error);
+                }
+            }
+
+            async generateMorningRoutineHeatmapData() {
+                try {
+                    const user = await window.supabase.getUser();
+                    if (!user) return {};
+
+                    const result = await window.supabase.query(`
+                        simple_routines?user_id=eq.${user.id}&select=date,routine_data
+                    `);
+
+                    const routineData = {};
+                    if (result?.data) {
+                        result.data.forEach(entry => {
+                            try {
+                                const data = typeof entry.routine_data === 'string' 
+                                    ? JSON.parse(entry.routine_data) 
+                                    : entry.routine_data;
+                                
+                                if (data && data.morning) {
+                                    // Check if all morning tasks are completed
+                                    const morningTasks = Object.values(data.morning);
+                                    const allCompleted = morningTasks.length > 0 && morningTasks.every(task => task === true);
+                                    routineData[entry.date] = allCompleted ? 1 : 0;
+                                }
+                            } catch (parseError) {
+                                console.warn('❌ Error parsing routine data for date:', entry.date, parseError);
+                            }
+                        });
+                    }
+
+                    return routineData;
+                } catch (error) {
+                    console.error('❌ Error generating morning routine heatmap data:', error);
+                    return {};
+                }
+            }
+
+            async generateEveningRoutineHeatmapData() {
+                try {
+                    const user = await window.supabase.getUser();
+                    if (!user) return {};
+
+                    const result = await window.supabase.query(`
+                        simple_routines?user_id=eq.${user.id}&select=date,routine_data
+                    `);
+
+                    const routineData = {};
+                    if (result?.data) {
+                        result.data.forEach(entry => {
+                            try {
+                                const data = typeof entry.routine_data === 'string' 
+                                    ? JSON.parse(entry.routine_data) 
+                                    : entry.routine_data;
+                                
+                                if (data && data.evening) {
+                                    // Check if all evening tasks are completed
+                                    const eveningTasks = Object.values(data.evening);
+                                    const allCompleted = eveningTasks.length > 0 && eveningTasks.every(task => task === true);
+                                    routineData[entry.date] = allCompleted ? 1 : 0;
+                                }
+                            } catch (parseError) {
+                                console.warn('❌ Error parsing routine data for date:', entry.date, parseError);
+                            }
+                        });
+                    }
+
+                    return routineData;
+                } catch (error) {
+                    console.error('❌ Error generating evening routine heatmap data:', error);
+                    return {};
+                }
+            }
+
+            renderRoutineHeatmap(type, gridElement, monthsElement, data) {
+                // Clear existing content
+                gridElement.innerHTML = '';
+                monthsElement.innerHTML = '';
+
+                // Calculate date range (371 squares for 53 weeks)
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(endDate.getDate() - 370);
+
+                // Generate month labels
+                const months = [];
+                let currentMonth = new Date(startDate);
+                let lastDisplayedMonth = -1;
+
+                for (let week = 0; week < 53; week++) {
+                    const weekStart = new Date(startDate);
+                    weekStart.setDate(startDate.getDate() + (week * 7));
+                    
+                    if (weekStart.getMonth() !== lastDisplayedMonth) {
+                        const monthName = weekStart.toLocaleDateString('de-DE', { month: 'short' });
+                        months.push({ week, name: monthName });
+                        lastDisplayedMonth = weekStart.getMonth();
+                    }
+                }
+
+                // Render month labels
+                monthsElement.innerHTML = months.map(month => 
+                    `<div style="grid-column: ${month.week + 1};">${month.name}</div>`
+                ).join('');
+
+                // Generate heatmap squares (column-first order)
+                for (let col = 0; col < 53; col++) {
+                    for (let row = 0; row < 7; row++) {
+                        const date = new Date(startDate);
+                        date.setDate(startDate.getDate() + (col * 7) + row);
+                        
+                        if (date > endDate) continue;
+
+                        const dateStr = date.toISOString().split('T')[0];
+                        const isCompleted = data[dateStr] || 0;
+                        const level = isCompleted ? 4 : 0; // Binary: 0 (gray) or 4 (green)
+                        
+                        const square = document.createElement('div');
+                        square.className = `heatmap-square level-${level}`;
+                        square.setAttribute('data-date', dateStr);
+                        square.setAttribute('data-level', level);
+                        square.style.gridColumn = col + 1;
+                        square.style.gridRow = row + 1;
+                        
+                        // Tooltip
+                        const formattedDate = date.toLocaleDateString('de-DE');
+                        const status = isCompleted ? 'Completed' : 'Not completed';
+                        square.title = `${formattedDate}: ${type} routine ${status}`;
+                        
+                        gridElement.appendChild(square);
+                    }
+                }
+            }
+
+            updateMorningRoutineHeatmapStats(data) {
+                const statsElement = document.getElementById('morning-routine-heatmap-stats');
+                if (!statsElement) return;
+
+                const total = Object.keys(data).length;
+                const completed = Object.values(data).filter(value => value === 1).length;
+                const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+                
+                statsElement.textContent = `${completed}/${total} days completed (${percentage}%)`;
+            }
+
+            updateEveningRoutineHeatmapStats(data) {
+                const statsElement = document.getElementById('evening-routine-heatmap-stats');
+                if (!statsElement) return;
+
+                const total = Object.keys(data).length;
+                const completed = Object.values(data).filter(value => value === 1).length;
+                const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+                
+                statsElement.textContent = `${completed}/${total} days completed (${percentage}%)`;
             }
         }
 
