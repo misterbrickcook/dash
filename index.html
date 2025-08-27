@@ -7333,6 +7333,27 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="setting-group">
+                    <h3>Backup & Export</h3>
+                    <div class="setting-item">
+                        <label>Daten exportieren:</label>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button id="export-all-data" class="btn">Alle Daten exportieren</button>
+                            <span id="backup-stats" style="color: var(--text-secondary); font-size: 0.85rem;"></span>
+                        </div>
+                        <span class="setting-description">Exportiere alle deine Daten (Journal, Routinen, Trading Rules, etc.) als JSON-Datei</span>
+                    </div>
+                    <div class="setting-item">
+                        <label>Daten importieren:</label>
+                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                            <input type="file" id="import-file" accept=".json" style="display: none;">
+                            <button id="select-import-file" class="btn">Datei auswählen</button>
+                            <button id="import-data" class="btn" disabled>Importieren</button>
+                        </div>
+                        <span class="setting-description">⚠️ Vorsicht: Import überschreibt bestehende Daten. Erst Backup erstellen!</span>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -7706,6 +7727,7 @@
     <!-- Scripts -->
     <script src="supabase-config.js"></script>
     <script src="cloud-storage.js"></script>
+    <script src="backup-system.js"></script>
     <script src="simple-counters.js"></script>
     <script src="simple-routine-system.js"></script>
     <script>
@@ -8496,6 +8518,105 @@
                         resetMonthlyTodos();
                     }
                 });
+            }
+            
+            // Backup & Export System Event Listeners
+            const exportAllBtn = document.getElementById('export-all-data');
+            if (exportAllBtn) {
+                exportAllBtn.addEventListener('click', async () => {
+                    exportAllBtn.disabled = true;
+                    exportAllBtn.textContent = 'Exportiere...';
+                    
+                    try {
+                        const success = await window.backupManager.downloadBackup();
+                        if (success) {
+                            updateBackupStats();
+                        }
+                    } catch (error) {
+                        console.error('Export failed:', error);
+                    } finally {
+                        exportAllBtn.disabled = false;
+                        exportAllBtn.textContent = 'Alle Daten exportieren';
+                    }
+                });
+            }
+            
+            const selectImportBtn = document.getElementById('select-import-file');
+            const importFileInput = document.getElementById('import-file');
+            const importDataBtn = document.getElementById('import-data');
+            
+            if (selectImportBtn && importFileInput) {
+                selectImportBtn.addEventListener('click', () => {
+                    importFileInput.click();
+                });
+                
+                importFileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file && file.type === 'application/json') {
+                        importDataBtn.disabled = false;
+                        selectImportBtn.textContent = `${file.name} ausgewählt`;
+                    } else {
+                        importDataBtn.disabled = true;
+                        selectImportBtn.textContent = 'Datei auswählen';
+                        if (file) {
+                            alert('Bitte wähle eine JSON-Datei aus.');
+                        }
+                    }
+                });
+            }
+            
+            if (importDataBtn) {
+                importDataBtn.addEventListener('click', async () => {
+                    const file = importFileInput.files[0];
+                    if (!file) return;
+                    
+                    if (!confirm('⚠️ WARNUNG: Der Import überschreibt deine bestehenden Daten!\n\nHast du bereits ein Backup erstellt?\n\nFortfahren?')) {
+                        return;
+                    }
+                    
+                    importDataBtn.disabled = true;
+                    importDataBtn.textContent = 'Importiere...';
+                    
+                    try {
+                        await window.backupManager.importFromBackup(file);
+                        updateBackupStats();
+                        
+                        // Reset file input
+                        importFileInput.value = '';
+                        selectImportBtn.textContent = 'Datei auswählen';
+                        
+                        // Suggest page reload
+                        if (confirm('Import abgeschlossen! Seite neu laden um alle Änderungen zu sehen?')) {
+                            window.location.reload();
+                        }
+                    } catch (error) {
+                        console.error('Import failed:', error);
+                    } finally {
+                        importDataBtn.disabled = true;
+                        importDataBtn.textContent = 'Importieren';
+                    }
+                });
+            }
+            
+            // Initialize backup stats display
+            updateBackupStats();
+        }
+        
+        // Update backup statistics display
+        async function updateBackupStats() {
+            const statsElement = document.getElementById('backup-stats');
+            if (!statsElement || !window.backupManager) return;
+            
+            try {
+                const stats = await window.backupManager.getBackupStats();
+                if (stats) {
+                    statsElement.textContent = `(${stats.totalRecords} Einträge verfügbar zum Backup)`;
+                } else {
+                    statsElement.textContent = '';
+                }
+            } catch (error) {
+                statsElement.textContent = '';
+                console.warn('Could not get backup stats:', error);
             }
         }
         
