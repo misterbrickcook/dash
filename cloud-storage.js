@@ -491,18 +491,15 @@ class CloudStorage {
                 const correctCategory = entry.category || 'general';
                 
                 // Get current tags for this entry to see if they need fixing
-                const currentTags = await supabase.query(`journal_tags?journal_entry_id=eq.${entry.id}&select=category`);
+                const currentTags = await supabase.query(`journal_tags?journal_entry_id=eq.${entry.id}&select=id,category`);
                 if (currentTags && currentTags.length > 0) {
                     const needsFixing = currentTags.some(tag => tag.category !== correctCategory);
                     if (needsFixing) {
                         // Update all tags for this entry with the correct category
-                        await supabase.query(
-                            `journal_tags?journal_entry_id=eq.${entry.id}`, 
-                            {
-                                method: 'PATCH',
-                                body: { category: correctCategory }
-                            }
-                        );
+                        const tagIds = currentTags.map(tag => tag.id);
+                        for (const tagId of tagIds) {
+                            await supabase.update('journal_tags', { category: correctCategory }, tagId);
+                        }
                         fixedCount++;
                         console.log(`✅ Fixed category for entry ${entry.id}: ${correctCategory}`);
                     }
