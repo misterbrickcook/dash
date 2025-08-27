@@ -4422,13 +4422,15 @@
             top: 50%;
             right: 1rem;
             transform: translateY(-50%);
-            color: var(--text-secondary);
-            font-size: 0.8rem;
+            color: #22c55e;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
             background: var(--bg-primary);
-            padding: 0.25rem 0.5rem;
+            padding: 0.25rem;
             border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .textsnippet-copy-feedback.show {
@@ -12538,7 +12540,9 @@
                             <div class="textsnippet-item" data-id="${snippet.id}">
                                 <i data-lucide="clipboard-list" style="width: 16px; height: 16px;"></i>
                                 <span class="textsnippet-text">${snippet.title}</span>
-                                <span class="textsnippet-copy-feedback">Kopiert!</span>
+                                <span class="textsnippet-copy-feedback">
+                                    <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+                                </span>
                                 <div class="delete-icon" onclick="event.stopPropagation(); ResourceManager.deleteTextSnippet('${snippet.id}')" title="Löschen">
                                     <i data-lucide="x" style="width: 14px; height: 14px;"></i>
                                 </div>
