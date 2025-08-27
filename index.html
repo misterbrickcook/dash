@@ -11479,12 +11479,11 @@
                         } else if (Array.isArray(entry.tags)) {
                             tags = entry.tags;
                         }
-                    } else if (entry.category) {
-                        // Migration: use old category as a tag
-                        tags = [entry.category];
                     }
+                    // Don't add category to tags - handle separately
                     
                     const tagsHtml = tags.map(tag => `<span class="journal-tag">${tag}</span>`).join('');
+                    const categoryHtml = entry.category ? `<span class="journal-kategorie">${entry.category}</span>` : '';
                     
                     html += `
                         <div class="journal-entry" data-entry-id="${entry.id}">
@@ -11498,6 +11497,7 @@
                             </div>
                             <div class="journal-entry-content">${InternalLinkParser.parseInternalLinks(entry.content)}</div>
                             <div class="journal-entry-meta">
+                                ${categoryHtml}
                                 <div class="journal-entry-tags">
                                     ${tagsHtml}
                                 </div>
@@ -14278,7 +14278,8 @@
             },
             
             renderEntry(entry) {
-                const tagsHtml = entry.tags.map(tag => `<span class="journal-tag">${tag}</span>`).join('');
+                const tagsHtml = entry.tags ? entry.tags.map(tag => `<span class="journal-tag">${tag}</span>`).join('') : '';
+                const categoryHtml = entry.category ? `<span class="journal-kategorie">${entry.category}</span>` : '';
                 const date = new Date(entry.created_at).toLocaleDateString('de-DE');
                 const time = new Date(entry.created_at).toLocaleTimeString('de-DE', { 
                     hour: '2-digit', 
@@ -14297,6 +14298,7 @@
                         </div>
                         <div class="journal-entry-content">${entry.content}</div>
                         <div class="journal-entry-meta">
+                            ${categoryHtml}
                             <div class="journal-entry-tags">
                                 ${tagsHtml}
                             </div>
