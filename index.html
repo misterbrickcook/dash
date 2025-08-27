@@ -12512,9 +12512,17 @@
                     
                     // Add click event listeners after rendering
                     container.querySelectorAll('.textsnippet-item').forEach(item => {
+                        // Left click = copy
                         item.addEventListener('click', () => {
                             const text = item.querySelector('.textsnippet-text').textContent;
                             this.copyToClipboard(text, item);
+                        });
+                        
+                        // Right click = delete
+                        item.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            const snippetId = item.dataset.id;
+                            this.deleteTextSnippet(snippetId);
                         });
                     });
                     
