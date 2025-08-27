@@ -4387,21 +4387,27 @@
         
         /* === TEXT SNIPPETS === */
         .textsnippet-item {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--border-primary);
+            gap: 0.5rem;
+            color: #000000;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-primary);
+            transition: all 0.2s ease;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            background: var(--bg-primary);
+            margin: 0.25rem;
+            position: relative;
+            overflow: hidden;
         }
         
         .textsnippet-item:hover {
-            background-color: var(--bg-secondary);
-        }
-        
-        .textsnippet-item:last-child {
-            border-bottom: none;
+            border-color: #000000;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
         .textsnippet-text {
@@ -4411,10 +4417,17 @@
         }
         
         .textsnippet-copy-feedback {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
             color: var(--text-secondary);
             font-size: 0.8rem;
             opacity: 0;
             transition: opacity 0.3s ease;
+            background: var(--bg-primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
         }
         
         .textsnippet-copy-feedback.show {
@@ -7063,16 +7076,17 @@
             <hr class="resources-separator">
             
             <!-- TEXT SNIPPETS SECTION -->
+            <div class="page-header">
+                <h2>
+                    <i data-lucide="clipboard-list" style="width: 20px; height: 20px; margin-right: 0.5rem;"></i>
+                    Text Snippets
+                </h2>
+                <button id="add-textsnippet-btn" class="add-btn">
+                    <i data-lucide="plus"></i>
+                </button>
+            </div>
+            
             <div class="resource-block">
-                <div class="resource-block-header">
-                    <h3>
-                        <i data-lucide="clipboard-list" style="width: 18px; height: 18px;"></i>
-                        Text Snippets
-                    </h3>
-                    <button id="add-textsnippet-btn" class="resource-add-btn" title="Text Snippet hinzufügen">
-                        <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                    </button>
-                </div>
                 <div class="resource-links" id="resource-textsnippets">
                     <!-- Text snippets will be loaded here -->
                 </div>
@@ -12493,6 +12507,7 @@
                         const escapedText = snippet.title.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
                         return `
                             <div class="textsnippet-item" data-id="${snippet.id}">
+                                <i data-lucide="clipboard-list" style="width: 16px; height: 16px;"></i>
                                 <span class="textsnippet-text">${snippet.title}</span>
                                 <span class="textsnippet-copy-feedback">Kopiert!</span>
                             </div>
@@ -12506,6 +12521,12 @@
                             this.copyToClipboard(text, item);
                         });
                     });
+                    
+                    // Initialize Lucide icons for text snippets
+                    if (window.lucide) {
+                        lucide.createIcons();
+                        window.devLog('🎨 Lucide icons initialized for text snippets');
+                    }
                 },
                 
                 async copyToClipboard(text, element) {
