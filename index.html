@@ -17319,6 +17319,11 @@
                         `simple_routines?user_id=eq.${user.id}&select=date,routine_data`
                     );
                     console.log('🔍 Morning routine raw data:', result);
+                    console.log('🔍 Result has data?', !!result?.data);
+                    console.log('🔍 Data length:', result?.data?.length);
+                    if (result?.data && result.data.length > 0) {
+                        console.log('🔍 First entry sample:', result.data[0]);
+                    }
 
                     const routineData = {};
                     if (result?.data) {
