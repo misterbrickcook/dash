@@ -6512,8 +6512,8 @@
                     <div class="sport-content">
                         <h3>Hast du heute Sport gemacht?</h3>
                         <div class="sport-actions">
-                            <button class="sport-btn sport-no" onclick="SportManager.markSportCompleted(false)">Nein</button>
-                            <button class="sport-btn sport-yes" onclick="SportManager.markSportCompleted(true)">Ja! 🔥</button>
+                            <button class="sport-btn sport-no" onclick="window.SportManager?.markSportCompleted(false)">Nein</button>
+                            <button class="sport-btn sport-yes" onclick="window.SportManager?.markSportCompleted(true)">Ja! 🔥</button>
                         </div>
                     </div>
                 </div>
@@ -19545,11 +19545,15 @@
                 
                 try {
                     if (!window.supabase?.isAuthenticated()) {
+                        this.showContainer();
                         return;
                     }
                     
                     const user = window.supabase.user;
-                    if (!user) return;
+                    if (!user) {
+                        this.showContainer();
+                        return;
+                    }
                     
                     // Check if sport was already logged today
                     const result = await window.supabase.query(
@@ -19567,8 +19571,9 @@
                         this.showContainer();
                     }
                 } catch (error) {
-                    console.error('❌ Error checking sport status:', error);
-                    this.showContainer(); // Show container on error
+                    console.warn('⚠️ Sport tracking table not found or error:', error.message);
+                    // Show container anyway - user can still click but will get error on save
+                    this.showContainer();
                 }
             }
             
@@ -19604,7 +19609,11 @@
                     
                 } catch (error) {
                     console.error('❌ Error saving sport status:', error);
-                    alert('Fehler beim Speichern');
+                    if (error.message?.includes('sport_tracking')) {
+                        alert('Sport-Tracking Tabelle noch nicht angelegt. Bitte erstelle die Tabelle in Supabase.');
+                    } else {
+                        alert('Fehler beim Speichern');
+                    }
                 }
             }
             
@@ -19652,8 +19661,31 @@
             }
         }
         
-        // Global SportManager instance
-        window.SportManager = new SportManager();
+        // Initialize SportManager when everything is ready
+        let sportManager;
+        
+        // Initialize SportManager after supabase is ready
+        function initializeSportManager() {
+            if (window.supabase && window.supabase.isAuthenticated() && !sportManager) {
+                sportManager = new SportManager();
+                window.SportManager = sportManager;
+                console.log('🏋️‍♂️ SportManager initialized');
+            }
+        }
+        
+        // Try to initialize SportManager after a delay and on home tab switch
+        setTimeout(initializeSportManager, 3000);
+        
+        // Also initialize when user switches to home tab
+        const originalShowTab = window.showTab;
+        if (originalShowTab) {
+            window.showTab = function(tabName) {
+                originalShowTab(tabName);
+                if (tabName === 'home') {
+                    setTimeout(initializeSportManager, 500);
+                }
+            };
+        }
         
         // Add sport heatmap methods to AnalyticsManager
         if (window.AnalyticsManager) {
