@@ -1785,6 +1785,101 @@
             50% { transform: scale(1.02); opacity: 0.8; border-color: #3b82f6; }
         }
         
+        /* === DAILY SPORT SECTION === */
+        .daily-sport-section {
+            margin: 2rem 0;
+            animation: slideInFromTop 0.5s ease-out;
+        }
+        
+        .sport-question-card {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1.5rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 4px 20px rgba(255, 107, 107, 0.2);
+            transition: all 0.3s ease;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .sport-question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 107, 107, 0.3);
+        }
+        
+        .sport-icon {
+            font-size: 2.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sport-content {
+            flex: 1;
+            color: white;
+        }
+        
+        .sport-content h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sport-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .sport-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .sport-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-1px);
+        }
+        
+        .sport-btn.sport-yes:hover {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: rgba(0, 255, 0, 0.5);
+        }
+        
+        .sport-btn.sport-no:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .daily-sport-section.hidden {
+            opacity: 0;
+            transform: translateY(-20px);
+            max-height: 0;
+            margin: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         @keyframes confettiPulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -6410,6 +6505,20 @@
                 </div>
             </section>
 
+            <!-- Daily Sport Question (appears until answered) -->
+            <section id="daily-sport-container" class="daily-sport-section">
+                <div class="sport-question-card">
+                    <div class="sport-icon">💪</div>
+                    <div class="sport-content">
+                        <h3>Hast du heute Sport gemacht?</h3>
+                        <div class="sport-actions">
+                            <button class="sport-btn sport-no" onclick="SportManager.markSportCompleted(false)">Nein</button>
+                            <button class="sport-btn sport-yes" onclick="SportManager.markSportCompleted(true)">Ja! 🔥</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Routinen Section -->
             <div class="routine-grid" style="margin-bottom: 4rem;">
                 <div id="morning-routine" class="routine-section">
@@ -7026,6 +7135,28 @@
                                     <div class="legend-square level-4" title="Completed"></div>
                                 </div>
                                 <span>Complete</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sport Heatmap -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h3>Sport Activity</h3>
+                            <div class="heatmap-info">
+                                <span id="sport-heatmap-stats">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="heatmap-container">
+                            <div class="heatmap-months" id="sport-heatmap-months"></div>
+                            <div class="heatmap-grid" id="sport-heatmap-grid"></div>
+                            <div class="heatmap-legend">
+                                <span>No Sport</span>
+                                <div class="legend-colors">
+                                    <div class="legend-square level-0" title="No sport"></div>
+                                    <div class="legend-square level-4" title="Sport completed"></div>
+                                </div>
+                                <span>Sport Done</span>
                             </div>
                         </div>
                     </div>
@@ -16648,6 +16779,7 @@
                 await this.setupPerformanceHeatmap();
                 await this.setupMorningRoutineHeatmap();
                 await this.setupEveningRoutineHeatmap();
+                await this.setupSportHeatmap();
             }
 
             async loadBalanceHistory() {
@@ -19396,6 +19528,245 @@
                 div.textContent = text;
                 return div.innerHTML;
             }
+        }
+        
+        // === SPORT MANAGER ===
+        class SportManager {
+            constructor() {
+                this.init();
+            }
+            
+            async init() {
+                await this.checkTodayStatus();
+            }
+            
+            async checkTodayStatus() {
+                const today = new Date().toISOString().split('T')[0];
+                
+                try {
+                    if (!window.supabase?.isAuthenticated()) {
+                        return;
+                    }
+                    
+                    const user = window.supabase.user;
+                    if (!user) return;
+                    
+                    // Check if sport was already logged today
+                    const result = await window.supabase.query(
+                        `sport_tracking?user_id=eq.${user.id}&date=eq.${today}`
+                    );
+                    
+                    const dataArray = result?.data || result;
+                    const todayEntry = Array.isArray(dataArray) && dataArray.length > 0 ? dataArray[0] : null;
+                    
+                    if (todayEntry) {
+                        // Sport already logged today - hide container
+                        this.hideContainer();
+                    } else {
+                        // Show container
+                        this.showContainer();
+                    }
+                } catch (error) {
+                    console.error('❌ Error checking sport status:', error);
+                    this.showContainer(); // Show container on error
+                }
+            }
+            
+            async markSportCompleted(completed) {
+                const today = new Date().toISOString().split('T')[0];
+                
+                try {
+                    if (!window.supabase?.isAuthenticated()) {
+                        alert('Not authenticated');
+                        return;
+                    }
+                    
+                    const user = window.supabase.user;
+                    if (!user) return;
+                    
+                    // Save to database
+                    await window.supabase.insert('sport_tracking', {
+                        user_id: user.id,
+                        date: today,
+                        completed: completed,
+                        created_at: new Date().toISOString()
+                    });
+                    
+                    console.log(`💪 Sport logged for ${today}: ${completed}`);
+                    
+                    // Hide container with animation
+                    this.hideContainer();
+                    
+                    // Show success feedback
+                    if (completed) {
+                        this.showSuccessFeedback();
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error saving sport status:', error);
+                    alert('Fehler beim Speichern');
+                }
+            }
+            
+            showContainer() {
+                const container = document.getElementById('daily-sport-container');
+                if (container) {
+                    container.classList.remove('hidden');
+                }
+            }
+            
+            hideContainer() {
+                const container = document.getElementById('daily-sport-container');
+                if (container) {
+                    container.classList.add('hidden');
+                }
+            }
+            
+            showSuccessFeedback() {
+                // Create temporary success message
+                const feedback = document.createElement('div');
+                feedback.style.cssText = `
+                    position: fixed;
+                    top: 2rem;
+                    right: 2rem;
+                    background: linear-gradient(135deg, #4CAF50, #45a049);
+                    color: white;
+                    padding: 1rem 2rem;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+                    z-index: 10000;
+                    font-weight: 600;
+                    animation: slideInRight 0.3s ease-out;
+                `;
+                feedback.innerHTML = '🔥 Sport erledigt! Gut gemacht!';
+                
+                document.body.appendChild(feedback);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    feedback.style.animation = 'slideOutRight 0.3s ease-in';
+                    setTimeout(() => {
+                        feedback.remove();
+                    }, 300);
+                }, 3000);
+            }
+        }
+        
+        // Global SportManager instance
+        window.SportManager = new SportManager();
+        
+        // Add sport heatmap methods to AnalyticsManager
+        if (window.AnalyticsManager) {
+            window.AnalyticsManager.setupSportHeatmap = async function() {
+                const gridElement = document.getElementById('sport-heatmap-grid');
+                const monthsElement = document.getElementById('sport-heatmap-months');
+                if (!gridElement || !monthsElement) return;
+
+                try {
+                    const sportData = await this.generateSportHeatmapData();
+                    this.renderSportHeatmap(gridElement, monthsElement, sportData);
+                    this.updateSportHeatmapStats(sportData);
+                } catch (error) {
+                    console.error('❌ Error setting up sport heatmap:', error);
+                }
+            };
+            
+            window.AnalyticsManager.generateSportHeatmapData = async function() {
+                try {
+                    if (!window.supabase?.isAuthenticated()) {
+                        console.warn('No supabase or user not authenticated for sport heatmap');
+                        return {};
+                    }
+                    
+                    const user = window.supabase.user;
+                    if (!user) return {};
+
+                    const result = await window.supabase.query(
+                        `sport_tracking?user_id=eq.${user.id}&select=date,completed`
+                    );
+                    
+                    const dataArray = result?.data || result;
+                    const sportData = {};
+                    
+                    if (Array.isArray(dataArray)) {
+                        dataArray.forEach(entry => {
+                            if (entry.completed) {
+                                sportData[entry.date] = 1;
+                            }
+                        });
+                    }
+                    
+                    return sportData;
+                } catch (error) {
+                    console.error('❌ Error generating sport heatmap data:', error);
+                    return {};
+                }
+            };
+            
+            window.AnalyticsManager.renderSportHeatmap = function(gridElement, monthsElement, data) {
+                // Use the same rendering logic as routine heatmaps
+                gridElement.innerHTML = '';
+                monthsElement.innerHTML = '';
+
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(endDate.getDate() - 370);
+
+                // Generate month labels (same as routine heatmaps)
+                const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 
+                                   'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+                let currentMonth = -1;
+                
+                for (let week = 0; week < 53; week++) {
+                    const weekDate = new Date(startDate);
+                    weekDate.setDate(startDate.getDate() + (week * 7));
+                    const month = weekDate.getMonth();
+                    
+                    if (month !== currentMonth && week % 4 === 0) {
+                        const monthDiv = document.createElement('div');
+                        monthDiv.className = 'heatmap-month';
+                        monthDiv.textContent = monthNames[month];
+                        monthDiv.style.gridColumn = `${week + 1} / span 4`;
+                        monthsElement.appendChild(monthDiv);
+                        currentMonth = month;
+                    }
+                }
+
+                // Generate heatmap squares
+                for (let col = 0; col < 53; col++) {
+                    for (let row = 0; row < 7; row++) {
+                        const date = new Date(startDate);
+                        date.setDate(startDate.getDate() + (col * 7) + row);
+                        
+                        if (date > endDate) continue;
+
+                        const dateStr = date.toISOString().split('T')[0];
+                        const hasSport = data[dateStr] || 0;
+                        const level = hasSport ? 4 : 0; // Binary: 0 (no sport) or 4 (sport done)
+                        
+                        const square = document.createElement('div');
+                        square.className = `heatmap-square level-${level}`;
+                        square.setAttribute('data-date', dateStr);
+                        square.setAttribute('data-level', level);
+                        square.style.gridColumn = col + 1;
+                        square.style.gridRow = row + 1;
+                        
+                        const formattedDate = date.toLocaleDateString('de-DE');
+                        const status = hasSport ? 'Sport gemacht' : 'Kein Sport';
+                        square.title = `${formattedDate}: ${status}`;
+                        
+                        gridElement.appendChild(square);
+                    }
+                }
+            };
+            
+            window.AnalyticsManager.updateSportHeatmapStats = function(data) {
+                const statsElement = document.getElementById('sport-heatmap-stats');
+                if (!statsElement) return;
+                
+                // Remove the stats text - keep it clean like routine heatmaps
+                statsElement.textContent = '';
+            };
         }
         
         // Initialize Brain Dump Manager
