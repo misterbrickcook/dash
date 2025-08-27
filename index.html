@@ -17448,26 +17448,27 @@
                 const startDate = new Date();
                 startDate.setDate(endDate.getDate() - 370);
 
-                // Generate month labels
-                const months = [];
-                let currentMonth = new Date(startDate);
-                let lastDisplayedMonth = -1;
-
+                // Generate month labels (same as Performance heatmap)
+                monthsElement.innerHTML = '';
+                
+                const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 
+                                   'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+                let currentMonth = -1;
+                
                 for (let week = 0; week < 53; week++) {
-                    const weekStart = new Date(startDate);
-                    weekStart.setDate(startDate.getDate() + (week * 7));
+                    const weekDate = new Date(startDate);
+                    weekDate.setDate(startDate.getDate() + (week * 7));
+                    const month = weekDate.getMonth();
                     
-                    if (weekStart.getMonth() !== lastDisplayedMonth) {
-                        const monthName = weekStart.toLocaleDateString('de-DE', { month: 'short' });
-                        months.push({ week, name: monthName });
-                        lastDisplayedMonth = weekStart.getMonth();
+                    if (month !== currentMonth && week % 4 === 0) {
+                        const monthDiv = document.createElement('div');
+                        monthDiv.className = 'heatmap-month';
+                        monthDiv.textContent = monthNames[month];
+                        monthDiv.style.gridColumn = `${week + 1} / span 4`;
+                        monthsElement.appendChild(monthDiv);
+                        currentMonth = month;
                     }
                 }
-
-                // Render month labels with proper spacing
-                monthsElement.innerHTML = months.map(month => 
-                    `<div style="grid-column: ${month.week + 1}; margin-right: 0.5rem;">${month.name}</div>`
-                ).join('');
 
                 // Generate heatmap squares (column-first order)
                 for (let col = 0; col < 53; col++) {
@@ -17501,23 +17502,17 @@
             updateMorningRoutineHeatmapStats(data) {
                 const statsElement = document.getElementById('morning-routine-heatmap-stats');
                 if (!statsElement) return;
-
-                const total = Object.keys(data).length;
-                const completed = Object.values(data).filter(value => value === 1).length;
-                const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
                 
-                statsElement.textContent = `${completed}/${total} days completed (${percentage}%)`;
+                // Remove the stats text - user doesn't want it
+                statsElement.textContent = '';
             }
 
             updateEveningRoutineHeatmapStats(data) {
                 const statsElement = document.getElementById('evening-routine-heatmap-stats');
                 if (!statsElement) return;
-
-                const total = Object.keys(data).length;
-                const completed = Object.values(data).filter(value => value === 1).length;
-                const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
                 
-                statsElement.textContent = `${completed}/${total} days completed (${percentage}%)`;
+                // Remove the stats text - user doesn't want it
+                statsElement.textContent = '';
             }
         }
 
