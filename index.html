@@ -17309,9 +17309,10 @@
                     const user = await window.supabase.getUser();
                     if (!user) return {};
 
-                    const result = await window.supabase.query(`
-                        simple_routines?user_id=eq.${user.id}&select=date,routine_data
-                    `);
+                    const result = await window.supabase.query(
+                        `simple_routines?user_id=eq.${user.id}&select=date,routine_data`
+                    );
+                    console.log('🔍 Morning routine raw data:', result);
 
                     const routineData = {};
                     if (result?.data) {
@@ -17326,6 +17327,7 @@
                                     const morningTasks = Object.values(data.morning);
                                     const allCompleted = morningTasks.length > 0 && morningTasks.every(task => task === true);
                                     routineData[entry.date] = allCompleted ? 1 : 0;
+                                    console.log(`📅 ${entry.date}: Morning tasks:`, morningTasks, 'All completed:', allCompleted);
                                 }
                             } catch (parseError) {
                                 console.warn('❌ Error parsing routine data for date:', entry.date, parseError);
@@ -17333,6 +17335,7 @@
                         });
                     }
 
+                    console.log('📊 Final morning routine data:', routineData);
                     return routineData;
                 } catch (error) {
                     console.error('❌ Error generating morning routine heatmap data:', error);
@@ -17345,9 +17348,10 @@
                     const user = await window.supabase.getUser();
                     if (!user) return {};
 
-                    const result = await window.supabase.query(`
-                        simple_routines?user_id=eq.${user.id}&select=date,routine_data
-                    `);
+                    const result = await window.supabase.query(
+                        `simple_routines?user_id=eq.${user.id}&select=date,routine_data`
+                    );
+                    console.log('🔍 Evening routine raw data:', result);
 
                     const routineData = {};
                     if (result?.data) {
@@ -17362,6 +17366,7 @@
                                     const eveningTasks = Object.values(data.evening);
                                     const allCompleted = eveningTasks.length > 0 && eveningTasks.every(task => task === true);
                                     routineData[entry.date] = allCompleted ? 1 : 0;
+                                    console.log(`📅 ${entry.date}: Evening tasks:`, eveningTasks, 'All completed:', allCompleted);
                                 }
                             } catch (parseError) {
                                 console.warn('❌ Error parsing routine data for date:', entry.date, parseError);
@@ -17369,6 +17374,7 @@
                         });
                     }
 
+                    console.log('📊 Final evening routine data:', routineData);
                     return routineData;
                 } catch (error) {
                     console.error('❌ Error generating evening routine heatmap data:', error);
@@ -17402,9 +17408,9 @@
                     }
                 }
 
-                // Render month labels
+                // Render month labels with proper spacing
                 monthsElement.innerHTML = months.map(month => 
-                    `<div style="grid-column: ${month.week + 1};">${month.name}</div>`
+                    `<div style="grid-column: ${month.week + 1}; margin-right: 0.5rem;">${month.name}</div>`
                 ).join('');
 
                 // Generate heatmap squares (column-first order)
