@@ -17331,9 +17331,11 @@
                                 
                                 console.log(`📋 Parsed data for ${entry.date}:`, data);
                                 
-                                if (data && data.morning) {
+                                // Access nested data structure: data[date].morning
+                                const dayData = data[entry.date];
+                                if (dayData && dayData.morning) {
                                     // Check if all morning tasks are completed
-                                    const morningTasks = Object.values(data.morning);
+                                    const morningTasks = Object.values(dayData.morning);
                                     const allCompleted = morningTasks.length > 0 && morningTasks.every(task => task === true);
                                     routineData[entry.date] = allCompleted ? 1 : 0;
                                     console.log(`📅 ${entry.date}: Morning tasks:`, morningTasks, 'All completed:', allCompleted);
@@ -17379,9 +17381,11 @@
                                 
                                 console.log(`📋 Parsed data for ${entry.date}:`, data);
                                 
-                                if (data && data.evening) {
+                                // Access nested data structure: data[date].evening
+                                const dayData = data[entry.date];
+                                if (dayData && dayData.evening) {
                                     // Check if all evening tasks are completed
-                                    const eveningTasks = Object.values(data.evening);
+                                    const eveningTasks = Object.values(dayData.evening);
                                     const allCompleted = eveningTasks.length > 0 && eveningTasks.every(task => task === true);
                                     routineData[entry.date] = allCompleted ? 1 : 0;
                                     console.log(`📅 ${entry.date}: Evening tasks:`, eveningTasks, 'All completed:', allCompleted);
