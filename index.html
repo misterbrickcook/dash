@@ -4401,7 +4401,11 @@
             background: var(--bg-primary);
             margin: 0.25rem;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+        }
+        
+        .textsnippet-item:hover .delete-icon {
+            opacity: 1;
         }
         
         .textsnippet-item:hover {
@@ -12506,23 +12510,19 @@
                                 <i data-lucide="clipboard-list" style="width: 16px; height: 16px;"></i>
                                 <span class="textsnippet-text">${snippet.title}</span>
                                 <span class="textsnippet-copy-feedback">Kopiert!</span>
+                                <div class="delete-icon" onclick="event.stopPropagation(); ResourceManager.deleteTextSnippet('${snippet.id}')" title="Löschen">
+                                    <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                                </div>
                             </div>
                         `;
                     }).join('');
                     
                     // Add click event listeners after rendering
                     container.querySelectorAll('.textsnippet-item').forEach(item => {
-                        // Left click = copy
+                        // Click = copy (delete icon has its own click handler to prevent bubbling)
                         item.addEventListener('click', () => {
                             const text = item.querySelector('.textsnippet-text').textContent;
                             this.copyToClipboard(text, item);
-                        });
-                        
-                        // Right click = delete
-                        item.addEventListener('contextmenu', (e) => {
-                            e.preventDefault();
-                            const snippetId = item.dataset.id;
-                            this.deleteTextSnippet(snippetId);
                         });
                     });
                     
