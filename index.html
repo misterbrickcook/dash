@@ -17322,11 +17322,14 @@
 
                     const routineData = {};
                     if (result?.data) {
-                        result.data.forEach(entry => {
+                        result.data.forEach((entry, index) => {
+                            console.log(`🔍 Processing entry ${index}:`, entry);
                             try {
                                 const data = typeof entry.routine_data === 'string' 
                                     ? JSON.parse(entry.routine_data) 
                                     : entry.routine_data;
+                                
+                                console.log(`📋 Parsed data for ${entry.date}:`, data);
                                 
                                 if (data && data.morning) {
                                     // Check if all morning tasks are completed
@@ -17367,11 +17370,14 @@
 
                     const routineData = {};
                     if (result?.data) {
-                        result.data.forEach(entry => {
+                        result.data.forEach((entry, index) => {
+                            console.log(`🔍 Processing entry ${index}:`, entry);
                             try {
                                 const data = typeof entry.routine_data === 'string' 
                                     ? JSON.parse(entry.routine_data) 
                                     : entry.routine_data;
+                                
+                                console.log(`📋 Parsed data for ${entry.date}:`, data);
                                 
                                 if (data && data.evening) {
                                     // Check if all evening tasks are completed
