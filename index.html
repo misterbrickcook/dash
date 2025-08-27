@@ -17306,7 +17306,13 @@
 
             async generateMorningRoutineHeatmapData() {
                 try {
-                    const user = await window.supabase.getUser();
+                    // Check if supabase is available and user is authenticated
+                    if (!window.supabase?.isAuthenticated()) {
+                        console.warn('No supabase or user not authenticated for morning routine heatmap');
+                        return {};
+                    }
+                    
+                    const user = window.supabase.user;
                     if (!user) return {};
 
                     const result = await window.supabase.query(
@@ -17345,7 +17351,13 @@
 
             async generateEveningRoutineHeatmapData() {
                 try {
-                    const user = await window.supabase.getUser();
+                    // Check if supabase is available and user is authenticated
+                    if (!window.supabase?.isAuthenticated()) {
+                        console.warn('No supabase or user not authenticated for evening routine heatmap');
+                        return {};
+                    }
+                    
+                    const user = window.supabase.user;
                     if (!user) return {};
 
                     const result = await window.supabase.query(
