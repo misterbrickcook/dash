@@ -17322,28 +17322,48 @@
 
                     const routineData = {};
                     if (result?.data) {
-                        result.data.forEach((entry, index) => {
-                            console.log(`🔍 Processing entry ${index}:`, entry);
+                        console.log('📊 Total entries to process:', result.data.length);
+                        
+                        for (let i = 0; i < result.data.length; i++) {
+                            const entry = result.data[i];
+                            console.log(`🔍 Processing entry ${i}:`, entry);
+                            
+                            if (!entry.routine_data) {
+                                console.warn(`⚠️ No routine_data for entry ${i}:`, entry);
+                                continue;
+                            }
+                            
                             try {
-                                const data = typeof entry.routine_data === 'string' 
-                                    ? JSON.parse(entry.routine_data) 
-                                    : entry.routine_data;
+                                let data;
+                                if (typeof entry.routine_data === 'string') {
+                                    console.log(`📝 Parsing string data for ${entry.date}`);
+                                    data = JSON.parse(entry.routine_data);
+                                } else {
+                                    console.log(`📦 Using object data for ${entry.date}`);
+                                    data = entry.routine_data;
+                                }
                                 
-                                console.log(`📋 Parsed data for ${entry.date}:`, data);
+                                console.log(`📋 Parsed data structure for ${entry.date}:`, data);
+                                console.log(`📋 Available keys in data:`, Object.keys(data));
                                 
                                 // Access nested data structure: data[date].morning
                                 const dayData = data[entry.date];
+                                console.log(`🗓️ Day data for ${entry.date}:`, dayData);
+                                
                                 if (dayData && dayData.morning) {
-                                    // Check if all morning tasks are completed
                                     const morningTasks = Object.values(dayData.morning);
                                     const allCompleted = morningTasks.length > 0 && morningTasks.every(task => task === true);
                                     routineData[entry.date] = allCompleted ? 1 : 0;
                                     console.log(`📅 ${entry.date}: Morning tasks:`, morningTasks, 'All completed:', allCompleted);
+                                } else {
+                                    console.warn(`❓ No morning data found for ${entry.date}. DayData:`, dayData);
                                 }
                             } catch (parseError) {
-                                console.warn('❌ Error parsing routine data for date:', entry.date, parseError);
+                                console.error('❌ Error parsing routine data for date:', entry.date, parseError);
+                                console.error('❌ Raw entry that failed:', entry);
+                                console.error('❌ Stack:', parseError.stack);
                             }
-                        });
+                        }
                     }
 
                     console.log('📊 Final morning routine data:', routineData);
@@ -17372,6 +17392,7 @@
 
                     const routineData = {};
                     if (result?.data) {
+                        console.log('📊 Total entries to process:', result.data.length);
                         result.data.forEach((entry, index) => {
                             console.log(`🔍 Processing entry ${index}:`, entry);
                             try {
@@ -17391,7 +17412,8 @@
                                     console.log(`📅 ${entry.date}: Evening tasks:`, eveningTasks, 'All completed:', allCompleted);
                                 }
                             } catch (parseError) {
-                                console.warn('❌ Error parsing routine data for date:', entry.date, parseError);
+                                console.error('❌ Error parsing routine data for date:', entry.date, parseError);
+                                console.error('❌ Raw entry that failed:', entry);
                             }
                         });
                     }
