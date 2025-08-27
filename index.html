@@ -4377,6 +4377,49 @@
             border-color: #000000;
             color: #000000;
         }
+        
+        /* === RESOURCES SEPARATOR === */
+        .resources-separator {
+            border: none;
+            border-top: 1px solid var(--border-primary);
+            margin: 2rem 0;
+        }
+        
+        /* === TEXT SNIPPETS === */
+        .textsnippet-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-primary);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .textsnippet-item:hover {
+            background-color: var(--bg-secondary);
+        }
+        
+        .textsnippet-item:last-child {
+            border-bottom: none;
+        }
+        
+        .textsnippet-text {
+            flex: 1;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        
+        .textsnippet-copy-feedback {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .textsnippet-copy-feedback.show {
+            opacity: 1;
+        }
 
         .resource-links {
             padding: 1.25rem;
@@ -7016,13 +7059,22 @@
                 </div>
             </div> <!-- end resources-grid -->
 
-            <!-- QUICK NOTES SECTION -->
-            <div class="quicknotes-section">
-                <div class="quicknotes-header">
-                    <h3>Quick Notes</h3>
+            <!-- SEPARATOR LINE -->
+            <hr class="resources-separator">
+            
+            <!-- TEXT SNIPPETS SECTION -->
+            <div class="resource-block">
+                <div class="resource-block-header">
+                    <h3>
+                        <i data-lucide="clipboard-list" style="width: 18px; height: 18px;"></i>
+                        Text Snippets
+                    </h3>
+                    <button id="add-textsnippet-btn" class="resource-add-btn" title="Text Snippet hinzufügen">
+                        <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                    </button>
                 </div>
-                <div class="quicknotes-content">
-                    <textarea id="quicknotes-textarea" placeholder="Notizen hier eingeben..."></textarea>
+                <div class="resource-links" id="resource-textsnippets">
+                    <!-- Text snippets will be loaded here -->
                 </div>
             </div>
 
@@ -12079,17 +12131,23 @@
             // === RESOURCE MANAGER ===
             const ResourceManager = {
                 resources: [],
+                textsnippets: [],
                 
                 async loadResources() {
                     if (!supabase?.isAuthenticated()) {
                         window.logAuthWarning('ResourceManager');
                         this.resources = [];
+                        this.textsnippets = [];
                         this.renderResources();
                         return;
                     }
                     
                     try {
                         this.resources = await cloudStorage.getResources() || [];
+                        
+                        // Filter text snippets from regular resources
+                        this.textsnippets = this.resources.filter(resource => resource.category === 'textsnippets');
+                        this.resources = this.resources.filter(resource => resource.category !== 'textsnippets');
                         
                         // Migrate old emoji icons to lucide icons (one-time migration)
                         this.migrateEmojiIcons();
@@ -12108,6 +12166,7 @@
                     this.displayResourcesForCategory('crypto'); 
                     this.displayResourcesForCategory('arbeit');
                     this.displayResourcesForCategory('uni');
+                    this.renderTextSnippets();
                 },
                 
                 displayResourcesForCategory(category) {
@@ -12400,6 +12459,114 @@
                     }
                 },
                 
+                // === TEXT SNIPPETS FUNCTIONALITY ===
+                
+                async loadTextSnippets() {
+                    if (!supabase?.isAuthenticated()) {
+                        this.textsnippets = [];
+                        this.renderTextSnippets();
+                        return;
+                    }
+                    
+                    try {
+                        // Load text snippets from resources table with special category
+                        const allResources = await cloudStorage.getResources() || [];
+                        this.textsnippets = allResources.filter(resource => resource.category === 'textsnippets');
+                        this.renderTextSnippets();
+                    } catch (error) {
+                        console.error('❌ Error loading text snippets:', error);
+                        this.textsnippets = [];
+                        this.renderTextSnippets();
+                    }
+                },
+                
+                renderTextSnippets() {
+                    const container = document.getElementById('resource-textsnippets');
+                    if (!container) return;
+                    
+                    if (this.textsnippets.length === 0) {
+                        container.innerHTML = '<div class="no-resources">Noch keine Text Snippets vorhanden</div>';
+                        return;
+                    }
+                    
+                    container.innerHTML = this.textsnippets.map(snippet => {
+                        const escapedText = snippet.title.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                        return `
+                            <div class="textsnippet-item" data-id="${snippet.id}">
+                                <span class="textsnippet-text">${snippet.title}</span>
+                                <span class="textsnippet-copy-feedback">Kopiert!</span>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    // Add click event listeners after rendering
+                    container.querySelectorAll('.textsnippet-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const text = item.querySelector('.textsnippet-text').textContent;
+                            this.copyToClipboard(text, item);
+                        });
+                    });
+                },
+                
+                async copyToClipboard(text, element) {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        
+                        // Show feedback
+                        const feedback = element.querySelector('.textsnippet-copy-feedback');
+                        if (feedback) {
+                            feedback.classList.add('show');
+                            setTimeout(() => {
+                                feedback.classList.remove('show');
+                            }, 1500);
+                        }
+                    } catch (error) {
+                        console.error('❌ Failed to copy to clipboard:', error);
+                        // Fallback for older browsers
+                        const textArea = document.createElement('textarea');
+                        textArea.value = text;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                    }
+                },
+                
+                async addTextSnippet() {
+                    const text = prompt('Text Snippet eingeben:');
+                    if (!text || text.trim() === '') return;
+                    
+                    const snippet = {
+                        title: text.trim(),
+                        description: 'Text Snippet',
+                        url: '', // Empty URL for text snippets
+                        category: 'textsnippets',
+                        icon: 'clipboard-list'
+                    };
+                    
+                    try {
+                        await cloudStorage.saveResource(snippet);
+                        this.textsnippets.push(snippet);
+                        this.renderTextSnippets();
+                    } catch (error) {
+                        console.error('❌ Error adding text snippet:', error);
+                        alert('Fehler beim Hinzufügen des Text Snippets');
+                    }
+                },
+                
+                async deleteTextSnippet(id) {
+                    if (!confirm('Text Snippet wirklich löschen?')) return;
+                    
+                    try {
+                        await cloudStorage.deleteResource(id);
+                        this.textsnippets = this.textsnippets.filter(s => s.id !== id);
+                        this.renderTextSnippets();
+                    } catch (error) {
+                        console.error('❌ Error deleting text snippet:', error);
+                        alert('Fehler beim Löschen des Text Snippets');
+                    }
+                }
+                
             };
             
             // Make ResourceManager global
@@ -12407,6 +12574,14 @@
             
             // Initialize ResourceManager now that it's properly defined
             ResourceManager.loadResources();
+            
+            // Add event listener for text snippet add button
+            const addTextSnippetBtn = document.getElementById('add-textsnippet-btn');
+            if (addTextSnippetBtn) {
+                addTextSnippetBtn.addEventListener('click', () => {
+                    ResourceManager.addTextSnippet();
+                });
+            }
 
             // === TRADING RULES MANAGER ===
             const TradingRulesManager = {
