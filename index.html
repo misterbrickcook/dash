@@ -1776,6 +1776,15 @@
             animation: confettiPulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
+        .streak-tile.updating {
+            animation: updating-pulse 1s ease-in-out;
+        }
+        
+        @keyframes updating-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.02); opacity: 0.8; border-color: #3b82f6; }
+        }
+        
         @keyframes confettiPulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -6393,7 +6402,7 @@
                         <div class="streak-number">0</div>
                         <div class="streak-label">Todos Erledigt</div>
                     </div>
-                    <div class="streak-tile">
+                    <div class="streak-tile" onclick="window.SimpleCounters.updateAllCounters(); this.classList.add('updating'); setTimeout(() => this.classList.remove('updating'), 1000)">
                         <div class="streak-number">0.00</div>
                         <div class="streak-label">SOL Balance</div>
                         <div class="streak-date">Live</div>
