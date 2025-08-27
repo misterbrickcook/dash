@@ -7499,6 +7499,28 @@
         </div>
     </div>
 
+    <!-- Add Text Snippet Modal -->
+    <div id="add-textsnippet-modal" class="modal hide">
+        <div class="modal-content">
+            <button class="close" onclick="ResourceManager.hideAddTextSnippetModal()">×</button>
+            <h2>Text Snippet</h2>
+            
+            <div class="modal-body">
+                <form id="add-textsnippet-form">
+                    <div class="form-group">
+                        <label for="textsnippet-text">Text *</label>
+                        <textarea id="textsnippet-text" placeholder="Text Snippet eingeben..." required autocomplete="off" rows="4"></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" onclick="ResourceManager.hideAddTextSnippetModal()" class="btn secondary">Abbrechen</button>
+                        <button type="submit" class="btn">Hinzufügen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="supabase-config.js"></script>
     <script src="cloud-storage.js"></script>
@@ -12594,8 +12616,30 @@
                     }
                 },
                 
-                async addTextSnippet() {
-                    const text = prompt('Text Snippet eingeben:');
+                showAddTextSnippetModal() {
+                    const modal = document.getElementById('add-textsnippet-modal');
+                    modal.classList.remove('hide');
+                    // Focus the textarea
+                    setTimeout(() => {
+                        const textInput = document.getElementById('textsnippet-text');
+                        if (textInput) textInput.focus();
+                    }, 100);
+                },
+                
+                hideAddTextSnippetModal() {
+                    const modal = document.getElementById('add-textsnippet-modal');
+                    modal.classList.add('hide');
+                    document.getElementById('add-textsnippet-form').reset();
+                },
+                
+                async addTextSnippet(text = null) {
+                    // If called with text parameter (from form), use it directly
+                    // If called without text (from old button), show modal
+                    if (!text) {
+                        this.showAddTextSnippetModal();
+                        return;
+                    }
+                    
                     if (!text || text.trim() === '') return;
                     
                     const snippet = {
@@ -12610,6 +12654,7 @@
                         await cloudStorage.saveResource(snippet);
                         this.textsnippets.push(snippet);
                         this.renderTextSnippets();
+                        this.hideAddTextSnippetModal();
                     } catch (error) {
                         console.error('❌ Error adding text snippet:', error);
                         alert('Fehler beim Hinzufügen des Text Snippets');
@@ -13517,6 +13562,23 @@
                 });
             }
             
+            // Add Text Snippet Form Submission
+            const addTextSnippetForm = document.getElementById('add-textsnippet-form');
+            if (addTextSnippetForm) {
+                addTextSnippetForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const textData = document.getElementById('textsnippet-text').value.trim();
+                    
+                    if (!textData) {
+                        alert('Bitte geben Sie einen Text ein');
+                        return;
+                    }
+                    
+                    await ResourceManager.addTextSnippet(textData);
+                });
+            }
+            
             // === TRADING RULES EVENT LISTENERS ===
             
             // Add Trading Rule Button
@@ -13578,6 +13640,16 @@
                 addResourceModal.addEventListener('click', (e) => {
                     if (e.target === addResourceModal) {
                         ResourceManager.hideAddResourceModal();
+                    }
+                });
+            }
+            
+            // Close text snippet modal when clicking outside
+            const addTextSnippetModal = document.getElementById('add-textsnippet-modal');
+            if (addTextSnippetModal) {
+                addTextSnippetModal.addEventListener('click', (e) => {
+                    if (e.target === addTextSnippetModal) {
+                        ResourceManager.hideAddTextSnippetModal();
                     }
                 });
             }
