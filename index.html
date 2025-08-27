@@ -1788,96 +1788,74 @@
         /* === DAILY SPORT SECTION === */
         .daily-sport-section {
             margin: 2rem 0;
-            animation: slideInFromTop 0.5s ease-out;
         }
         
         .sport-question-card {
-            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
             padding: 1.5rem;
-            border-radius: 12px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 1rem;
-            box-shadow: 0 4px 20px rgba(255, 107, 107, 0.2);
-            transition: all 0.3s ease;
-            max-width: 500px;
-            margin: 0 auto;
+            transition: all 0.2s ease;
         }
         
         .sport-question-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(255, 107, 107, 0.3);
+            border-color: #000000;
+        }
+        
+        .sport-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
         
         .sport-icon {
-            font-size: 2.5rem;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 1.25rem;
         }
         
-        .sport-content {
-            flex: 1;
-            color: white;
-        }
-        
-        .sport-content h3 {
-            margin: 0 0 1rem 0;
-            font-size: 1.2rem;
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        .sport-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
         }
         
         .sport-actions {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.5rem;
         }
         
         .sport-btn {
             padding: 0.5rem 1rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border-radius: 8px;
+            border: 1px solid var(--border-primary);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             cursor: pointer;
             transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
         }
         
         .sport-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-1px);
+            border-color: #000000;
+            color: #000000;
         }
         
         .sport-btn.sport-yes:hover {
-            background: rgba(0, 255, 0, 0.2);
-            border-color: rgba(0, 255, 0, 0.5);
-        }
-        
-        .sport-btn.sport-no:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: #000000;
+            color: #ffffff;
         }
         
         .daily-sport-section.hidden {
             opacity: 0;
-            transform: translateY(-20px);
             max-height: 0;
             margin: 0;
             overflow: hidden;
             transition: all 0.3s ease;
-        }
-        
-        @keyframes slideInFromTop {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
         
         @keyframes confettiPulse {
@@ -6508,13 +6486,13 @@
             <!-- Daily Sport Question (appears until answered) -->
             <section id="daily-sport-container" class="daily-sport-section">
                 <div class="sport-question-card">
-                    <div class="sport-icon">💪</div>
-                    <div class="sport-content">
-                        <h3>Hast du heute Sport gemacht?</h3>
-                        <div class="sport-actions">
-                            <button class="sport-btn sport-no" onclick="window.SportManager?.markSportCompleted(false)">Nein</button>
-                            <button class="sport-btn sport-yes" onclick="window.SportManager?.markSportCompleted(true)">Ja! 🔥</button>
-                        </div>
+                    <div class="sport-left">
+                        <div class="sport-icon">💪</div>
+                        <div class="sport-text">Hast du heute Sport gemacht?</div>
+                    </div>
+                    <div class="sport-actions">
+                        <button class="sport-btn sport-no" onclick="window.SportManager?.markSportCompleted(false)">Nein</button>
+                        <button class="sport-btn sport-yes" onclick="window.SportManager?.markSportCompleted(true)">Ja</button>
                     </div>
                 </div>
             </section>
@@ -19632,32 +19610,38 @@
             }
             
             showSuccessFeedback() {
-                // Create temporary success message
+                // Create temporary success message - minimal style
                 const feedback = document.createElement('div');
                 feedback.style.cssText = `
                     position: fixed;
                     top: 2rem;
                     right: 2rem;
-                    background: linear-gradient(135deg, #4CAF50, #45a049);
-                    color: white;
-                    padding: 1rem 2rem;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+                    background: var(--bg-primary);
+                    color: var(--text-primary);
+                    border: 1px solid #000000;
+                    padding: 0.75rem 1.5rem;
                     z-index: 10000;
-                    font-weight: 600;
-                    animation: slideInRight 0.3s ease-out;
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
                 `;
-                feedback.innerHTML = '🔥 Sport erledigt! Gut gemacht!';
+                feedback.innerHTML = 'Sport erledigt';
                 
                 document.body.appendChild(feedback);
                 
-                // Remove after 3 seconds
+                // Fade in
                 setTimeout(() => {
-                    feedback.style.animation = 'slideOutRight 0.3s ease-in';
+                    feedback.style.opacity = '1';
+                }, 10);
+                
+                // Remove after 2 seconds
+                setTimeout(() => {
+                    feedback.style.opacity = '0';
                     setTimeout(() => {
                         feedback.remove();
                     }, 300);
-                }, 3000);
+                }, 2000);
             }
         }
         
