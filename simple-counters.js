@@ -270,7 +270,7 @@ class SimpleCounters {
                     id: 1,
                     method: "getBalance",
                     params: [
-                        "4vChGDq5TgpceVBEiY7BAEXd2AaK7gtBJzwZzbrdrrQM" // Your wallet address
+                        "2yJ7C9UMrfPeM1o1Nn89U9PbiAiXMk4q9VmdYosYUvmW" // Your wallet address
                     ]
                 })
             });
