@@ -4404,9 +4404,6 @@
             overflow: visible;
         }
         
-        .textsnippet-item:hover .delete-icon {
-            opacity: 1;
-        }
         
         .textsnippet-item:hover {
             border-color: #000000;
@@ -4483,6 +4480,16 @@
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 1px 4px rgba(220, 38, 38, 0.3);
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            opacity: 0;
+            z-index: 10;
+        }
+        
+        .delete-icon.show {
+            opacity: 1;
+            animation: fadeIn 0.2s ease;
         }
 
         .delete-icon:hover {
@@ -12517,14 +12524,44 @@
                         `;
                     }).join('');
                     
-                    // Add click event listeners after rendering
+                    // Add click and context menu event listeners after rendering
                     container.querySelectorAll('.textsnippet-item').forEach(item => {
-                        // Click = copy (delete icon has its own click handler to prevent bubbling)
-                        item.addEventListener('click', () => {
-                            const text = item.querySelector('.textsnippet-text').textContent;
-                            this.copyToClipboard(text, item);
+                        // Left click = copy (only if not clicking delete button)
+                        item.addEventListener('click', (e) => {
+                            if (!e.target.closest('.delete-icon')) {
+                                const text = item.querySelector('.textsnippet-text').textContent;
+                                this.copyToClipboard(text, item);
+                            }
+                        });
+                        
+                        // Right click = show delete button
+                        item.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            
+                            // Hide all other delete buttons first
+                            document.querySelectorAll('.textsnippet-item .delete-icon').forEach(icon => {
+                                icon.classList.remove('show');
+                            });
+                            
+                            // Show this item's delete button
+                            const deleteIcon = item.querySelector('.delete-icon');
+                            if (deleteIcon) {
+                                deleteIcon.classList.add('show');
+                            }
                         });
                     });
+                    
+                    // Add global click handler to hide delete buttons when clicking outside (only once)
+                    if (!this.textsnippetClickHandlerAdded) {
+                        document.addEventListener('click', (e) => {
+                            if (!e.target.closest('.textsnippet-item')) {
+                                document.querySelectorAll('.textsnippet-item .delete-icon').forEach(icon => {
+                                    icon.classList.remove('show');
+                                });
+                            }
+                        });
+                        this.textsnippetClickHandlerAdded = true;
+                    }
                     
                     // Initialize Lucide icons for text snippets
                     if (window.lucide) {
