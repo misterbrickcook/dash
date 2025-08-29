@@ -255,10 +255,9 @@
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
             border-radius: 8px;
-            padding: 1rem;
+            padding: 0;
             display: flex;
             align-items: flex-start;
-            gap: 0.75rem;
             transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
@@ -279,13 +278,14 @@
             top: 0;
             right: 0;
             bottom: 0;
-            width: 80px;
+            width: 60px;
             background: var(--accent-danger);
             display: flex;
             align-items: center;
             justify-content: center;
-            transform: translateX(80px);
+            transform: translateX(60px);
             transition: transform 0.2s ease;
+            border-radius: 0 8px 8px 0;
         }
         
         .item.swiped .item-swipe-actions {
@@ -308,6 +308,11 @@
         .item-content {
             flex: 1;
             min-width: 0;
+            position: relative;
+            z-index: 2;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 1rem;
             transition: transform 0.2s ease;
             transform: translateX(0);
         }
@@ -1110,7 +1115,7 @@
                 let currentX = 0;
                 let isSwiping = false;
                 let startTime = 0;
-                const swipeThreshold = 80;
+                const swipeThreshold = 60; // Reduced so text stays visible
                 const velocityThreshold = 0.3;
                 
                 itemElement.addEventListener('touchstart', (e) => {
