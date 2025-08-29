@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Brain Dump Mobile v4.2 - LIVE STATUS</title>
+    <title>Brain Dump Mobile v4.3 - LIVE STATUS + LONG PRESS EDIT</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -164,6 +164,105 @@
         
         .status-error .status-icon {
             color: var(--accent-danger);
+        }
+        
+        /* === EDIT MODE === */
+        .edit-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .edit-modal {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-primary);
+            border-radius: 0;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .edit-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-primary);
+            padding-bottom: 1rem;
+        }
+        
+        .edit-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .edit-close {
+            background: none;
+            border: 1px solid var(--border-primary);
+            border-radius: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+        
+        .edit-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 0.75rem;
+            border: 1px solid var(--border-primary);
+            border-radius: 0;
+            background: var(--bg-secondary);
+            font-family: inherit;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: vertical;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .edit-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+        
+        .edit-btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--border-primary);
+            border-radius: 0;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .edit-btn-cancel {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        .edit-btn-save {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+        
+        .edit-btn:hover {
+            opacity: 0.8;
         }
         
         /* === MAIN CONTENT === */
@@ -803,6 +902,33 @@
             </div>
         </section>
     </main>
+
+    <!-- Edit Modal -->
+    <div id="edit-mode" class="edit-mode hidden">
+        <div class="edit-modal">
+            <div class="edit-header">
+                <div class="edit-title">
+                    <i data-lucide="edit-3" style="width: 16px; height: 16px; margin-right: 0.5rem;"></i>
+                    Edit Item
+                </div>
+                <button class="edit-close" onclick="app.closeEditMode()">
+                    <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+            
+            <textarea id="edit-textarea" class="edit-textarea" placeholder="Edit your note..."></textarea>
+            
+            <div class="edit-actions">
+                <button class="edit-btn edit-btn-cancel" onclick="app.closeEditMode()">
+                    Cancel
+                </button>
+                <button class="edit-btn edit-btn-save" onclick="app.saveEditedItem()">
+                    <i data-lucide="save" style="width: 14px; height: 14px; margin-right: 0.5rem;"></i>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // === ULTRA FAST MOBILE BRAIN DUMP ===
@@ -1669,18 +1795,46 @@
                 let currentX = 0;
                 let isSwiping = false;
                 let startTime = 0;
-                const swipeThreshold = 60; // Reduced so text stays visible
+                let longPressTimer = null;
+                let longPressTriggered = false;
+                const swipeThreshold = 60;
                 const velocityThreshold = 0.3;
+                const longPressDelay = 800; // 800ms for long press
                 
                 itemElement.addEventListener('touchstart', (e) => {
                     startX = e.touches[0].clientX;
                     startTime = Date.now();
                     isSwiping = true;
+                    longPressTriggered = false;
                     itemElement.classList.add('swiping');
+                    
+                    // Start long press timer
+                    const itemId = itemElement.dataset.id;
+                    const itemText = itemElement.querySelector('.item-text').textContent;
+                    
+                    longPressTimer = setTimeout(() => {
+                        if (isSwiping && !longPressTriggered) {
+                            longPressTriggered = true;
+                            this.hapticFeedback('medium'); // Strong haptic for long press
+                            this.openEditMode(itemId, itemText);
+                            
+                            // Cancel swipe
+                            isSwiping = false;
+                            itemElement.classList.remove('swiping', 'swiped');
+                            const itemContent = itemElement.querySelector('.item-content');
+                            itemContent.style.transform = 'translateX(0)';
+                        }
+                    }, longPressDelay);
                 }, { passive: true });
                 
                 itemElement.addEventListener('touchmove', (e) => {
-                    if (!isSwiping) return;
+                    if (!isSwiping || longPressTriggered) return;
+                    
+                    // Clear long press timer if user moves finger
+                    if (longPressTimer) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                    }
                     
                     currentX = e.touches[0].clientX;
                     const deltaX = startX - currentX; // Positive = swipe left
@@ -1708,6 +1862,18 @@
                 itemElement.addEventListener('touchend', (e) => {
                     if (!isSwiping) return;
                     
+                    // Clear long press timer
+                    if (longPressTimer) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                    }
+                    
+                    // Skip swipe logic if long press was triggered
+                    if (longPressTriggered) {
+                        isSwiping = false;
+                        return;
+                    }
+                    
                     const deltaX = startX - currentX;
                     const deltaTime = Date.now() - startTime;
                     const velocity = Math.abs(deltaX) / deltaTime;
@@ -1730,6 +1896,7 @@
                     isSwiping = false;
                     startX = 0;
                     currentX = 0;
+                    longPressTriggered = false;
                 }, { passive: true });
                 
                 // Close swipe when tapping elsewhere
@@ -1812,6 +1979,94 @@
                 const itemsSection = document.querySelector('.items-section');
                 itemsSection.classList.add('appear');
                 setTimeout(() => itemsSection.classList.remove('appear'), 400);
+            }
+            
+            // === EDIT MODE ===
+            openEditMode(itemId, currentText) {
+                this.editingItemId = itemId;
+                
+                const editMode = document.getElementById('edit-mode');
+                const editTextarea = document.getElementById('edit-textarea');
+                
+                editTextarea.value = currentText;
+                editMode.classList.remove('hidden');
+                
+                // Focus textarea and select all text
+                setTimeout(() => {
+                    editTextarea.focus();
+                    editTextarea.select();
+                }, 100);
+                
+                // Update icons
+                window.updateIcons();
+                
+                this.updateLiveStatus('edit', 'Edit mode active');
+            }
+            
+            closeEditMode() {
+                const editMode = document.getElementById('edit-mode');
+                editMode.classList.add('hidden');
+                this.editingItemId = null;
+                
+                this.updateLiveStatus('ready', 'Edit cancelled');
+            }
+            
+            async saveEditedItem() {
+                if (!this.editingItemId) return;
+                
+                const editTextarea = document.getElementById('edit-textarea');
+                const newText = editTextarea.value.trim();
+                
+                if (!newText) {
+                    this.updateLiveStatus('error', 'Text cannot be empty');
+                    return;
+                }
+                
+                // Find and update the item
+                const itemIndex = this.items.findIndex(item => item.id == this.editingItemId);
+                if (itemIndex >= 0) {
+                    this.items[itemIndex].text = newText;
+                    
+                    // Save offline
+                    this.saveOfflineItems();
+                    
+                    // Update UI
+                    this.renderItems();
+                    
+                    // Sync to database if online
+                    if (this.isOnline) {
+                        this.updateLiveStatus('syncing', 'Updating item...');
+                        await this.updateItemInDatabase(this.editingItemId, newText);
+                    }
+                    
+                    this.closeEditMode();
+                    this.updateLiveStatus('success', 'Item updated!');
+                    
+                    // Haptic feedback
+                    this.hapticFeedback('light');
+                }
+            }
+            
+            async updateItemInDatabase(itemId, newText) {
+                try {
+                    const response = await fetch(`${this.supabaseUrl}/rest/v1/todos?id=eq.${itemId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': this.supabaseKey,
+                            'Authorization': `Bearer ${this.session.access_token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: newText })
+                    });
+                    
+                    if (response.ok) {
+                        this.updateLiveStatus('success', 'Updated in DB');
+                    } else {
+                        this.updateLiveStatus('error', 'DB update failed');
+                    }
+                } catch (error) {
+                    this.updateLiveStatus('error', 'Connection failed');
+                }
             }
             
             // === LIVE STATUS SYSTEM ===
