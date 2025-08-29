@@ -884,6 +884,9 @@
                     this.syncQueue.push(item);
                 }
                 
+                // Notify desktop about new brain dump
+                this.notifyDesktop(item);
+                
                 console.log('🎙️ Voice item added successfully!');
             }
             
@@ -1245,6 +1248,9 @@
                 } else {
                     this.syncQueue.push(item);
                 }
+                
+                // Notify desktop about new brain dump
+                this.notifyDesktop(item);
             }
             
             async syncItem(item) {
@@ -1514,6 +1520,36 @@
                             button.style.transform = '';
                         }, 100);
                     }
+                }
+            }
+            
+            notifyDesktop(item) {
+                try {
+                    // Method 1: localStorage sync (for cross-tab communication)
+                    const notification = {
+                        type: 'NEW_BRAIN_DUMP',
+                        source: 'mobile',
+                        item: item,
+                        timestamp: Date.now()
+                    };
+                    
+                    localStorage.setItem('brain_dump_sync', JSON.stringify(notification));
+                    
+                    // Clean up after 1 second
+                    setTimeout(() => {
+                        localStorage.removeItem('brain_dump_sync');
+                    }, 1000);
+                    
+                    // Method 2: BroadcastChannel (modern browsers)
+                    if ('BroadcastChannel' in window) {
+                        const channel = new BroadcastChannel('brain_dump_updates');
+                        channel.postMessage(notification);
+                        channel.close();
+                    }
+                    
+                    console.log('📡 Desktop notified about new brain dump');
+                } catch (error) {
+                    console.log('📡 Failed to notify desktop');
                 }
             }
         }
