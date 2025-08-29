@@ -1278,7 +1278,8 @@
             
             async syncItem(item) {
                 try {
-                    await fetch(`${this.supabaseUrl}/rest/v1/todos`, {
+                    this.showDebug('💾 Saving to DB...');
+                    const response = await fetch(`${this.supabaseUrl}/rest/v1/todos`, {
                         method: 'POST',
                         headers: {
                             'apikey': this.supabaseKey,
@@ -1287,7 +1288,17 @@
                         },
                         body: JSON.stringify(item)
                     });
+                    
+                    if (response.ok) {
+                        this.showDebug('💾 DB Save ✅');
+                        console.log('✅ Item saved to database successfully');
+                    } else {
+                        const errorText = await response.text();
+                        this.showDebug('💾 DB Save ❌');
+                        console.log('❌ Database save failed:', response.status, errorText);
+                    }
                 } catch (error) {
+                    this.showDebug('💾 DB Error');
                     console.log('Sync failed, queuing for later');
                     this.syncQueue.push(item);
                 }
