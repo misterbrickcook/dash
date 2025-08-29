@@ -713,7 +713,11 @@
                 if (!SpeechRecognition) {
                     console.log('🎙️ Speech Recognition not supported');
                     const voiceBtn = document.getElementById('voice-btn');
-                    voiceBtn.style.display = 'none';
+                    if (voiceBtn) {
+                        voiceBtn.style.opacity = '0.5';
+                        voiceBtn.title = 'Spracherkennung nicht verfügbar';
+                        voiceBtn.disabled = true;
+                    }
                     return;
                 }
                 
@@ -994,13 +998,20 @@
                 
                 // Voice button
                 const voiceBtn = document.getElementById('voice-btn');
-                voiceBtn.addEventListener('click', () => {
-                    if (this.isListening) {
-                        this.recognition.stop();
-                    } else {
-                        this.startVoiceRecognition();
-                    }
-                });
+                if (voiceBtn) {
+                    voiceBtn.addEventListener('click', () => {
+                        if (!this.recognition) {
+                            alert('Spracherkennung ist in diesem Browser nicht verfügbar.');
+                            return;
+                        }
+                        
+                        if (this.isListening) {
+                            this.recognition.stop();
+                        } else {
+                            this.startVoiceRecognition();
+                        }
+                    });
+                }
                 
                 // Enter key (mobile friendly)
                 input.addEventListener('keydown', (e) => {
