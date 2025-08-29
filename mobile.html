@@ -585,6 +585,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
+            z-index: 10; /* Make sure it's above other content */
         }
         
         .brain-dump-item.delete-visible .swipe-delete-bg {
@@ -1011,7 +1012,7 @@
                 let startY = 0;
                 let currentY = 0;
                 let isPulling = false;
-                const threshold = 60;
+                const threshold = 40; // Lower threshold for faster trigger
                 
                 pullContainer.addEventListener('touchstart', (e) => {
                     if (pullContainer.scrollTop === 0) {
@@ -1488,14 +1489,16 @@
                         currentX = e.touches[0].clientX;
                         const deltaX = currentX - startX;
                         
-                        console.log('🔄 SWIPE MOVE:', deltaX, 'px');
+                        // Only log every 10px for performance
+                        if (Math.abs(deltaX) % 10 < 2) {
+                            console.log('🔄 SWIPE MOVE:', deltaX, 'px');
+                        }
                         
-                        // Only allow left swipes
-                        if (deltaX < -20) {
+                        // Only allow left swipes, with immediate response
+                        if (deltaX < -15) {
                             e.preventDefault();
                             const distance = Math.min(Math.abs(deltaX), 100);
                             item.style.transform = `translateX(-${distance}px)`;
-                            console.log('⬅️ MOVING LEFT:', distance, 'px');
                         }
                     };
                     
@@ -1521,17 +1524,26 @@
                             
                             const deleteHandler = async (e) => {
                                 e.stopPropagation();
+                                e.preventDefault();
                                 console.log('💥 DELETE CLICKED for:', todoId);
+                                
+                                // Add visual feedback
+                                deleteBtn.style.background = '#a71e2a';
+                                setTimeout(() => {
+                                    deleteBtn.style.background = '#dc3545';
+                                }, 100);
+                                
                                 await this.deleteTodo(todoId);
                             };
                             
-                            // Remove old handler if exists
-                            if (deleteBtn._handler) {
-                                deleteBtn.removeEventListener('click', deleteBtn._handler);
-                            }
+                            // Remove ALL existing event listeners by cloning the button
+                            const newDeleteBtn = deleteBtn.cloneNode(true);
+                            deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
                             
-                            deleteBtn._handler = deleteHandler;
-                            deleteBtn.addEventListener('click', deleteHandler);
+                            // Add event listener to fresh button
+                            newDeleteBtn.addEventListener('click', deleteHandler);
+                            
+                            console.log('✅ Delete handler attached to fresh button');
                             
                             // Auto-close after 4 seconds
                             setTimeout(() => {
