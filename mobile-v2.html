@@ -3,7 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>DashFin Mobile v2 - Ultra Fast</title>
+    <title>Brain Dump Mobile</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Schnelle Mobile Notizen mit Desktop Sync">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="BrainDump">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" sizes="192x192" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Ccircle cx='256' cy='256' r='256' fill='%23000'/%3E%3Ctext x='256' y='290' text-anchor='middle' fill='white' font-size='280' font-family='system-ui'%3E🧠%3C/text%3E%3C/svg%3E">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Ccircle cx='256' cy='256' r='256' fill='%23000'/%3E%3Ctext x='256' y='290' text-anchor='middle' fill='white' font-size='280' font-family='system-ui'%3E🧠%3C/text%3E%3C/svg%3E">
     <style>
         /* === MODERN MOBILE FOUNDATION === */
         :root {
@@ -1233,6 +1250,40 @@
         window.app = app; // Make globally available for onclick handlers
         
         console.log('🚀 Mobile v2.0 loaded successfully');
+        
+        // === PWA SERVICE WORKER ===
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('PWA: Service Worker registered successfully:', registration.scope);
+                    
+                    // Check for updates
+                    registration.addEventListener('updatefound', () => {
+                        console.log('PWA: New version available');
+                    });
+                } catch (error) {
+                    console.log('PWA: Service Worker registration failed:', error);
+                }
+            });
+        }
+        
+        // === PWA INSTALL PROMPT ===
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('PWA: Install prompt available');
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Could show custom install button here
+            // For now, let browser handle it
+        });
+        
+        // Track if app is installed
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA: App installed successfully');
+            deferredPrompt = null;
+        });
     </script>
 </body>
 </html>
