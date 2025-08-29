@@ -848,11 +848,10 @@
                     return;
                 }
                 
-                // Create item directly
+                // Create item directly - match desktop structure exactly
                 const item = {
-                    id: Date.now(),
                     text: transcript.trim(),
-                    category: 'braindump',
+                    category: 'braindump', 
                     priority: 2,
                     completed: false,
                     date: null,
@@ -861,10 +860,13 @@
                     created_at: new Date().toISOString()
                 };
                 
+                // Add local ID for mobile UI (not sent to database)
+                const localItem = { ...item, id: Date.now() };
+                
                 console.log('🎙️ Created voice item:', item);
                 
-                // Add to local array immediately
-                this.items.unshift(item);
+                // Add to local array immediately (with local ID for UI)
+                this.items.unshift(localItem);
                 
                 // Save offline
                 this.saveOfflineItems();
@@ -877,14 +879,14 @@
                 input.value = '';
                 input.dispatchEvent(new Event('input'));
                 
-                // Sync to database in background
+                // Sync to database in background (without local ID)
                 if (this.isOnline) {
                     this.syncItem(item);
                 } else {
                     this.syncQueue.push(item);
                 }
                 
-                // Notify desktop about new brain dump
+                // Notify desktop about new brain dump (with database structure)
                 this.notifyDesktop(item);
                 
                 console.log('🎙️ Voice item added successfully!');
@@ -1216,9 +1218,8 @@
                 // Haptic feedback (iOS)
                 this.hapticFeedback('light');
                 
-                // Create item
+                // Create item - match desktop structure exactly
                 const item = {
-                    id: Date.now(),
                     text: text,
                     category: 'braindump',
                     priority: 2,
@@ -1229,8 +1230,11 @@
                     created_at: new Date().toISOString()
                 };
                 
+                // Add local ID for mobile UI
+                const localItem = { ...item, id: Date.now() };
+                
                 // Add to local array immediately
-                this.items.unshift(item);
+                this.items.unshift(localItem);
                 
                 // Save offline
                 this.saveOfflineItems();
@@ -1533,6 +1537,8 @@
                         timestamp: Date.now()
                     };
                     
+                    console.log('📡 Notifying desktop with:', notification);
+                    
                     localStorage.setItem('brain_dump_sync', JSON.stringify(notification));
                     
                     // Clean up after 1 second
@@ -1545,11 +1551,12 @@
                         const channel = new BroadcastChannel('brain_dump_updates');
                         channel.postMessage(notification);
                         channel.close();
+                        console.log('📡 BroadcastChannel message sent');
                     }
                     
-                    console.log('📡 Desktop notified about new brain dump');
+                    console.log('📡 Desktop notification complete');
                 } catch (error) {
-                    console.log('📡 Failed to notify desktop');
+                    console.log('📡 Failed to notify desktop:', error);
                 }
             }
         }
