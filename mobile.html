@@ -1287,7 +1287,7 @@
                         return;
                     }
                     
-                    const response = await fetch(`${this.supabaseUrl}/rest/v1/todos`, {
+                    let response = await fetch(`${this.supabaseUrl}/rest/v1/todos`, {
                         method: 'POST',
                         headers: {
                             'apikey': this.supabaseKey,
@@ -1297,6 +1297,26 @@
                         body: JSON.stringify(item)
                     });
                     
+                    // If 401 (token expired), try to refresh token and retry once
+                    if (response.status === 401) {
+                        this.showDebug('🔄 Token Expired');
+                        console.log('🔄 Token expired, attempting refresh...');
+                        
+                        const refreshed = await this.refreshToken();
+                        if (refreshed) {
+                            // Retry with new token
+                            response = await fetch(`${this.supabaseUrl}/rest/v1/todos`, {
+                                method: 'POST',
+                                headers: {
+                                    'apikey': this.supabaseKey,
+                                    'Authorization': `Bearer ${this.session.access_token}`,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(item)
+                            });
+                        }
+                    }
+                    
                     if (response.ok) {
                         this.showDebug('💾 DB Save ✅');
                         console.log('✅ Item saved to database successfully');
@@ -1304,15 +1324,58 @@
                         const errorText = await response.text();
                         this.showDebug('💾 DB Save ❌ ' + response.status);
                         console.log('❌ Database save failed:', response.status, errorText);
-                        // Show detailed error in debug
-                        setTimeout(() => {
-                            this.showDebug('❌ Error: ' + errorText.substring(0, 20));
-                        }, 1000);
                     }
                 } catch (error) {
                     this.showDebug('💾 DB Error');
                     console.log('Sync failed, queuing for later');
                     this.syncQueue.push(item);
+                }
+            }
+            
+            async refreshToken() {
+                try {
+                    if (!this.session.refresh_token) {
+                        this.showDebug('❌ No Refresh Token');
+                        return false;
+                    }
+                    
+                    const response = await fetch(`${this.supabaseUrl}/auth/v1/token?grant_type=refresh_token`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': this.supabaseKey,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            refresh_token: this.session.refresh_token
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.access_token) {
+                            // Update session with new token
+                            this.session.access_token = data.access_token;
+                            if (data.refresh_token) {
+                                this.session.refresh_token = data.refresh_token;
+                            }
+                            this.session.created_at = Date.now();
+                            
+                            // Save updated session
+                            localStorage.setItem('mobile_supabase_session', JSON.stringify(this.session));
+                            
+                            this.showDebug('🔄 Token Refreshed');
+                            console.log('✅ Token refreshed successfully');
+                            return true;
+                        }
+                    }
+                    
+                    this.showDebug('❌ Refresh Failed');
+                    console.log('❌ Token refresh failed');
+                    return false;
+                } catch (error) {
+                    this.showDebug('❌ Refresh Error');
+                    console.log('❌ Token refresh error:', error);
+                    return false;
                 }
             }
             
