@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>DashFin Mobile v2 - Ultra Fast</title>
+    <style>
+        /* === MODERN MOBILE FOUNDATION === */
+        :root {
+            /* Design System */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --border-light: #e9ecef;
+            --accent-primary: #000000;
+            --accent-success: #22c55e;
+            --accent-danger: #ef4444;
+            
+            /* Safe Areas */
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-size: 16px; /* Prevents iOS zoom */
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-left: var(--safe-left);
+            padding-right: var(--safe-right);
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* === HEADER === */
+        .header {
+            position: sticky;
+            top: var(--safe-top);
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1rem;
+            padding-top: max(1rem, calc(var(--safe-top) + 1rem));
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+        
+        .status {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+        
+        .status.online {
+            color: var(--accent-success);
+            background: #dcfce7;
+        }
+        
+        /* === MAIN CONTENT === */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-bottom: max(1rem, calc(var(--safe-bottom) + 1rem));
+        }
+        
+        /* === BRAIN DUMP INPUT === */
+        .input-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .brain-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.75rem;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            font-family: inherit;
+            font-size: 16px; /* Prevents iOS zoom */
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        
+        .brain-input:focus {
+            border-color: var(--accent-primary);
+        }
+        
+        .brain-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .input-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+        }
+        
+        .char-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .add-btn {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            min-height: 44px; /* iOS touch target */
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .add-btn:active {
+            transform: translateY(0);
+        }
+        
+        .add-btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* === ITEMS LIST === */
+        .items-section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .items-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+        }
+        
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        
+        .item:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .item-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .item-text {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+            word-wrap: break-word;
+        }
+        
+        .item-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            min-height: 44px;
+            min-width: 44px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .delete-btn:hover {
+            background: #fef2f2;
+            color: var(--accent-danger);
+        }
+        
+        .delete-btn:active {
+            background: #fee2e2;
+            transform: scale(0.95);
+        }
+        
+        /* === EMPTY STATE === */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .empty-title {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-desc {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        /* === LOADING STATES === */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* === UTILITIES === */
+        .hidden {
+            display: none !important;
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Brain Dump</div>
+            <div class="status" id="status">Offline</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="input-label">Schnelle Notiz</div>
+            <div class="input-wrapper">
+                <textarea 
+                    id="brain-input" 
+                    class="brain-input" 
+                    placeholder="Gedanke, Idee, Aufgabe..."
+                    maxlength="500"
+                ></textarea>
+            </div>
+            <div class="input-actions">
+                <div class="char-count" id="char-count">0 / 500</div>
+                <button id="add-btn" class="add-btn" disabled>
+                    Hinzufügen
+                </button>
+            </div>
+        </section>
+
+        <!-- Items Section -->
+        <section class="items-section">
+            <div class="section-header">
+                <h2 class="section-title">Notizen</h2>
+                <div class="items-count" id="items-count">0</div>
+            </div>
+            
+            <div id="items-list" class="items-list">
+                <!-- Items will be inserted here -->
+            </div>
+            
+            <div id="empty-state" class="empty-state">
+                <div class="empty-icon">🧠</div>
+                <div class="empty-title">Bereit für deine Gedanken</div>
+                <div class="empty-desc">Schreibe schnell Ideen, Aufgaben oder Notizen auf.<br>Sie werden automatisch mit dem Desktop synchronisiert.</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // === ULTRA FAST MOBILE BRAIN DUMP ===
+        class FastMobile {
+            constructor() {
+                this.items = [];
+                this.isOnline = false;
+                this.syncQueue = [];
+                
+                this.init();
+            }
+            
+            init() {
+                console.log('🚀 FastMobile v2.0 starting...');
+                
+                // Initialize Supabase
+                this.initDatabase();
+                
+                // Bind events
+                this.bindEvents();
+                
+                // Load data
+                this.loadItems();
+                
+                console.log('✅ FastMobile ready!');
+            }
+            
+            initDatabase() {
+                // Reuse same Supabase config for compatibility
+                this.supabaseUrl = 'https://aotuakgnudtiigbbzkkf.supabase.co';
+                this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvdHVha2dudWR0aWlnYmJ6a2tmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Mzk1MTYsImV4cCI6MjA3MDMxNTUxNn0.xC6i5Kphk-H3pGUwFj0ko7_YZTguast3hK5fprsJfZI';
+                
+                // Try to restore session
+                this.restoreSession();
+            }
+            
+            restoreSession() {
+                const stored = localStorage.getItem('mobile_supabase_session');
+                if (stored) {
+                    try {
+                        this.session = JSON.parse(stored);
+                        this.setOnline(true);
+                    } catch (e) {
+                        localStorage.removeItem('mobile_supabase_session');
+                    }
+                } else {
+                    // Simple auto-login for demo
+                    this.quickLogin();
+                }
+            }
+            
+            async quickLogin() {
+                try {
+                    const response = await fetch(`${this.supabaseUrl}/auth/v1/token?grant_type=password`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': this.supabaseKey,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: 'mail@alexanderbarzik.de',
+                            password: 'your-password-here' // You'll need to update this
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.session = data;
+                        localStorage.setItem('mobile_supabase_session', JSON.stringify(data));
+                        this.setOnline(true);
+                    }
+                } catch (error) {
+                    console.log('Offline mode');
+                    this.setOnline(false);
+                }
+            }
+            
+            setOnline(status) {
+                this.isOnline = status;
+                const statusEl = document.getElementById('status');
+                statusEl.textContent = status ? 'Online' : 'Offline';
+                statusEl.className = `status ${status ? 'online' : ''}`;
+            }
+            
+            bindEvents() {
+                const input = document.getElementById('brain-input');
+                const addBtn = document.getElementById('add-btn');
+                const charCount = document.getElementById('char-count');
+                
+                // Input events
+                input.addEventListener('input', () => {
+                    const length = input.value.length;
+                    charCount.textContent = `${length} / 500`;
+                    addBtn.disabled = length === 0;
+                });
+                
+                // Add button
+                addBtn.addEventListener('click', () => {
+                    this.addItem();
+                });
+                
+                // Enter key (mobile friendly)
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.addItem();
+                    }
+                });
+            }
+            
+            async addItem() {
+                const input = document.getElementById('brain-input');
+                const text = input.value.trim();
+                
+                if (!text) return;
+                
+                // Create item
+                const item = {
+                    id: Date.now(),
+                    text: text,
+                    category: 'braindump',
+                    priority: 2,
+                    completed: false,
+                    date: null,
+                    time: '21:00',
+                    user_id: this.session?.user?.id || null,
+                    created_at: new Date().toISOString()
+                };
+                
+                // Add to local array immediately
+                this.items.unshift(item);
+                
+                // Clear input
+                input.value = '';
+                input.dispatchEvent(new Event('input')); // Trigger char count update
+                
+                // Update UI instantly
+                this.renderItems();
+                
+                // Sync to database in background
+                if (this.isOnline) {
+                    this.syncItem(item);
+                } else {
+                    this.syncQueue.push(item);
+                }
+            }
+            
+            async syncItem(item) {
+                try {
+                    await fetch(`${this.supabaseUrl}/rest/v1/todos`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': this.supabaseKey,
+                            'Authorization': `Bearer ${this.session.access_token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(item)
+                    });
+                } catch (error) {
+                    console.log('Sync failed, queuing for later');
+                    this.syncQueue.push(item);
+                }
+            }
+            
+            async deleteItem(id) {
+                // Remove from UI immediately
+                this.items = this.items.filter(item => item.id !== id);
+                this.renderItems();
+                
+                // Sync deletion in background
+                if (this.isOnline) {
+                    try {
+                        await fetch(`${this.supabaseUrl}/rest/v1/todos?id=eq.${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'apikey': this.supabaseKey,
+                                'Authorization': `Bearer ${this.session.access_token}`
+                            }
+                        });
+                    } catch (error) {
+                        console.log('Delete sync failed');
+                    }
+                }
+            }
+            
+            async loadItems() {
+                if (!this.isOnline || !this.session) {
+                    this.renderItems();
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${this.supabaseUrl}/rest/v1/todos?category=eq.braindump&order=created_at.desc`, {
+                        headers: {
+                            'apikey': this.supabaseKey,
+                            'Authorization': `Bearer ${this.session.access_token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        this.items = await response.json();
+                        this.renderItems();
+                    }
+                } catch (error) {
+                    console.log('Load failed');
+                    this.renderItems();
+                }
+            }
+            
+            renderItems() {
+                const list = document.getElementById('items-list');
+                const emptyState = document.getElementById('empty-state');
+                const itemsCount = document.getElementById('items-count');
+                
+                // Update count
+                itemsCount.textContent = this.items.length;
+                
+                if (this.items.length === 0) {
+                    list.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                emptyState.classList.add('hidden');
+                
+                list.innerHTML = this.items.map(item => `
+                    <div class="item" data-id="${item.id}">
+                        <div class="item-content">
+                            <div class="item-text">${this.escapeHtml(item.text)}</div>
+                            <div class="item-meta">
+                                <span>Vor ${this.getTimeAgo(item.created_at)}</span>
+                            </div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="delete-btn" onclick="app.deleteItem(${item.id})" title="Löschen">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            getTimeAgo(dateString) {
+                const now = new Date();
+                const date = new Date(dateString);
+                const diff = Math.floor((now - date) / 1000);
+                
+                if (diff < 60) return 'wenigen Sekunden';
+                if (diff < 3600) return `${Math.floor(diff / 60)} Min`;
+                if (diff < 86400) return `${Math.floor(diff / 3600)} Std`;
+                return `${Math.floor(diff / 86400)} Tagen`;
+            }
+        }
+        
+        // Initialize app
+        const app = new FastMobile();
+        window.app = app; // Make globally available for onclick handlers
+        
+        console.log('🚀 Mobile v2.0 loaded successfully');
+    </script>
+</body>
+</html>
