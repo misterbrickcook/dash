@@ -19103,8 +19103,8 @@
                 this.setupAggressiveSync();
                 this.loadBrainDumps();
                 
-                // Check for brain dumps every 10 seconds (backup sync)
-                setInterval(() => this.loadBrainDumps(), 10000);
+                // Check for brain dumps every 3 seconds (backup sync)
+                setInterval(() => this.loadBrainDumps(), 3000);
             }
             
             setupAggressiveSync() {

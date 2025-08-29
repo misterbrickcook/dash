@@ -905,8 +905,8 @@
                     this.syncQueue.push(item);
                 }
                 
-                // Force desktop refresh with multiple methods
-                this.forceDesktopRefresh(item);
+                // Simple database-only sync
+                this.simpleDesktopSync();
                 
                 console.log('🎙️ Voice item added successfully!');
             }
@@ -1272,8 +1272,8 @@
                     this.syncQueue.push(item);
                 }
                 
-                // Force desktop refresh with multiple methods
-                this.forceDesktopRefresh(item);
+                // Simple database-only sync
+                this.simpleDesktopSync();
             }
             
             async syncItem(item) {
@@ -1557,55 +1557,16 @@
                 }
             }
             
-            forceDesktopRefresh(item) {
-                console.log('🚨 FORCING desktop refresh for item:', item);
-                this.showDebug('📡 Syncing to Desktop...');
+            simpleDesktopSync() {
+                // Simple approach: Desktop polls database every 3 seconds
+                // No complex localStorage/BroadcastChannel needed!
+                this.showDebug('📡 DB-Only Sync');
+                console.log('📡 Using database-only sync - desktop polls every 3s');
                 
-                try {
-                    // Method 1: Direct localStorage trigger (what desktop listens for)
-                    const notification = {
-                        type: 'NEW_BRAIN_DUMP',
-                        source: 'mobile',
-                        item: item,
-                        timestamp: Date.now()
-                    };
-                    
-                    localStorage.setItem('brain_dump_sync', JSON.stringify(notification));
-                    console.log('📡 localStorage trigger set');
-                    
-                    // Method 2: BroadcastChannel
-                    if ('BroadcastChannel' in window) {
-                        const channel = new BroadcastChannel('brain_dump_updates');
-                        channel.postMessage(notification);
-                        channel.close();
-                        console.log('📡 BroadcastChannel sent');
-                    }
-                    
-                    // Method 3: Try to directly call desktop brain dump reload if window exists
-                    if (window.opener && window.opener.BrainDump) {
-                        window.opener.BrainDump.loadBrainDumps();
-                        console.log('📡 Direct desktop call made');
-                    }
-                    
-                    // Method 4: Set a polling trigger
-                    localStorage.setItem('mobile_sync_trigger', Date.now().toString());
-                    console.log('📡 Polling trigger set');
-                    
-                    // Method 5: Create custom event
-                    window.dispatchEvent(new CustomEvent('brain_dump_added', { detail: item }));
-                    console.log('📡 Custom event dispatched');
-                    
-                    // Clean up localStorage after 2 seconds
-                    setTimeout(() => {
-                        localStorage.removeItem('brain_dump_sync');
-                        localStorage.removeItem('mobile_sync_trigger');
-                        this.showDebug('📡 Sync Complete!');
-                    }, 2000);
-                    
-                } catch (error) {
-                    console.log('📡 Force refresh failed:', error);
-                    this.showDebug('❌ Sync Failed');
-                }
+                // Show completion after short delay
+                setTimeout(() => {
+                    this.showDebug('📡 Sync via DB!');
+                }, 1000);
             }
         }
         
