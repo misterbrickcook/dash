@@ -1053,17 +1053,31 @@
                 const voiceBtn = document.getElementById('voice-btn');
                 if (voiceBtn) {
                     voiceBtn.addEventListener('click', () => {
+                        console.log('🎙️ Voice button clicked');
+                        
                         if (!this.recognition) {
                             alert('Spracherkennung ist in diesem Browser nicht verfügbar.');
                             return;
                         }
                         
                         if (this.isListening) {
+                            console.log('🎙️ Stopping recognition');
                             this.recognition.stop();
                         } else {
+                            console.log('🎙️ Starting recognition');
                             this.startVoiceRecognition();
                         }
                     });
+                    
+                    // TEST: Add manual test button
+                    const testBtn = document.createElement('button');
+                    testBtn.textContent = 'TEST ADD';
+                    testBtn.style.margin = '10px';
+                    testBtn.onclick = () => {
+                        console.log('🧪 Manual test - adding item');
+                        this.forceAddVoiceItem('Manual Test Item');
+                    };
+                    voiceBtn.parentNode.appendChild(testBtn);
                 }
                 
                 // Enter key (mobile friendly)
