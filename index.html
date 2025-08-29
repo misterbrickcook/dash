@@ -19167,10 +19167,13 @@
             setupInstantSync() {
                 // Method 1: localStorage event listener (cross-tab communication)
                 window.addEventListener('storage', (event) => {
+                    console.log('🔍 DESKTOP: Storage event received', event.key, event.newValue);
                     if (event.key === 'brain_dump_sync' && event.newValue) {
                         try {
                             const notification = JSON.parse(event.newValue);
+                            console.log('🔍 DESKTOP: Notification parsed', notification);
                             if (notification.type === 'NEW_BRAIN_DUMP' && notification.source === 'mobile') {
+                                console.log('🔍 DESKTOP: Loading brain dumps from mobile sync');
                                 this.loadBrainDumps();
                             }
                         } catch (error) {
@@ -19183,7 +19186,9 @@
                 if (typeof BroadcastChannel !== 'undefined') {
                     const channel = new BroadcastChannel('brain_dump_updates');
                     channel.onmessage = (event) => {
+                        console.log('🔍 DESKTOP: BroadcastChannel message received', event.data);
                         if (event.data.type === 'NEW_BRAIN_DUMP' && event.data.source === 'mobile') {
+                            console.log('🔍 DESKTOP: Loading brain dumps from BroadcastChannel');
                             this.loadBrainDumps();
                         }
                     };
@@ -19195,6 +19200,7 @@
                 }
             
             async loadBrainDumps() {
+                console.log('🔍 DESKTOP: loadBrainDumps() called');
                 try {
                     if (!window.supabase || !window.supabase.isAuthenticated()) {
                         this.brainDumps = [];
