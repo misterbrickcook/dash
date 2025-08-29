@@ -676,6 +676,7 @@
                 this.localStorageKey = 'mobile_brain_dump_items';
                 this.recognition = null;
                 this.isListening = false;
+                this.manualStop = false;
                 
                 this.init();
             }
@@ -726,9 +727,9 @@
                 }
                 
                 this.recognition = new SpeechRecognition();
-                this.recognition.continuous = false;
-                this.recognition.interimResults = true; // Enable interim results for iOS
-                this.recognition.lang = 'de-DE'; // German language
+                this.recognition.continuous = true; // Keep listening
+                this.recognition.interimResults = true;
+                this.recognition.lang = 'de-DE';
                 this.recognition.maxAlternatives = 1;
                 
                 // Recognition events
@@ -743,35 +744,46 @@
                 
                 this.recognition.onresult = (event) => {
                     console.log('🎙️ Voice recognition result received');
-                    console.log('🎙️ Results length:', event.results.length);
                     
-                    // Get final result (iOS needs this check)
+                    // Show live transcript in input field
+                    const input = document.getElementById('brain-input');
                     let transcript = '';
+                    
+                    // Get latest result (final or interim)
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                    
+                    // Update input field live
+                    input.value = transcript;
+                    input.dispatchEvent(new Event('input'));
+                    
+                    console.log('🎙️ Live transcript:', transcript);
+                    
+                    // Check for final results to auto-add
                     for (let i = event.resultIndex; i < event.results.length; i++) {
                         if (event.results[i].isFinal) {
-                            transcript = event.results[i][0].transcript;
-                            console.log('🎙️ Final transcript:', transcript);
-                            break;
+                            const finalText = event.results[i][0].transcript.trim();
+                            if (finalText) {
+                                console.log('🎙️ Final result - auto-adding:', finalText);
+                                
+                                // Show success feedback
+                                const voiceBtn = document.getElementById('voice-btn');
+                                voiceBtn.textContent = '✅';
+                                voiceBtn.style.background = '#22c55e';
+                                
+                                // Add the item
+                                this.forceAddVoiceItem(finalText);
+                                
+                                // Clear input for next voice input
+                                setTimeout(() => {
+                                    input.value = '';
+                                    input.dispatchEvent(new Event('input'));
+                                }, 500);
+                                
+                                this.hapticFeedback('medium');
+                            }
                         }
-                    }
-                    
-                    // If no final result, take the latest interim
-                    if (!transcript && event.results.length > 0) {
-                        transcript = event.results[event.results.length - 1][0].transcript;
-                        console.log('🎙️ Interim transcript:', transcript);
-                    }
-                    
-                    if (transcript.trim()) {
-                        // Show visual feedback
-                        const voiceBtn = document.getElementById('voice-btn');
-                        voiceBtn.textContent = '✅';
-                        voiceBtn.style.background = '#22c55e';
-                        
-                        // Force add item immediately
-                        console.log('🎙️ Adding voice item:', transcript);
-                        this.forceAddVoiceItem(transcript.trim());
-                        
-                        this.hapticFeedback('medium');
                     }
                 };
                 
@@ -789,7 +801,21 @@
                 
                 this.recognition.onend = () => {
                     console.log('🎙️ Voice recognition ended');
-                    this.stopListening();
+                    
+                    // Auto-restart if user didn't manually stop and we're still supposed to be listening
+                    if (this.isListening && !this.manualStop) {
+                        console.log('🎙️ Auto-restarting recognition');
+                        setTimeout(() => {
+                            try {
+                                this.recognition.start();
+                            } catch (error) {
+                                console.log('🎙️ Auto-restart failed:', error);
+                                this.stopListening();
+                            }
+                        }, 100);
+                    } else {
+                        this.stopListening();
+                    }
                 };
                 
                 console.log('🎙️ Voice recognition initialized');
@@ -807,6 +833,7 @@
             
             stopListening() {
                 this.isListening = false;
+                this.manualStop = true;
                 const voiceBtn = document.getElementById('voice-btn');
                 voiceBtn.classList.remove('listening', 'processing');
                 voiceBtn.textContent = '🎙️';
@@ -1072,10 +1099,12 @@
                         }
                         
                         if (this.isListening) {
-                            console.log('🎙️ Stopping recognition');
+                            console.log('🎙️ Manual stop');
+                            this.manualStop = true;
                             this.recognition.stop();
                         } else {
                             console.log('🎙️ Starting recognition');
+                            this.manualStop = false;
                             this.startVoiceRecognition();
                         }
                     });
