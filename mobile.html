@@ -341,39 +341,6 @@
             border-bottom: 1px solid var(--border-primary);
         }
         
-        /* === BRAIN DUMP CHIPS === */
-        .action-chips {
-            display: flex;
-            gap: 0.5rem;
-            margin: 1rem 0;
-            flex-wrap: wrap;
-        }
-        
-        .chip {
-            width: 44px;
-            height: 44px;
-            border: 1px solid var(--border-primary);
-            background: var(--bg-primary);
-            border-radius: 22px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-        
-        .chip:hover {
-            border-color: var(--accent-primary);
-            background: var(--bg-secondary);
-        }
-        
-        .chip.active {
-            border-color: var(--accent-primary);
-            background: var(--accent-primary);
-            color: white;
-        }
         
         .brain-add-btn {
             width: 100%;
@@ -625,14 +592,6 @@
                         rows="3"
                         autofocus
                     ></textarea>
-                    
-                    <!-- Icon Tags -->
-                    <div class="action-chips">
-                        <button class="chip" id="chip-ausruf" data-tag="ausruf">❗</button>
-                        <button class="chip" id="chip-bitcoin" data-tag="bitcoin">₿</button>
-                        <button class="chip" id="chip-idee" data-tag="idee">💡</button>
-                        <button class="chip" id="chip-arbeit" data-tag="arbeit">💼</button>
-                    </div>
                     
                     <!-- Instant Add Button -->
                     <div class="brain-actions">
@@ -952,9 +911,6 @@
             }
             
             initBrainDump() {
-                // Selected chips state
-                this.selectedChips = new Set();
-                
                 // Brain input
                 const brainInput = document.getElementById('brain-input');
                 const instantAddBtn = document.getElementById('brain-add-btn');
@@ -984,51 +940,8 @@
                         this.instantAddTodo();
                     }
                 });
-                
-                // Smart chips
-                this.bindSmartChips();
             }
             
-            bindSmartChips() {
-                const chips = {
-                    'chip-ausruf': { type: 'tag', value: 'ausruf', icon: '❗' },
-                    'chip-bitcoin': { type: 'tag', value: 'bitcoin', icon: '₿' },
-                    'chip-idee': { type: 'tag', value: 'idee', icon: '💡' },
-                    'chip-arbeit': { type: 'tag', value: 'arbeit', icon: '💼' }
-                };
-                
-                Object.keys(chips).forEach(chipId => {
-                    const chip = document.getElementById(chipId);
-                    if (chip) {
-                        chip.addEventListener('click', () => {
-                            this.toggleChip(chipId, chips[chipId]);
-                        });
-                    }
-                });
-            }
-            
-            toggleChip(chipId, chipData) {
-                const chip = document.getElementById(chipId);
-                
-                if (this.selectedChips.has(chipId)) {
-                    // Deselect current chip
-                    this.selectedChips.delete(chipId);
-                    chip.classList.remove('active');
-                } else {
-                    // Clear all other chips (only one category allowed)
-                    this.selectedChips.forEach(selectedId => {
-                        const selectedChip = document.getElementById(selectedId);
-                        if (selectedChip) {
-                            selectedChip.classList.remove('active');
-                        }
-                    });
-                    this.selectedChips.clear();
-                    
-                    // Select new chip
-                    this.selectedChips.add(chipId);
-                    chip.classList.add('active');
-                }
-            }
             
             smartParsing(text) {
                 // Simple smart parsing for common patterns
@@ -1097,10 +1010,9 @@
                     this.notifyDesktopOfNewBrainDump();
                     console.log('📱 Mobile: Desktop notification sent');
                     
-                    // Clear input and chips
+                    // Clear input
                     brainInput.value = '';
                     brainInput.style.height = 'auto';
-                    this.clearSelectedChips();
                     
                     // Hide suggestions (if exists)
                     const suggestions = document.getElementById('smart-suggestions');
@@ -1131,32 +1043,9 @@
             }
             
             processBrainDump(text) {
-                // Always use 'braindump' category for desktop Brain Dump Container
-                let category = 'braindump';
-                let iconTag = '';
-                
-                // Add selected icon as tag to text for desktop display
-                if (this.selectedChips.size > 0) {
-                    const firstChip = Array.from(this.selectedChips)[0];
-                    switch (firstChip) {
-                        case 'chip-ausruf':
-                            iconTag = ' ❗';
-                            break;
-                        case 'chip-bitcoin':
-                            iconTag = ' ₿';
-                            break;
-                        case 'chip-idee':
-                            iconTag = ' 💡';
-                            break;
-                        case 'chip-arbeit':
-                            iconTag = ' 💼';
-                            break;
-                    }
-                }
-                
                 return {
-                    text: text + iconTag, // Text with icon tag for desktop
-                    category: category, // Always 'braindump' for Brain Dump Container
+                    text: text,
+                    category: 'braindump', // Always 'braindump' for Brain Dump Container
                     priority: 2, // Default priority
                     completed: false,
                     date: null, // No date by default
@@ -1165,15 +1054,6 @@
                 };
             }
             
-            clearSelectedChips() {
-                this.selectedChips.forEach(chipId => {
-                    const chip = document.getElementById(chipId);
-                    if (chip) {
-                        chip.classList.remove('active');
-                    }
-                });
-                this.selectedChips.clear();
-            }
             
             async handleLogin() {
                 if (this.isLoading) return;
@@ -1414,23 +1294,17 @@
                     list.innerHTML = `
                         <div class="todo-empty-state">
                             <p>Brain Dump bereit</p>
-                            <small>Ideen mit Icon-Tags sammeln</small>
+                            <small>Schnelle Notizen sammeln</small>
                         </div>
                     `;
                     return;
                 }
                 
                 const todosHTML = this.todos.map(todo => {
-                    // Extract icon tag from text for mobile display
-                    const iconMatch = todo.text.match(/\s([❗₿💡💼])$/);
-                    const cleanText = iconMatch ? todo.text.replace(/\s[❗₿💡💼]$/, '') : todo.text;
-                    const iconTag = iconMatch ? iconMatch[1] : '';
-                    
                     return `
                         <div class="brain-dump-item" data-id="${todo.id}">
                             <div class="brain-dump-content">
-                                <div class="brain-dump-text">${this.escapeHtml(cleanText)}</div>
-                                ${iconTag ? `<div class="brain-dump-category">${iconTag}</div>` : ''}
+                                <div class="brain-dump-text">${this.escapeHtml(todo.text)}</div>
                             </div>
                             <button class="brain-dump-delete" onclick="app.deleteTodo(${todo.id})">×</button>
                         </div>
