@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Brain Dump Mobile v4.1 - FULLY SQUARE</title>
+    <title>Brain Dump Mobile v4.2 - LIVE STATUS</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -119,6 +119,51 @@
             color: var(--accent-success);
             background: var(--bg-secondary);
             border-color: var(--accent-success);
+        }
+        
+        /* === LIVE STATUS DASHBOARD === */
+        .live-status {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 0;
+            padding: 0.75rem;
+            font-size: 0.75rem;
+            min-width: 200px;
+        }
+        
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-secondary);
+        }
+        
+        .status-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .status-icon {
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+        }
+        
+        .status-connected .status-icon {
+            color: var(--accent-success);
+        }
+        
+        .status-syncing .status-icon {
+            color: var(--accent-success);
+            animation: pulse 1s ease-in-out infinite;
+        }
+        
+        .status-offline .status-icon {
+            color: var(--text-muted);
+        }
+        
+        .status-error .status-icon {
+            color: var(--accent-danger);
         }
         
         /* === MAIN CONTENT === */
@@ -686,8 +731,19 @@
     <header class="header" id="main-header">
         <div class="header-content">
             <div class="logo">Brain Dump</div>
-            <div id="debug-status" style="background: #f0f0f0; padding: 8px; border: 1px solid #000; border-radius: 0; font-size: 12px; max-width: 200px; overflow: hidden;">
-                🔍 Debug: Ready
+            <div id="live-status" class="live-status">
+                <div class="status-row">
+                    <i data-lucide="wifi" class="status-icon"></i>
+                    <span id="connection-text">Connecting...</span>
+                </div>
+                <div class="status-row">
+                    <i data-lucide="activity" class="status-icon"></i>
+                    <span id="sync-text">Ready to sync</span>
+                </div>
+                <div class="status-row">
+                    <i data-lucide="smartphone" class="status-icon"></i>
+                    <span id="queue-text">0 queued</span>
+                </div>
             </div>
             <div class="status" id="status">Offline</div>
         </div>
@@ -1349,9 +1405,11 @@
                 
                 // Sync to database in background
                 if (this.isOnline) {
+                    this.updateLiveStatus('syncing', 'Saving...');
                     this.syncItem(item);
                 } else {
                     this.syncQueue.push(item);
+                    this.updateLiveStatus('offline', 'Queued for sync');
                 }
                 
                 // Simple database-only sync
@@ -1401,14 +1459,17 @@
                     
                     if (response.ok) {
                         this.showDebug('💾 DB Save ✅');
+                        this.updateLiveStatus('success', 'Saved to DB');
                         console.log('✅ Item saved to database successfully');
                     } else {
                         const errorText = await response.text();
                         this.showDebug('💾 DB Save ❌ ' + response.status);
+                        this.updateLiveStatus('error', `Save failed: ${response.status}`);
                         console.log('❌ Database save failed:', response.status, errorText);
                     }
                 } catch (error) {
                     this.showDebug('💾 DB Error');
+                    this.updateLiveStatus('error', 'Connection failed');
                     console.log('Sync failed, queuing for later');
                     this.syncQueue.push(item);
                 }
@@ -1751,6 +1812,57 @@
                 const itemsSection = document.querySelector('.items-section');
                 itemsSection.classList.add('appear');
                 setTimeout(() => itemsSection.classList.remove('appear'), 400);
+            }
+            
+            // === LIVE STATUS SYSTEM ===
+            updateLiveStatus(type, message) {
+                const statusElement = document.getElementById('live-status');
+                const connectionText = document.getElementById('connection-text');
+                const syncText = document.getElementById('sync-text');
+                const queueText = document.getElementById('queue-text');
+                
+                // Remove all status classes
+                statusElement.classList.remove('status-connected', 'status-syncing', 'status-offline', 'status-error');
+                
+                // Update connection status
+                if (this.isOnline) {
+                    statusElement.classList.add('status-connected');
+                    connectionText.textContent = '🟢 Desktop Connected';
+                } else {
+                    statusElement.classList.add('status-offline');
+                    connectionText.textContent = '🔴 Offline Mode';
+                }
+                
+                // Update sync status based on type
+                switch(type) {
+                    case 'syncing':
+                        statusElement.classList.add('status-syncing');
+                        syncText.textContent = '⚡ Syncing...';
+                        break;
+                    case 'success':
+                        syncText.textContent = `✅ ${message}`;
+                        setTimeout(() => {
+                            syncText.textContent = '⚡ Ready to sync';
+                        }, 2000);
+                        break;
+                    case 'error':
+                        statusElement.classList.add('status-error');
+                        syncText.textContent = `❌ ${message}`;
+                        break;
+                    default:
+                        syncText.textContent = '⚡ Ready to sync';
+                }
+                
+                // Update queue count
+                const queueCount = this.syncQueue.length;
+                if (queueCount > 0) {
+                    queueText.textContent = `📱 ${queueCount} queued`;
+                } else {
+                    queueText.textContent = '📱 All synced';
+                }
+                
+                // Update icons
+                window.updateIcons();
             }
         }
         
