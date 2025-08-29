@@ -562,7 +562,7 @@
         .brain-dump-item {
             position: relative;
             transition: transform 0.3s ease;
-            overflow: visible; /* Changed from hidden to visible */
+            overflow: hidden; /* Back to hidden to prevent spillover */
             background: var(--bg-primary);
         }
         
@@ -573,11 +573,11 @@
         .swipe-delete-bg {
             position: absolute;
             top: 0;
-            right: -100px; /* Back to hiding it completely off-screen */
+            right: 0;
             bottom: 0;
             width: 100px;
             background: #dc3545;
-            display: flex;
+            display: none; /* Completely hidden by default */
             align-items: center;
             justify-content: center;
             color: white;
@@ -588,7 +588,7 @@
         }
         
         .brain-dump-item.delete-visible .swipe-delete-bg {
-            right: 0; /* Move into view when parent has delete-visible class */
+            display: flex; /* Show when parent has delete-visible class */
         }
         
         .swipe-delete-bg:active {
