@@ -886,8 +886,8 @@
                     this.syncQueue.push(item);
                 }
                 
-                // Notify desktop about new brain dump (with database structure)
-                this.notifyDesktop(item);
+                // Force desktop refresh with multiple methods
+                this.forceDesktopRefresh(item);
                 
                 console.log('🎙️ Voice item added successfully!');
             }
@@ -1253,8 +1253,8 @@
                     this.syncQueue.push(item);
                 }
                 
-                // Notify desktop about new brain dump
-                this.notifyDesktop(item);
+                // Force desktop refresh with multiple methods
+                this.forceDesktopRefresh(item);
             }
             
             async syncItem(item) {
@@ -1527,9 +1527,11 @@
                 }
             }
             
-            notifyDesktop(item) {
+            forceDesktopRefresh(item) {
+                console.log('🚨 FORCING desktop refresh for item:', item);
+                
                 try {
-                    // Method 1: localStorage sync (for cross-tab communication)
+                    // Method 1: Direct localStorage trigger (what desktop listens for)
                     const notification = {
                         type: 'NEW_BRAIN_DUMP',
                         source: 'mobile',
@@ -1537,26 +1539,39 @@
                         timestamp: Date.now()
                     };
                     
-                    console.log('📡 Notifying desktop with:', notification);
-                    
                     localStorage.setItem('brain_dump_sync', JSON.stringify(notification));
+                    console.log('📡 localStorage trigger set');
                     
-                    // Clean up after 1 second
-                    setTimeout(() => {
-                        localStorage.removeItem('brain_dump_sync');
-                    }, 1000);
-                    
-                    // Method 2: BroadcastChannel (modern browsers)
+                    // Method 2: BroadcastChannel
                     if ('BroadcastChannel' in window) {
                         const channel = new BroadcastChannel('brain_dump_updates');
                         channel.postMessage(notification);
                         channel.close();
-                        console.log('📡 BroadcastChannel message sent');
+                        console.log('📡 BroadcastChannel sent');
                     }
                     
-                    console.log('📡 Desktop notification complete');
+                    // Method 3: Try to directly call desktop brain dump reload if window exists
+                    if (window.opener && window.opener.BrainDump) {
+                        window.opener.BrainDump.loadBrainDumps();
+                        console.log('📡 Direct desktop call made');
+                    }
+                    
+                    // Method 4: Set a polling trigger
+                    localStorage.setItem('mobile_sync_trigger', Date.now().toString());
+                    console.log('📡 Polling trigger set');
+                    
+                    // Method 5: Create custom event
+                    window.dispatchEvent(new CustomEvent('brain_dump_added', { detail: item }));
+                    console.log('📡 Custom event dispatched');
+                    
+                    // Clean up localStorage after 2 seconds
+                    setTimeout(() => {
+                        localStorage.removeItem('brain_dump_sync');
+                        localStorage.removeItem('mobile_sync_trigger');
+                    }, 2000);
+                    
                 } catch (error) {
-                    console.log('📡 Failed to notify desktop:', error);
+                    console.log('📡 Force refresh failed:', error);
                 }
             }
         }
