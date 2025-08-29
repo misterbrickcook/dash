@@ -753,12 +753,11 @@
                     // Trigger input event to update char count and enable button
                     input.dispatchEvent(new Event('input'));
                     
-                    // Auto-add if transcript seems complete
-                    if (transcript.length > 5) {
-                        setTimeout(() => {
-                            this.addItem();
-                        }, 500);
-                    }
+                    // Always auto-add voice input (remove length check)
+                    setTimeout(() => {
+                        console.log('🎙️ Auto-adding voice input:', transcript);
+                        this.addItem();
+                    }, 1000); // Give more time
                     
                     this.hapticFeedback('medium');
                 };
@@ -1106,10 +1105,15 @@
             }
             
             async addItem() {
+                console.log('🎙️ addItem() called');
                 const input = document.getElementById('brain-input');
                 const text = input.value.trim();
+                console.log('🎙️ Input text:', text);
                 
-                if (!text) return;
+                if (!text) {
+                    console.log('🎙️ No text found, aborting');
+                    return;
+                }
                 
                 // Haptic feedback (iOS)
                 this.hapticFeedback('light');
