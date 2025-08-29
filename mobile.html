@@ -1313,19 +1313,16 @@
             }
             
             startPeriodicSync() {
-                // Sync every 3 seconds to catch desktop changes quickly
+                // Sync every 15 seconds - less aggressive for better performance
                 if (this.syncInterval) {
                     clearInterval(this.syncInterval);
                 }
                 
                 this.syncInterval = setInterval(async () => {
                     if (window.supabase && window.supabase.isAuthenticated()) {
-                        console.log('🔄 Mobile: Syncing with server...');
                         await this.loadTodos();
                     }
-                }, 3000); // 3 seconds for faster sync
-                
-                console.log('📱 Mobile: Started periodic sync (every 3s)');
+                }, 15000); // 15 seconds for better performance
             }
             
             notifyDesktopOfNewBrainDump() {
@@ -1439,7 +1436,6 @@
                 // Don't re-render if delete buttons are currently visible
                 const hasActiveDelete = document.querySelector('.brain-dump-item.delete-visible');
                 if (hasActiveDelete) {
-                    console.log('⏸️ SKIPPING RENDER - Delete button active');
                     return;
                 }
                 
@@ -1487,7 +1483,6 @@
                         currentX = startX;
                         isSwiping = true;
                         item.classList.add('swiping');
-                        console.log('🟢 SWIPE START:', startX, 'Item:', item.dataset.id);
                     };
                     
                     const handleMove = (e) => {
@@ -1495,11 +1490,6 @@
                         
                         currentX = e.touches[0].clientX;
                         const deltaX = currentX - startX;
-                        
-                        // Only log every 10px for performance
-                        if (Math.abs(deltaX) % 10 < 2) {
-                            console.log('🔄 SWIPE MOVE:', deltaX, 'px');
-                        }
                         
                         // Only allow left swipes, with immediate response
                         if (deltaX < -15) {
@@ -1515,11 +1505,8 @@
                         const deltaX = currentX - startX;
                         item.classList.remove('swiping');
                         
-                        console.log('🔴 SWIPE END:', deltaX, 'px');
-                        
                         if (deltaX < -60) {
                             // Swipe threshold reached - show delete
-                            console.log('🗑️ DELETE THRESHOLD REACHED! Showing delete button');
                             item.style.transform = 'translateX(-100px)';
                             item.classList.add('delete-visible');
                             
@@ -1527,12 +1514,9 @@
                             const deleteBtn = item.querySelector('.swipe-delete-bg');
                             const todoId = parseInt(item.dataset.id);
                             
-                            console.log('🎯 Delete button found:', !!deleteBtn, 'TodoID:', todoId);
-                            
                             const deleteHandler = async (e) => {
                                 e.stopPropagation();
                                 e.preventDefault();
-                                console.log('💥 DELETE CLICKED for:', todoId);
                                 
                                 // Add visual feedback
                                 deleteBtn.style.background = '#a71e2a';
@@ -1550,31 +1534,18 @@
                             // Add event listener to fresh button
                             newDeleteBtn.addEventListener('click', deleteHandler);
                             
-                            // Add debug click test
-                            newDeleteBtn.addEventListener('mousedown', () => {
-                                console.log('🖱️ MOUSEDOWN on delete button');
-                            });
-                            
-                            newDeleteBtn.addEventListener('touchstart', () => {
-                                console.log('👆 TOUCHSTART on delete button');
-                            });
-                            
-                            console.log('✅ Delete handler attached to fresh button');
-                            
-                            // Auto-close after 8 seconds - more time to tap
+                            // Auto-close after 6 seconds
                             const autoCloseTimer = setTimeout(() => {
                                 if (item.parentNode) {
-                                    console.log('⏰ AUTO-CLOSING delete button');
                                     this.closeDeleteState(item);
                                 }
-                            }, 8000);
+                            }, 6000);
                             
                             // Store timer for potential cleanup
                             item._autoCloseTimer = autoCloseTimer;
                             
                         } else {
                             // Snap back
-                            console.log('↩️ SNAPPING BACK');
                             item.style.transform = '';
                         }
                         
@@ -1601,7 +1572,6 @@
             }
             
             closeDeleteState(item) {
-                console.log('🔒 CLOSING DELETE STATE');
                 item.style.transform = '';
                 item.classList.remove('delete-visible');
                 
@@ -1616,11 +1586,6 @@
                     deleteBtn.removeEventListener('click', deleteBtn._handler);
                     deleteBtn._handler = null;
                 }
-                
-                // Allow rendering again after delete state is closed
-                setTimeout(() => {
-                    console.log('🔄 RENDERING ALLOWED AGAIN');
-                }, 100);
             }
             
             
