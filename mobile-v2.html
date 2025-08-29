@@ -40,6 +40,11 @@
             padding-left: var(--safe-left);
             padding-right: var(--safe-right);
             -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent; /* Remove iOS tap highlights */
+            -webkit-touch-callout: none; /* Disable iOS callout menu */
+            -webkit-user-select: none; /* Prevent text selection */
+            user-select: none;
+            overscroll-behavior: none; /* Prevent bounce scrolling */
         }
         
         /* === HEADER === */
@@ -130,6 +135,12 @@
             color: var(--text-muted);
         }
         
+        .brain-input, 
+        .form-group input {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
         .input-actions {
             display: flex;
             justify-content: space-between;
@@ -169,6 +180,43 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+        
+        /* === PULL TO REFRESH === */
+        .pull-container {
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        
+        .pull-indicator {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .pull-indicator.visible {
+            opacity: 1;
+        }
+        
+        .pull-indicator.refreshing {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
         }
         
         /* === ITEMS LIST === */
@@ -311,6 +359,122 @@
             50% { opacity: 0.3; }
         }
         
+        /* === LOGIN SCREEN === */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 1000;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .login-form {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 16px; /* Prevents iOS zoom */
+            background: var(--bg-primary);
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+        
+        .login-btn {
+            width: 100%;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.875rem;
+            font-size: 1rem;
+            font-weight: 500;
+            min-height: 44px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 0.5rem;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .login-btn:disabled {
+            background: var(--text-muted);
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .login-error {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            color: var(--accent-danger);
+            font-size: 0.875rem;
+            text-align: center;
+        }
+        
+        /* === APP STATES === */
+        .app-loading {
+            opacity: 0.6;
+        }
+        
+        .app-hidden {
+            display: none;
+        }
+        
         /* === UTILITIES === */
         .hidden {
             display: none !important;
@@ -330,8 +494,32 @@
     </style>
 </head>
 <body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1 class="login-title">Brain Dump</h1>
+                <p class="login-subtitle">Schnelle Mobile Notizen</p>
+            </div>
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Passwort</label>
+                    <input type="password" id="password" required autocomplete="current-password">
+                </div>
+                <button type="submit" id="login-btn" class="login-btn">
+                    Anmelden
+                </button>
+                <div id="login-error" class="login-error hidden"></div>
+            </form>
+        </div>
+    </div>
+
     <!-- Header -->
-    <header class="header">
+    <header class="header" id="main-header">
         <div class="header-content">
             <div class="logo">Brain Dump</div>
             <div class="status" id="status">Offline</div>
@@ -339,7 +527,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container">
+    <main id="main-content" class="container app-hidden">
         <!-- Input Section -->
         <section class="input-section">
             <div class="input-label">Schnelle Notiz</div>
@@ -366,8 +554,11 @@
                 <div class="items-count" id="items-count">0</div>
             </div>
             
-            <div id="items-list" class="items-list">
-                <!-- Items will be inserted here -->
+            <div id="pull-container" class="pull-container">
+                <div id="pull-indicator" class="pull-indicator">↻</div>
+                <div id="items-list" class="items-list">
+                    <!-- Items will be inserted here -->
+                </div>
             </div>
             
             <div id="empty-state" class="empty-state">
@@ -417,18 +608,42 @@
                 const stored = localStorage.getItem('mobile_supabase_session');
                 if (stored) {
                     try {
-                        this.session = JSON.parse(stored);
-                        this.setOnline(true);
+                        const session = JSON.parse(stored);
+                        // Check if session is still valid (not too old)
+                        const sessionAge = Date.now() - (session.created_at || 0);
+                        const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+                        
+                        if (sessionAge < maxAge && session.access_token) {
+                            this.session = session;
+                            this.setOnline(true);
+                            this.showApp();
+                            return;
+                        } else {
+                            localStorage.removeItem('mobile_supabase_session');
+                        }
                     } catch (e) {
                         localStorage.removeItem('mobile_supabase_session');
                     }
-                } else {
-                    // Simple auto-login for demo
-                    this.quickLogin();
                 }
+                
+                // Show login screen
+                this.showLogin();
             }
             
-            async quickLogin() {
+            showLogin() {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-header').classList.add('app-hidden');
+                document.getElementById('main-content').classList.add('app-hidden');
+            }
+            
+            showApp() {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-header').classList.remove('app-hidden');
+                document.getElementById('main-content').classList.remove('app-hidden');
+                this.loadItems();
+            }
+            
+            async handleLogin(email, password) {
                 try {
                     const response = await fetch(`${this.supabaseUrl}/auth/v1/token?grant_type=password`, {
                         method: 'POST',
@@ -437,20 +652,33 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            email: 'mail@alexanderbarzik.de',
-                            password: 'your-password-here' // You'll need to update this
+                            email: email,
+                            password: password
                         })
                     });
                     
                     if (response.ok) {
                         const data = await response.json();
-                        this.session = data;
-                        localStorage.setItem('mobile_supabase_session', JSON.stringify(data));
-                        this.setOnline(true);
+                        if (data.access_token && data.user) {
+                            data.created_at = Date.now(); // Add timestamp
+                            this.session = data;
+                            localStorage.setItem('mobile_supabase_session', JSON.stringify(data));
+                            this.setOnline(true);
+                            this.showApp();
+                            return { success: true };
+                        }
                     }
+                    
+                    const errorData = await response.json();
+                    return { 
+                        success: false, 
+                        error: errorData.error_description || 'Login fehlgeschlagen'
+                    };
                 } catch (error) {
-                    console.log('Offline mode');
-                    this.setOnline(false);
+                    return { 
+                        success: false, 
+                        error: 'Verbindung fehlgeschlagen. Bitte versuchen Sie es erneut.'
+                    };
                 }
             }
             
@@ -462,6 +690,48 @@
             }
             
             bindEvents() {
+                // Login form
+                const loginForm = document.getElementById('login-form');
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value.trim();
+                    const loginBtn = document.getElementById('login-btn');
+                    const loginError = document.getElementById('login-error');
+                    
+                    if (!email || !password) {
+                        this.showError('Bitte Email und Passwort eingeben');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    loginBtn.disabled = true;
+                    loginBtn.textContent = 'Wird angemeldet...';
+                    loginError.classList.add('hidden');
+                    
+                    // Attempt login
+                    const result = await this.handleLogin(email, password);
+                    
+                    if (result.success) {
+                        // Login successful - showApp() already called in handleLogin
+                    } else {
+                        this.showError(result.error);
+                    }
+                    
+                    // Reset button state
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Anmelden';
+                });
+                
+                // App input events (only bind when app is shown)
+                this.bindAppEvents();
+                
+                // Pull to refresh
+                this.initPullToRefresh();
+            }
+            
+            bindAppEvents() {
                 const input = document.getElementById('brain-input');
                 const addBtn = document.getElementById('add-btn');
                 const charCount = document.getElementById('char-count');
@@ -487,11 +757,93 @@
                 });
             }
             
+            showError(message) {
+                const errorEl = document.getElementById('login-error');
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+            }
+            
+            initPullToRefresh() {
+                const pullContainer = document.getElementById('pull-container');
+                const pullIndicator = document.getElementById('pull-indicator');
+                
+                let startY = 0;
+                let currentY = 0;
+                let isPulling = false;
+                const threshold = 50;
+                
+                pullContainer.addEventListener('touchstart', (e) => {
+                    if (pullContainer.scrollTop === 0) {
+                        startY = e.touches[0].clientY;
+                        isPulling = true;
+                    }
+                }, { passive: true });
+                
+                pullContainer.addEventListener('touchmove', (e) => {
+                    if (!isPulling) return;
+                    
+                    currentY = e.touches[0].clientY;
+                    const pullDistance = Math.max(0, (currentY - startY) * 0.6);
+                    
+                    if (pullDistance > 0) {
+                        e.preventDefault();
+                        pullContainer.style.transform = `translateY(${pullDistance}px)`;
+                        
+                        const opacity = Math.min(1, pullDistance / threshold);
+                        pullIndicator.style.opacity = opacity;
+                        
+                        if (pullDistance >= threshold) {
+                            pullIndicator.textContent = '↻';
+                            pullIndicator.classList.add('visible');
+                        } else {
+                            pullIndicator.textContent = '↓';
+                            pullIndicator.classList.remove('visible');
+                        }
+                    }
+                });
+                
+                pullContainer.addEventListener('touchend', async () => {
+                    if (!isPulling) return;
+                    
+                    const pullDistance = Math.max(0, (currentY - startY) * 0.6);
+                    
+                    if (pullDistance >= threshold) {
+                        // Trigger refresh
+                        pullIndicator.classList.add('refreshing');
+                        pullIndicator.textContent = '↻';
+                        
+                        try {
+                            await this.loadItems();
+                        } catch (error) {
+                            console.log('Refresh failed');
+                        }
+                        
+                        setTimeout(() => {
+                            pullIndicator.classList.remove('refreshing', 'visible');
+                            pullContainer.style.transform = '';
+                            pullIndicator.style.opacity = '0';
+                        }, 500);
+                    } else {
+                        // Snap back
+                        pullContainer.style.transform = '';
+                        pullIndicator.style.opacity = '0';
+                        pullIndicator.classList.remove('visible');
+                    }
+                    
+                    isPulling = false;
+                    startY = 0;
+                    currentY = 0;
+                }, { passive: false });
+            }
+            
             async addItem() {
                 const input = document.getElementById('brain-input');
                 const text = input.value.trim();
                 
                 if (!text) return;
+                
+                // Haptic feedback (iOS)
+                this.hapticFeedback('light');
                 
                 // Create item
                 const item = {
@@ -569,19 +921,30 @@
                 }
                 
                 try {
-                    const response = await fetch(`${this.supabaseUrl}/rest/v1/todos?category=eq.braindump&order=created_at.desc`, {
+                    // Add timeout for better UX
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    
+                    const response = await fetch(`${this.supabaseUrl}/rest/v1/todos?category=eq.braindump&order=created_at.desc&limit=100`, {
                         headers: {
                             'apikey': this.supabaseKey,
                             'Authorization': `Bearer ${this.session.access_token}`
-                        }
+                        },
+                        signal: controller.signal
                     });
+                    
+                    clearTimeout(timeoutId);
                     
                     if (response.ok) {
                         this.items = await response.json();
                         this.renderItems();
                     }
                 } catch (error) {
-                    console.log('Load failed');
+                    if (error.name === 'AbortError') {
+                        console.log('Request timed out');
+                    } else {
+                        console.log('Load failed');
+                    }
                     this.renderItems();
                 }
             }
@@ -602,8 +965,15 @@
                 
                 emptyState.classList.add('hidden');
                 
-                list.innerHTML = this.items.map(item => `
-                    <div class="item" data-id="${item.id}">
+                // Use DocumentFragment for better performance
+                const fragment = document.createDocumentFragment();
+                
+                this.items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'item';
+                    itemDiv.dataset.id = item.id;
+                    
+                    itemDiv.innerHTML = `
                         <div class="item-content">
                             <div class="item-text">${this.escapeHtml(item.text)}</div>
                             <div class="item-meta">
@@ -615,8 +985,13 @@
                                 🗑️
                             </button>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                    
+                    fragment.appendChild(itemDiv);
+                });
+                
+                list.innerHTML = '';
+                list.appendChild(fragment);
             }
             
             escapeHtml(text) {
@@ -634,6 +1009,31 @@
                 if (diff < 3600) return `${Math.floor(diff / 60)} Min`;
                 if (diff < 86400) return `${Math.floor(diff / 3600)} Std`;
                 return `${Math.floor(diff / 86400)} Tagen`;
+            }
+            
+            hapticFeedback(type = 'light') {
+                // iOS Haptic Feedback
+                if ('navigator' in window && 'vibrate' in navigator) {
+                    // Android vibration patterns
+                    const patterns = {
+                        light: [10],
+                        medium: [20],
+                        heavy: [50]
+                    };
+                    navigator.vibrate(patterns[type] || patterns.light);
+                }
+                
+                // iOS Taptic Engine (if available)
+                if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
+                    // iOS device - use subtle visual feedback as fallback
+                    const button = document.activeElement;
+                    if (button && button.classList.contains('add-btn')) {
+                        button.style.transform = 'scale(0.98)';
+                        setTimeout(() => {
+                            button.style.transform = '';
+                        }, 100);
+                    }
+                }
             }
         }
         
