@@ -512,25 +512,6 @@
             display: none;
         }
         
-        .brain-dump-delete {
-            width: 32px;
-            height: 32px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 1rem;
-        }
-        
-        .brain-dump-delete:hover {
-            background: #c82333;
-        }
         
         .brain-dump-meta {
             margin-top: 0.5rem;
@@ -601,6 +582,12 @@
             color: white;
             font-size: 20px;
             font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .swipe-delete-bg:hover {
+            background: #c82333;
         }
 
         /* === HIDDEN BY DEFAULT === */
@@ -1460,7 +1447,6 @@
                             <div class="brain-dump-content">
                                 <div class="brain-dump-text">${this.escapeHtml(todo.text)}</div>
                             </div>
-                            <button class="brain-dump-delete" onclick="app.deleteTodo(${todo.id})">×</button>
                         </div>
                     `;
                 }).join('');
@@ -1517,9 +1503,8 @@
                         const swipeDistance = Math.abs(deltaX);
                         
                         if (isSwipingHorizontally && deltaX < -70) {
-                            // Delete threshold reached
-                            const todoId = parseInt(item.dataset.id);
-                            this.deleteTodo(todoId);
+                            // Delete threshold reached - show delete confirmation
+                            this.showDeleteConfirmation(item, parseInt(item.dataset.id));
                         } else {
                             // Snap back
                             item.style.transform = '';
@@ -1534,6 +1519,28 @@
                         currentX = 0;
                     }, { passive: true });
                 });
+            }
+            
+            showDeleteConfirmation(item, todoId) {
+                // Keep item swiped open and show delete confirmation
+                item.style.transform = 'translateX(-100px)';
+                
+                // Add click handler to delete background
+                const deleteBackground = item.querySelector('.swipe-delete-bg');
+                const handleDelete = async () => {
+                    await this.deleteTodo(todoId);
+                    deleteBackground.removeEventListener('click', handleDelete);
+                };
+                
+                deleteBackground.addEventListener('click', handleDelete);
+                
+                // Auto-close after 3 seconds if no action
+                setTimeout(() => {
+                    if (item.parentNode) {
+                        item.style.transform = '';
+                        deleteBackground.removeEventListener('click', handleDelete);
+                    }
+                }, 3000);
             }
             
             // Old addTodo method removed - replaced with instantAddTodo()
