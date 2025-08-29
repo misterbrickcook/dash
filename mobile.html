@@ -562,7 +562,8 @@
         .brain-dump-item {
             position: relative;
             transition: transform 0.3s ease;
-            overflow: hidden;
+            overflow: visible; /* Changed from hidden to visible */
+            background: var(--bg-primary);
         }
         
         .brain-dump-item.swiping {
@@ -572,7 +573,7 @@
         .swipe-delete-bg {
             position: absolute;
             top: 0;
-            right: -100px;
+            right: 0; /* Changed from -100px to 0 */
             bottom: 0;
             width: 100px;
             background: #dc3545;
@@ -580,13 +581,18 @@
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.2s ease;
+            transform: translateX(100px); /* Initially hidden to the right */
         }
         
-        .swipe-delete-bg:hover {
+        .brain-dump-item.delete-visible .swipe-delete-bg {
+            transform: translateX(0); /* Show when parent has delete-visible class */
+        }
+        
+        .swipe-delete-bg:active {
             background: #c82333;
         }
 
@@ -1459,155 +1465,110 @@
             
             attachSwipeListeners() {
                 const items = document.querySelectorAll('.brain-dump-item');
-                console.log('📱 Attaching swipe listeners to', items.length, 'items');
                 
-                items.forEach((item, index) => {
-                    console.log(`📱 Adding swipe to item ${index}:`, item.dataset.id);
-                    
+                items.forEach((item) => {
                     let startX = 0;
-                    let startY = 0;
                     let currentX = 0;
-                    let isSwipingHorizontally = false;
-                    let isSwipingItem = false;
+                    let isSwiping = false;
                     
-                    // Clear any existing listeners
+                    // Reset any previous state
                     item.style.transform = '';
+                    item.classList.remove('delete-visible', 'swiping');
                     
-                    const handleTouchStart = (e) => {
-                        console.log('📱 Touch start on item:', item.dataset.id);
+                    const handleStart = (e) => {
                         startX = e.touches[0].clientX;
-                        startY = e.touches[0].clientY;
                         currentX = startX;
-                        isSwipingItem = true;
-                        isSwipingHorizontally = false;
+                        isSwiping = true;
                         item.classList.add('swiping');
                     };
                     
-                    const handleTouchMove = (e) => {
-                        if (!isSwipingItem) return;
+                    const handleMove = (e) => {
+                        if (!isSwiping) return;
                         
                         currentX = e.touches[0].clientX;
-                        const currentY = e.touches[0].clientY;
-                        
                         const deltaX = currentX - startX;
-                        const deltaY = currentY - startY;
                         
-                        // Determine if this is a horizontal swipe
-                        if (!isSwipingHorizontally && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
-                            isSwipingHorizontally = Math.abs(deltaX) > Math.abs(deltaY);
-                            console.log('📱 Swipe direction determined:', isSwipingHorizontally ? 'horizontal' : 'vertical');
-                        }
-                        
-                        if (isSwipingHorizontally && deltaX < -10) {
-                            // Swipe left - show delete background
+                        // Only allow left swipes
+                        if (deltaX < -20) {
                             e.preventDefault();
-                            const swipeDistance = Math.min(Math.abs(deltaX), 100);
-                            item.style.transform = `translateX(-${swipeDistance}px)`;
-                            console.log('📱 Swiping left, distance:', swipeDistance);
+                            const distance = Math.min(Math.abs(deltaX), 100);
+                            item.style.transform = `translateX(-${distance}px)`;
                         }
                     };
                     
-                    const handleTouchEnd = () => {
-                        if (!isSwipingItem) return;
+                    const handleEnd = () => {
+                        if (!isSwiping) return;
                         
                         const deltaX = currentX - startX;
-                        const swipeDistance = Math.abs(deltaX);
+                        item.classList.remove('swiping');
                         
-                        console.log('📱 Touch end. DeltaX:', deltaX, 'Distance:', swipeDistance, 'Horizontal:', isSwipingHorizontally);
-                        
-                        if (isSwipingHorizontally && deltaX < -50) {
-                            // Lower threshold for easier triggering
-                            console.log('📱 Delete threshold reached, showing confirmation');
-                            this.showDeleteConfirmation(item, parseInt(item.dataset.id));
+                        if (deltaX < -60) {
+                            // Swipe threshold reached - show delete
+                            item.style.transform = 'translateX(-100px)';
+                            item.classList.add('delete-visible');
+                            
+                            // Set up delete click handler
+                            const deleteBtn = item.querySelector('.swipe-delete-bg');
+                            const todoId = parseInt(item.dataset.id);
+                            
+                            const deleteHandler = async (e) => {
+                                e.stopPropagation();
+                                await this.deleteTodo(todoId);
+                            };
+                            
+                            // Remove old handler if exists
+                            if (deleteBtn._handler) {
+                                deleteBtn.removeEventListener('click', deleteBtn._handler);
+                            }
+                            
+                            deleteBtn._handler = deleteHandler;
+                            deleteBtn.addEventListener('click', deleteHandler);
+                            
+                            // Auto-close after 4 seconds
+                            setTimeout(() => {
+                                if (item.parentNode) {
+                                    this.closeDeleteState(item);
+                                }
+                            }, 4000);
+                            
                         } else {
                             // Snap back
-                            console.log('📱 Snapping back');
                             item.style.transform = '';
                         }
                         
-                        // Reset state
-                        item.classList.remove('swiping');
-                        isSwipingHorizontally = false;
-                        isSwipingItem = false;
+                        isSwiping = false;
                         startX = 0;
-                        startY = 0;
                         currentX = 0;
                     };
                     
-                    // Remove existing listeners first
-                    item.removeEventListener('touchstart', handleTouchStart);
-                    item.removeEventListener('touchmove', handleTouchMove);
-                    item.removeEventListener('touchend', handleTouchEnd);
+                    // Clean up old listeners
+                    item.removeEventListener('touchstart', item._startHandler);
+                    item.removeEventListener('touchmove', item._moveHandler);
+                    item.removeEventListener('touchend', item._endHandler);
                     
-                    // Add fresh listeners
-                    item.addEventListener('touchstart', handleTouchStart, { passive: true });
-                    item.addEventListener('touchmove', handleTouchMove, { passive: false });
-                    item.addEventListener('touchend', handleTouchEnd, { passive: true });
+                    // Store handlers for cleanup
+                    item._startHandler = handleStart;
+                    item._moveHandler = handleMove;
+                    item._endHandler = handleEnd;
+                    
+                    // Add new listeners
+                    item.addEventListener('touchstart', handleStart, { passive: true });
+                    item.addEventListener('touchmove', handleMove, { passive: false });
+                    item.addEventListener('touchend', handleEnd, { passive: true });
                 });
             }
             
-            showDeleteConfirmation(item, todoId) {
-                console.log('📱 Showing delete confirmation for:', todoId);
+            closeDeleteState(item) {
+                item.style.transform = '';
+                item.classList.remove('delete-visible');
                 
-                // Keep item swiped open and show delete confirmation
-                item.style.transform = 'translateX(-100px)';
-                item.style.transition = 'transform 0.3s ease';
-                
-                // Add click handler to delete background
-                const deleteBackground = item.querySelector('.swipe-delete-bg');
-                console.log('📱 Delete background found:', !!deleteBackground);
-                
-                if (!deleteBackground) {
-                    console.error('📱 Delete background not found!');
-                    return;
+                const deleteBtn = item.querySelector('.swipe-delete-bg');
+                if (deleteBtn && deleteBtn._handler) {
+                    deleteBtn.removeEventListener('click', deleteBtn._handler);
+                    deleteBtn._handler = null;
                 }
-                
-                // Remove any existing listeners
-                const oldHandler = deleteBackground._deleteHandler;
-                if (oldHandler) {
-                    deleteBackground.removeEventListener('click', oldHandler);
-                }
-                
-                const handleDelete = async (e) => {
-                    e.stopPropagation();
-                    console.log('📱 Delete clicked for:', todoId);
-                    await this.deleteTodo(todoId);
-                };
-                
-                // Store reference for cleanup
-                deleteBackground._deleteHandler = handleDelete;
-                deleteBackground.addEventListener('click', handleDelete);
-                
-                // Auto-close after 4 seconds if no action
-                const autoCloseTimer = setTimeout(() => {
-                    if (item.parentNode) {
-                        console.log('📱 Auto-closing delete confirmation');
-                        item.style.transform = '';
-                        if (deleteBackground._deleteHandler) {
-                            deleteBackground.removeEventListener('click', deleteBackground._deleteHandler);
-                            deleteBackground._deleteHandler = null;
-                        }
-                    }
-                }, 4000);
-                
-                // Also close if user taps elsewhere
-                const closeOnOutsideClick = (e) => {
-                    if (!item.contains(e.target)) {
-                        console.log('📱 Closing on outside click');
-                        item.style.transform = '';
-                        clearTimeout(autoCloseTimer);
-                        if (deleteBackground._deleteHandler) {
-                            deleteBackground.removeEventListener('click', deleteBackground._deleteHandler);
-                            deleteBackground._deleteHandler = null;
-                        }
-                        document.removeEventListener('click', closeOnOutsideClick);
-                    }
-                };
-                
-                setTimeout(() => {
-                    document.addEventListener('click', closeOnOutsideClick);
-                }, 100);
             }
+            
             
             // Old addTodo method removed - replaced with instantAddTodo()
             
