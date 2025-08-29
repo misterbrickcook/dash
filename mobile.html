@@ -573,7 +573,7 @@
         .swipe-delete-bg {
             position: absolute;
             top: 0;
-            right: 0; /* Changed from -100px to 0 */
+            right: -100px; /* Back to hiding it completely off-screen */
             bottom: 0;
             width: 100px;
             background: #dc3545;
@@ -584,12 +584,11 @@
             font-size: 24px;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s ease;
-            transform: translateX(100px); /* Initially hidden to the right */
+            transition: all 0.3s ease;
         }
         
         .brain-dump-item.delete-visible .swipe-delete-bg {
-            transform: translateX(0); /* Show when parent has delete-visible class */
+            right: 0; /* Move into view when parent has delete-visible class */
         }
         
         .swipe-delete-bg:active {
