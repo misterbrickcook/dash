@@ -727,8 +727,9 @@
                 
                 this.recognition = new SpeechRecognition();
                 this.recognition.continuous = false;
-                this.recognition.interimResults = false;
+                this.recognition.interimResults = true; // Enable interim results for iOS
                 this.recognition.lang = 'de-DE'; // German language
+                this.recognition.maxAlternatives = 1;
                 
                 // Recognition events
                 this.recognition.onstart = () => {
@@ -741,27 +742,37 @@
                 };
                 
                 this.recognition.onresult = (event) => {
-                    console.log('🎙️ Voice recognition result');
-                    const transcript = event.results[0][0].transcript;
-                    console.log('Transcript:', transcript);
+                    console.log('🎙️ Voice recognition result received');
+                    console.log('🎙️ Results length:', event.results.length);
                     
-                    // Show visual feedback first
-                    const voiceBtn = document.getElementById('voice-btn');
-                    voiceBtn.textContent = '✅';
-                    voiceBtn.style.background = '#22c55e';
+                    // Get final result (iOS needs this check)
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            transcript = event.results[i][0].transcript;
+                            console.log('🎙️ Final transcript:', transcript);
+                            break;
+                        }
+                    }
                     
-                    // Add to input field
-                    const input = document.getElementById('brain-input');
-                    input.value = transcript;
+                    // If no final result, take the latest interim
+                    if (!transcript && event.results.length > 0) {
+                        transcript = event.results[event.results.length - 1][0].transcript;
+                        console.log('🎙️ Interim transcript:', transcript);
+                    }
                     
-                    // Trigger input event
-                    input.dispatchEvent(new Event('input'));
-                    
-                    // Force add item immediately
-                    console.log('🎙️ Forcing addItem with:', transcript);
-                    this.forceAddVoiceItem(transcript);
-                    
-                    this.hapticFeedback('medium');
+                    if (transcript.trim()) {
+                        // Show visual feedback
+                        const voiceBtn = document.getElementById('voice-btn');
+                        voiceBtn.textContent = '✅';
+                        voiceBtn.style.background = '#22c55e';
+                        
+                        // Force add item immediately
+                        console.log('🎙️ Adding voice item:', transcript);
+                        this.forceAddVoiceItem(transcript.trim());
+                        
+                        this.hapticFeedback('medium');
+                    }
                 };
                 
                 this.recognition.onerror = (event) => {
