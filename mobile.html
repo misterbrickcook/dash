@@ -3,13 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>DashFin Mobile v4.0 - Brain Dump Interface</title>
-    <!-- Cache Buster für neues Brain Dump Design -->
+    <title>Brain Dump Mobile v2.1</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Schnelle Mobile Notizen mit Desktop Sync">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="BrainDump">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" sizes="192x192" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Ccircle cx='256' cy='256' r='256' fill='%23000'/%3E%3Ctext x='256' y='290' text-anchor='middle' fill='white' font-size='280' font-family='system-ui'%3E🧠%3C/text%3E%3C/svg%3E">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Ccircle cx='256' cy='256' r='256' fill='%23000'/%3E%3Ctext x='256' y='290' text-anchor='middle' fill='white' font-size='280' font-family='system-ui'%3E🧠%3C/text%3E%3C/svg%3E">
     <style>
-        /* === SUPER SIMPLE MOBILE STYLES === */
+        /* === MODERN MOBILE FOUNDATION === */
+        :root {
+            /* Design System */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --border-light: #e9ecef;
+            --accent-primary: #000000;
+            --accent-success: #22c55e;
+            --accent-danger: #ef4444;
+            
+            /* Safe Areas */
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -19,510 +54,209 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             font-size: 16px; /* Prevents iOS zoom */
-            background: #ffffff;
-            color: #333;
-            min-height: 100vh;
-            /* Safe area padding for modern devices */
-            padding-left: var(--safe-area-left);
-            padding-right: var(--safe-area-right);
-        }
-        
-        /* === DESIGN SYSTEM (EXACT DESKTOP MATCH) === */
-        :root {
-            /* Colors */
-            --bg-primary: #ffffff;
-            --bg-secondary: #F5F5F5;
-            --text-primary: #333333;
-            --text-secondary: #666666;
-            --text-muted: #999999;
-            --border-primary: #e0e0e0;
-            --border-secondary: #d1d5db;
-            --accent-primary: #000000;
-            
-            /* Typography */
-            --font-size-base: 16px;
-            --line-height-base: 24px;
-            --font-size-sm: 14px;
-            --font-size-xs: 12px;
-            --font-size-lg: 18px;
-            --font-size-xl: 20px;
-            
-            /* Safe Area Insets for modern devices */
-            --safe-area-top: env(safe-area-inset-top, 0px);
-            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-            --safe-area-left: env(safe-area-inset-left, 0px);
-            --safe-area-right: env(safe-area-inset-right, 0px);
-        }
-
-        /* === AUTH SCREEN (like desktop) === */
-        .login-screen {
-            position: fixed;
-            top: var(--safe-area-top);
-            left: var(--safe-area-left);
-            right: var(--safe-area-right);
-            bottom: var(--safe-area-bottom);
-            background: #ffffff;
-            display: flex; /* Re-enable login for proper authentication */
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 1rem;
-        }
-        
-        .login-form {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-primary);
-            padding: 3rem;
-            width: 100%;
-            max-width: 400px;
-            position: relative;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(5px);
-            border-radius: 8px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-        
-        .login-title {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: 500;
-            color: #000000;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #000000;
-            font-weight: 500;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 1rem;
-            border: 1px solid #d0d0d0;
-            background: var(--bg-primary);
-            font-family: inherit;
-            font-size: 16px; /* Prevents iOS zoom */
-            min-height: 44px; /* iOS touch target */
-            transition: border-color 0.2s ease;
-        }
-        
-        .form-group input:focus {
-            outline: none;
-            border-color: #000000;
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 1rem;
-            border: 1px solid #000000;
-            background: var(--bg-primary);
-            color: #000000;
-            font-family: inherit;
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-height: 44px; /* iOS touch target */
-        }
-        
-        .login-btn:hover {
-            background: #000000;
-            color: #ffffff;
-        }
-        
-        .login-btn:disabled {
-            background: #ccc;
-            color: #666;
-            border-color: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .error {
-            color: #cc0000;
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .error.hidden {
-            display: none;
-        }
-        
-        /* === DASHBOARD SCREEN === */
-        .dashboard {
-            display: none; /* Hide dashboard until authenticated */
-            min-height: 100vh;
-        }
-        
-        .dashboard.show {
-            display: block;
-        }
-        
-        .dashboard-header {
             background: var(--bg-primary);
             color: var(--text-primary);
-            padding: 1rem;
+            min-height: 100vh;
+            padding-left: var(--safe-left);
+            padding-right: var(--safe-right);
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent; /* Remove iOS tap highlights */
+            -webkit-touch-callout: none; /* Disable iOS callout menu */
+            -webkit-user-select: none; /* Prevent text selection */
+            user-select: none;
+            overscroll-behavior: none; /* Prevent bounce scrolling */
+        }
+        
+        /* === HEADER === */
+        .header {
             position: sticky;
-            top: var(--safe-area-top);
+            top: var(--safe-top);
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1rem;
+            padding-top: max(1rem, calc(var(--safe-top) + 1rem));
             z-index: 100;
-            border-bottom: 1px solid var(--border-primary);
-            /* Add padding for safe area */
-            padding-top: max(1rem, calc(var(--safe-area-top) + 1rem));
         }
         
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
         }
         
-        .dashboard-title {
-            font-size: 1.2rem;
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+        
+        .status {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+        
+        .status.online {
+            color: var(--accent-success);
+            background: #dcfce7;
+        }
+        
+        /* === MAIN CONTENT === */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-bottom: max(1rem, calc(var(--safe-bottom) + 1rem));
+        }
+        
+        /* === BRAIN DUMP INPUT === */
+        .input-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-label {
+            font-size: 0.875rem;
             font-weight: 500;
-            color: #000000;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
         }
         
-        .logout-btn {
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .brain-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.75rem;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
             background: var(--bg-primary);
-            color: #000000;
-            border: 1px solid var(--border-primary);
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-family: inherit;
+            font-size: 16px; /* Prevents iOS zoom */
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        
+        .brain-input:focus {
+            border-color: var(--accent-primary);
+        }
+        
+        .brain-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .brain-input, 
+        .form-group input {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
+        .input-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+        }
+        
+        .input-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .voice-btn {
+            background: none;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
             cursor: pointer;
             transition: all 0.2s ease;
         }
         
-        .logout-btn:hover {
-            background: #000000;
-            color: #ffffff;
+        .voice-btn:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
         }
         
-        .dashboard-content {
-            padding: 1rem;
-            /* Add bottom padding for safe area */
-            padding-bottom: max(1rem, calc(var(--safe-area-bottom) + 1rem));
+        .voice-btn:active {
+            transform: translateY(0) scale(0.95);
         }
         
-        /* === OLD TODO SECTION REMOVED === */
-        
-        .todo-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        
-        .add-btn:disabled {
-            background: #ccc;
-        }
-        
-        .options-btn {
-            flex: 1;
-            height: 44px;
-            background: #6c757d;
+        .voice-btn.listening {
+            background: #ef4444;
+            border-color: #ef4444;
             color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
+            animation: pulse-red 1.5s ease-in-out infinite;
         }
         
-        .options-btn.active {
-            background: #495057;
+        .voice-btn.processing {
+            background: #f59e0b;
+            border-color: #f59e0b;
+            color: white;
         }
         
-        .todo-options {
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 1rem;
-            background: white;
+        @keyframes pulse-red {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
         }
         
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 14px;
-            font-weight: 500;
-            color: #555;
-        }
-        
-        /* === OLD TODO STYLES REMOVED === */
-        
-        /* === DESKTOP-STYLE TODO BLOCK === */
-        .todo-block {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-primary);
-            margin-bottom: 2rem;
-        }
-        
-        .todo-block-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-primary);
-        }
-        
-        .todo-block-header h3 {
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-primary);
-            margin: 0;
+        .char-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
         
         .add-btn {
-            width: 32px;
-            height: 32px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-primary);
-            color: var(--text-secondary);
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            min-height: 44px; /* iOS touch target */
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            line-height: 1;
-            transition: border-color 0.2s ease;
+            transition: all 0.2s ease;
         }
         
         .add-btn:hover {
-            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         
-        .add-btn {
-            width: 32px;
-            height: 32px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-primary);
-            color: var(--text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            line-height: 1;
-            transition: border-color 0.2s ease;
+        .add-btn:active {
+            transform: translateY(0);
         }
         
-        .brain-input-container {
-            padding: 1.5rem;
-            background: var(--bg-primary);
-            border-bottom: 1px solid var(--border-primary);
-        }
-        
-        
-        .brain-add-btn {
-            width: 100%;
-            padding: 1rem;
-            background: var(--accent-primary);
-            color: white;
-            border: 1px solid var(--accent-primary);
-            border-radius: 6px;
-            font-size: var(--font-size-base);
-            font-weight: 500;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: all 0.2s ease;
-        }
-        
-        .brain-add-btn:hover {
-            background: #222;
-            border-color: #222;
-        }
-        
-        .brain-add-btn:active {
-            transform: translateY(1px);
-        }
-        
-        .smart-suggestions {
-            margin-top: 1rem;
-            padding: 0.75rem;
-            background: var(--bg-secondary);
-            border-radius: 6px;
-            font-size: var(--font-size-sm);
-            color: var(--text-muted);
-        }
-        
-        .suggestions-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        
-        .suggestion-chip {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.5rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-primary);
-            border-radius: 12px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .suggestion-chip:hover {
-            border-color: var(--accent-primary);
-            background: var(--accent-primary);
-            color: white;
-        }
-        
-        .brain-textarea {
-            width: 100%;
-            min-height: 100px;
-            padding: 1rem;
-            border: 1px solid var(--border-primary);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: var(--font-size-base);
-            line-height: var(--line-height-base);
-            resize: vertical;
-            outline: none;
-        }
-        
-        .brain-textarea:focus {
-            border-color: var(--accent-primary);
-        }
-        
-        .brain-textarea::placeholder {
-            color: var(--text-muted);
-        }
-        
-        .brain-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-            justify-content: flex-end;
-        }
-        
-        .brain-save-btn, .brain-cancel-btn {
-            padding: 0.75rem 1.5rem;
-            border: 1px solid var(--border-primary);
-            background: var(--bg-primary);
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: border-color 0.2s ease;
-        }
-        
-        .brain-save-btn:hover, .brain-cancel-btn:hover {
-            border-color: var(--accent-primary);
-        }
-        
-        .brain-save-btn {
-            background: var(--accent-primary);
-            color: var(--bg-primary);
-            border-color: var(--accent-primary);
-        }
-        
-        .todo-links {
-            min-height: 100px;
-            padding: 1.5rem;
-        }
-        
-        .todo-empty-state {
-            text-align: center;
-            color: var(--text-muted);
-        }
-        
-        .todo-empty-state p {
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .todo-empty-state small {
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-        
-        .brain-dump-item {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-primary);
-            background: var(--bg-primary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .brain-dump-item:last-child {
-            border-bottom: none;
-        }
-        
-        .brain-dump-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .brain-dump-text {
-            font-size: var(--font-size-base);
-            line-height: var(--line-height-base);
-            color: var(--text-primary);
-            flex: 1;
-        }
-        
-        .brain-dump-category {
-            font-size: 18px;
-            background: var(--bg-secondary);
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            border: 1px solid var(--border-primary);
-        }
-        
-        /* Hide mobile category display */
-        .brain-dump-category.mobile-category {
-            display: none;
-        }
-        
-        
-        .brain-dump-meta {
-            margin-top: 0.5rem;
-            font-size: var(--font-size-xs);
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+        .add-btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
         /* === PULL TO REFRESH === */
-        .pull-to-refresh {
+        .pull-container {
             position: relative;
             transition: transform 0.3s ease;
         }
@@ -534,13 +268,13 @@
             transform: translateX(-50%);
             width: 40px;
             height: 40px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-light);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-primary);
-            border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 1.25rem;
             opacity: 0;
             transition: all 0.3s ease;
         }
@@ -558,451 +292,744 @@
             to { transform: translateX(-50%) rotate(360deg); }
         }
         
-        /* === SWIPE ACTIONS === */
-        .brain-dump-item {
-            position: relative;
-            transition: transform 0.3s ease;
-            overflow: hidden; /* Back to hidden to prevent spillover */
-            background: var(--bg-primary);
+        /* === ITEMS LIST === */
+        .items-section {
+            margin-bottom: 2rem;
         }
         
-        .brain-dump-item.swiping {
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .items-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+        }
+        
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 0;
+            display: flex;
+            align-items: flex-start;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            transform: translateX(0);
+        }
+        
+        .item:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .item.swiping {
             transition: none;
         }
         
-        .swipe-delete-bg {
+        .item-swipe-actions {
             position: absolute;
             top: 0;
             right: 0;
             bottom: 0;
-            width: 100px;
-            background: #dc3545;
-            display: none; /* Completely hidden by default */
+            width: 60px;
+            background: var(--accent-danger);
+            display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 0 8px 8px 0;
+            transform: translateX(60px);
+            transition: transform 0.2s ease;
+        }
+        
+        .item.swiped .item-swipe-actions {
+            transform: translateX(0);
+        }
+        
+        .swipe-delete-btn {
+            background: none;
+            border: none;
             color: white;
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 1.5rem;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 10; /* Make sure it's above other content */
         }
         
-        .brain-dump-item.delete-visible .swipe-delete-bg {
-            display: flex; /* Show when parent has delete-visible class */
+        .item-content {
+            flex: 1;
+            min-width: 0;
+            padding: 1rem;
+            background: var(--bg-primary);
+            transition: transform 0.2s ease;
         }
         
-        .swipe-delete-bg:active {
-            background: #c82333;
+        .item.swiping .item-content {
+            transition: none;
         }
-
-        /* === HIDDEN BY DEFAULT === */
+        
+        .item-text {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+            word-wrap: break-word;
+        }
+        
+        .item-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .item-actions {
+            display: none; /* Hide regular actions, use swipe instead */
+        }
+        
+        /* === EMPTY STATE === */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .empty-title {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-desc {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        /* === LOADING STATES === */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* === LOGIN SCREEN === */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 1000;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .login-form {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 16px; /* Prevents iOS zoom */
+            background: var(--bg-primary);
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+        
+        .login-btn {
+            width: 100%;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.875rem;
+            font-size: 1rem;
+            font-weight: 500;
+            min-height: 44px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 0.5rem;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .login-btn:disabled {
+            background: var(--text-muted);
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .login-error {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            color: var(--accent-danger);
+            font-size: 0.875rem;
+            text-align: center;
+        }
+        
+        /* === APP STATES === */
+        .app-loading {
+            opacity: 0.6;
+        }
+        
+        .app-hidden {
+            display: none;
+        }
+        
+        /* === UTILITIES === */
         .hidden {
             display: none !important;
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
     </style>
 </head>
 <body>
-    <!-- === LOGIN SCREEN === -->
-    <div class="login-screen" id="login-screen">
-        <div class="login-form">
-            <h1 class="login-title">DashFin Mobile</h1>
-            <form id="login-form">
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1 class="login-title">Brain Dump</h1>
+                <p class="login-subtitle">Schnelle Mobile Notizen</p>
+            </div>
+            <form id="login-form" class="login-form">
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" required>
+                    <input type="email" id="email" required autocomplete="email">
                 </div>
                 <div class="form-group">
                     <label for="password">Passwort</label>
-                    <input type="password" id="password" required>
+                    <input type="password" id="password" required autocomplete="current-password">
                 </div>
-                <button type="submit" class="login-btn" id="login-btn">Login</button>
-                <div class="error hidden" id="error-msg"></div>
+                <button type="submit" id="login-btn" class="login-btn">
+                    Anmelden
+                </button>
+                <div id="login-error" class="login-error hidden"></div>
             </form>
         </div>
     </div>
-    
-    <!-- === DASHBOARD SCREEN === -->
-    <div class="dashboard" id="dashboard">
-        <div class="dashboard-header">
-            <div class="header-content">
-                <h1 class="dashboard-title">Dashboard</h1>
-                <button class="logout-btn" id="logout-btn">Logout</button>
-            </div>
+
+    <!-- Header -->
+    <header class="header" id="main-header">
+        <div class="header-content">
+            <div class="logo">Brain Dump</div>
+            <button id="test-voice-btn" style="background: red; color: white; padding: 8px; border: none; border-radius: 4px;">🎙️ TEST</button>
+            <div class="status" id="status">Offline</div>
         </div>
-        
-        <div class="dashboard-content">
-            <!-- === TODO SECTION === -->
-            <!-- === BRAIN DUMP BLOCK (WIE DESKTOP DASHBOARD) === -->
-            <div class="todo-block">
-                <div class="todo-block-header">
-                    <h3>Brain Dump</h3>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="container app-hidden">
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="input-label">Schnelle Notiz</div>
+            <div class="input-wrapper">
+                <textarea 
+                    id="brain-input" 
+                    class="brain-input" 
+                    placeholder="Gedanke, Idee, Aufgabe..."
+                    maxlength="500"
+                ></textarea>
+            </div>
+            <div class="input-actions">
+                <div class="input-left">
+                    <button id="voice-btn" class="voice-btn" title="Spracherkennung">
+                        🎙️
+                    </button>
+                    <div class="char-count" id="char-count">0 / 500</div>
                 </div>
-                
-                <!-- Brain Dump Input (immer sichtbar für schnelle Eingabe) -->
-                <div id="brain-input-container" class="brain-input-container">
-                    <textarea 
-                        id="brain-input" 
-                        class="brain-textarea"
-                        placeholder="Idee, Aufgabe, Gedanke..."
-                        rows="3"
-                        autofocus
-                    ></textarea>
-                    
-                    <!-- Instant Add Button -->
-                    <div class="brain-actions">
-                        <button id="brain-add-btn" class="brain-add-btn">⚡ Schnell hinzufügen</button>
-                    </div>
-                    
-                    <!-- Smart Suggestions Area -->
-                    <div id="smart-suggestions" class="smart-suggestions hidden">
-                        <small>Smart-Vorschläge:</small>
-                        <div id="suggestions-list" class="suggestions-list"></div>
-                    </div>
-                </div>
-                
-                <!-- Brain Dump List with Pull to Refresh -->
-                <div class="pull-to-refresh" id="pull-container">
-                    <div class="pull-indicator" id="pull-indicator">↻</div>
-                    <div class="todo-links" id="brain-dump-list">
-                        <div class="todo-empty-state">
-                            <p>Schnelle Notizen</p>
-                            <small>Ideen sammeln für spätere Bearbeitung</small>
-                        </div>
-                    </div>
+                <button id="add-btn" class="add-btn" disabled>
+                    Hinzufügen
+                </button>
+            </div>
+        </section>
+
+        <!-- Items Section -->
+        <section class="items-section">
+            <div class="section-header">
+                <h2 class="section-title">Notizen</h2>
+                <div class="items-count" id="items-count">0</div>
+            </div>
+            
+            <div id="pull-container" class="pull-container">
+                <div id="pull-indicator" class="pull-indicator">↻</div>
+                <div id="items-list" class="items-list">
+                    <!-- Items will be inserted here -->
                 </div>
             </div>
-        </div>
-    </div>
+            
+            <div id="empty-state" class="empty-state">
+                <div class="empty-icon">🧠</div>
+                <div class="empty-title">Bereit für deine Gedanken</div>
+                <div class="empty-desc">Schreibe schnell Ideen, Aufgaben oder Notizen auf.<br>Sie werden automatisch mit dem Desktop synchronisiert.</div>
+            </div>
+        </section>
+    </main>
 
-    <!-- === SUPABASE INTEGRATION === -->
     <script>
-        // Inline Supabase configuration (no external dependencies)
-        const SUPABASE_URL = 'https://aotuakgnudtiigbbzkkf.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvdHVha2dudWR0aWlnYmJ6a2tmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Mzk1MTYsImV4cCI6MjA3MDMxNTUxNn0.xC6i5Kphk-H3pGUwFj0ko7_YZTguast3hK5fprsJfZI';
-
-        // Simple Supabase client for mobile
-        class MobileSupabaseClient {
+        // === ULTRA FAST MOBILE BRAIN DUMP ===
+        class FastMobile {
             constructor() {
-                this.url = SUPABASE_URL;
-                this.key = SUPABASE_ANON_KEY;
-                this.user = null;
-                this.session = null;
-                this.headers = {
-                    'apikey': this.key,
-                    'Authorization': `Bearer ${this.key}`,
-                    'Content-Type': 'application/json'
-                };
-                
-                console.log('📱 MobileSupabaseClient created with URL:', this.url);
-                
-                // Immediately try to restore session from localStorage
-                this.loadStoredSession();
-            }
-            
-            loadStoredSession() {
-                try {
-                    const storedSession = localStorage.getItem('mobile_supabase_session');
-                    if (storedSession) {
-                        const session = JSON.parse(storedSession);
-                        
-                        // Check if session is not too old (7 days max)
-                        const sessionAge = Date.now() - (session.created_at || 0);
-                        const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-                        
-                        if (sessionAge < maxAge && session.access_token && session.user) {
-                            console.log('📱 Restoring stored session for user:', session.user.email);
-                            this.session = session;
-                            this.user = session.user;
-                            this.headers.Authorization = `Bearer ${session.access_token}`;
-                            return true;
-                        } else {
-                            console.log('📱 Stored session expired or invalid, removing...');
-                            localStorage.removeItem('mobile_supabase_session');
-                        }
-                    }
-                } catch (error) {
-                    console.error('📱 Error loading stored session:', error);
-                    localStorage.removeItem('mobile_supabase_session');
-                }
-                return false;
-            }
-            
-            async signIn(email, password) {
-                try {
-                    console.log('📱 Attempting login to:', `${this.url}/auth/v1/token`);
-                    console.log('📱 Using headers:', { 
-                        'apikey': this.key.substring(0, 20) + '...',
-                        'Content-Type': 'application/json'
-                    });
-                    
-                    // Try multiple endpoints in case one fails
-                    const endpoints = [
-                        `${this.url}/auth/v1/token?grant_type=password`,
-                        `${this.url}/auth/v1/signin`
-                    ];
-                    
-                    let lastError = null;
-                    
-                    for (const endpoint of endpoints) {
-                        try {
-                            console.log('📱 Trying endpoint:', endpoint);
-                            
-                            // Add timeout to prevent "load failed" errors
-                            const controller = new AbortController();
-                            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-                            
-                            const response = await fetch(endpoint, {
-                                method: 'POST',
-                                headers: {
-                                    'apikey': this.key,
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${this.key}`
-                                },
-                                body: JSON.stringify({
-                                    email: email,
-                                    password: password
-                                }),
-                                signal: controller.signal
-                            });
-                            
-                            clearTimeout(timeoutId);
-                            
-                            console.log('📱 Response status:', response.status);
-                            console.log('📱 Response headers:', Object.fromEntries(response.headers.entries()));
-                            
-                            if (!response.ok) {
-                                const errorText = await response.text();
-                                console.log('📱 Error response text:', errorText);
-                                
-                                try {
-                                    const errorData = JSON.parse(errorText);
-                                    lastError = errorData.error_description || errorData.message || `HTTP ${response.status}`;
-                                } catch {
-                                    lastError = `HTTP ${response.status}: ${errorText}`;
-                                }
-                                continue; // Try next endpoint
-                            }
-                            
-                            const responseText = await response.text();
-                            console.log('📱 Success response text:', responseText);
-                            
-                            const data = JSON.parse(responseText);
-                            console.log('📱 Parsed login data:', {
-                                has_access_token: !!data.access_token,
-                                has_user: !!data.user,
-                                user_email: data.user?.email
-                            });
-                            
-                            if (data.access_token && data.user) {
-                                this.session = {
-                                    access_token: data.access_token,
-                                    refresh_token: data.refresh_token,
-                                    user: data.user,
-                                    created_at: Date.now() // Add timestamp for expiration check
-                                };
-                                this.user = data.user;
-                                this.headers.Authorization = `Bearer ${data.access_token}`;
-                                
-                                // Store in localStorage with timestamp
-                                localStorage.setItem('mobile_supabase_session', JSON.stringify(this.session));
-                                console.log('📱 Session stored with timestamp:', new Date(this.session.created_at).toLocaleString());
-                                
-                                console.log('✅ Login successful for:', data.user.email);
-                                return { user: data.user, error: null };
-                            }
-                            
-                            lastError = 'Login successful but missing user data';
-                            break;
-                            
-                        } catch (fetchError) {
-                            console.error('📱 Fetch error for endpoint', endpoint, ':', fetchError);
-                            lastError = `Network error: ${fetchError.message}`;
-                            continue;
-                        }
-                    }
-                    
-                    return { user: null, error: lastError || 'All login methods failed' };
-                    
-                } catch (error) {
-                    console.error('📱 Outer login error:', error);
-                    return { user: null, error: `Login error: ${error.message}` };
-                }
-            }
-            
-            async signOut() {
-                this.session = null;
-                this.user = null;
-                this.headers.Authorization = `Bearer ${this.key}`;
-                localStorage.removeItem('mobile_supabase_session');
-                return { error: null };
-            }
-            
-            getCurrentUser() {
-                return this.user;
-            }
-            
-            isAuthenticated() {
-                return !!(this.user && this.session);
-            }
-            
-            async select(table, columns = '*') {
-                try {
-                    const response = await fetch(`${this.url}/rest/v1/${table}?select=${columns}`, {
-                        method: 'GET',
-                        headers: this.headers
-                    });
-                    
-                    if (response.status === 401) {
-                        console.log('📱 Session expired, clearing stored session...');
-                        this.signOut(); // This will clear localStorage and reload
-                        return [];
-                    }
-                    
-                    if (!response.ok) {
-                        console.error('Select error:', response.status);
-                        return [];
-                    }
-                    
-                    return await response.json();
-                } catch (error) {
-                    console.error('Select error:', error);
-                    return [];
-                }
-            }
-            
-            async insert(table, data) {
-                try {
-                    const response = await fetch(`${this.url}/rest/v1/${table}`, {
-                        method: 'POST',
-                        headers: {
-                            ...this.headers,
-                            'Prefer': 'return=representation'
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    
-                    if (response.status === 401) {
-                        console.log('📱 Session expired during insert, clearing stored session...');
-                        this.signOut(); // This will clear localStorage and reload
-                        return null;
-                    }
-                    
-                    if (!response.ok) {
-                        console.error('Insert error:', response.status);
-                        return null;
-                    }
-                    
-                    const result = await response.json();
-                    return result;
-                } catch (error) {
-                    console.error('Insert error:', error);
-                    return null;
-                }
-            }
-            
-            async delete(table, id) {
-                try {
-                    const response = await fetch(`${this.url}/rest/v1/${table}?id=eq.${id}`, {
-                        method: 'DELETE',
-                        headers: this.headers
-                    });
-                    
-                    return response.ok;
-                } catch (error) {
-                    console.error('Delete error:', error);
-                    return false;
-                }
-            }
-        }
-
-        // Initialize global Supabase instance
-        window.supabase = new MobileSupabaseClient();
-        console.log('📱 Global supabase initialized:', !!window.supabase);
-    </script>
-    
-    <script>
-        // === SUPER SIMPLE MOBILE APP ===
-        class SimpleMobileApp {
-            constructor() {
-                this.currentUser = null;
-                this.todos = [];
-                this.isLoading = false;
+                this.items = [];
+                this.isOnline = false;
+                this.syncQueue = [];
+                this.localStorageKey = 'mobile_brain_dump_items';
+                this.recognition = null;
+                this.isListening = false;
                 
                 this.init();
             }
             
             init() {
-                console.log('📱 SimpleMobileApp initializing...');
-                console.log('📱 Supabase available:', !!window.supabase);
+                console.log('🚀 FastMobile v2.0 starting...');
+                
+                // Initialize Supabase
+                this.initDatabase();
+                
+                // Initialize Voice Recognition
+                this.initVoiceRecognition();
                 
                 // Bind events
                 this.bindEvents();
                 
-                // Give Supabase a moment to load stored session
-                setTimeout(() => {
-                    // Check if already logged in after session restore
-                    if (window.supabase && window.supabase.isAuthenticated()) {
-                        console.log('📱 User already authenticated via stored session');
-                        this.currentUser = window.supabase.getCurrentUser();
-                        this.showDashboard();
-                    } else {
-                        console.log('📱 No valid session found, showing login');
-                        this.showLogin();
+                // Load offline data first
+                this.loadOfflineItems();
+                
+                // Load data from server
+                this.loadItems();
+                
+                console.log('✅ FastMobile ready!');
+            }
+            
+            initDatabase() {
+                // Reuse same Supabase config for compatibility
+                this.supabaseUrl = 'https://aotuakgnudtiigbbzkkf.supabase.co';
+                this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvdHVha2dudWR0aWlnYmJ6a2tmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Mzk1MTYsImV4cCI6MjA3MDMxNTUxNn0.xC6i5Kphk-H3pGUwFj0ko7_YZTguast3hK5fprsJfZI';
+                
+                // Try to restore session
+                this.restoreSession();
+            }
+            
+            initVoiceRecognition() {
+                // Check if browser supports Speech Recognition
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                
+                if (!SpeechRecognition) {
+                    console.log('🎙️ Speech Recognition not supported');
+                    const voiceBtn = document.getElementById('voice-btn');
+                    if (voiceBtn) {
+                        voiceBtn.style.opacity = '0.5';
+                        voiceBtn.title = 'Spracherkennung nicht verfügbar';
+                        voiceBtn.disabled = true;
                     }
-                }, 100); // Small delay to let session restoration complete
+                    return;
+                }
+                
+                this.recognition = new SpeechRecognition();
+                this.recognition.continuous = false;
+                this.recognition.interimResults = false;
+                this.recognition.lang = 'de-DE'; // German language
+                
+                // Recognition events
+                this.recognition.onstart = () => {
+                    console.log('🎙️ Voice recognition started');
+                    this.isListening = true;
+                    const voiceBtn = document.getElementById('voice-btn');
+                    voiceBtn.classList.add('listening');
+                    voiceBtn.textContent = '🔴';
+                    this.hapticFeedback('light');
+                };
+                
+                this.recognition.onresult = (event) => {
+                    console.log('🎙️ Voice recognition result');
+                    const transcript = event.results[0][0].transcript;
+                    console.log('Transcript:', transcript);
+                    
+                    // Add to input field
+                    const input = document.getElementById('brain-input');
+                    const currentText = input.value.trim();
+                    input.value = currentText ? `${currentText} ${transcript}` : transcript;
+                    
+                    // Trigger input event to update char count and enable button
+                    input.dispatchEvent(new Event('input'));
+                    
+                    // Auto-add if transcript seems complete
+                    if (transcript.length > 5) {
+                        setTimeout(() => {
+                            this.addItem();
+                        }, 500);
+                    }
+                    
+                    this.hapticFeedback('medium');
+                };
+                
+                this.recognition.onerror = (event) => {
+                    console.log('🎙️ Voice recognition error:', event.error);
+                    this.stopListening();
+                    
+                    // Show error feedback
+                    const voiceBtn = document.getElementById('voice-btn');
+                    voiceBtn.textContent = '❌';
+                    setTimeout(() => {
+                        voiceBtn.textContent = '🎙️';
+                    }, 2000);
+                };
+                
+                this.recognition.onend = () => {
+                    console.log('🎙️ Voice recognition ended');
+                    this.stopListening();
+                };
+                
+                console.log('🎙️ Voice recognition initialized');
+            }
+            
+            startVoiceRecognition() {
+                if (!this.recognition || this.isListening) return;
+                
+                try {
+                    this.recognition.start();
+                } catch (error) {
+                    console.log('🎙️ Failed to start recognition:', error);
+                }
+            }
+            
+            stopListening() {
+                this.isListening = false;
+                const voiceBtn = document.getElementById('voice-btn');
+                voiceBtn.classList.remove('listening', 'processing');
+                voiceBtn.textContent = '🎙️';
+            }
+            
+            restoreSession() {
+                const stored = localStorage.getItem('mobile_supabase_session');
+                if (stored) {
+                    try {
+                        const session = JSON.parse(stored);
+                        // Check if session is still valid (not too old)
+                        const sessionAge = Date.now() - (session.created_at || 0);
+                        const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+                        
+                        if (sessionAge < maxAge && session.access_token) {
+                            this.session = session;
+                            this.setOnline(true);
+                            this.showApp();
+                            return;
+                        } else {
+                            localStorage.removeItem('mobile_supabase_session');
+                        }
+                    } catch (e) {
+                        localStorage.removeItem('mobile_supabase_session');
+                    }
+                }
+                
+                // Show login screen
+                this.showLogin();
+            }
+            
+            showLogin() {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-header').classList.add('app-hidden');
+                document.getElementById('main-content').classList.add('app-hidden');
+            }
+            
+            showApp() {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-header').classList.remove('app-hidden');
+                document.getElementById('main-content').classList.remove('app-hidden');
+                this.loadItems();
+            }
+            
+            async handleLogin(email, password) {
+                try {
+                    const response = await fetch(`${this.supabaseUrl}/auth/v1/token?grant_type=password`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': this.supabaseKey,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            password: password
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.access_token && data.user) {
+                            data.created_at = Date.now(); // Add timestamp
+                            this.session = data;
+                            localStorage.setItem('mobile_supabase_session', JSON.stringify(data));
+                            this.setOnline(true);
+                            this.showApp();
+                            return { success: true };
+                        }
+                    }
+                    
+                    const errorData = await response.json();
+                    return { 
+                        success: false, 
+                        error: errorData.error_description || 'Login fehlgeschlagen'
+                    };
+                } catch (error) {
+                    return { 
+                        success: false, 
+                        error: 'Verbindung fehlgeschlagen. Bitte versuchen Sie es erneut.'
+                    };
+                }
+            }
+            
+            setOnline(status) {
+                this.isOnline = status;
+                const statusEl = document.getElementById('status');
+                statusEl.textContent = status ? 'Online' : 'Offline';
+                statusEl.className = `status ${status ? 'online' : ''}`;
+                
+                // Sync queued items when coming online
+                if (status && this.syncQueue.length > 0) {
+                    this.syncQueuedItems();
+                }
+            }
+            
+            loadOfflineItems() {
+                try {
+                    const stored = localStorage.getItem(this.localStorageKey);
+                    if (stored) {
+                        this.items = JSON.parse(stored);
+                        this.renderItems();
+                        console.log(`📱 Loaded ${this.items.length} items from offline storage`);
+                    }
+                } catch (error) {
+                    console.log('Failed to load offline items');
+                    this.items = [];
+                }
+            }
+            
+            saveOfflineItems() {
+                try {
+                    localStorage.setItem(this.localStorageKey, JSON.stringify(this.items));
+                } catch (error) {
+                    console.log('Failed to save offline items');
+                }
+            }
+            
+            async syncQueuedItems() {
+                if (!this.isOnline || this.syncQueue.length === 0) return;
+                
+                console.log(`🔄 Syncing ${this.syncQueue.length} queued items...`);
+                const itemsToSync = [...this.syncQueue];
+                this.syncQueue = [];
+                
+                for (const item of itemsToSync) {
+                    try {
+                        if (item.action === 'delete') {
+                            // Handle queued deletion
+                            await fetch(`${this.supabaseUrl}/rest/v1/todos?id=eq.${item.id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'apikey': this.supabaseKey,
+                                    'Authorization': `Bearer ${this.session.access_token}`
+                                }
+                            });
+                        } else {
+                            // Handle queued creation
+                            await this.syncItem(item);
+                        }
+                    } catch (error) {
+                        // Re-queue failed items
+                        this.syncQueue.push(item);
+                    }
+                }
             }
             
             bindEvents() {
                 // Login form
-                document.getElementById('login-form').addEventListener('submit', (e) => {
+                const loginForm = document.getElementById('login-form');
+                loginForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    this.handleLogin();
+                    
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value.trim();
+                    const loginBtn = document.getElementById('login-btn');
+                    const loginError = document.getElementById('login-error');
+                    
+                    if (!email || !password) {
+                        this.showError('Bitte Email und Passwort eingeben');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    loginBtn.disabled = true;
+                    loginBtn.textContent = 'Wird angemeldet...';
+                    loginError.classList.add('hidden');
+                    
+                    // Attempt login
+                    const result = await this.handleLogin(email, password);
+                    
+                    if (result.success) {
+                        // Login successful - showApp() already called in handleLogin
+                    } else {
+                        this.showError(result.error);
+                    }
+                    
+                    // Reset button state
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Anmelden';
                 });
                 
-                // Logout button
-                document.getElementById('logout-btn').addEventListener('click', () => {
-                    this.handleLogout();
-                });
+                // App input events (only bind when app is shown)
+                this.bindAppEvents();
                 
-                // Brain dump functionality
-                this.initBrainDump();
+                // Pull to refresh
+                this.initPullToRefresh();
             }
             
-            initBrainDump() {
-                // Brain input
-                const brainInput = document.getElementById('brain-input');
-                const instantAddBtn = document.getElementById('brain-add-btn');
+            bindAppEvents() {
+                const input = document.getElementById('brain-input');
+                const addBtn = document.getElementById('add-btn');
+                const charCount = document.getElementById('char-count');
                 
-                // Auto-resize textarea
-                brainInput.addEventListener('input', () => {
-                    brainInput.style.height = 'auto';
-                    brainInput.style.height = Math.min(brainInput.scrollHeight, 200) + 'px';
-                    
-                    // Enable/disable add button
-                    const hasText = brainInput.value.trim().length > 0;
-                    instantAddBtn.disabled = !hasText;
-                    
-                    // Smart parsing (simple version)
-                    this.smartParsing(brainInput.value);
+                // Input events
+                input.addEventListener('input', () => {
+                    const length = input.value.length;
+                    charCount.textContent = `${length} / 500`;
+                    addBtn.disabled = length === 0;
                 });
                 
-                // Instant add button
-                instantAddBtn.addEventListener('click', () => {
-                    this.instantAddTodo();
+                // Add button
+                addBtn.addEventListener('click', () => {
+                    this.addItem();
                 });
                 
-                // Enter to add (Shift+Enter for new line)
-                brainInput.addEventListener('keydown', (e) => {
+                // Voice button
+                const voiceBtn = document.getElementById('voice-btn');
+                if (voiceBtn) {
+                    voiceBtn.addEventListener('click', () => {
+                        if (!this.recognition) {
+                            alert('Spracherkennung ist in diesem Browser nicht verfügbar.');
+                            return;
+                        }
+                        
+                        if (this.isListening) {
+                            this.recognition.stop();
+                        } else {
+                            this.startVoiceRecognition();
+                        }
+                    });
+                }
+                
+                // Enter key (mobile friendly)
+                input.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        this.instantAddTodo();
+                        this.addItem();
                     }
                 });
-                
-                // Initialize gesture handlers
-                this.initPullToRefresh();
-                this.initSwipeGestures();
+            }
+            
+            showError(message) {
+                const errorEl = document.getElementById('login-error');
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
             }
             
             initPullToRefresh() {
@@ -1012,7 +1039,7 @@
                 let startY = 0;
                 let currentY = 0;
                 let isPulling = false;
-                const threshold = 40; // Lower threshold for faster trigger
+                const threshold = 50;
                 
                 pullContainer.addEventListener('touchstart', (e) => {
                     if (pullContainer.scrollTop === 0) {
@@ -1025,7 +1052,7 @@
                     if (!isPulling) return;
                     
                     currentY = e.touches[0].clientY;
-                    const pullDistance = Math.max(0, (currentY - startY) * 0.5);
+                    const pullDistance = Math.max(0, (currentY - startY) * 0.6);
                     
                     if (pullDistance > 0) {
                         e.preventDefault();
@@ -1047,7 +1074,7 @@
                 pullContainer.addEventListener('touchend', async () => {
                     if (!isPulling) return;
                     
-                    const pullDistance = Math.max(0, (currentY - startY) * 0.5);
+                    const pullDistance = Math.max(0, (currentY - startY) * 0.6);
                     
                     if (pullDistance >= threshold) {
                         // Trigger refresh
@@ -1055,9 +1082,9 @@
                         pullIndicator.textContent = '↻';
                         
                         try {
-                            await this.loadTodos();
+                            await this.loadItems();
                         } catch (error) {
-                            console.error('Pull to refresh failed:', error);
+                            console.log('Refresh failed');
                         }
                         
                         setTimeout(() => {
@@ -1075,542 +1102,278 @@
                     isPulling = false;
                     startY = 0;
                     currentY = 0;
-                }, { passive: true });
+                }, { passive: false });
             }
             
-            initSwipeGestures() {
-                this.swipeState = {
-                    startX: 0,
-                    startY: 0,
-                    currentX: 0,
-                    isSwipingHorizontally: false,
-                    swipingElement: null
-                };
-            }
-            
-            
-            smartParsing(text) {
-                // Simple smart parsing for common patterns
-                const suggestions = document.getElementById('smart-suggestions');
-                const suggestionsList = document.getElementById('suggestions-list');
+            async addItem() {
+                const input = document.getElementById('brain-input');
+                const text = input.value.trim();
                 
-                if (text.length < 3) {
-                    suggestions.classList.add('hidden');
-                    return;
-                }
-                
-                const smartTags = [];
-                
-                // Date detection
-                if (/\b(heute|today)\b/i.test(text)) smartTags.push('📅 Heute');
-                if (/\b(morgen|tomorrow)\b/i.test(text)) smartTags.push('🌅 Morgen');
-                if (/\b(wichtig|urgent|important)\b/i.test(text)) smartTags.push('❗ Wichtig');
-                if (/\b(dringend|asap)\b/i.test(text)) smartTags.push('🔥 Dringend');
-                if (/\b(idee|idea|concept)\b/i.test(text)) smartTags.push('💡 Idee');
-                if (/\b(email|mail|schreiben)\b/i.test(text)) smartTags.push('📧 Kommunikation');
-                if (/\b(termin|meeting|call)\b/i.test(text)) smartTags.push('🗓️ Termin');
-                
-                if (smartTags.length > 0 && suggestionsList) {
-                    suggestionsList.innerHTML = smartTags.map(tag => 
-                        `<span class="suggestion-chip">${tag}</span>`
-                    ).join('');
-                    suggestions.classList.remove('hidden');
-                } else {
-                    suggestions.classList.add('hidden');
-                }
-            }
-            
-            async instantAddTodo() {
-                const brainInput = document.getElementById('brain-input');
-                const instantAddBtn = document.getElementById('brain-add-btn');
-                
-                const text = brainInput.value.trim();
                 if (!text) return;
                 
-                // Show loading state
-                instantAddBtn.textContent = 'Wird hinzugefügt...';
-                instantAddBtn.disabled = true;
+                // Haptic feedback (iOS)
+                this.hapticFeedback('light');
                 
-                
-                try {
-                    // Process selected chips
-                    const todoData = this.processBrainDump(text);
-                    
-                    console.log('🧠 Brain dump todo:', todoData);
-                    
-                    if (window.supabase && window.supabase.isAuthenticated()) {
-                        const result = await window.supabase.insert('todos', [todoData]);
-                        if (result && result[0]) {
-                            todoData.id = result[0].id;
-                        }
-                    } else {
-                        todoData.id = Date.now();
-                    }
-                    
-                    // Add to local array
-                    this.todos.push(todoData);
-                    this.renderTodos();
-                    
-                    // INSTANT SYNC: Notify desktop about new brain dump
-                    console.log('📱 Mobile: About to notify desktop of new brain dump');
-                    this.notifyDesktopOfNewBrainDump();
-                    console.log('📱 Mobile: Desktop notification sent');
-                    
-                    // Clear input
-                    brainInput.value = '';
-                    brainInput.style.height = 'auto';
-                    
-                    // Hide suggestions (if exists)
-                    const suggestions = document.getElementById('smart-suggestions');
-                    if (suggestions) suggestions.classList.add('hidden');
-                    
-                    // Flash success
-                    instantAddBtn.style.background = '#28a745';
-                    setTimeout(() => {
-                        instantAddBtn.style.background = 'var(--accent-primary)';
-                    }, 300);
-                    
-                } catch (error) {
-                    console.error('❌ Error adding brain dump todo:', error);
-                    
-                    // Flash error
-                    instantAddBtn.style.background = '#dc3545';
-                    setTimeout(() => {
-                        instantAddBtn.style.background = 'var(--accent-primary)';
-                    }, 1000);
-                } finally {
-                    // Reset button state
-                    instantAddBtn.textContent = '⚡ Schnell hinzufügen';
-                    instantAddBtn.disabled = false;
-                    
-                    // Focus back to input for next entry
-                    brainInput.focus();
-                }
-            }
-            
-            processBrainDump(text) {
-                return {
+                // Create item
+                const item = {
+                    id: Date.now(),
                     text: text,
-                    category: 'braindump', // Always 'braindump' for Brain Dump Container
-                    priority: 2, // Default priority
+                    category: 'braindump',
+                    priority: 2,
                     completed: false,
-                    date: null, // No date by default
-                    time: '21:00', // Default time
-                    user_id: this.currentUser?.id
+                    date: null,
+                    time: '21:00',
+                    user_id: this.session?.user?.id || null,
+                    created_at: new Date().toISOString()
                 };
+                
+                // Add to local array immediately
+                this.items.unshift(item);
+                
+                // Save offline
+                this.saveOfflineItems();
+                
+                // Clear input
+                input.value = '';
+                input.dispatchEvent(new Event('input')); // Trigger char count update
+                
+                // Update UI instantly
+                this.renderItems();
+                
+                // Sync to database in background
+                if (this.isOnline) {
+                    this.syncItem(item);
+                } else {
+                    this.syncQueue.push(item);
+                }
             }
             
-            
-            async handleLogin() {
-                if (this.isLoading) return;
-                
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value.trim();
-                const loginBtn = document.getElementById('login-btn');
-                
-                if (!email || !password) {
-                    this.showError('Bitte Email und Passwort eingeben');
-                    return;
-                }
-                
-                this.isLoading = true;
-                loginBtn.textContent = 'Wird angemeldet...';
-                loginBtn.disabled = true;
-                
+            async syncItem(item) {
                 try {
-                    console.log('📱 Attempting login with email:', email);
-                    
-                    if (!window.supabase) {
-                        throw new Error('Datenbankverbindung nicht verfügbar');
-                    }
-                    
-                    const { user, error } = await window.supabase.signIn(email, password);
-                    
-                    console.log('📱 Login result - User:', !!user, 'Error:', error);
-                    
-                    if (error) {
-                        throw new Error(error);
-                    }
-                    
-                    if (user) {
-                        console.log('✅ Login successful, user:', user.email);
-                        this.currentUser = user;
-                        this.showDashboard();
-                    } else {
-                        throw new Error('Anmeldung fehlgeschlagen - kein Benutzer zurückgegeben');
-                    }
-                    
+                    await fetch(`${this.supabaseUrl}/rest/v1/todos`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': this.supabaseKey,
+                            'Authorization': `Bearer ${this.session.access_token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(item)
+                    });
                 } catch (error) {
-                    console.error('❌ Login error:', error);
-                    
-                    // If it's a network error, offer demo mode
-                    if (error.message?.includes('Network error') || error.message?.includes('Load failed')) {
-                        this.showError('Netzwerkverbindung fehlgeschlagen. Versuche es mit deiner mobilen Daten oder WLAN.');
-                        
-                        // Add demo mode button after 3 seconds
-                        setTimeout(() => {
-                            const errorEl = document.getElementById('error-msg');
-                            if (errorEl && !errorEl.classList.contains('hidden')) {
-                                errorEl.innerHTML = `
-                                    <div>Netzwerkverbindung fehlgeschlagen.</div>
-                                    <button onclick="app.enterDemoMode()" style="margin-top: 10px; padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px;">
-                                        Demo-Modus starten
-                                    </button>
-                                `;
+                    console.log('Sync failed, queuing for later');
+                    this.syncQueue.push(item);
+                }
+            }
+            
+            async deleteItem(id) {
+                // Remove from UI immediately
+                this.items = this.items.filter(item => item.id !== id);
+                
+                // Save offline
+                this.saveOfflineItems();
+                
+                // Update UI
+                this.renderItems();
+                
+                // Sync deletion in background
+                if (this.isOnline) {
+                    try {
+                        await fetch(`${this.supabaseUrl}/rest/v1/todos?id=eq.${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'apikey': this.supabaseKey,
+                                'Authorization': `Bearer ${this.session.access_token}`
                             }
-                        }, 3000);
+                        });
+                    } catch (error) {
+                        console.log('Delete sync failed');
+                        // Queue deletion for later sync
+                        this.syncQueue.push({ action: 'delete', id: id });
+                    }
+                } else {
+                    // Queue deletion for when online
+                    this.syncQueue.push({ action: 'delete', id: id });
+                }
+            }
+            
+            async loadItems() {
+                if (!this.isOnline || !this.session) {
+                    this.renderItems();
+                    return;
+                }
+                
+                try {
+                    // Add timeout for better UX
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    
+                    const response = await fetch(`${this.supabaseUrl}/rest/v1/todos?category=eq.braindump&order=created_at.desc&limit=100`, {
+                        headers: {
+                            'apikey': this.supabaseKey,
+                            'Authorization': `Bearer ${this.session.access_token}`
+                        },
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (response.ok) {
+                        const serverItems = await response.json();
+                        // Merge with offline items (avoid duplicates)
+                        this.mergeItems(serverItems);
+                        this.saveOfflineItems();
+                        this.renderItems();
+                    }
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        console.log('Request timed out');
                     } else {
-                        this.showError(error.message || 'Anmeldung fehlgeschlagen');
+                        console.log('Load failed');
                     }
-                } finally {
-                    this.isLoading = false;
-                    loginBtn.textContent = 'Login';
-                    loginBtn.disabled = false;
+                    this.renderItems();
                 }
             }
             
-            enterDemoMode() {
-                console.log('📱 Entering demo mode');
-                this.currentUser = { email: 'demo@user.com', id: 'demo' };
-                this.todos = [
-                    { id: 1, text: 'Demo Todo 1', category: 'privat', priority: 2 },
-                    { id: 2, text: 'Demo Todo 2', category: 'arbeit', priority: 3 }
-                ];
-                this.hideError();
-                this.showDashboard();
-            }
-            
-            async handleLogout() {
-                try {
-                    if (window.supabase) {
-                        await window.supabase.signOut();
-                    }
-                    this.currentUser = null;
-                    this.todos = [];
-                    this.showLogin();
-                } catch (error) {
-                    console.error('❌ Logout error:', error);
-                    // Force logout anyway
-                    this.showLogin();
-                }
-            }
-            
-            showLogin() {
-                document.getElementById('login-screen').classList.remove('hidden');
-                document.getElementById('dashboard').classList.remove('show');
-                this.hideError();
-            }
-            
-            async showDashboard() {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('dashboard').classList.add('show');
+            mergeItems(serverItems) {
+                // Create a map of existing items by ID
+                const existingIds = new Set(this.items.map(item => item.id));
                 
-                // Load todos
-                await this.loadTodos();
+                // Add new items from server that don't exist locally
+                serverItems.forEach(serverItem => {
+                    if (!existingIds.has(serverItem.id)) {
+                        this.items.push(serverItem);
+                    }
+                });
                 
-                // Start periodic sync to catch desktop changes
-                this.startPeriodicSync();
+                // Sort by creation date (newest first)
+                this.items.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             }
             
-            startPeriodicSync() {
-                // Sync every 15 seconds - less aggressive for better performance
-                if (this.syncInterval) {
-                    clearInterval(this.syncInterval);
-                }
+            renderItems() {
+                const list = document.getElementById('items-list');
+                const emptyState = document.getElementById('empty-state');
+                const itemsCount = document.getElementById('items-count');
                 
-                this.syncInterval = setInterval(async () => {
-                    if (window.supabase && window.supabase.isAuthenticated()) {
-                        await this.loadTodos();
-                    }
-                }, 15000); // 15 seconds for better performance
-            }
-            
-            notifyDesktopOfNewBrainDump() {
-                try {
-                    // Method 1: localStorage event (works across tabs)
-                    const notification = {
-                        type: 'NEW_BRAIN_DUMP',
-                        timestamp: Date.now(),
-                        source: 'mobile'
-                    };
-                    
-                    // Set and remove multiple times to ensure trigger
-                    for (let i = 0; i < 3; i++) {
-                        setTimeout(() => {
-                            localStorage.setItem('brain_dump_sync', JSON.stringify({
-                                ...notification,
-                                attempt: i + 1
-                            }));
-                            
-                            setTimeout(() => {
-                                localStorage.removeItem('brain_dump_sync');
-                            }, 50);
-                        }, i * 100);
-                    }
-                    
-                    console.log('📱 Mobile: Notified desktop of new brain dump (3 attempts)');
-                    
-                    // Method 2: BroadcastChannel (modern browsers, same origin)
-                    if (typeof BroadcastChannel !== 'undefined') {
-                        const channel = new BroadcastChannel('brain_dump_updates');
-                        channel.postMessage(notification);
-                        channel.close();
-                        console.log('📱 Mobile: Sent BroadcastChannel notification');
-                    }
-                    
-                    // Method 3: Simple timestamp trigger
-                    localStorage.setItem('brain_dump_timestamp', Date.now().toString());
-                    
-                } catch (error) {
-                    console.error('❌ Error notifying desktop:', error);
-                }
-            }
-            
-            showError(message) {
-                const errorEl = document.getElementById('error-msg');
-                errorEl.textContent = message;
-                errorEl.classList.remove('hidden');
-            }
-            
-            hideError() {
-                document.getElementById('error-msg').classList.add('hidden');
-            }
-            
-            // Old methods removed - replaced with brain dump interface
-            
-            async loadTodos() {
-                try {
-                    console.log('📋 Loading brain dump todos...');
-                    
-                    if (!window.supabase || !window.supabase.isAuthenticated()) {
-                        throw new Error('Not authenticated');
-                    }
-                    
-                    const allTodos = await window.supabase.select('todos', '*');
-                    
-                    // Only show brain dump todos (not distributed ones)
-                    this.todos = (allTodos || []).filter(todo => 
-                        todo.category === 'braindump'
-                    );
-                    
-                    console.log(`📋 Found ${this.todos.length} brain dump todos (filtered from ${allTodos?.length || 0} total)`);
-                    
-                    // Clean up empty brain dump todos automatically
-                    await this.cleanupEmptyTodos();
-                    
-                    this.renderTodos();
-                    
-                } catch (error) {
-                    console.error('❌ Error loading todos:', error);
-                    this.renderTodos(); // Show empty list
-                }
-            }
-            
-            async cleanupEmptyTodos() {
-                const emptyTodos = this.todos.filter(todo => 
-                    !todo || !(todo.text || todo.title) || (todo.text || todo.title).trim() === ''
-                );
+                // Update count
+                itemsCount.textContent = this.items.length;
                 
-                if (emptyTodos.length > 0) {
-                    console.log(`🧹 Cleaning up ${emptyTodos.length} empty todos...`);
-                    
-                    for (const emptyTodo of emptyTodos) {
-                        try {
-                            await window.supabase.delete('todos', emptyTodo.id);
-                            console.log(`🗑️ Deleted empty todo with ID ${emptyTodo.id}`);
-                        } catch (error) {
-                            console.error(`❌ Error deleting empty todo ${emptyTodo.id}:`, error);
-                        }
-                    }
-                    
-                    // Remove from local array (support both text and title fields)
-                    this.todos = this.todos.filter(todo => 
-                        todo && (todo.text || todo.title) && (todo.text || todo.title).trim() !== ''
-                    );
-                }
-            }
-            
-            renderTodos() {
-                const list = document.getElementById('brain-dump-list');
-                
-                // Don't re-render if delete buttons are currently visible
-                const hasActiveDelete = document.querySelector('.brain-dump-item.delete-visible');
-                if (hasActiveDelete) {
+                if (this.items.length === 0) {
+                    list.innerHTML = '';
+                    emptyState.classList.remove('hidden');
                     return;
                 }
                 
-                if (this.todos.length === 0) {
-                    list.innerHTML = `
-                        <div class="todo-empty-state">
-                            <p>Brain Dump bereit</p>
-                            <small>Schnelle Notizen sammeln</small>
-                        </div>
-                    `;
-                    return;
-                }
+                emptyState.classList.add('hidden');
                 
-                const todosHTML = this.todos.map(todo => {
-                    return `
-                        <div class="brain-dump-item" data-id="${todo.id}">
-                            <div class="swipe-delete-bg">🗑️</div>
-                            <div class="brain-dump-content">
-                                <div class="brain-dump-text">${this.escapeHtml(todo.text)}</div>
+                // Use DocumentFragment for better performance
+                const fragment = document.createDocumentFragment();
+                
+                this.items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'item';
+                    itemDiv.dataset.id = item.id;
+                    
+                    itemDiv.innerHTML = `
+                        <div class="item-content">
+                            <div class="item-text">${this.escapeHtml(item.text)}</div>
+                            <div class="item-meta">
+                                <span>Vor ${this.getTimeAgo(item.created_at)}</span>
                             </div>
                         </div>
+                        <div class="item-swipe-actions">
+                            <button class="swipe-delete-btn" onclick="app.deleteItem(${item.id})" title="Löschen">
+                                🗑️
+                            </button>
+                        </div>
                     `;
-                }).join('');
-                
-                list.innerHTML = todosHTML;
-                
-                // Add swipe event listeners to newly created items
-                this.attachSwipeListeners();
-            }
-            
-            attachSwipeListeners() {
-                const items = document.querySelectorAll('.brain-dump-item');
-                
-                items.forEach((item) => {
-                    let startX = 0;
-                    let currentX = 0;
-                    let isSwiping = false;
                     
-                    // Reset any previous state
-                    item.style.transform = '';
-                    item.classList.remove('delete-visible', 'swiping');
+                    // Add swipe functionality
+                    this.addSwipeHandlers(itemDiv);
                     
-                    const handleStart = (e) => {
-                        startX = e.touches[0].clientX;
-                        currentX = startX;
-                        isSwiping = true;
-                        item.classList.add('swiping');
-                    };
-                    
-                    const handleMove = (e) => {
-                        if (!isSwiping) return;
-                        
-                        currentX = e.touches[0].clientX;
-                        const deltaX = currentX - startX;
-                        
-                        // Only allow left swipes, with immediate response
-                        if (deltaX < -15) {
-                            e.preventDefault();
-                            const distance = Math.min(Math.abs(deltaX), 100);
-                            item.style.transform = `translateX(-${distance}px)`;
-                        }
-                    };
-                    
-                    const handleEnd = () => {
-                        if (!isSwiping) return;
-                        
-                        const deltaX = currentX - startX;
-                        item.classList.remove('swiping');
-                        
-                        if (deltaX < -60) {
-                            // Swipe threshold reached - show delete
-                            item.style.transform = 'translateX(-100px)';
-                            item.classList.add('delete-visible');
-                            
-                            // Set up delete click handler
-                            const deleteBtn = item.querySelector('.swipe-delete-bg');
-                            const todoId = parseInt(item.dataset.id);
-                            
-                            const deleteHandler = async (e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                
-                                // Add visual feedback
-                                deleteBtn.style.background = '#a71e2a';
-                                setTimeout(() => {
-                                    deleteBtn.style.background = '#dc3545';
-                                }, 100);
-                                
-                                await this.deleteTodo(todoId);
-                            };
-                            
-                            // Remove ALL existing event listeners by cloning the button
-                            const newDeleteBtn = deleteBtn.cloneNode(true);
-                            deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
-                            
-                            // Add event listener to fresh button
-                            newDeleteBtn.addEventListener('click', deleteHandler);
-                            
-                            // Auto-close after 6 seconds
-                            const autoCloseTimer = setTimeout(() => {
-                                if (item.parentNode) {
-                                    this.closeDeleteState(item);
-                                }
-                            }, 6000);
-                            
-                            // Store timer for potential cleanup
-                            item._autoCloseTimer = autoCloseTimer;
-                            
-                        } else {
-                            // Snap back
-                            item.style.transform = '';
-                        }
-                        
-                        isSwiping = false;
-                        startX = 0;
-                        currentX = 0;
-                    };
-                    
-                    // Clean up old listeners
-                    item.removeEventListener('touchstart', item._startHandler);
-                    item.removeEventListener('touchmove', item._moveHandler);
-                    item.removeEventListener('touchend', item._endHandler);
-                    
-                    // Store handlers for cleanup
-                    item._startHandler = handleStart;
-                    item._moveHandler = handleMove;
-                    item._endHandler = handleEnd;
-                    
-                    // Add new listeners
-                    item.addEventListener('touchstart', handleStart, { passive: true });
-                    item.addEventListener('touchmove', handleMove, { passive: false });
-                    item.addEventListener('touchend', handleEnd, { passive: true });
+                    fragment.appendChild(itemDiv);
                 });
+                
+                list.innerHTML = '';
+                list.appendChild(fragment);
             }
             
-            closeDeleteState(item) {
-                item.style.transform = '';
-                item.classList.remove('delete-visible');
+            addSwipeHandlers(itemElement) {
+                let startX = 0;
+                let currentX = 0;
+                let isSwiping = false;
+                let startTime = 0;
+                const swipeThreshold = 60; // Reduced so text stays visible
+                const velocityThreshold = 0.3;
                 
-                // Clear auto-close timer if exists
-                if (item._autoCloseTimer) {
-                    clearTimeout(item._autoCloseTimer);
-                    item._autoCloseTimer = null;
-                }
+                itemElement.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    startTime = Date.now();
+                    isSwiping = true;
+                    itemElement.classList.add('swiping');
+                }, { passive: true });
                 
-                const deleteBtn = item.querySelector('.swipe-delete-bg');
-                if (deleteBtn && deleteBtn._handler) {
-                    deleteBtn.removeEventListener('click', deleteBtn._handler);
-                    deleteBtn._handler = null;
-                }
-            }
-            
-            
-            // Old addTodo method removed - replaced with instantAddTodo()
-            
-            async deleteTodo(todoId) {
-                try {
-                    // Extra security: Only delete if todo is actually a braindump
-                    const todoToDelete = this.todos.find(todo => todo.id === todoId);
-                    if (!todoToDelete || todoToDelete.category !== 'braindump') {
-                        console.warn('🚫 Mobile: Attempted to delete non-braindump todo, blocked for security');
-                        return;
+                itemElement.addEventListener('touchmove', (e) => {
+                    if (!isSwiping) return;
+                    
+                    currentX = e.touches[0].clientX;
+                    const deltaX = startX - currentX; // Positive = swipe left
+                    
+                    const itemContent = itemElement.querySelector('.item-content');
+                    
+                    if (deltaX > 0) {
+                        // Swipe left - move content but keep visible
+                        const swipeDistance = Math.min(deltaX * 0.7, 50); // Only move 50px max
+                        itemContent.style.transform = `translateX(-${swipeDistance}px)`;
+                        
+                        if (deltaX >= swipeThreshold) {
+                            itemElement.classList.add('swiped');
+                            this.hapticFeedback('light');
+                        } else {
+                            itemElement.classList.remove('swiped');
+                        }
+                    } else if (deltaX < -20) {
+                        // Swipe right - close
+                        itemContent.style.transform = 'translateX(0)';
+                        itemElement.classList.remove('swiped');
+                    }
+                }, { passive: true });
+                
+                itemElement.addEventListener('touchend', (e) => {
+                    if (!isSwiping) return;
+                    
+                    const deltaX = startX - currentX;
+                    const deltaTime = Date.now() - startTime;
+                    const velocity = Math.abs(deltaX) / deltaTime;
+                    
+                    itemElement.classList.remove('swiping');
+                    
+                    const itemContent = itemElement.querySelector('.item-content');
+                    
+                    // Check if swipe should trigger delete visibility
+                    if (deltaX >= swipeThreshold / 2 || velocity > velocityThreshold) {
+                        // Show delete button
+                        itemContent.style.transform = 'translateX(-50px)';
+                        itemElement.classList.add('swiped');
+                    } else {
+                        // Snap back
+                        itemContent.style.transform = 'translateX(0)';
+                        itemElement.classList.remove('swiped');
                     }
                     
-                    if (window.supabase && window.supabase.isAuthenticated()) {
-                        await window.supabase.delete('todos', todoId);
+                    isSwiping = false;
+                    startX = 0;
+                    currentX = 0;
+                }, { passive: true });
+                
+                // Close swipe when tapping elsewhere
+                itemElement.addEventListener('click', (e) => {
+                    if (itemElement.classList.contains('swiped') && !e.target.closest('.item-swipe-actions')) {
+                        e.preventDefault();
+                        const itemContent = itemElement.querySelector('.item-content');
+                        itemContent.style.transform = 'translateX(0)';
+                        itemElement.classList.remove('swiped');
                     }
-                    
-                    this.todos = this.todos.filter(todo => todo.id !== todoId);
-                    this.renderTodos();
-                    
-                } catch (error) {
-                    console.error('❌ Error deleting todo:', error);
-                    alert('Fehler beim Löschen des Todos');
-                }
+                });
             }
             
             escapeHtml(text) {
@@ -1618,21 +1381,83 @@
                 div.textContent = text;
                 return div.innerHTML;
             }
+            
+            getTimeAgo(dateString) {
+                const now = new Date();
+                const date = new Date(dateString);
+                const diff = Math.floor((now - date) / 1000);
+                
+                if (diff < 60) return 'wenigen Sekunden';
+                if (diff < 3600) return `${Math.floor(diff / 60)} Min`;
+                if (diff < 86400) return `${Math.floor(diff / 3600)} Std`;
+                return `${Math.floor(diff / 86400)} Tagen`;
+            }
+            
+            hapticFeedback(type = 'light') {
+                // iOS Haptic Feedback
+                if ('navigator' in window && 'vibrate' in navigator) {
+                    // Android vibration patterns
+                    const patterns = {
+                        light: [10],
+                        medium: [20],
+                        heavy: [50]
+                    };
+                    navigator.vibrate(patterns[type] || patterns.light);
+                }
+                
+                // iOS Taptic Engine (if available)
+                if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
+                    // iOS device - use subtle visual feedback as fallback
+                    const button = document.activeElement;
+                    if (button && button.classList.contains('add-btn')) {
+                        button.style.transform = 'scale(0.98)';
+                        setTimeout(() => {
+                            button.style.transform = '';
+                        }, 100);
+                    }
+                }
+            }
         }
         
-        // Initialize app when DOM is ready
-        let app;
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                app = new SimpleMobileApp();
-                window.app = app; // Make globally available
+        // Initialize app
+        const app = new FastMobile();
+        window.app = app; // Make globally available for onclick handlers
+        
+        console.log('🚀 Mobile v2.0 loaded successfully');
+        
+        // === PWA SERVICE WORKER ===
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('PWA: Service Worker registered successfully:', registration.scope);
+                    
+                    // Check for updates
+                    registration.addEventListener('updatefound', () => {
+                        console.log('PWA: New version available');
+                    });
+                } catch (error) {
+                    console.log('PWA: Service Worker registration failed:', error);
+                }
             });
-        } else {
-            app = new SimpleMobileApp();
-            window.app = app; // Make globally available
         }
         
-        console.log('📱 Mobile app script loaded');
+        // === PWA INSTALL PROMPT ===
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('PWA: Install prompt available');
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Could show custom install button here
+            // For now, let browser handle it
+        });
+        
+        // Track if app is installed
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA: App installed successfully');
+            deferredPrompt = null;
+        });
     </script>
 </body>
 </html>
