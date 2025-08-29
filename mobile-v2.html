@@ -165,6 +165,59 @@
             margin-top: 0.75rem;
         }
         
+        .input-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .voice-btn {
+            background: none;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .voice-btn:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+        
+        .voice-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+        
+        .voice-btn.listening {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: white;
+            animation: pulse-red 1.5s ease-in-out infinite;
+        }
+        
+        .voice-btn.processing {
+            background: #f59e0b;
+            border-color: #f59e0b;
+            color: white;
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
+        }
+        
         .char-count {
             font-size: 0.75rem;
             color: var(--text-muted);
@@ -575,7 +628,12 @@
                 ></textarea>
             </div>
             <div class="input-actions">
-                <div class="char-count" id="char-count">0 / 500</div>
+                <div class="input-left">
+                    <button id="voice-btn" class="voice-btn" title="Spracherkennung">
+                        🎙️
+                    </button>
+                    <div class="char-count" id="char-count">0 / 500</div>
+                </div>
                 <button id="add-btn" class="add-btn" disabled>
                     Hinzufügen
                 </button>
@@ -612,6 +670,8 @@
                 this.isOnline = false;
                 this.syncQueue = [];
                 this.localStorageKey = 'mobile_brain_dump_items';
+                this.recognition = null;
+                this.isListening = false;
                 
                 this.init();
             }
@@ -621,6 +681,9 @@
                 
                 // Initialize Supabase
                 this.initDatabase();
+                
+                // Initialize Voice Recognition
+                this.initVoiceRecognition();
                 
                 // Bind events
                 this.bindEvents();
@@ -641,6 +704,92 @@
                 
                 // Try to restore session
                 this.restoreSession();
+            }
+            
+            initVoiceRecognition() {
+                // Check if browser supports Speech Recognition
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                
+                if (!SpeechRecognition) {
+                    console.log('🎙️ Speech Recognition not supported');
+                    const voiceBtn = document.getElementById('voice-btn');
+                    voiceBtn.style.display = 'none';
+                    return;
+                }
+                
+                this.recognition = new SpeechRecognition();
+                this.recognition.continuous = false;
+                this.recognition.interimResults = false;
+                this.recognition.lang = 'de-DE'; // German language
+                
+                // Recognition events
+                this.recognition.onstart = () => {
+                    console.log('🎙️ Voice recognition started');
+                    this.isListening = true;
+                    const voiceBtn = document.getElementById('voice-btn');
+                    voiceBtn.classList.add('listening');
+                    voiceBtn.textContent = '🔴';
+                    this.hapticFeedback('light');
+                };
+                
+                this.recognition.onresult = (event) => {
+                    console.log('🎙️ Voice recognition result');
+                    const transcript = event.results[0][0].transcript;
+                    console.log('Transcript:', transcript);
+                    
+                    // Add to input field
+                    const input = document.getElementById('brain-input');
+                    const currentText = input.value.trim();
+                    input.value = currentText ? `${currentText} ${transcript}` : transcript;
+                    
+                    // Trigger input event to update char count and enable button
+                    input.dispatchEvent(new Event('input'));
+                    
+                    // Auto-add if transcript seems complete
+                    if (transcript.length > 5) {
+                        setTimeout(() => {
+                            this.addItem();
+                        }, 500);
+                    }
+                    
+                    this.hapticFeedback('medium');
+                };
+                
+                this.recognition.onerror = (event) => {
+                    console.log('🎙️ Voice recognition error:', event.error);
+                    this.stopListening();
+                    
+                    // Show error feedback
+                    const voiceBtn = document.getElementById('voice-btn');
+                    voiceBtn.textContent = '❌';
+                    setTimeout(() => {
+                        voiceBtn.textContent = '🎙️';
+                    }, 2000);
+                };
+                
+                this.recognition.onend = () => {
+                    console.log('🎙️ Voice recognition ended');
+                    this.stopListening();
+                };
+                
+                console.log('🎙️ Voice recognition initialized');
+            }
+            
+            startVoiceRecognition() {
+                if (!this.recognition || this.isListening) return;
+                
+                try {
+                    this.recognition.start();
+                } catch (error) {
+                    console.log('🎙️ Failed to start recognition:', error);
+                }
+            }
+            
+            stopListening() {
+                this.isListening = false;
+                const voiceBtn = document.getElementById('voice-btn');
+                voiceBtn.classList.remove('listening', 'processing');
+                voiceBtn.textContent = '🎙️';
             }
             
             restoreSession() {
@@ -841,6 +990,16 @@
                 // Add button
                 addBtn.addEventListener('click', () => {
                     this.addItem();
+                });
+                
+                // Voice button
+                const voiceBtn = document.getElementById('voice-btn');
+                voiceBtn.addEventListener('click', () => {
+                    if (this.isListening) {
+                        this.recognition.stop();
+                    } else {
+                        this.startVoiceRecognition();
+                    }
                 });
                 
                 // Enter key (mobile friendly)
