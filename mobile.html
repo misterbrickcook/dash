@@ -540,6 +540,69 @@
             letter-spacing: 0.05em;
         }
         
+        /* === PULL TO REFRESH === */
+        .pull-to-refresh {
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        
+        .pull-indicator {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .pull-indicator.visible {
+            opacity: 1;
+        }
+        
+        .pull-indicator.refreshing {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+        
+        /* === SWIPE ACTIONS === */
+        .brain-dump-item {
+            position: relative;
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .brain-dump-item.swiping {
+            transition: none;
+        }
+        
+        .swipe-delete-bg {
+            position: absolute;
+            top: 0;
+            right: -100px;
+            bottom: 0;
+            width: 100px;
+            background: #dc3545;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
         /* === HIDDEN BY DEFAULT === */
         .hidden {
             display: none !important;
@@ -605,11 +668,14 @@
                     </div>
                 </div>
                 
-                <!-- Brain Dump List -->
-                <div class="todo-links" id="brain-dump-list">
-                    <div class="todo-empty-state">
-                        <p>Schnelle Notizen</p>
-                        <small>Ideen sammeln für spätere Bearbeitung</small>
+                <!-- Brain Dump List with Pull to Refresh -->
+                <div class="pull-to-refresh" id="pull-container">
+                    <div class="pull-indicator" id="pull-indicator">↻</div>
+                    <div class="todo-links" id="brain-dump-list">
+                        <div class="todo-empty-state">
+                            <p>Schnelle Notizen</p>
+                            <small>Ideen sammeln für spätere Bearbeitung</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -940,6 +1006,93 @@
                         this.instantAddTodo();
                     }
                 });
+                
+                // Initialize gesture handlers
+                this.initPullToRefresh();
+                this.initSwipeGestures();
+            }
+            
+            initPullToRefresh() {
+                const pullContainer = document.getElementById('pull-container');
+                const pullIndicator = document.getElementById('pull-indicator');
+                
+                let startY = 0;
+                let currentY = 0;
+                let isPulling = false;
+                const threshold = 60;
+                
+                pullContainer.addEventListener('touchstart', (e) => {
+                    if (pullContainer.scrollTop === 0) {
+                        startY = e.touches[0].clientY;
+                        isPulling = true;
+                    }
+                }, { passive: true });
+                
+                pullContainer.addEventListener('touchmove', (e) => {
+                    if (!isPulling) return;
+                    
+                    currentY = e.touches[0].clientY;
+                    const pullDistance = Math.max(0, (currentY - startY) * 0.5);
+                    
+                    if (pullDistance > 0) {
+                        e.preventDefault();
+                        pullContainer.style.transform = `translateY(${pullDistance}px)`;
+                        
+                        const opacity = Math.min(1, pullDistance / threshold);
+                        pullIndicator.style.opacity = opacity;
+                        
+                        if (pullDistance >= threshold) {
+                            pullIndicator.textContent = '↻';
+                            pullIndicator.classList.add('visible');
+                        } else {
+                            pullIndicator.textContent = '↓';
+                            pullIndicator.classList.remove('visible');
+                        }
+                    }
+                });
+                
+                pullContainer.addEventListener('touchend', async () => {
+                    if (!isPulling) return;
+                    
+                    const pullDistance = Math.max(0, (currentY - startY) * 0.5);
+                    
+                    if (pullDistance >= threshold) {
+                        // Trigger refresh
+                        pullIndicator.classList.add('refreshing');
+                        pullIndicator.textContent = '↻';
+                        
+                        try {
+                            await this.loadTodos();
+                        } catch (error) {
+                            console.error('Pull to refresh failed:', error);
+                        }
+                        
+                        setTimeout(() => {
+                            pullIndicator.classList.remove('refreshing', 'visible');
+                            pullContainer.style.transform = '';
+                            pullIndicator.style.opacity = '0';
+                        }, 500);
+                    } else {
+                        // Snap back
+                        pullContainer.style.transform = '';
+                        pullIndicator.style.opacity = '0';
+                        pullIndicator.classList.remove('visible');
+                    }
+                    
+                    isPulling = false;
+                    startY = 0;
+                    currentY = 0;
+                }, { passive: true });
+            }
+            
+            initSwipeGestures() {
+                this.swipeState = {
+                    startX: 0,
+                    startY: 0,
+                    currentX: 0,
+                    isSwipingHorizontally: false,
+                    swipingElement: null
+                };
             }
             
             
@@ -1303,6 +1456,7 @@
                 const todosHTML = this.todos.map(todo => {
                     return `
                         <div class="brain-dump-item" data-id="${todo.id}">
+                            <div class="swipe-delete-bg">🗑️</div>
                             <div class="brain-dump-content">
                                 <div class="brain-dump-text">${this.escapeHtml(todo.text)}</div>
                             </div>
@@ -1312,6 +1466,74 @@
                 }).join('');
                 
                 list.innerHTML = todosHTML;
+                
+                // Add swipe event listeners to newly created items
+                this.attachSwipeListeners();
+            }
+            
+            attachSwipeListeners() {
+                const items = document.querySelectorAll('.brain-dump-item');
+                
+                items.forEach(item => {
+                    let startX = 0;
+                    let startY = 0;
+                    let currentX = 0;
+                    let isSwipingHorizontally = false;
+                    let isSwipingItem = false;
+                    
+                    item.addEventListener('touchstart', (e) => {
+                        startX = e.touches[0].clientX;
+                        startY = e.touches[0].clientY;
+                        isSwipingItem = true;
+                        item.classList.add('swiping');
+                    }, { passive: true });
+                    
+                    item.addEventListener('touchmove', (e) => {
+                        if (!isSwipingItem) return;
+                        
+                        currentX = e.touches[0].clientX;
+                        const currentY = e.touches[0].clientY;
+                        
+                        const deltaX = currentX - startX;
+                        const deltaY = currentY - startY;
+                        
+                        // Determine if this is a horizontal swipe
+                        if (!isSwipingHorizontally && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+                            isSwipingHorizontally = Math.abs(deltaX) > Math.abs(deltaY);
+                        }
+                        
+                        if (isSwipingHorizontally && deltaX < 0) {
+                            // Swipe left - show delete background
+                            e.preventDefault();
+                            const swipeDistance = Math.min(Math.abs(deltaX), 100);
+                            item.style.transform = `translateX(-${swipeDistance}px)`;
+                        }
+                    });
+                    
+                    item.addEventListener('touchend', () => {
+                        if (!isSwipingItem) return;
+                        
+                        const deltaX = currentX - startX;
+                        const swipeDistance = Math.abs(deltaX);
+                        
+                        if (isSwipingHorizontally && deltaX < -70) {
+                            // Delete threshold reached
+                            const todoId = parseInt(item.dataset.id);
+                            this.deleteTodo(todoId);
+                        } else {
+                            // Snap back
+                            item.style.transform = '';
+                        }
+                        
+                        // Reset state
+                        item.classList.remove('swiping');
+                        isSwipingHorizontally = false;
+                        isSwipingItem = false;
+                        startX = 0;
+                        startY = 0;
+                        currentX = 0;
+                    }, { passive: true });
+                });
             }
             
             // Old addTodo method removed - replaced with instantAddTodo()
