@@ -1550,15 +1550,27 @@
                             // Add event listener to fresh button
                             newDeleteBtn.addEventListener('click', deleteHandler);
                             
+                            // Add debug click test
+                            newDeleteBtn.addEventListener('mousedown', () => {
+                                console.log('🖱️ MOUSEDOWN on delete button');
+                            });
+                            
+                            newDeleteBtn.addEventListener('touchstart', () => {
+                                console.log('👆 TOUCHSTART on delete button');
+                            });
+                            
                             console.log('✅ Delete handler attached to fresh button');
                             
-                            // Auto-close after 4 seconds
-                            setTimeout(() => {
+                            // Auto-close after 8 seconds - more time to tap
+                            const autoCloseTimer = setTimeout(() => {
                                 if (item.parentNode) {
                                     console.log('⏰ AUTO-CLOSING delete button');
                                     this.closeDeleteState(item);
                                 }
-                            }, 4000);
+                            }, 8000);
+                            
+                            // Store timer for potential cleanup
+                            item._autoCloseTimer = autoCloseTimer;
                             
                         } else {
                             // Snap back
@@ -1592,6 +1604,12 @@
                 console.log('🔒 CLOSING DELETE STATE');
                 item.style.transform = '';
                 item.classList.remove('delete-visible');
+                
+                // Clear auto-close timer if exists
+                if (item._autoCloseTimer) {
+                    clearTimeout(item._autoCloseTimer);
+                    item._autoCloseTimer = null;
+                }
                 
                 const deleteBtn = item.querySelector('.swipe-delete-bg');
                 if (deleteBtn && deleteBtn._handler) {
