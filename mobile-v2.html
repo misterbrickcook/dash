@@ -288,6 +288,10 @@
             border-radius: 0 8px 8px 0;
         }
         
+        .item.swiping .item-swipe-actions {
+            transition: none;
+        }
+        
         .item.swiped .item-swipe-actions {
             transform: translateX(0);
         }
@@ -313,12 +317,6 @@
             background: var(--bg-primary);
             border-radius: 8px;
             padding: 1rem;
-            transition: transform 0.2s ease;
-            transform: translateX(0);
-        }
-        
-        .item.swiping .item-content {
-            transition: none;
         }
         
         .item-text {
@@ -1134,11 +1132,12 @@
                     const itemContent = itemElement.querySelector('.item-content');
                     
                     if (deltaX > 0) {
-                        // Swipe left - show delete
-                        const swipeDistance = Math.min(deltaX, swipeThreshold);
-                        itemContent.style.transform = `translateX(-${swipeDistance}px)`;
+                        // Swipe left - show delete (but don't move content)
+                        const progress = Math.min(deltaX / swipeThreshold, 1);
+                        const deleteActions = itemElement.querySelector('.item-swipe-actions');
+                        deleteActions.style.transform = `translateX(${60 - (60 * progress)}px)`;
                         
-                        if (swipeDistance >= swipeThreshold) {
+                        if (deltaX >= swipeThreshold) {
                             itemElement.classList.add('swiped');
                             this.hapticFeedback('light');
                         } else {
@@ -1146,7 +1145,8 @@
                         }
                     } else if (deltaX < -20) {
                         // Swipe right - close if open
-                        itemContent.style.transform = 'translateX(0)';
+                        const deleteActions = itemElement.querySelector('.item-swipe-actions');
+                        deleteActions.style.transform = 'translateX(60px)';
                         itemElement.classList.remove('swiped');
                     }
                 }, { passive: true });
@@ -1160,16 +1160,16 @@
                     
                     itemElement.classList.remove('swiping');
                     
-                    const itemContent = itemElement.querySelector('.item-content');
+                    const deleteActions = itemElement.querySelector('.item-swipe-actions');
                     
                     // Check if swipe should trigger delete visibility
                     if (deltaX >= swipeThreshold / 2 || velocity > velocityThreshold) {
                         // Show delete button
-                        itemContent.style.transform = `translateX(-${swipeThreshold}px)`;
+                        deleteActions.style.transform = 'translateX(0px)';
                         itemElement.classList.add('swiped');
                     } else {
                         // Snap back
-                        itemContent.style.transform = 'translateX(0)';
+                        deleteActions.style.transform = 'translateX(60px)';
                         itemElement.classList.remove('swiped');
                     }
                     
@@ -1182,8 +1182,8 @@
                 itemElement.addEventListener('click', (e) => {
                     if (itemElement.classList.contains('swiped') && !e.target.closest('.item-swipe-actions')) {
                         e.preventDefault();
-                        const itemContent = itemElement.querySelector('.item-content');
-                        itemContent.style.transform = 'translateX(0)';
+                        const deleteActions = itemElement.querySelector('.item-swipe-actions');
+                        deleteActions.style.transform = 'translateX(60px)';
                         itemElement.classList.remove('swiped');
                     }
                 });
