@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Brain Dump Mobile v2.2 - FORCE DEPLOY</title>
+    <title>Brain Dump Mobile v2.3 - Voice Ready</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -1080,15 +1080,6 @@
                         }
                     });
                     
-                    // TEST: Add manual test button
-                    const testBtn = document.createElement('button');
-                    testBtn.textContent = 'TEST ADD';
-                    testBtn.style.margin = '10px';
-                    testBtn.onclick = () => {
-                        console.log('🧪 Manual test - adding item');
-                        this.forceAddVoiceItem('Manual Test Item');
-                    };
-                    voiceBtn.parentNode.appendChild(testBtn);
                 }
                 
                 // Enter key (mobile friendly)
