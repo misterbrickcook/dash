@@ -1279,6 +1279,14 @@
             async syncItem(item) {
                 try {
                     this.showDebug('💾 Saving to DB...');
+                    
+                    // Debug: Check if we have session
+                    if (!this.session || !this.session.access_token) {
+                        this.showDebug('❌ No Session');
+                        console.log('❌ No valid session for database save');
+                        return;
+                    }
+                    
                     const response = await fetch(`${this.supabaseUrl}/rest/v1/todos`, {
                         method: 'POST',
                         headers: {
@@ -1294,8 +1302,12 @@
                         console.log('✅ Item saved to database successfully');
                     } else {
                         const errorText = await response.text();
-                        this.showDebug('💾 DB Save ❌');
+                        this.showDebug('💾 DB Save ❌ ' + response.status);
                         console.log('❌ Database save failed:', response.status, errorText);
+                        // Show detailed error in debug
+                        setTimeout(() => {
+                            this.showDebug('❌ Error: ' + errorText.substring(0, 20));
+                        }, 1000);
                     }
                 } catch (error) {
                     this.showDebug('💾 DB Error');
