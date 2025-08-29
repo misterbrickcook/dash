@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Brain Dump Mobile v4.3 - LIVE STATUS + LONG PRESS EDIT</title>
+    <title>Brain Dump Mobile v4.4 - PERSISTENT VOICE PERMISSION</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -990,17 +990,55 @@
                 this.restoreSession();
             }
             
-            initVoiceRecognition() {
+            async initVoiceRecognition() {
                 // Check if browser supports Speech Recognition
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 
                 if (!SpeechRecognition) {
                     console.log('🎙️ Speech Recognition not supported');
+                    this.updateLiveStatus('error', 'Voice not supported');
                     const voiceBtn = document.getElementById('voice-btn');
                     if (voiceBtn) {
                         voiceBtn.style.opacity = '0.5';
                         voiceBtn.title = 'Spracherkennung nicht verfügbar';
                         voiceBtn.disabled = true;
+                    }
+                    return;
+                }
+                
+                // Pre-request microphone permission for persistent access
+                try {
+                    console.log('🎙️ Requesting microphone permission...');
+                    this.updateLiveStatus('syncing', 'Checking voice access...');
+                    
+                    // Test microphone access
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: true 
+                    });
+                    
+                    // Permission granted - release stream immediately  
+                    stream.getTracks().forEach(track => track.stop());
+                    console.log('🎙️ Microphone permission granted & saved');
+                    this.updateLiveStatus('success', 'Voice ready - permission saved!');
+                    
+                    // Show voice button as ready
+                    const voiceBtn = document.getElementById('voice-btn');
+                    if (voiceBtn) {
+                        voiceBtn.style.opacity = '1';
+                        voiceBtn.title = 'Spracherkennung bereit (Berechtigung gespeichert)';
+                    }
+                    
+                } catch (error) {
+                    console.log('🎙️ Microphone access denied:', error);
+                    this.updateLiveStatus('error', 'Voice permission denied');
+                    
+                    const voiceBtn = document.getElementById('voice-btn');
+                    if (voiceBtn) {
+                        voiceBtn.style.opacity = '0.5';
+                        voiceBtn.title = 'Mikrofon-Berechtigung erforderlich';
+                        voiceBtn.addEventListener('click', () => {
+                            alert('Bitte erlaube Mikrofon-Zugriff in den Browser-Einstellungen und lade die Seite neu.');
+                        });
                     }
                     return;
                 }
@@ -2151,9 +2189,40 @@
             e.preventDefault();
             deferredPrompt = e;
             
-            // Could show custom install button here
-            // For now, let browser handle it
+            // Show install hint for better microphone persistence
+            setTimeout(() => {
+                if (deferredPrompt && app) {
+                    app.updateLiveStatus('info', 'Install app for better voice experience');
+                    
+                    // Add install button to empty state
+                    const emptyState = document.getElementById('empty-state');
+                    if (emptyState && !emptyState.querySelector('.install-hint')) {
+                        const installHint = document.createElement('div');
+                        installHint.className = 'install-hint';
+                        installHint.innerHTML = `
+                            <button class="empty-action" onclick="window.installPWA()" style="margin-top: 0.5rem; background: var(--accent-success);">
+                                📱 Als App installieren (bessere Spracherkennung)
+                            </button>
+                        `;
+                        emptyState.appendChild(installHint);
+                    }
+                }
+            }, 3000);
         });
+        
+        // Install PWA function
+        window.installPWA = async function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`PWA install outcome: ${outcome}`);
+                deferredPrompt = null;
+                
+                if (outcome === 'accepted') {
+                    app.updateLiveStatus('success', 'App installed! Reload for best experience.');
+                }
+            }
+        };
         
         // Track if app is installed
         window.addEventListener('appinstalled', () => {
