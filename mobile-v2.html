@@ -284,6 +284,12 @@
             align-items: center;
             justify-content: center;
             border-radius: 0 8px 8px 0;
+            transform: translateX(60px);
+            transition: transform 0.2s ease;
+        }
+        
+        .item.swiped .item-swipe-actions {
+            transform: translateX(0);
         }
         
         .swipe-delete-btn {
