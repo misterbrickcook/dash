@@ -1436,6 +1436,13 @@
             renderTodos() {
                 const list = document.getElementById('brain-dump-list');
                 
+                // Don't re-render if delete buttons are currently visible
+                const hasActiveDelete = document.querySelector('.brain-dump-item.delete-visible');
+                if (hasActiveDelete) {
+                    console.log('⏸️ SKIPPING RENDER - Delete button active');
+                    return;
+                }
+                
                 if (this.todos.length === 0) {
                     list.innerHTML = `
                         <div class="todo-empty-state">
@@ -1582,6 +1589,7 @@
             }
             
             closeDeleteState(item) {
+                console.log('🔒 CLOSING DELETE STATE');
                 item.style.transform = '';
                 item.classList.remove('delete-visible');
                 
@@ -1590,6 +1598,11 @@
                     deleteBtn.removeEventListener('click', deleteBtn._handler);
                     deleteBtn._handler = null;
                 }
+                
+                // Allow rendering again after delete state is closed
+                setTimeout(() => {
+                    console.log('🔄 RENDERING ALLOWED AGAIN');
+                }, 100);
             }
             
             
