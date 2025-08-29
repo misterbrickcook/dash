@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>DashFin Mobile v4.0 - Brain Dump Interface</title>
     <!-- Cache Buster für neues Brain Dump Design -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -22,6 +22,9 @@
             background: #ffffff;
             color: #333;
             min-height: 100vh;
+            /* Safe area padding for modern devices */
+            padding-left: var(--safe-area-left);
+            padding-right: var(--safe-area-right);
         }
         
         /* === DESIGN SYSTEM (EXACT DESKTOP MATCH) === */
@@ -43,15 +46,21 @@
             --font-size-xs: 12px;
             --font-size-lg: 18px;
             --font-size-xl: 20px;
+            
+            /* Safe Area Insets for modern devices */
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-area-left: env(safe-area-inset-left, 0px);
+            --safe-area-right: env(safe-area-inset-right, 0px);
         }
 
         /* === AUTH SCREEN (like desktop) === */
         .login-screen {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: var(--safe-area-top);
+            left: var(--safe-area-left);
+            right: var(--safe-area-right);
+            bottom: var(--safe-area-bottom);
             background: #ffffff;
             display: flex; /* Re-enable login for proper authentication */
             align-items: center;
@@ -169,9 +178,11 @@
             color: var(--text-primary);
             padding: 1rem;
             position: sticky;
-            top: 0;
+            top: var(--safe-area-top);
             z-index: 100;
             border-bottom: 1px solid var(--border-primary);
+            /* Add padding for safe area */
+            padding-top: max(1rem, calc(var(--safe-area-top) + 1rem));
         }
         
         .header-content {
@@ -209,6 +220,8 @@
         
         .dashboard-content {
             padding: 1rem;
+            /* Add bottom padding for safe area */
+            padding-bottom: max(1rem, calc(var(--safe-area-bottom) + 1rem));
         }
         
         /* === OLD TODO SECTION REMOVED === */
