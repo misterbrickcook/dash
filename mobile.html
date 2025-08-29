@@ -745,19 +745,21 @@
                     const transcript = event.results[0][0].transcript;
                     console.log('Transcript:', transcript);
                     
+                    // Show visual feedback first
+                    const voiceBtn = document.getElementById('voice-btn');
+                    voiceBtn.textContent = '✅';
+                    voiceBtn.style.background = '#22c55e';
+                    
                     // Add to input field
                     const input = document.getElementById('brain-input');
-                    const currentText = input.value.trim();
-                    input.value = currentText ? `${currentText} ${transcript}` : transcript;
+                    input.value = transcript;
                     
-                    // Trigger input event to update char count and enable button
+                    // Trigger input event
                     input.dispatchEvent(new Event('input'));
                     
-                    // Always auto-add voice input (remove length check)
-                    setTimeout(() => {
-                        console.log('🎙️ Auto-adding voice input:', transcript);
-                        this.addItem();
-                    }, 1000); // Give more time
+                    // Force add item immediately
+                    console.log('🎙️ Forcing addItem with:', transcript);
+                    this.forceAddVoiceItem(transcript);
                     
                     this.hapticFeedback('medium');
                 };
@@ -797,6 +799,54 @@
                 const voiceBtn = document.getElementById('voice-btn');
                 voiceBtn.classList.remove('listening', 'processing');
                 voiceBtn.textContent = '🎙️';
+                voiceBtn.style.background = '';
+            }
+            
+            forceAddVoiceItem(transcript) {
+                console.log('🎙️ forceAddVoiceItem called with:', transcript);
+                
+                if (!transcript || transcript.trim().length === 0) {
+                    console.log('🎙️ Empty transcript, aborting');
+                    return;
+                }
+                
+                // Create item directly
+                const item = {
+                    id: Date.now(),
+                    text: transcript.trim(),
+                    category: 'braindump',
+                    priority: 2,
+                    completed: false,
+                    date: null,
+                    time: '21:00',
+                    user_id: this.session?.user?.id || null,
+                    created_at: new Date().toISOString()
+                };
+                
+                console.log('🎙️ Created voice item:', item);
+                
+                // Add to local array immediately
+                this.items.unshift(item);
+                
+                // Save offline
+                this.saveOfflineItems();
+                
+                // Update UI instantly
+                this.renderItems();
+                
+                // Clear input
+                const input = document.getElementById('brain-input');
+                input.value = '';
+                input.dispatchEvent(new Event('input'));
+                
+                // Sync to database in background
+                if (this.isOnline) {
+                    this.syncItem(item);
+                } else {
+                    this.syncQueue.push(item);
+                }
+                
+                console.log('🎙️ Voice item added successfully!');
             }
             
             restoreSession() {
