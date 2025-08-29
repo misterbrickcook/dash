@@ -1480,6 +1480,7 @@
                         currentX = startX;
                         isSwiping = true;
                         item.classList.add('swiping');
+                        console.log('🟢 SWIPE START:', startX, 'Item:', item.dataset.id);
                     };
                     
                     const handleMove = (e) => {
@@ -1488,11 +1489,14 @@
                         currentX = e.touches[0].clientX;
                         const deltaX = currentX - startX;
                         
+                        console.log('🔄 SWIPE MOVE:', deltaX, 'px');
+                        
                         // Only allow left swipes
                         if (deltaX < -20) {
                             e.preventDefault();
                             const distance = Math.min(Math.abs(deltaX), 100);
                             item.style.transform = `translateX(-${distance}px)`;
+                            console.log('⬅️ MOVING LEFT:', distance, 'px');
                         }
                     };
                     
@@ -1502,8 +1506,11 @@
                         const deltaX = currentX - startX;
                         item.classList.remove('swiping');
                         
+                        console.log('🔴 SWIPE END:', deltaX, 'px');
+                        
                         if (deltaX < -60) {
                             // Swipe threshold reached - show delete
+                            console.log('🗑️ DELETE THRESHOLD REACHED! Showing delete button');
                             item.style.transform = 'translateX(-100px)';
                             item.classList.add('delete-visible');
                             
@@ -1511,8 +1518,11 @@
                             const deleteBtn = item.querySelector('.swipe-delete-bg');
                             const todoId = parseInt(item.dataset.id);
                             
+                            console.log('🎯 Delete button found:', !!deleteBtn, 'TodoID:', todoId);
+                            
                             const deleteHandler = async (e) => {
                                 e.stopPropagation();
+                                console.log('💥 DELETE CLICKED for:', todoId);
                                 await this.deleteTodo(todoId);
                             };
                             
@@ -1527,12 +1537,14 @@
                             // Auto-close after 4 seconds
                             setTimeout(() => {
                                 if (item.parentNode) {
+                                    console.log('⏰ AUTO-CLOSING delete button');
                                     this.closeDeleteState(item);
                                 }
                             }, 4000);
                             
                         } else {
                             // Snap back
+                            console.log('↩️ SNAPPING BACK');
                             item.style.transform = '';
                         }
                         
