@@ -260,11 +260,48 @@
             align-items: flex-start;
             gap: 0.75rem;
             transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            transform: translateX(0);
         }
         
         .item:hover {
             border-color: var(--accent-primary);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .item.swiping {
+            transition: none;
+        }
+        
+        .item-swipe-actions {
+            position: absolute;
+            top: 0;
+            right: -80px;
+            bottom: 0;
+            width: 80px;
+            background: var(--accent-danger);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: right 0.2s ease;
+        }
+        
+        .item.swiped .item-swipe-actions {
+            right: 0;
+        }
+        
+        .swipe-delete-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
         }
         
         .item-content {
@@ -289,34 +326,7 @@
         }
         
         .item-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .delete-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.25rem;
-            min-height: 44px;
-            min-width: 44px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .delete-btn:hover {
-            background: #fef2f2;
-            color: var(--accent-danger);
-        }
-        
-        .delete-btn:active {
-            background: #fee2e2;
-            transform: scale(0.95);
+            display: none; /* Hide regular actions, use swipe instead */
         }
         
         /* === EMPTY STATE === */
@@ -576,6 +586,7 @@
                 this.items = [];
                 this.isOnline = false;
                 this.syncQueue = [];
+                this.localStorageKey = 'mobile_brain_dump_items';
                 
                 this.init();
             }
@@ -589,7 +600,10 @@
                 // Bind events
                 this.bindEvents();
                 
-                // Load data
+                // Load offline data first
+                this.loadOfflineItems();
+                
+                // Load data from server
                 this.loadItems();
                 
                 console.log('✅ FastMobile ready!');
@@ -687,6 +701,62 @@
                 const statusEl = document.getElementById('status');
                 statusEl.textContent = status ? 'Online' : 'Offline';
                 statusEl.className = `status ${status ? 'online' : ''}`;
+                
+                // Sync queued items when coming online
+                if (status && this.syncQueue.length > 0) {
+                    this.syncQueuedItems();
+                }
+            }
+            
+            loadOfflineItems() {
+                try {
+                    const stored = localStorage.getItem(this.localStorageKey);
+                    if (stored) {
+                        this.items = JSON.parse(stored);
+                        this.renderItems();
+                        console.log(`📱 Loaded ${this.items.length} items from offline storage`);
+                    }
+                } catch (error) {
+                    console.log('Failed to load offline items');
+                    this.items = [];
+                }
+            }
+            
+            saveOfflineItems() {
+                try {
+                    localStorage.setItem(this.localStorageKey, JSON.stringify(this.items));
+                } catch (error) {
+                    console.log('Failed to save offline items');
+                }
+            }
+            
+            async syncQueuedItems() {
+                if (!this.isOnline || this.syncQueue.length === 0) return;
+                
+                console.log(`🔄 Syncing ${this.syncQueue.length} queued items...`);
+                const itemsToSync = [...this.syncQueue];
+                this.syncQueue = [];
+                
+                for (const item of itemsToSync) {
+                    try {
+                        if (item.action === 'delete') {
+                            // Handle queued deletion
+                            await fetch(`${this.supabaseUrl}/rest/v1/todos?id=eq.${item.id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'apikey': this.supabaseKey,
+                                    'Authorization': `Bearer ${this.session.access_token}`
+                                }
+                            });
+                        } else {
+                            // Handle queued creation
+                            await this.syncItem(item);
+                        }
+                    } catch (error) {
+                        // Re-queue failed items
+                        this.syncQueue.push(item);
+                    }
+                }
             }
             
             bindEvents() {
@@ -861,6 +931,9 @@
                 // Add to local array immediately
                 this.items.unshift(item);
                 
+                // Save offline
+                this.saveOfflineItems();
+                
                 // Clear input
                 input.value = '';
                 input.dispatchEvent(new Event('input')); // Trigger char count update
@@ -896,6 +969,11 @@
             async deleteItem(id) {
                 // Remove from UI immediately
                 this.items = this.items.filter(item => item.id !== id);
+                
+                // Save offline
+                this.saveOfflineItems();
+                
+                // Update UI
                 this.renderItems();
                 
                 // Sync deletion in background
@@ -910,7 +988,12 @@
                         });
                     } catch (error) {
                         console.log('Delete sync failed');
+                        // Queue deletion for later sync
+                        this.syncQueue.push({ action: 'delete', id: id });
                     }
+                } else {
+                    // Queue deletion for when online
+                    this.syncQueue.push({ action: 'delete', id: id });
                 }
             }
             
@@ -936,7 +1019,10 @@
                     clearTimeout(timeoutId);
                     
                     if (response.ok) {
-                        this.items = await response.json();
+                        const serverItems = await response.json();
+                        // Merge with offline items (avoid duplicates)
+                        this.mergeItems(serverItems);
+                        this.saveOfflineItems();
                         this.renderItems();
                     }
                 } catch (error) {
@@ -947,6 +1033,21 @@
                     }
                     this.renderItems();
                 }
+            }
+            
+            mergeItems(serverItems) {
+                // Create a map of existing items by ID
+                const existingIds = new Set(this.items.map(item => item.id));
+                
+                // Add new items from server that don't exist locally
+                serverItems.forEach(serverItem => {
+                    if (!existingIds.has(serverItem.id)) {
+                        this.items.push(serverItem);
+                    }
+                });
+                
+                // Sort by creation date (newest first)
+                this.items.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             }
             
             renderItems() {
@@ -980,18 +1081,95 @@
                                 <span>Vor ${this.getTimeAgo(item.created_at)}</span>
                             </div>
                         </div>
-                        <div class="item-actions">
-                            <button class="delete-btn" onclick="app.deleteItem(${item.id})" title="Löschen">
+                        <div class="item-swipe-actions">
+                            <button class="swipe-delete-btn" onclick="app.deleteItem(${item.id})" title="Löschen">
                                 🗑️
                             </button>
                         </div>
                     `;
+                    
+                    // Add swipe functionality
+                    this.addSwipeHandlers(itemDiv);
                     
                     fragment.appendChild(itemDiv);
                 });
                 
                 list.innerHTML = '';
                 list.appendChild(fragment);
+            }
+            
+            addSwipeHandlers(itemElement) {
+                let startX = 0;
+                let currentX = 0;
+                let isSwiping = false;
+                let startTime = 0;
+                const swipeThreshold = 80;
+                const velocityThreshold = 0.3;
+                
+                itemElement.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    startTime = Date.now();
+                    isSwiping = true;
+                    itemElement.classList.add('swiping');
+                }, { passive: true });
+                
+                itemElement.addEventListener('touchmove', (e) => {
+                    if (!isSwiping) return;
+                    
+                    currentX = e.touches[0].clientX;
+                    const deltaX = startX - currentX; // Positive = swipe left
+                    
+                    if (deltaX > 0) {
+                        // Swipe left - show delete
+                        const swipeDistance = Math.min(deltaX, swipeThreshold);
+                        itemElement.style.transform = `translateX(-${swipeDistance}px)`;
+                        
+                        if (swipeDistance >= swipeThreshold) {
+                            itemElement.classList.add('swiped');
+                            this.hapticFeedback('light');
+                        } else {
+                            itemElement.classList.remove('swiped');
+                        }
+                    } else if (deltaX < -20) {
+                        // Swipe right - close if open
+                        itemElement.style.transform = 'translateX(0)';
+                        itemElement.classList.remove('swiped');
+                    }
+                }, { passive: true });
+                
+                itemElement.addEventListener('touchend', (e) => {
+                    if (!isSwiping) return;
+                    
+                    const deltaX = startX - currentX;
+                    const deltaTime = Date.now() - startTime;
+                    const velocity = Math.abs(deltaX) / deltaTime;
+                    
+                    itemElement.classList.remove('swiping');
+                    
+                    // Check if swipe should trigger delete visibility
+                    if (deltaX >= swipeThreshold / 2 || velocity > velocityThreshold) {
+                        // Show delete button
+                        itemElement.style.transform = `translateX(-${swipeThreshold}px)`;
+                        itemElement.classList.add('swiped');
+                    } else {
+                        // Snap back
+                        itemElement.style.transform = 'translateX(0)';
+                        itemElement.classList.remove('swiped');
+                    }
+                    
+                    isSwiping = false;
+                    startX = 0;
+                    currentX = 0;
+                }, { passive: true });
+                
+                // Close swipe when tapping elsewhere
+                itemElement.addEventListener('click', (e) => {
+                    if (itemElement.classList.contains('swiped') && !e.target.closest('.item-swipe-actions')) {
+                        e.preventDefault();
+                        itemElement.style.transform = 'translateX(0)';
+                        itemElement.classList.remove('swiped');
+                    }
+                });
             }
             
             escapeHtml(text) {
