@@ -1459,22 +1459,31 @@
             
             attachSwipeListeners() {
                 const items = document.querySelectorAll('.brain-dump-item');
+                console.log('📱 Attaching swipe listeners to', items.length, 'items');
                 
-                items.forEach(item => {
+                items.forEach((item, index) => {
+                    console.log(`📱 Adding swipe to item ${index}:`, item.dataset.id);
+                    
                     let startX = 0;
                     let startY = 0;
                     let currentX = 0;
                     let isSwipingHorizontally = false;
                     let isSwipingItem = false;
                     
-                    item.addEventListener('touchstart', (e) => {
+                    // Clear any existing listeners
+                    item.style.transform = '';
+                    
+                    const handleTouchStart = (e) => {
+                        console.log('📱 Touch start on item:', item.dataset.id);
                         startX = e.touches[0].clientX;
                         startY = e.touches[0].clientY;
+                        currentX = startX;
                         isSwipingItem = true;
+                        isSwipingHorizontally = false;
                         item.classList.add('swiping');
-                    }, { passive: true });
+                    };
                     
-                    item.addEventListener('touchmove', (e) => {
+                    const handleTouchMove = (e) => {
                         if (!isSwipingItem) return;
                         
                         currentX = e.touches[0].clientX;
@@ -1484,29 +1493,35 @@
                         const deltaY = currentY - startY;
                         
                         // Determine if this is a horizontal swipe
-                        if (!isSwipingHorizontally && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+                        if (!isSwipingHorizontally && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
                             isSwipingHorizontally = Math.abs(deltaX) > Math.abs(deltaY);
+                            console.log('📱 Swipe direction determined:', isSwipingHorizontally ? 'horizontal' : 'vertical');
                         }
                         
-                        if (isSwipingHorizontally && deltaX < 0) {
+                        if (isSwipingHorizontally && deltaX < -10) {
                             // Swipe left - show delete background
                             e.preventDefault();
                             const swipeDistance = Math.min(Math.abs(deltaX), 100);
                             item.style.transform = `translateX(-${swipeDistance}px)`;
+                            console.log('📱 Swiping left, distance:', swipeDistance);
                         }
-                    });
+                    };
                     
-                    item.addEventListener('touchend', () => {
+                    const handleTouchEnd = () => {
                         if (!isSwipingItem) return;
                         
                         const deltaX = currentX - startX;
                         const swipeDistance = Math.abs(deltaX);
                         
-                        if (isSwipingHorizontally && deltaX < -70) {
-                            // Delete threshold reached - show delete confirmation
+                        console.log('📱 Touch end. DeltaX:', deltaX, 'Distance:', swipeDistance, 'Horizontal:', isSwipingHorizontally);
+                        
+                        if (isSwipingHorizontally && deltaX < -50) {
+                            // Lower threshold for easier triggering
+                            console.log('📱 Delete threshold reached, showing confirmation');
                             this.showDeleteConfirmation(item, parseInt(item.dataset.id));
                         } else {
                             // Snap back
+                            console.log('📱 Snapping back');
                             item.style.transform = '';
                         }
                         
@@ -1517,30 +1532,81 @@
                         startX = 0;
                         startY = 0;
                         currentX = 0;
-                    }, { passive: true });
+                    };
+                    
+                    // Remove existing listeners first
+                    item.removeEventListener('touchstart', handleTouchStart);
+                    item.removeEventListener('touchmove', handleTouchMove);
+                    item.removeEventListener('touchend', handleTouchEnd);
+                    
+                    // Add fresh listeners
+                    item.addEventListener('touchstart', handleTouchStart, { passive: true });
+                    item.addEventListener('touchmove', handleTouchMove, { passive: false });
+                    item.addEventListener('touchend', handleTouchEnd, { passive: true });
                 });
             }
             
             showDeleteConfirmation(item, todoId) {
+                console.log('📱 Showing delete confirmation for:', todoId);
+                
                 // Keep item swiped open and show delete confirmation
                 item.style.transform = 'translateX(-100px)';
+                item.style.transition = 'transform 0.3s ease';
                 
                 // Add click handler to delete background
                 const deleteBackground = item.querySelector('.swipe-delete-bg');
-                const handleDelete = async () => {
+                console.log('📱 Delete background found:', !!deleteBackground);
+                
+                if (!deleteBackground) {
+                    console.error('📱 Delete background not found!');
+                    return;
+                }
+                
+                // Remove any existing listeners
+                const oldHandler = deleteBackground._deleteHandler;
+                if (oldHandler) {
+                    deleteBackground.removeEventListener('click', oldHandler);
+                }
+                
+                const handleDelete = async (e) => {
+                    e.stopPropagation();
+                    console.log('📱 Delete clicked for:', todoId);
                     await this.deleteTodo(todoId);
-                    deleteBackground.removeEventListener('click', handleDelete);
                 };
                 
+                // Store reference for cleanup
+                deleteBackground._deleteHandler = handleDelete;
                 deleteBackground.addEventListener('click', handleDelete);
                 
-                // Auto-close after 3 seconds if no action
-                setTimeout(() => {
+                // Auto-close after 4 seconds if no action
+                const autoCloseTimer = setTimeout(() => {
                     if (item.parentNode) {
+                        console.log('📱 Auto-closing delete confirmation');
                         item.style.transform = '';
-                        deleteBackground.removeEventListener('click', handleDelete);
+                        if (deleteBackground._deleteHandler) {
+                            deleteBackground.removeEventListener('click', deleteBackground._deleteHandler);
+                            deleteBackground._deleteHandler = null;
+                        }
                     }
-                }, 3000);
+                }, 4000);
+                
+                // Also close if user taps elsewhere
+                const closeOnOutsideClick = (e) => {
+                    if (!item.contains(e.target)) {
+                        console.log('📱 Closing on outside click');
+                        item.style.transform = '';
+                        clearTimeout(autoCloseTimer);
+                        if (deleteBackground._deleteHandler) {
+                            deleteBackground.removeEventListener('click', deleteBackground._deleteHandler);
+                            deleteBackground._deleteHandler = null;
+                        }
+                        document.removeEventListener('click', closeOnOutsideClick);
+                    }
+                };
+                
+                setTimeout(() => {
+                    document.addEventListener('click', closeOnOutsideClick);
+                }, 100);
             }
             
             // Old addTodo method removed - replaced with instantAddTodo()
