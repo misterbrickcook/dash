@@ -730,6 +730,11 @@
                 this.recognition.interimResults = false;
                 this.recognition.lang = 'de-DE'; // German language
                 
+                // Safari iOS 17.4+ additional check - ensure user gesture
+                if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+                    console.log('🍎 Safari detected - requiring user gesture for speech recognition');
+                }
+                
                 // Recognition events
                 this.recognition.onstart = () => {
                     console.log('🎙️ Voice recognition started');
@@ -786,10 +791,26 @@
             startVoiceRecognition() {
                 if (!this.recognition || this.isListening) return;
                 
-                try {
-                    this.recognition.start();
-                } catch (error) {
-                    console.log('🎙️ Failed to start recognition:', error);
+                // Safari iOS 17.4+ requires explicit permission check
+                if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+                    navigator.mediaDevices.getUserMedia({ audio: true })
+                        .then(() => {
+                            try {
+                                this.recognition.start();
+                            } catch (error) {
+                                console.log('🎙️ Failed to start recognition:', error);
+                                alert('Spracherkennung nicht verfügbar. Bitte Browser neu laden.');
+                            }
+                        })
+                        .catch(() => {
+                            alert('Mikrofon-Berechtigung erforderlich für Spracherkennung.');
+                        });
+                } else {
+                    try {
+                        this.recognition.start();
+                    } catch (error) {
+                        console.log('🎙️ Failed to start recognition:', error);
+                    }
                 }
             }
             
