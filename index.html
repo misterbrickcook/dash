@@ -16,9 +16,9 @@
             const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                            (window.innerWidth <= 768 && 'ontouchstart' in window);
             
-            if (isMobile && !window.location.pathname.includes('mobile-v2.html')) {
+            if (isMobile && window.location.pathname === '/' || window.location.pathname === '/index.html') {
                 // Mobile device detected - redirecting to mobile-v2.html
-                window.location.href = 'mobile-v2.html';
+                window.location.href = '/mobile-v2.html';
                 return;
             }
         })();
