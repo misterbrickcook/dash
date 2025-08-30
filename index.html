@@ -6483,18 +6483,9 @@
                 </div>
             </section>
 
-            <!-- Daily Sport Question (appears until answered) -->
-            <section id="daily-sport-container" class="daily-sport-section">
-                <div class="sport-question-card">
-                    <div class="sport-left">
-                        <div class="sport-icon">💪</div>
-                        <div class="sport-text">Hast du heute Sport gemacht?</div>
-                    </div>
-                    <div class="sport-actions">
-                        <button class="sport-btn sport-no" onclick="window.SportManager?.markSportCompleted(false)">Nein</button>
-                        <button class="sport-btn sport-yes" onclick="window.SportManager?.markSportCompleted(true)">Ja</button>
-                    </div>
-                </div>
+            <!-- Daily Sport Question (dynamically loaded) -->
+            <section id="daily-sport-container" class="daily-sport-section hidden">
+                <!-- Content loaded dynamically by SportManager -->
             </section>
 
             <!-- Routinen Section -->
@@ -19900,6 +19891,19 @@
             showContainer() {
                 const container = document.getElementById('daily-sport-container');
                 if (container) {
+                    // Create content dynamically only when needed
+                    container.innerHTML = `
+                        <div class="sport-question-card">
+                            <div class="sport-left">
+                                <div class="sport-icon">💪</div>
+                                <div class="sport-text">Hast du heute Sport gemacht?</div>
+                            </div>
+                            <div class="sport-actions">
+                                <button class="sport-btn sport-no" onclick="window.SportManager?.markSportCompleted(false)">Nein</button>
+                                <button class="sport-btn sport-yes" onclick="window.SportManager?.markSportCompleted(true)">Ja</button>
+                            </div>
+                        </div>
+                    `;
                     container.classList.remove('hidden');
                 }
             }
@@ -19908,6 +19912,7 @@
                 const container = document.getElementById('daily-sport-container');
                 if (container) {
                     container.classList.add('hidden');
+                    container.innerHTML = ''; // Clear content when hidden
                 }
             }
             
@@ -19959,8 +19964,8 @@
             }
         }
         
-        // Try to initialize SportManager after a delay and on home tab switch
-        setTimeout(initializeSportManager, 3000);
+        // Initialize SportManager immediately when ready
+        setTimeout(initializeSportManager, 100);
         
         // Also initialize when user switches to home tab
         const originalShowTab = window.showTab;
