@@ -1069,10 +1069,11 @@
                     
                     // Safari iOS 17.4+ compatibility fix
                     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                    this.isSafari = isSafari; // Store for use in event handlers
                     if (isSafari) {
                         console.log('🍎 Safari detected - applying compatibility fixes');
                         this.recognition.continuous = false; // Safari needs restart after each session
-                        this.recognition.interimResults = false; // Safari issues with interim results
+                        this.recognition.interimResults = true; // Keep interim results for live feedback
                     }
                     
                     console.log('🎙️ Speech Recognition configured successfully');
@@ -1099,42 +1100,58 @@
                     // Show live transcript in input field
                     const input = document.getElementById('brain-input');
                     let transcript = '';
+                    let hasFinalResult = false;
+                    let finalText = '';
                     
-                    // Get latest result (final or interim)
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        transcript += event.results[i][0].transcript;
+                    // Get all results
+                    for (let i = 0; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            finalText += event.results[i][0].transcript;
+                            hasFinalResult = true;
+                        } else {
+                            transcript += event.results[i][0].transcript;
+                        }
                     }
                     
-                    // Update input field live
-                    input.value = transcript;
-                    input.dispatchEvent(new Event('input'));
+                    // For Safari: always show current transcript
+                    const displayText = finalText || transcript;
+                    if (displayText) {
+                        input.value = displayText;
+                        input.dispatchEvent(new Event('input'));
+                        console.log('🎙️ Live transcript:', displayText);
+                    }
                     
-                    console.log('🎙️ Live transcript:', transcript);
-                    
-                    // Check for final results to auto-add
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        if (event.results[i].isFinal) {
-                            const finalText = event.results[i][0].transcript.trim();
-                            if (finalText) {
-                                console.log('🎙️ Final result - auto-adding:', finalText);
-                                this.showDebug('🎙️ Adding: ' + finalText.substring(0, 15));
-                                
-                                // Show success feedback
-                                const voiceBtn = document.getElementById('voice-btn');
-                                voiceBtn.textContent = '✅';
-                                voiceBtn.style.background = '#22c55e';
-                                
-                                // Add the item
-                                this.forceAddVoiceItem(finalText);
-                                
-                                // Clear input for next voice input
+                    // Process final results
+                    if (hasFinalResult && finalText.trim()) {
+                        console.log('🎙️ Final result - auto-adding:', finalText);
+                        this.showDebug('🎙️ Adding: ' + finalText.substring(0, 15));
+                        
+                        // Show success feedback
+                        const voiceBtn = document.getElementById('voice-btn');
+                        voiceBtn.textContent = '✅';
+                        voiceBtn.style.background = '#22c55e';
+                        
+                        // Add the item
+                        this.forceAddVoiceItem(finalText.trim());
+                        
+                        // Clear input for next voice input
+                        setTimeout(() => {
+                            input.value = '';
+                            input.dispatchEvent(new Event('input'));
+                        }, 500);
+                        
+                        this.hapticFeedback('medium');
+                        
+                        // For Safari: manually stop and restart if continuous mode
+                        if (this.isSafari && !this.manualStop) {
+                            setTimeout(() => {
+                                this.recognition.stop();
                                 setTimeout(() => {
-                                    input.value = '';
-                                    input.dispatchEvent(new Event('input'));
-                                }, 500);
-                                
-                                this.hapticFeedback('medium');
-                            }
+                                    if (!this.manualStop && this.isListening) {
+                                        this.startVoiceRecognition();
+                                    }
+                                }, 100);
+                            }, 1000);
                         }
                     }
                 };
