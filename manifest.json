@@ -2,7 +2,7 @@
   "name": "Brain Dump Mobile",
   "short_name": "BrainDump",
   "description": "Schnelle Mobile Notizen mit Desktop Sync",
-  "start_url": "/mobile.html",
+  "start_url": "/mobile-v2.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",

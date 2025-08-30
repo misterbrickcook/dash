@@ -1,6 +1,6 @@
 const CACHE_NAME = 'braindump-v5-reset-' + Date.now();
 const urlsToCache = [
-  '/mobile.html', 
+  '/mobile-v2.html', 
   '/manifest.json'
 ];
 
@@ -60,7 +60,7 @@ self.addEventListener('fetch', event => {
             .catch(() => {
               // Network failed, serve from cache or offline fallback
               if (event.request.destination === 'document') {
-                return caches.match('/mobile.html');
+                return caches.match('/mobile-v2.html');
               }
             });
           
