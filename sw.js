@@ -1,4 +1,4 @@
-const CACHE_NAME = 'braindump-v2-' + new Date().getTime();
+const CACHE_NAME = 'braindump-v3-' + Date.now();
 const urlsToCache = [
   '/mobile.html',
   '/mobile-v2.html', 
@@ -13,7 +13,10 @@ self.addEventListener('install', event => {
         console.log('PWA: Caching app shell');
         return cache.addAll(urlsToCache);
       })
-      .then(() => self.skipWaiting())
+      .then(() => {
+        console.log('PWA: Force updating to latest version');
+        return self.skipWaiting();
+      })
   );
 });
 
@@ -29,7 +32,11 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => {
+      // Force refresh of all HTML files
+      console.log('PWA: Forcing reload of all clients');
+      return self.clients.claim();
+    })
   );
 });
 
