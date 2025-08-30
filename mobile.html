@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Brain Dump Mobile v4.4 - PERSISTENT VOICE PERMISSION</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -18,6 +21,19 @@
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- FORCE CACHE REFRESH -->
+    <script>
+        const version = Date.now();
+        console.log('🔄 FORCING v4.4 - Cache Bust:', version);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                registrations.forEach(registration => registration.unregister());
+                console.log('🗑️ All service workers unregistered');
+                setTimeout(() => location.reload(true), 1000);
+            });
+        }
+    </script>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
