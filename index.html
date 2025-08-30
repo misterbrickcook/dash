@@ -19712,6 +19712,7 @@
             constructor() {
                 this.resetTime = '06:00';
                 this.containerVisible = true;
+                this.localStorageKey = 'sport_completed_today';
                 this.init();
             }
             
@@ -19792,6 +19793,16 @@
                         return;
                     }
                     
+                    const today = new Date().toISOString().split('T')[0];
+                    
+                    // Check local cache first - prevents reload issues
+                    const localCache = localStorage.getItem(this.localStorageKey);
+                    if (localCache === today) {
+                        console.log('💪 Sport already completed today (local cache)');
+                        this.hideContainer();
+                        return;
+                    }
+                    
                     if (!window.supabase?.isAuthenticated()) {
                         this.showContainer();
                         return;
@@ -19803,9 +19814,7 @@
                         return;
                     }
                     
-                    const today = new Date().toISOString().split('T')[0];
-                    
-                    // Check if sport was already logged today
+                    // Check if sport was already logged today in database
                     const result = await window.supabase.query(
                         `sport_tracking?user_id=eq.${user.id}&date=eq.${today}`
                     );
@@ -19814,7 +19823,8 @@
                     const todayEntry = Array.isArray(dataArray) && dataArray.length > 0 ? dataArray[0] : null;
                     
                     if (todayEntry) {
-                        // Sport already logged today - hide container
+                        // Sport already logged today - update cache and hide
+                        localStorage.setItem(this.localStorageKey, today);
                         this.hideContainer();
                     } else {
                         // Show container
@@ -19852,6 +19862,9 @@
                     });
                     
                     console.log(`💪 Sport logged for ${today}: ${completed}`);
+                    
+                    // Update local cache to prevent re-showing after reload
+                    localStorage.setItem(this.localStorageKey, today);
                     
                     // Hide container with animation
                     this.hideContainer();
