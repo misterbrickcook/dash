@@ -19712,7 +19712,7 @@
             constructor() {
                 this.resetTime = '06:00';
                 this.containerVisible = true;
-                this.localStorageKey = 'sport_completed_today';
+                this.completedToday = null; // Memory-based cache instead of localStorage
                 this.init();
             }
             
@@ -19795,10 +19795,9 @@
                     
                     const today = new Date().toISOString().split('T')[0];
                     
-                    // Check local cache first - prevents reload issues
-                    const localCache = localStorage.getItem(this.localStorageKey);
-                    if (localCache === today) {
-                        console.log('💪 Sport already completed today (local cache)');
+                    // Check memory cache first - prevents multiple DB calls
+                    if (this.completedToday === today) {
+                        console.log('💪 Sport already completed today (memory cache)');
                         this.hideContainer();
                         return;
                     }
@@ -19823,8 +19822,8 @@
                     const todayEntry = Array.isArray(dataArray) && dataArray.length > 0 ? dataArray[0] : null;
                     
                     if (todayEntry) {
-                        // Sport already logged today - update cache and hide
-                        localStorage.setItem(this.localStorageKey, today);
+                        // Sport already logged today - update memory cache and hide
+                        this.completedToday = today;
                         this.hideContainer();
                     } else {
                         // Show container
@@ -19844,8 +19843,8 @@
             async markSportCompleted(completed) {
                 const today = new Date().toISOString().split('T')[0];
                 
-                // Immediately update local cache and hide container
-                localStorage.setItem(this.localStorageKey, today);
+                // Immediately update memory cache and hide container
+                this.completedToday = today;
                 this.hideContainer();
                 
                 try {
@@ -19882,12 +19881,6 @@
                         });
                         console.log(`💪 Sport logged for ${today}: ${completed}`);
                     }
-                    
-                    // Update local cache to prevent re-showing after reload
-                    localStorage.setItem(this.localStorageKey, today);
-                    
-                    // Hide container with animation
-                    this.hideContainer();
                     
                     // Show success feedback
                     if (completed) {
