@@ -473,6 +473,49 @@
             to { transform: translateX(-50%) rotate(360deg); }
         }
         
+        /* === ENHANCED ANIMATIONS === */
+        @keyframes tapBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes successBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); background-color: var(--accent-success); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes slideUpIn {
+            from { 
+                transform: translateY(20px); 
+                opacity: 0; 
+                scale: 0.95;
+            }
+            to { 
+                transform: translateY(0); 
+                opacity: 1; 
+                scale: 1;
+            }
+        }
+        
+        @keyframes voicePulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+            }
+        }
+        
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
         /* === ITEMS LIST === */
         .items-section {
             margin-bottom: 2rem;
@@ -679,6 +722,46 @@
         @keyframes pulse {
             0%, 100% { opacity: 0.6; }
             50% { opacity: 0.3; }
+        }
+        
+        /* === ANIMATION CLASSES === */
+        .tap-feedback {
+            animation: tapBounce 0.15s ease-out;
+        }
+        
+        .success-flash {
+            animation: successBounce 0.6s ease-out;
+            color: white !important;
+        }
+        
+        .new-item {
+            animation: slideUpIn 0.4s ease-out;
+        }
+        
+        .voice-btn.recording {
+            animation: voicePulse 1.5s ease-in-out infinite;
+        }
+        
+        .error-shake {
+            animation: errorShake 0.4s ease-in-out;
+        }
+        
+        /* Button hover effects */
+        .add-btn:active {
+            transform: scale(0.97);
+            transition: transform 0.1s ease;
+        }
+        
+        .voice-btn:active {
+            transform: scale(0.95);
+            transition: transform 0.1s ease;
+        }
+        
+        /* Item interaction animations */
+        .item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
         }
         
         /* === LOGIN SCREEN === */
@@ -1089,9 +1172,9 @@
                     this.showDebug('🎙️ Voice Started');
                     this.isListening = true;
                     const voiceBtn = document.getElementById('voice-btn');
-                    voiceBtn.classList.add('listening');
+                    voiceBtn.classList.add('listening', 'recording');
                     voiceBtn.textContent = '🔴';
-                    this.hapticFeedback('light');
+                    this.hapticFeedback('medium'); // Stronger feedback for voice start
                 };
                 
                 this.recognition.onresult = (event) => {
@@ -1126,10 +1209,16 @@
                         console.log('🎙️ Final result - auto-adding:', finalText);
                         this.showDebug('🎙️ Adding: ' + finalText.substring(0, 15));
                         
-                        // Show success feedback
+                        // Show success feedback with animation
                         const voiceBtn = document.getElementById('voice-btn');
                         voiceBtn.textContent = '✅';
                         voiceBtn.style.background = '#22c55e';
+                        voiceBtn.classList.add('success-flash');
+                        
+                        // Remove animation after completion
+                        setTimeout(() => {
+                            voiceBtn.classList.remove('success-flash');
+                        }, 600);
                         
                         // Add the item
                         this.forceAddVoiceItem(finalText.trim());
@@ -1140,7 +1229,7 @@
                             input.dispatchEvent(new Event('input'));
                         }, 500);
                         
-                        this.hapticFeedback('medium');
+                        this.hapticFeedback('success'); // New success haptic pattern
                         
                         // For Safari: manually stop and restart if continuous mode
                         if (this.isSafari && !this.manualStop) {
@@ -1160,11 +1249,15 @@
                     console.log('🎙️ Voice recognition error:', event.error);
                     this.stopListening();
                     
-                    // Show error feedback
+                    // Show error feedback with animation and stronger haptic
                     const voiceBtn = document.getElementById('voice-btn');
                     voiceBtn.textContent = '❌';
+                    voiceBtn.classList.add('error-shake');
+                    this.hapticFeedback('error');
+                    
                     setTimeout(() => {
                         voiceBtn.textContent = '🎙️';
+                        voiceBtn.classList.remove('error-shake');
                     }, 2000);
                 };
                 
@@ -1204,7 +1297,7 @@
                 this.isListening = false;
                 this.manualStop = true;
                 const voiceBtn = document.getElementById('voice-btn');
-                voiceBtn.classList.remove('listening', 'processing');
+                voiceBtn.classList.remove('listening', 'processing', 'recording', 'success-flash');
                 voiceBtn.textContent = '🎙️';
                 voiceBtn.style.background = '';
             }
@@ -1456,9 +1549,19 @@
                     addBtn.disabled = length === 0;
                 });
                 
-                // Add button with haptic feedback
+                // Add button with enhanced feedback
                 addBtn.addEventListener('click', () => {
                     this.addTapFeedback(addBtn);
+                    
+                    // Add success flash if item was added
+                    const inputText = document.getElementById('brain-input').value.trim();
+                    if (inputText) {
+                        setTimeout(() => {
+                            addBtn.classList.add('success-flash');
+                            setTimeout(() => addBtn.classList.remove('success-flash'), 600);
+                        }, 100);
+                    }
+                    
                     this.addItem();
                 });
                 
@@ -1590,8 +1693,8 @@
                     return;
                 }
                 
-                // Haptic feedback (iOS)
-                this.hapticFeedback('light');
+                // Enhanced haptic feedback for item add
+                this.hapticFeedback('medium');
                 
                 // Create item - match desktop structure exactly
                 const item = {
@@ -1940,7 +2043,7 @@
                         
                         if (deltaX >= swipeThreshold) {
                             itemElement.classList.add('swiped');
-                            this.hapticFeedback('light');
+                            this.hapticFeedback('medium'); // Stronger feedback for swipe threshold
                         } else {
                             itemElement.classList.remove('swiped');
                         }
@@ -2020,20 +2123,21 @@
             }
             
             hapticFeedback(type = 'light') {
-                // iOS Haptic Feedback
+                // Enhanced haptic patterns with stronger feedback
                 if ('navigator' in window && 'vibrate' in navigator) {
-                    // Android vibration patterns
                     const patterns = {
-                        light: [10],
-                        medium: [20],
-                        heavy: [50]
+                        light: [15],      // Slightly stronger
+                        medium: [30],     // Much stronger 
+                        heavy: [60],      // Very strong
+                        success: [20, 10, 30], // Success pattern
+                        error: [100, 50, 100]   // Error pattern
                     };
                     navigator.vibrate(patterns[type] || patterns.light);
                 }
                 
-                // iOS Taptic Engine (if available)
-                if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
-                    // iOS device - use subtle visual feedback as fallback
+                // iOS Taptic Engine (if available) 
+                if (window.navigator && window.navigator.vibrate) {
+                    // iOS device - enhanced patterns
                     const button = document.activeElement;
                     if (button && button.classList.contains('add-btn')) {
                         button.style.transform = 'scale(0.98)';
