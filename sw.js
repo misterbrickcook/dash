@@ -1,4 +1,4 @@
-const CACHE_NAME = 'braindump-v3-' + Date.now();
+const CACHE_NAME = 'braindump-v4-force-' + Date.now();
 const urlsToCache = [
   '/mobile-v2.html', 
   '/manifest.json'
