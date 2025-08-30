@@ -1049,6 +1049,11 @@
                 this.recognition.lang = 'de-DE';
                 this.recognition.maxAlternatives = 1;
                 
+                // Safari iOS 17.4+ compatibility fix
+                if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+                    this.recognition.continuous = false; // Safari needs restart after each session
+                }
+                
                 // Recognition events
                 this.recognition.onstart = () => {
                     console.log('🎙️ Voice recognition started');

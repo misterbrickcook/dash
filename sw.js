@@ -1,6 +1,7 @@
-const CACHE_NAME = 'braindump-v1';
+const CACHE_NAME = 'braindump-v2-' + new Date().getTime();
 const urlsToCache = [
-  '/mobile-v2.html',
+  '/mobile.html',
+  '/mobile-v2.html', 
   '/manifest.json'
 ];
 
@@ -32,20 +33,33 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - stale-while-revalidate strategy
 self.addEventListener('fetch', event => {
   // Only handle same-origin requests
   if (event.request.url.startsWith(self.location.origin)) {
     event.respondWith(
       caches.match(event.request)
         .then(response => {
-          // Return cached version or fetch from network
-          return response || fetch(event.request).catch(() => {
-            // If both cache and network fail, return offline page for HTML requests
-            if (event.request.destination === 'document') {
-              return caches.match('/mobile-v2.html');
-            }
-          });
+          // Always try to fetch fresh version in background
+          const fetchPromise = fetch(event.request)
+            .then(fetchResponse => {
+              // Update cache with fresh version
+              if (fetchResponse && fetchResponse.status === 200) {
+                const responseClone = fetchResponse.clone();
+                caches.open(CACHE_NAME)
+                  .then(cache => cache.put(event.request, responseClone));
+              }
+              return fetchResponse;
+            })
+            .catch(() => {
+              // Network failed, serve from cache or offline fallback
+              if (event.request.destination === 'document') {
+                return caches.match('/mobile.html') || caches.match('/mobile-v2.html');
+              }
+            });
+          
+          // Return cached version immediately, or wait for network
+          return response || fetchPromise;
         })
     );
   }
