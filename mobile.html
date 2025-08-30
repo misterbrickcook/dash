@@ -22,15 +22,14 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     
-    <!-- FORCE CACHE REFRESH -->
+    <!-- NO SERVICE WORKER - DIRECT LOADING -->
     <script>
-        const version = Date.now();
-        console.log('🔄 FORCING v4.4 - Cache Bust:', version);
+        console.log('🚀 Brain Dump Mobile v4.4 DIRECT LOAD');
+        // Kill any existing service workers
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
-                registrations.forEach(registration => registration.unregister());
-                console.log('🗑️ All service workers unregistered');
-                setTimeout(() => location.reload(true), 1000);
+                registrations.forEach(reg => reg.unregister());
+                console.log('🗑️ Service workers disabled');
             });
         }
     </script>
@@ -2186,22 +2185,8 @@
         
         console.log('🚀 Mobile v2.0 loaded successfully');
         
-        // === PWA SERVICE WORKER ===
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', async () => {
-                try {
-                    const registration = await navigator.serviceWorker.register('/sw.js');
-                    console.log('PWA: Service Worker registered successfully:', registration.scope);
-                    
-                    // Check for updates
-                    registration.addEventListener('updatefound', () => {
-                        console.log('PWA: New version available');
-                    });
-                } catch (error) {
-                    console.log('PWA: Service Worker registration failed:', error);
-                }
-            });
-        }
+        // === NO PWA SERVICE WORKER - DISABLED FOR CACHE ISSUES ===
+        console.log('🚫 Service Worker disabled - direct loading only');
         
         // === PWA INSTALL PROMPT ===
         let deferredPrompt;
