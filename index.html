@@ -4719,14 +4719,105 @@
             letter-spacing: 0.1em;
         }
 
-        /* DISABLED: Trading styles
-        .trading-container {
+        /* Trading Table Styles */
+        .trade-table-container {
             background: var(--bg-primary);
             border: 1px solid var(--border-primary);
-            padding: 1.5rem;
+            border-radius: 0;
+            overflow: hidden;
             margin-bottom: 2rem;
         }
-        */
+
+        .trade-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: var(--font-size-sm);
+        }
+
+        .trade-table th {
+            background: var(--bg-secondary);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-primary);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 12px;
+        }
+
+        .trade-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-secondary);
+            vertical-align: top;
+        }
+
+        .trade-table tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .trade-table .empty-message {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .trade-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .trade-action-btn {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trade-action-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .trade-action-btn.delete:hover {
+            color: #dc2626;
+        }
+
+        .trade-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .trade-amount {
+            font-family: var(--font-mono);
+            text-align: right;
+        }
+
+        .trade-amount.positive {
+            color: #059669;
+        }
+
+        .trade-amount.negative {
+            color: #dc2626;
+        }
+
+        .trade-notes {
+            max-width: 300px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
 
         .trades-view {
             /* Ensure only one view is visible at a time */
@@ -6740,84 +6831,29 @@
                 </button>
             </div>
             
-            <!-- Trading Rules Sticky Note -->
-            <div class="trading-rules-sticky">
-                <div class="sticky-header">
-                    <span class="sticky-title">📝 Trading Grundregeln</span>
-                    <button class="sticky-minimize" onclick="this.parentElement.parentElement.classList.toggle('minimized'); this.textContent = this.parentElement.parentElement.classList.contains('minimized') ? '+' : '−'" title="Ein-/Ausklappen">−</button>
-                </div>
-                <div class="sticky-content">
-                    <ul class="rules-list">
-                        <li>💰 <strong>Risk Management:</strong> Nie mehr als 2-5% pro Trade riskieren</li>
-                        <li>🎯 <strong>Take Profit:</strong> Initials raus bei 2x, Rest laufen lassen</li>
-                        <li>🛑 <strong>Stop Loss:</strong> Bei -20% aussteigen, keine Emotionen</li>
-                        <li>📊 <strong>Research:</strong> Nur Coins traden, die du verstehst</li>
-                        <li>⏰ <strong>Timing:</strong> Nicht FOMO - warten auf Setup</li>
-                        <li>📝 <strong>Journal:</strong> Jeden Trade dokumentieren und lernen</li>
-                    </ul>
-                </div>
-            </div>
-
-            Portfolio Overview
-            <div class="portfolio-overview">
-                <div class="portfolio-stats">
-                    <div class="portfolio-stat">
-                        <div class="stat-number" id="sol-balance">0.00 SOL</div>
-                        <div class="stat-label">SOL Balance</div>
-                    </div>
-                    <div class="portfolio-stat">
-                        <div class="stat-number" id="sol-in-trades">0.00 SOL</div>
-                        <div class="stat-label">SOL in Open Trades</div>
-                    </div>
-                    <div class="portfolio-stat">
-                        <div class="stat-number" id="total-pnl">+0.00 SOL</div>
-                        <div class="stat-label">Total P&L (SOL)</div>
-                    </div>
-                    <div class="portfolio-stat">
-                        <div class="stat-number" id="open-trades">0</div>
-                        <div class="stat-label">Open Positions</div>
-                    </div>
-                    <div class="portfolio-stat">
-                        <div class="stat-number" id="win-rate">0%</div>
-                        <div class="stat-label">Win Rate</div>
-                    </div>
-                    <div class="portfolio-stat">
-                        <div class="stat-number" id="total-pnl-usd">+$0.00</div>
-                        <div class="stat-label">Total P&L (USD)</div>
-                    </div>
-                </div>
-            </div>
-
-            Trading Container
-            <div class="trading-container">
-                <div class="section-header">
-                    <h3 id="trading-section-title">Open Positions</h3>
-                    <div class="section-actions">
-                        <button id="add-trade-secondary-btn" class="trade-action-btn">
-                            <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
-                        </button>
-                        <button id="refresh-prices-btn" class="trade-action-btn">
-                            <i data-lucide="refresh-cw" style="width: 18px; height: 18px;"></i>
-                        </button>
-                        <button id="lock-btn" class="trade-action-btn">
-                            <i data-lucide="lock" style="width: 18px; height: 18px;"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                Open Trades View
-                <div id="open-trades-view" class="trades-view">
-                    <div class="trades-table" id="open-trades-list">
-                        <div class="empty-trades">No open trades yet</div>
-                    </div>
-                </div>
-
-                Closed Trades View
-                <div id="closed-trades-view" class="trades-view" style="display: none;">
-                    <div class="trades-table" id="closed-trades-list">
-                        <div class="empty-trades">No closed trades yet</div>
-                    </div>
-                </div>
+            <!-- Trade Tracking Table -->
+            <div class="trade-table-container">
+                <table class="trade-table" id="trade-table">
+                    <thead>
+                        <tr>
+                            <th>Trade Name</th>
+                            <th>Einsatz</th>
+                            <th>Ertrag</th>
+                            <th>Notizen/Learning</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trade-table-body">
+                        <tr class="empty-row">
+                            <td colspan="5" class="empty-message">
+                                <div class="empty-content">
+                                    <i data-lucide="bar-chart-3" style="width: 24px; height: 24px; margin-bottom: 8px;"></i>
+                                    <span>Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
         </section>
@@ -6894,35 +6930,36 @@
         <div id="add-trade-modal" class="modal-overlay" style="display: none;">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Add New Trade</h2>
+                    <h2>Trade hinzufügen</h2>
                     <button class="modal-close" id="add-trade-modal-close">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="trade-form">
+                        <div class="form-group">
+                            <label for="trade-name">Trade Name</label>
+                            <input type="text" id="trade-name" placeholder="z.B. BONK Long, BTC Swing..." autocomplete="off">
+                        </div>
+                        
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="modal-trade-token">Token</label>
-                                <input type="text" id="modal-trade-token" placeholder="BONK" autocomplete="off">
+                                <label for="trade-einsatz">Einsatz (optional)</label>
+                                <input type="text" id="trade-einsatz" placeholder="z.B. 0.5 SOL, $100..." autocomplete="off">
                             </div>
                             <div class="form-group">
-                                <label for="modal-trade-sol-amount">SOL</label>
-                                <input type="number" id="modal-trade-sol-amount" placeholder="0.5" step="0.001" autocomplete="off">
-                            </div>
-                            <div class="form-group">
-                                <label for="modal-trade-mcap">Market Cap</label>
-                                <input type="text" id="modal-trade-mcap" placeholder="2.1M" autocomplete="off">
+                                <label for="trade-ertrag">Ertrag (optional)</label>
+                                <input type="text" id="trade-ertrag" placeholder="z.B. +1.2 SOL, -$50..." autocomplete="off">
                             </div>
                         </div>
                         
                         <div class="form-group">
-                            <label for="modal-trade-notes">Notes</label>
-                            <textarea id="modal-trade-notes" placeholder="e.g., Strong community, upcoming catalyst, technical breakout, stop loss, take profit..." rows="3" autocomplete="off"></textarea>
+                            <label for="trade-notes">Notizen/Learning</label>
+                            <textarea id="trade-notes" placeholder="Was hast du gelernt? Setup? Fehler? Erfolg?" rows="3" autocomplete="off"></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn secondary" id="add-trade-cancel">Cancel</button>
-                    <button class="btn" id="add-trade-confirm">Add Trade</button>
+                    <button class="btn secondary" id="add-trade-cancel">Abbrechen</button>
+                    <button class="btn" id="add-trade-confirm">Trade hinzufügen</button>
                 </div>
             </div>
         </div>
@@ -15967,42 +16004,50 @@
             }
 
             async addTrade() {
-                const token = document.getElementById('modal-trade-token').value.trim().toUpperCase();
-                const solAmount = parseFloat(document.getElementById('modal-trade-sol-amount').value);
-                const entryMcap = document.getElementById('modal-trade-mcap').value.trim();
-                const notes = document.getElementById('modal-trade-notes').value.trim();
+                const name = document.getElementById('trade-name').value.trim();
+                const einsatz = document.getElementById('trade-einsatz').value.trim();
+                const ertrag = document.getElementById('trade-ertrag').value.trim();
+                const notes = document.getElementById('trade-notes').value.trim();
 
-                if (!token || !solAmount || !entryMcap) {
-                    alert('Please fill in all required fields');
+                if (!name) {
+                    alert('Bitte gebe einen Trade Name ein');
                     return;
                 }
 
-                const trade = {
-                    id: Date.now().toString(),
-                    token,
-                    sol_amount: solAmount,
-                    entry_mcap: entryMcap,
-                    entry_price: this.solPrice * solAmount,
-                    entry_date: new Date().toISOString(),
-                    status: 'open',
-                    pnl: 0,
-                    user_id: window.supabase?.getCurrentUser()?.id
-                };
+                let trade;
+                let isUpdate = false;
 
-                // Add notes if provided
-                if (notes) {
-                    trade.notes = notes;
+                if (this.editingTradeId) {
+                    // Update existing trade
+                    isUpdate = true;
+                    trade = this.trades.find(t => t.id === this.editingTradeId);
+                    if (trade) {
+                        trade.name = name;
+                        trade.einsatz = einsatz || '';
+                        trade.ertrag = ertrag || '';
+                        trade.notes = notes || '';
+                    }
+                } else {
+                    // Create new trade
+                    trade = {
+                        id: Date.now().toString(),
+                        name: name,
+                        einsatz: einsatz || '',
+                        ertrag: ertrag || '',
+                        notes: notes || '',
+                        date: new Date().toLocaleDateString('de-DE'),
+                        user_id: window.supabase?.getCurrentUser()?.id
+                    };
                 }
-                
-                // Store cost_basis locally until DB schema is updated
-                trade._cost_basis = solAmount;
 
                 try {
                     // Save to cloud
                     await this.saveTradeToCloud(trade);
                     
-                    // Add to local array
-                    this.trades.push(trade);
+                    // Add to local array if new
+                    if (!isUpdate) {
+                        this.trades.push(trade);
+                    }
                     
                     // Clear form and close modal
                     this.clearAddTradeForm();
@@ -16010,7 +16055,6 @@
                     
                     // Refresh display
                     this.renderTrades();
-                    this.updatePortfolioStats();
 
                 } catch (error) {
                     console.error('Error adding trade:', error);
@@ -16024,46 +16068,50 @@
 
             hideAddTradeModal() {
                 document.getElementById('add-trade-modal').style.display = 'none';
+                this.resetModalToAddMode();
             }
 
             clearAddTradeForm() {
-                document.getElementById('modal-trade-token').value = '';
-                document.getElementById('modal-trade-sol-amount').value = '';
-                document.getElementById('modal-trade-mcap').value = '';
-                document.getElementById('modal-trade-notes').value = '';
+                document.getElementById('trade-name').value = '';
+                document.getElementById('trade-einsatz').value = '';
+                document.getElementById('trade-ertrag').value = '';
+                document.getElementById('trade-notes').value = '';
+                this.resetModalToAddMode();
+            }
+
+            resetModalToAddMode() {
+                this.editingTradeId = null;
+                document.getElementById('add-trade-confirm').textContent = 'Trade hinzufügen';
             }
 
             async saveTradeToCloud(trade) {
-                if (!window.supabase || !window.supabase.isAuthenticated()) {
-                    throw new Error('Not authenticated');
+                // Simple localStorage backup for now
+                try {
+                    localStorage.setItem('simple_trades', JSON.stringify(this.trades));
+                } catch (error) {
+                    console.warn('Could not save to localStorage:', error);
                 }
 
-                // Create a copy with only fields that exist in the database
-                const dbTrade = {
-                    id: trade.id,
-                    token: trade.token,
-                    sol_amount: trade.sol_amount,
-                    entry_mcap: trade.entry_mcap,
-                    entry_price: trade.entry_price,
-                    entry_date: trade.entry_date,
-                    status: trade.status,
-                    pnl: trade.pnl,
-                    user_id: trade.user_id
-                };
-                
-                // Add badge-related flags to database
-                if (trade._initials_recovered !== undefined) dbTrade._initials_recovered = trade._initials_recovered;
-                if (trade._is_free_ride_trade !== undefined) dbTrade._is_free_ride_trade = trade._is_free_ride_trade;
-                if (trade._is_free_ride !== undefined) dbTrade._is_free_ride = trade._is_free_ride;
-                if (trade._initials_taken !== undefined) dbTrade._initials_taken = trade._initials_taken;
-                if (trade._cost_basis !== undefined) dbTrade._cost_basis = trade._cost_basis;
-                
-                // TODO: Add these fields when database schema is updated
-                // stop_loss: trade.stop_loss,
-                // take_profit: trade.take_profit,
-                // notes: trade.notes
-                
-                await window.supabase.insert('trades', [dbTrade]);
+                // Optional cloud sync if available
+                if (window.supabase && window.supabase.isAuthenticated()) {
+                    try {
+                        // Simple trade data structure for cloud
+                        const cloudTrade = {
+                            id: trade.id,
+                            name: trade.name,
+                            einsatz: trade.einsatz,
+                            ertrag: trade.ertrag,
+                            notes: trade.notes,
+                            date: trade.date || new Date().toLocaleDateString('de-DE'),
+                            user_id: trade.user_id
+                        };
+                        
+                        // Save to a simple trades table (would need to create this in supabase)
+                        await window.supabase.insert('simple_trades', [cloudTrade]);
+                    } catch (error) {
+                        console.warn('Could not sync to cloud:', error);
+                    }
+                }
             }
 
             handleLockButton() {
@@ -16110,24 +16158,35 @@
 
             async loadTrades() {
                 try {
-                    if (!window.supabase || !window.supabase.isAuthenticated()) {
+                    // Load from localStorage first
+                    const stored = localStorage.getItem('simple_trades');
+                    if (stored) {
+                        this.trades = JSON.parse(stored);
+                        this.renderTrades();
                         return;
                     }
 
-                    const user = window.supabase.getCurrentUser();
-                    const data = await window.supabase.query(`trades?user_id=eq.${user.id}&select=*`);
-                    
-                    if (data) {
-                        // Add cost_basis fallback for existing trades
-                        this.trades = data.map(trade => {
-                            if (!trade._cost_basis) {
-                                trade._cost_basis = trade.sol_amount; // Fallback: cost basis = original sol amount
+                    // Optional: sync from cloud if available
+                    if (window.supabase && window.supabase.isAuthenticated()) {
+                        try {
+                            const user = window.supabase.getCurrentUser();
+                            const data = await window.supabase.query(`simple_trades?user_id=eq.${user.id}&select=*`);
+                            
+                            if (data && data.length > 0) {
+                                this.trades = data;
+                                this.renderTrades();
+                                // Save to localStorage for offline use
+                                localStorage.setItem('simple_trades', JSON.stringify(this.trades));
+                                return;
                             }
-                            return trade;
-                        });
-                        this.renderTrades();
-                        this.updatePortfolioStats();
+                        } catch (error) {
+                            console.warn('Could not load from cloud:', error);
+                        }
                     }
+
+                    // Initialize empty if nothing found
+                    this.trades = [];
+                    this.renderTrades();
 
                 } catch (error) {
                     console.error('Error loading trades:', error);
@@ -16135,23 +16194,70 @@
             }
 
             renderTrades() {
-                console.log(`RENDER TRADES: Total trades: ${this.trades.length}`);
-                const openTrades = this.trades.filter(t => t.status === 'open');
-                const closedTrades = this.trades.filter(t => t.status === 'closed');
+                const tbody = document.getElementById('trade-table-body');
                 
-                console.log(`RENDER TRADES: Open trades: ${openTrades.length}, Closed trades: ${closedTrades.length}`);
-                openTrades.forEach((trade, i) => {
-                    console.log(`OPEN TRADE ${i+1}:`, {
-                        id: trade.id,
-                        token: trade.token,
-                        sol_amount: trade.sol_amount,
-                        status: trade.status,
-                        cost_basis: trade._cost_basis
-                    });
-                });
+                if (this.trades.length === 0) {
+                    tbody.innerHTML = `
+                        <tr class="empty-row">
+                            <td colspan="5" class="empty-message">
+                                <div class="empty-content">
+                                    <i data-lucide="bar-chart-3" style="width: 24px; height: 24px; margin-bottom: 8px;"></i>
+                                    <span>Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.</span>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = this.trades.map(trade => `
+                        <tr>
+                            <td class="trade-name">${trade.name}</td>
+                            <td class="trade-amount">${trade.einsatz || '-'}</td>
+                            <td class="trade-amount ${this.getErtragClass(trade.ertrag)}">${trade.ertrag || '-'}</td>
+                            <td class="trade-notes">${trade.notes || '-'}</td>
+                            <td class="trade-actions">
+                                <button class="trade-action-btn" onclick="tradingManager.editTrade('${trade.id}')" title="Bearbeiten">
+                                    <i data-lucide="edit-3" style="width: 16px; height: 16px;"></i>
+                                </button>
+                                <button class="trade-action-btn delete" onclick="tradingManager.deleteTrade('${trade.id}')" title="Löschen">
+                                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                
+                // Re-initialize Lucide icons
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
 
-                this.renderOpenTrades(openTrades);
-                this.renderClosedTrades(closedTrades);
+            getErtragClass(ertrag) {
+                if (!ertrag) return '';
+                const str = ertrag.toString().toLowerCase();
+                if (str.startsWith('+') || str.includes('gewinn') || str.includes('profit')) return 'positive';
+                if (str.startsWith('-') || str.includes('verlust') || str.includes('loss')) return 'negative';
+                return '';
+            }
+
+            editTrade(tradeId) {
+                const trade = this.trades.find(t => t.id === tradeId);
+                if (!trade) return;
+
+                // Fill form with current values
+                document.getElementById('trade-name').value = trade.name;
+                document.getElementById('trade-einsatz').value = trade.einsatz;
+                document.getElementById('trade-ertrag').value = trade.ertrag;
+                document.getElementById('trade-notes').value = trade.notes;
+
+                // Store the ID for updating
+                this.editingTradeId = tradeId;
+
+                // Change button text
+                document.getElementById('add-trade-confirm').textContent = 'Trade aktualisieren';
+
+                // Show modal
+                this.showAddTradeModal();
             }
 
             renderOpenTrades(trades) {
@@ -16794,20 +16900,26 @@
             }
 
             async deleteTrade(tradeId) {
-                if (!confirm('Are you sure you want to delete this trade?')) return;
+                if (!confirm('Trade wirklich löschen?')) return;
 
                 try {
-                    // Remove from cloud
-                    if (window.supabase && window.supabase.isAuthenticated()) {
-                        await window.supabase.delete('trades', tradeId);
-                    }
-                    
                     // Remove from local array
                     this.trades = this.trades.filter(t => t.id !== tradeId);
                     
+                    // Update localStorage
+                    localStorage.setItem('simple_trades', JSON.stringify(this.trades));
+                    
+                    // Optional: Remove from cloud
+                    if (window.supabase && window.supabase.isAuthenticated()) {
+                        try {
+                            await window.supabase.delete('simple_trades', tradeId);
+                        } catch (error) {
+                            console.warn('Could not delete from cloud:', error);
+                        }
+                    }
+                    
                     // Refresh display
                     this.renderTrades();
-                    this.updatePortfolioStats();
 
                 } catch (error) {
                     console.error('Error deleting trade:', error);
@@ -16858,8 +16970,8 @@
             }
         }
 
-        // Initialize Trading Manager - DISABLED
-        // window.TradingManager = new TradingManager();
+        // Initialize Trading Manager
+        window.tradingManager = new TradingManager();
         
         // Initialize lucide icons for trade action buttons
         setTimeout(() => {
