@@ -4716,139 +4716,54 @@
             letter-spacing: 0.1em;
         }
 
-        /* Trading Table Styles - Version 2.1 */
-        .trade-table-container {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-primary);
-            border-radius: 0;
-            overflow-x: auto;
-            margin-bottom: 2rem;
+        /* SIMPLE TRADE TABLE - NO CONFLICTS */
+        .simple-trade-container {
+            border: 1px solid #ddd;
+            margin: 20px 0;
         }
 
-        .trade-table {
+        .simple-trade-table {
             width: 100%;
             border-collapse: collapse;
-            font-family: var(--font-mono);
-            font-size: var(--font-size-sm);
-            table-layout: fixed;
+            font-family: -apple-system, sans-serif;
         }
 
-        .trade-table col:nth-child(1) { width: 30%; }  /* Trade Name */
-        .trade-table col:nth-child(2) { width: 20%; }  /* Einsatz */
-        .trade-table col:nth-child(3) { width: 20%; }  /* Ertrag */
-        .trade-table col:nth-child(4) { width: 30%; }  /* Notizen */
-
-        .trade-table th {
-            background: var(--bg-secondary);
-            padding: 12px 16px;
-            text-align: left;
+        .simple-trade-table th {
+            background: #f5f5f5;
+            padding: 12px;
+            border-bottom: 2px solid #ddd;
             font-weight: 600;
-            border-bottom: 2px solid var(--border-primary);
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
             font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
         }
 
-        .trade-table th:nth-child(2),
-        .trade-table th:nth-child(3) {
-            text-align: center;
-        }
-
-        .trade-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-secondary);
+        .simple-trade-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
             vertical-align: middle;
         }
 
-        .trade-table tbody tr:hover {
-            background: var(--bg-secondary);
+        .simple-trade-table tr:hover {
+            background: #f9f9f9;
         }
 
-        .trade-table .empty-message {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .trade-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .trade-action-btn {
-            background: none;
-            border: none;
-            padding: 4px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            transition: color 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .trade-action-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .trade-action-btn.delete:hover {
-            color: #dc2626;
-        }
-
-        .trade-name {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .trade-amount {
-            font-family: var(--font-mono);
-            text-align: center;
-        }
-
-        .trade-amount.positive {
-            color: #059669;
-        }
-
-        .trade-amount.negative {
-            color: #dc2626;
-        }
-
-        .trade-notes {
-            min-width: 200px;
-            word-wrap: break-word;
-            line-height: 1.4;
-        }
-
-        /* Inline editing styles */
-        .trade-table td[contenteditable="true"] {
+        .simple-trade-table td[contenteditable] {
             cursor: text;
-            transition: background-color 0.2s ease;
-            white-space: pre-wrap;
-            word-break: break-word;
         }
 
-        .trade-table td[contenteditable="true"]:hover {
-            background-color: var(--bg-secondary);
+        .simple-trade-table td[contenteditable]:focus {
+            outline: 2px solid #007cba;
+            background: #fff;
         }
 
-        .trade-table td[contenteditable="true"]:focus {
-            outline: 2px solid var(--accent-primary);
-            background-color: #fff;
-            border-radius: 2px;
-        }
-
-        .trade-table td[contenteditable="true"]:empty:before {
+        .simple-trade-table td[contenteditable]:empty:before {
             content: "-";
-            color: var(--text-secondary);
+            color: #999;
         }
+
+        .trade-amount.positive { color: #059669; }
+        .trade-amount.negative { color: #dc2626; }
 
         .trades-view {
             /* Ensure only one view is visible at a time */
@@ -6862,30 +6777,21 @@
                 </button>
             </div>
             
-            <!-- Trade Tracking Table -->
-            <div class="trade-table-container">
-                <table class="trade-table" id="trade-table">
-                    <colgroup>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                    </colgroup>
+            <!-- Trade Tracking Table - CLEAN VERSION -->
+            <div class="simple-trade-container">
+                <table class="simple-trade-table">
                     <thead>
                         <tr>
-                            <th>Trade Name</th>
-                            <th>Einsatz</th>
-                            <th>Ertrag</th>
-                            <th>Notizen/Learning</th>
+                            <th style="width: 25%;">Trade Name</th>
+                            <th style="width: 20%; text-align: center;">Einsatz</th>
+                            <th style="width: 20%; text-align: center;">Ertrag</th>
+                            <th style="width: 35%;">Notizen/Learning</th>
                         </tr>
                     </thead>
-                    <tbody id="trade-table-body">
-                        <tr class="empty-row">
-                            <td colspan="4" class="empty-message">
-                                <div class="empty-content">
-                                    <i data-lucide="bar-chart-3" style="width: 24px; height: 24px; margin-bottom: 8px;"></i>
-                                    <span>Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.</span>
-                                </div>
+                    <tbody id="simple-trade-body">
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 2rem; color: #666;">
+                                Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.
                             </td>
                         </tr>
                     </tbody>
@@ -16233,26 +16139,24 @@
             }
 
             renderTrades() {
-                const tbody = document.getElementById('trade-table-body');
+                const tbody = document.getElementById('simple-trade-body');
+                if (!tbody) return;
                 
                 if (this.trades.length === 0) {
                     tbody.innerHTML = `
-                        <tr class="empty-row">
-                            <td colspan="4" class="empty-message">
-                                <div class="empty-content">
-                                    <i data-lucide="bar-chart-3" style="width: 24px; height: 24px; margin-bottom: 8px;"></i>
-                                    <span>Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.</span>
-                                </div>
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 2rem; color: #666;">
+                                Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.
                             </td>
                         </tr>
                     `;
                 } else {
                     tbody.innerHTML = this.trades.map(trade => `
-                        <tr data-trade-id="${trade.id}" class="trade-row">
-                            <td class="trade-name" contenteditable="true" data-field="name">${trade.name}</td>
-                            <td class="trade-amount" contenteditable="true" data-field="einsatz">${trade.einsatz || ''}</td>
-                            <td class="trade-amount ${this.getErtragClass(trade.ertrag)}" contenteditable="true" data-field="ertrag">${trade.ertrag || ''}</td>
-                            <td class="trade-notes" contenteditable="true" data-field="notes">${trade.notes || ''}</td>
+                        <tr data-trade-id="${trade.id}">
+                            <td contenteditable="true" data-field="name">${trade.name}</td>
+                            <td contenteditable="true" data-field="einsatz" style="text-align: center;">${trade.einsatz || ''}</td>
+                            <td contenteditable="true" data-field="ertrag" style="text-align: center;" class="trade-amount ${this.getErtragClass(trade.ertrag)}">${trade.ertrag || ''}</td>
+                            <td contenteditable="true" data-field="notes">${trade.notes || ''}</td>
                         </tr>
                     `).join('');
                 }
@@ -16267,7 +16171,7 @@
             }
 
             setupInlineEditing() {
-                const tbody = document.getElementById('trade-table-body');
+                const tbody = document.getElementById('simple-trade-body');
                 if (!tbody) return;
 
                 // Listen for blur events (when user finishes editing)
@@ -16278,7 +16182,9 @@
                         const field = e.target.dataset.field;
                         const newValue = e.target.textContent.trim();
                         
-                        await this.updateTradeField(tradeId, field, newValue);
+                        if (tradeId && field) {
+                            await this.updateTradeField(tradeId, field, newValue);
+                        }
                     }
                 }, true);
 
@@ -16292,8 +16198,8 @@
 
                 // Right-click to delete trade directly
                 tbody.addEventListener('contextmenu', (e) => {
-                    const row = e.target.closest('.trade-row');
-                    if (row) {
+                    const row = e.target.closest('tr');
+                    if (row && row.dataset.tradeId) {
                         e.preventDefault();
                         const tradeId = row.dataset.tradeId;
                         const trade = this.trades.find(t => t.id === tradeId);
