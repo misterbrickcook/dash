@@ -4716,7 +4716,7 @@
             letter-spacing: 0.1em;
         }
 
-        /* Trading Table Styles */
+        /* Trading Table Styles - Version 2.1 */
         .trade-table-container {
             background: var(--bg-primary);
             border: 1px solid var(--border-primary);
@@ -4827,17 +4827,10 @@
             line-height: 1.4;
         }
 
-        .trade-actions-hidden {
-            border-left: none !important;
-            padding: 0 !important;
-            vertical-align: middle;
-        }
-
         /* Inline editing styles */
         .trade-table td[contenteditable="true"] {
             cursor: text;
             transition: background-color 0.2s ease;
-            position: relative;
             white-space: pre-wrap;
             word-break: break-word;
         }
@@ -4855,27 +4848,6 @@
         .trade-table td[contenteditable="true"]:empty:before {
             content: "-";
             color: var(--text-secondary);
-        }
-
-        .trade-delete-btn {
-            background: #dc2626;
-            border: none;
-            border-radius: 3px;
-            padding: 0;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: none;
-            width: 18px;
-            height: 18px;
-            font-size: 14px;
-            font-weight: bold;
-            line-height: 1;
-        }
-
-        .trade-delete-btn:hover {
-            background: #b91c1c;
-            transform: scale(1.1);
         }
 
         .trades-view {
