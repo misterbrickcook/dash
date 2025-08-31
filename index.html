@@ -16982,11 +16982,17 @@
             }
         }
 
-        // Initialize Trading Manager when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
+        // Initialize Trading Manager
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                window.tradingManager = new TradingManager();
+                console.log('🚀 TradingManager initialized after DOM ready');
+            });
+        } else {
+            // DOM already loaded
             window.tradingManager = new TradingManager();
-            console.log('🚀 TradingManager initialized');
-        });
+            console.log('🚀 TradingManager initialized immediately');
+        }
         
         // Initialize lucide icons for trade action buttons
         setTimeout(() => {
