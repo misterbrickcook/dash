@@ -15900,69 +15900,6 @@
         // Initialize compatibility
         window.tradingManager = new TradingManager();
     </script>
-    
-    <!-- ========================================= -->
-    <!-- ANALYTICS MANAGER -->
-    <!-- ========================================= -->
-    <script>
-        class AnalyticsManager {
-            constructor() {
-                this.chart = null;
-                this.currentPeriod = 'week';
-                this.balanceHistory = [];
-                this.init();
-            }
-
-            async init() {
-                // Check if supabase is available and user is authenticated
-                if (!window.supabase?.isAuthenticated()) {
-                    window.logAuthWarning('Analytics', 'initialize');
-                    return;
-                }
-                
-                await this.loadBalanceHistory();
-                await this.checkAndRecordDailyBalance();
-                this.setupPeriodButtons();
-                await this.setupChart();
-                await this.updateCurrentBalance();
-                await this.setupHeatmap();
-                await this.setupPerformanceHeatmap();
-                await this.setupMorningRoutineHeatmap();
-                await this.setupEveningRoutineHeatmap();
-                await this.setupSportHeatmap();
-            }
-
-            async loadBalanceHistory() {
-                try {
-                    if (!window.supabase?.isAuthenticated()) {
-                        this.balanceHistory = [];
-                        return;
-                    }
-
-                    const user = window.supabase.getCurrentUser();
-                    if (!user) {
-                        this.balanceHistory = [];
-                        return;
-                    }
-
-                    // Query balance history from cloud
-                    const data = await window.supabase.query(
-                        `analytics_balance_history?user_id=eq.${user.id}&select=*&order=date.asc`
-                    );
-
-                    this.balanceHistory = data || [];
-                } catch (error) {
-                    console.error('Error loading balance history:', error);
-                    this.balanceHistory = [];
-                }
-            }
-        }
-    </script>
-    
-    <!-- ========================================= -->
-    <!-- ANALYTICS MANAGER -->
-    <!-- ========================================= -->
-                if (lockBtn) {
                     lockBtn.addEventListener('click', () => this.handleLockButton());
                 }
 
