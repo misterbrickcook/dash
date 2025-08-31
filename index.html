@@ -15951,15 +15951,17 @@
                     );
 
                     this.balanceHistory = data || [];
-                    } catch (error) {
+                } catch (error) {
                     console.error('Error loading balance history:', error);
                     this.balanceHistory = [];
                 }
             }
-                }
-
-                // Lock button (placeholder for future functionality)
-                const lockBtn = document.getElementById('lock-btn');
+        }
+    </script>
+    
+    <!-- ========================================= -->
+    <!-- ANALYTICS MANAGER -->
+    <!-- ========================================= -->
                 if (lockBtn) {
                     lockBtn.addEventListener('click', () => this.handleLockButton());
                 }
