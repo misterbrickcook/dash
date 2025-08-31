@@ -4816,6 +4816,27 @@
             line-height: 1.4;
         }
 
+        /* Inline editing styles */
+        .trade-table td[contenteditable="true"] {
+            cursor: text;
+            transition: background-color 0.2s ease;
+        }
+
+        .trade-table td[contenteditable="true"]:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        .trade-table td[contenteditable="true"]:focus {
+            outline: 2px solid var(--accent-primary);
+            background-color: #fff;
+            border-radius: 2px;
+        }
+
+        .trade-table td[contenteditable="true"]:empty:before {
+            content: "-";
+            color: var(--text-secondary);
+        }
+
         .trades-view {
             /* Ensure only one view is visible at a time */
             width: 100%;
@@ -16209,15 +16230,12 @@
                     `;
                 } else {
                     tbody.innerHTML = this.trades.map(trade => `
-                        <tr>
-                            <td class="trade-name">${trade.name}</td>
-                            <td class="trade-amount">${trade.einsatz || '-'}</td>
-                            <td class="trade-amount ${this.getErtragClass(trade.ertrag)}">${trade.ertrag || '-'}</td>
-                            <td class="trade-notes">${trade.notes || '-'}</td>
+                        <tr data-trade-id="${trade.id}">
+                            <td class="trade-name" contenteditable="true" data-field="name">${trade.name}</td>
+                            <td class="trade-amount" contenteditable="true" data-field="einsatz">${trade.einsatz || ''}</td>
+                            <td class="trade-amount ${this.getErtragClass(trade.ertrag)}" contenteditable="true" data-field="ertrag">${trade.ertrag || ''}</td>
+                            <td class="trade-notes" contenteditable="true" data-field="notes">${trade.notes || ''}</td>
                             <td class="trade-actions">
-                                <button class="trade-action-btn" onclick="tradingManager.editTrade('${trade.id}')">
-                                    <i data-lucide="edit-3" style="width: 16px; height: 16px;"></i>
-                                </button>
                                 <button class="trade-action-btn delete" onclick="tradingManager.deleteTrade('${trade.id}')">
                                     <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                                 </button>
@@ -16226,9 +16244,64 @@
                     `).join('');
                 }
                 
+                // Add inline editing event listeners
+                this.setupInlineEditing();
+                
                 // Re-initialize Lucide icons
                 if (window.lucide) {
                     lucide.createIcons();
+                }
+            }
+
+            setupInlineEditing() {
+                const tbody = document.getElementById('trade-table-body');
+                if (!tbody) return;
+
+                // Listen for blur events (when user finishes editing)
+                tbody.addEventListener('blur', async (e) => {
+                    if (e.target.contentEditable === 'true') {
+                        const row = e.target.closest('tr');
+                        const tradeId = row.dataset.tradeId;
+                        const field = e.target.dataset.field;
+                        const newValue = e.target.textContent.trim();
+                        
+                        await this.updateTradeField(tradeId, field, newValue);
+                    }
+                }, true);
+
+                // Prevent line breaks on Enter
+                tbody.addEventListener('keydown', (e) => {
+                    if (e.target.contentEditable === 'true' && e.key === 'Enter') {
+                        e.preventDefault();
+                        e.target.blur(); // Save changes and lose focus
+                    }
+                });
+            }
+
+            async updateTradeField(tradeId, field, newValue) {
+                try {
+                    // Find trade in local array
+                    const trade = this.trades.find(t => t.id === tradeId);
+                    if (!trade) return;
+
+                    // Update local data
+                    trade[field] = newValue;
+
+                    // Save to cloud
+                    await this.saveTradeToCloud(trade);
+                    
+                    console.log(`✅ Updated ${field} for trade ${tradeId}`);
+                    
+                    // Re-render to apply color classes for ertrag
+                    if (field === 'ertrag') {
+                        this.renderTrades();
+                    }
+
+                } catch (error) {
+                    console.error('Error updating trade:', error);
+                    alert('Fehler beim Speichern');
+                    // Reload trades to revert changes
+                    this.loadTrades();
                 }
             }
 
@@ -16240,25 +16313,6 @@
                 return '';
             }
 
-            editTrade(tradeId) {
-                const trade = this.trades.find(t => t.id === tradeId);
-                if (!trade) return;
-
-                // Fill form with current values
-                document.getElementById('trade-name').value = trade.name;
-                document.getElementById('trade-einsatz').value = trade.einsatz;
-                document.getElementById('trade-ertrag').value = trade.ertrag;
-                document.getElementById('trade-notes').value = trade.notes;
-
-                // Store the ID for updating
-                this.editingTradeId = tradeId;
-
-                // Change button text
-                document.getElementById('add-trade-confirm').textContent = 'Trade aktualisieren';
-
-                // Show modal
-                this.showAddTradeModal();
-            }
 
             renderOpenTrades(trades) {
                 const container = document.getElementById('open-trades-list');
