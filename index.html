@@ -6772,7 +6772,7 @@
         <!-- === TRADING TAB === -->
         <section id="tab-trading" class="tab-section">
             <div class="page-header">
-                <button id="add-trade-btn" class="add-btn">
+                <button id="add-trade-btn" class="add-btn" onclick="tradingManager.addTrade()">
                     <i data-lucide="plus"></i>
                 </button>
             </div>
@@ -6868,25 +6868,6 @@
             </div>
         </div>
 
-        <!-- === ADD TRADE MODAL === -->
-        <div id="add-trade-modal" class="modal hide">
-            <div class="modal-content">
-                <button class="close" onclick="tradingManager.hideAddTradeModal()">×</button>
-                <h2>NEUEN TRADE HINZUFÜGEN</h2>
-                
-                <div class="modal-body">
-                    <p style="color: #666; margin: 1rem 0; line-height: 1.5;">
-                        Es wird eine neue leere Zeile oben in der Tabelle eingefügt. 
-                        Du kannst dann direkt in die Zellen klicken und bearbeiten.
-                    </p>
-                    
-                    <div class="form-actions">
-                        <button type="button" class="btn secondary" onclick="tradingManager.hideAddTradeModal()">Abbrechen</button>
-                        <button type="button" class="btn" onclick="tradingManager.addTrade()">Neue Zeile hinzufügen</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- === VIEW TRADE DETAILS MODAL === -->
         <div id="view-trade-modal" class="modal-overlay" style="display: none;">
@@ -15769,24 +15750,8 @@
             }
 
             setupEventListeners() {
-                // Add trade button - show modal
-                const addTradeBtn = document.getElementById('add-trade-btn');
-                console.log('🔍 Add Trade Button found:', !!addTradeBtn);
-                if (addTradeBtn) {
-                    addTradeBtn.addEventListener('click', () => {
-                        console.log('🎯 Add Trade Button clicked!');
-                        this.showAddTradeModal();
-                    });
-                }
-
-                const addTradeSecondaryBtn = document.getElementById('add-trade-secondary-btn');
-                console.log('🔍 Secondary Add Trade Button found:', !!addTradeSecondaryBtn);
-                if (addTradeSecondaryBtn) {
-                    addTradeSecondaryBtn.addEventListener('click', () => {
-                        console.log('🎯 Secondary Add Trade Button clicked!');
-                        this.showAddTradeModal();
-                    });
-                }
+                // Add trade button now uses direct onclick in HTML
+                console.log('🔍 Add Trade Button setup: Direct onclick to addTrade()');
 
                 // Add trade form submission is now handled by onclick in HTML
 
@@ -15940,9 +15905,6 @@
                     // Add to beginning of local array (top of table)
                     this.trades.unshift(trade);
                     
-                    // Close modal
-                    this.hideAddTradeModal();
-                    
                     // Refresh display
                     this.renderTrades();
                     
@@ -15962,7 +15924,7 @@
 
                 } catch (error) {
                     console.error('Error adding trade:', error);
-                    alert('Failed to save trade');
+                    alert('Fehler beim Speichern');
                 }
             }
 
