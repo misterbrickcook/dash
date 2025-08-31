@@ -4733,11 +4733,10 @@
             table-layout: fixed;
         }
 
-        .trade-table col:nth-child(1) { width: 25%; }  /* Trade Name */
-        .trade-table col:nth-child(2) { width: 15%; }  /* Einsatz */
-        .trade-table col:nth-child(3) { width: 15%; }  /* Ertrag */
-        .trade-table col:nth-child(4) { width: 35%; }  /* Notizen */
-        .trade-table col:nth-child(5) { width: 10%; }  /* Aktionen */
+        .trade-table col:nth-child(1) { width: 30%; }  /* Trade Name */
+        .trade-table col:nth-child(2) { width: 20%; }  /* Einsatz */
+        .trade-table col:nth-child(3) { width: 20%; }  /* Ertrag */
+        .trade-table col:nth-child(4) { width: 30%; }  /* Notizen */
 
         .trade-table th {
             background: var(--bg-secondary);
@@ -4852,6 +4851,27 @@
         .trade-table td[contenteditable="true"] {
             white-space: pre-wrap;
             word-break: break-word;
+            position: relative;
+        }
+
+        .trade-delete-btn {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            background: #dc2626;
+            border: none;
+            border-radius: 4px;
+            padding: 4px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: none;
+        }
+
+        .trade-delete-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-50%) scale(1.1);
         }
 
         .trades-view {
@@ -6874,7 +6894,6 @@
                         <col>
                         <col>
                         <col>
-                        <col>
                     </colgroup>
                     <thead>
                         <tr>
@@ -6882,12 +6901,11 @@
                             <th>Einsatz</th>
                             <th>Ertrag</th>
                             <th>Notizen/Learning</th>
-                            <th>Aktionen</th>
                         </tr>
                     </thead>
                     <tbody id="trade-table-body">
                         <tr class="empty-row">
-                            <td colspan="5" class="empty-message">
+                            <td colspan="4" class="empty-message">
                                 <div class="empty-content">
                                     <i data-lucide="bar-chart-3" style="width: 24px; height: 24px; margin-bottom: 8px;"></i>
                                     <span>Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.</span>
@@ -16244,7 +16262,7 @@
                 if (this.trades.length === 0) {
                     tbody.innerHTML = `
                         <tr class="empty-row">
-                            <td colspan="5" class="empty-message">
+                            <td colspan="4" class="empty-message">
                                 <div class="empty-content">
                                     <i data-lucide="bar-chart-3" style="width: 24px; height: 24px; margin-bottom: 8px;"></i>
                                     <span>Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.</span>
@@ -16254,13 +16272,12 @@
                     `;
                 } else {
                     tbody.innerHTML = this.trades.map(trade => `
-                        <tr data-trade-id="${trade.id}">
+                        <tr data-trade-id="${trade.id}" class="trade-row">
                             <td class="trade-name" contenteditable="true" data-field="name">${trade.name}</td>
                             <td class="trade-amount" contenteditable="true" data-field="einsatz">${trade.einsatz || ''}</td>
                             <td class="trade-amount ${this.getErtragClass(trade.ertrag)}" contenteditable="true" data-field="ertrag">${trade.ertrag || ''}</td>
-                            <td class="trade-notes" contenteditable="true" data-field="notes">${trade.notes || ''}</td>
-                            <td class="trade-actions">
-                                <button class="trade-action-btn delete" onclick="tradingManager.deleteTrade('${trade.id}')">
+                            <td class="trade-notes" contenteditable="true" data-field="notes">${trade.notes || ''}
+                                <button class="trade-delete-btn" style="display: none;" onclick="tradingManager.deleteTrade('${trade.id}')">
                                     <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                                 </button>
                             </td>
@@ -16298,6 +16315,39 @@
                     if (e.target.contentEditable === 'true' && e.key === 'Enter') {
                         e.preventDefault();
                         e.target.blur(); // Save changes and lose focus
+                    }
+                });
+
+                // Right-click to show delete button
+                tbody.addEventListener('contextmenu', (e) => {
+                    const row = e.target.closest('.trade-row');
+                    if (row) {
+                        e.preventDefault();
+                        
+                        // Hide all other delete buttons first
+                        document.querySelectorAll('.trade-delete-btn').forEach(btn => {
+                            btn.style.display = 'none';
+                        });
+                        
+                        // Show delete button for this row
+                        const deleteBtn = row.querySelector('.trade-delete-btn');
+                        if (deleteBtn) {
+                            deleteBtn.style.display = 'inline-flex';
+                            
+                            // Hide after 3 seconds or when clicking elsewhere
+                            setTimeout(() => {
+                                deleteBtn.style.display = 'none';
+                            }, 3000);
+                        }
+                    }
+                });
+
+                // Hide delete buttons when clicking elsewhere
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.trade-delete-btn') && !e.target.closest('.trade-row')) {
+                        document.querySelectorAll('.trade-delete-btn').forEach(btn => {
+                            btn.style.display = 'none';
+                        });
                     }
                 });
             }
