@@ -6795,29 +6795,27 @@
         <!-- === TRADING TAB === -->
         <section id="tab-trading" class="tab-section">
             <div class="page-header">
-                <button id="add-trade-btn" class="add-btn" onclick="tradingManager.addTrade()">
+                <button id="add-trade-btn" class="add-btn" onclick="addNewTrade()">
                     <i data-lucide="plus"></i>
                 </button>
             </div>
             
-            <!-- Trade Tracking Table - FIXED -->
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                <thead>
-                    <tr style="background: #f5f5f5;">
-                        <th style="padding: 12px; border: 1px solid #ddd; width: 25%;">Trade Name</th>
-                        <th style="padding: 12px; border: 1px solid #ddd; width: 20%; text-align: center;">Einsatz</th>
-                        <th style="padding: 12px; border: 1px solid #ddd; width: 20%; text-align: center;">Ertrag</th>
-                        <th style="padding: 12px; border: 1px solid #ddd; width: 35%;">Notizen</th>
-                    </tr>
-                </thead>
-                <tbody id="simple-trade-body">
-                    <tr>
-                        <td colspan="4" style="text-align: center; padding: 2rem; color: #666; border: 1px solid #ddd;">
-                            Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- KOMPLETT NEUE TRADING TABLE -->
+            <div style="border: 1px solid #ddd; margin: 20px 0;">
+                <!-- Header -->
+                <div style="display: grid; grid-template-columns: 25% 20% 20% 35%; background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                    <div style="padding: 12px; font-weight: bold; border-right: 1px solid #ddd;">Trade Name</div>
+                    <div style="padding: 12px; font-weight: bold; border-right: 1px solid #ddd; text-align: center;">Einsatz</div>
+                    <div style="padding: 12px; font-weight: bold; border-right: 1px solid #ddd; text-align: center;">Ertrag</div>
+                    <div style="padding: 12px; font-weight: bold;">Notizen/Learning</div>
+                </div>
+                <!-- Body -->
+                <div id="trades-container">
+                    <div style="padding: 2rem; text-align: center; color: #666; border-bottom: 1px solid #eee;">
+                        Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.
+                    </div>
+                </div>
+            </div>
 
         </section>
 
@@ -15748,33 +15746,167 @@
     <!-- TRADING MANAGER -->
     <!-- ========================================= -->
     <script>
+        // NEUES SIMPLES TRADING SYSTEM
+        let allTrades = [];
+        
+        function addNewTrade() {
+            const newTrade = {
+                id: Date.now().toString(),
+                name: 'Neuer Trade',
+                einsatz: '',
+                ertrag: '',
+                notes: '',
+                user_id: window.supabase?.getCurrentUser()?.id
+            };
+            
+            allTrades.unshift(newTrade); // Add to beginning
+            renderAllTrades();
+            saveTradeToCloud(newTrade);
+        }
+        
+        function renderAllTrades() {
+            const container = document.getElementById('trades-container');
+            if (!container) return;
+            
+            if (allTrades.length === 0) {
+                container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666; border-bottom: 1px solid #eee;">Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.</div>';
+                return;
+            }
+            
+            let html = '';
+            allTrades.forEach(trade => {
+                html += `<div class="trade-row-grid" data-trade-id="${trade.id}" style="display: grid; grid-template-columns: 25% 20% 20% 35%; border-bottom: 1px solid #eee; min-height: 50px;">
+                    <div contenteditable="true" data-field="name" style="padding: 12px; border-right: 1px solid #eee; outline: none;" onblur="updateTrade('${trade.id}', 'name', this.textContent)">${trade.name}</div>
+                    <div contenteditable="true" data-field="einsatz" style="padding: 12px; border-right: 1px solid #eee; text-align: center; outline: none;" onblur="updateTrade('${trade.id}', 'einsatz', this.textContent)">${trade.einsatz}</div>
+                    <div contenteditable="true" data-field="ertrag" style="padding: 12px; border-right: 1px solid #eee; text-align: center; outline: none;" onblur="updateTrade('${trade.id}', 'ertrag', this.textContent)">${trade.ertrag}</div>
+                    <div contenteditable="true" data-field="notes" style="padding: 12px; outline: none; position: relative;" onblur="updateTrade('${trade.id}', 'notes', this.textContent)" oncontextmenu="showDeleteButton(event, '${trade.id}')">${trade.notes}
+                        <button id="delete-${trade.id}" style="display: none; position: absolute; top: 4px; right: 4px; background: #dc2626; color: white; border: none; width: 18px; height: 18px; font-size: 12px; cursor: pointer; border-radius: 2px;" onclick="deleteTrade('${trade.id}')">×</button>
+                    </div>
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function updateTrade(tradeId, field, value) {
+            const trade = allTrades.find(t => t.id === tradeId);
+            if (trade) {
+                trade[field] = value;
+                saveTradeToCloud(trade);
+            }
+        }
+        
+        function showDeleteButton(event, tradeId) {
+            event.preventDefault();
+            
+            // Hide all delete buttons
+            document.querySelectorAll('[id^="delete-"]').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            
+            // Show this delete button
+            const deleteBtn = document.getElementById('delete-' + tradeId);
+            if (deleteBtn) {
+                deleteBtn.style.display = 'block';
+            }
+        }
+        
+        function deleteTrade(tradeId) {
+            // Remove from array
+            allTrades = allTrades.filter(t => t.id !== tradeId);
+            
+            // Re-render
+            renderAllTrades();
+            
+            // Delete from cloud
+            if (window.supabase?.isAuthenticated()) {
+                window.supabase.delete('simple_trades', tradeId);
+            }
+        }
+        
+        async function saveTradeToCloud(trade) {
+            if (!window.supabase?.isAuthenticated()) return;
+            
+            try {
+                const cloudTrade = {
+                    id: trade.id,
+                    name: trade.name,
+                    einsatz: trade.einsatz,
+                    ertrag: trade.ertrag,
+                    notes: trade.notes,
+                    date: new Date().toLocaleDateString('de-DE'),
+                    user_id: trade.user_id
+                };
+                
+                // Check if exists
+                const existing = allTrades.find(t => t.id === trade.id && t.saved);
+                if (existing) {
+                    await window.supabase.update('simple_trades', cloudTrade, trade.id);
+                } else {
+                    await window.supabase.insert('simple_trades', [cloudTrade]);
+                    trade.saved = true;
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+            }
+        }
+        
+        async function loadTrades() {
+            if (!window.supabase?.isAuthenticated()) {
+                allTrades = [];
+                renderAllTrades();
+                return;
+            }
+            
+            try {
+                const user = window.supabase.getCurrentUser();
+                const data = await window.supabase.query(`simple_trades?user_id=eq.${user.id}&select=*&order=created_at.desc`);
+                
+                if (data && data.length > 0) {
+                    allTrades = data.map(t => ({...t, saved: true}));
+                } else {
+                    allTrades = [];
+                }
+                
+                renderAllTrades();
+            } catch (error) {
+                console.error('Load error:', error);
+                allTrades = [];
+                renderAllTrades();
+            }
+        }
+        
+        // Load trades when trading tab is clicked
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('[data-tab="tab-trading"]')) {
+                loadTrades();
+            }
+        });
+        
+        // Hide delete buttons when clicking elsewhere
+        document.addEventListener('click', (e) => {
+            if (!e.target.matches('[id^="delete-"]')) {
+                document.querySelectorAll('[id^="delete-"]').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+            }
+        });
+
+        // Dummy for compatibility  
         class TradingManager {
+            constructor() {}
+        }
+        
+        // Initialize compatibility
+        window.tradingManager = new TradingManager();
+    </script>
+    
+    <!-- ANALYTICS MANAGER -->
+    <!-- ========================================= -->
+    <script>
+        class AnalyticsManager {
             constructor() {
-                this.apiKey = '35ffdb6a-2061-4573-a66b-ea263c5eaa34';
-                this.trades = [];
-                this.solPrice = 0;
-                this.requestCount = 0;
-                this.maxRequestsPerHour = 30; // Conservative limit
-                
-                this.init();
-            }
-
-            async init() {
-                // Setup event listeners
-                this.setupEventListeners();
-                
-                // Load trades from cloud when tab is accessed
-                this.setupTabListener();
-                
-                // Get current SOL price
-                await this.updateSolPrice();
-            }
-
-            setupEventListeners() {
-                // Add trade button now uses direct onclick in HTML
-                console.log('🔍 Add Trade Button setup: Direct onclick to addTrade()');
-
-                // Add trade form submission is now handled by onclick in HTML
+                this.chart = null;
 
                 // Refresh prices button
                 const refreshPricesBtn = document.getElementById('refresh-prices-btn');
