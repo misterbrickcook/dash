@@ -15844,13 +15844,21 @@
             setupEventListeners() {
                 // Add trade button - show modal
                 const addTradeBtn = document.getElementById('add-trade-btn');
+                console.log('🔍 Add Trade Button found:', !!addTradeBtn);
                 if (addTradeBtn) {
-                    addTradeBtn.addEventListener('click', () => this.showAddTradeModal());
+                    addTradeBtn.addEventListener('click', () => {
+                        console.log('🎯 Add Trade Button clicked!');
+                        this.showAddTradeModal();
+                    });
                 }
 
                 const addTradeSecondaryBtn = document.getElementById('add-trade-secondary-btn');
+                console.log('🔍 Secondary Add Trade Button found:', !!addTradeSecondaryBtn);
                 if (addTradeSecondaryBtn) {
-                    addTradeSecondaryBtn.addEventListener('click', () => this.showAddTradeModal());
+                    addTradeSecondaryBtn.addEventListener('click', () => {
+                        console.log('🎯 Secondary Add Trade Button clicked!');
+                        this.showAddTradeModal();
+                    });
                 }
 
                 // Add trade modal buttons
@@ -16060,7 +16068,14 @@
             }
 
             showAddTradeModal() {
-                document.getElementById('add-trade-modal').style.display = 'flex';
+                const modal = document.getElementById('add-trade-modal');
+                console.log('🔍 Modal found:', !!modal);
+                if (modal) {
+                    modal.style.display = 'flex';
+                    console.log('✅ Modal opened');
+                } else {
+                    console.error('❌ Modal not found!');
+                }
             }
 
             hideAddTradeModal() {
@@ -16967,8 +16982,11 @@
             }
         }
 
-        // Initialize Trading Manager
-        window.tradingManager = new TradingManager();
+        // Initialize Trading Manager when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.tradingManager = new TradingManager();
+            console.log('🚀 TradingManager initialized');
+        });
         
         // Initialize lucide icons for trade action buttons
         setTimeout(() => {
