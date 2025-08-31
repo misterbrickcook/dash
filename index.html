@@ -4747,7 +4747,7 @@
         .trade-table td {
             padding: 12px 16px;
             border-bottom: 1px solid var(--border-secondary);
-            vertical-align: top;
+            vertical-align: middle;
         }
 
         .trade-table tbody tr:hover {
@@ -4799,7 +4799,7 @@
 
         .trade-amount {
             font-family: var(--font-mono);
-            text-align: right;
+            text-align: center;
         }
 
         .trade-amount.positive {
@@ -16215,10 +16215,10 @@
                             <td class="trade-amount ${this.getErtragClass(trade.ertrag)}">${trade.ertrag || '-'}</td>
                             <td class="trade-notes">${trade.notes || '-'}</td>
                             <td class="trade-actions">
-                                <button class="trade-action-btn" onclick="tradingManager.editTrade('${trade.id}')" title="Bearbeiten">
+                                <button class="trade-action-btn" onclick="tradingManager.editTrade('${trade.id}')">
                                     <i data-lucide="edit-3" style="width: 16px; height: 16px;"></i>
                                 </button>
-                                <button class="trade-action-btn delete" onclick="tradingManager.deleteTrade('${trade.id}')" title="Löschen">
+                                <button class="trade-action-btn delete" onclick="tradingManager.deleteTrade('${trade.id}')">
                                     <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                                 </button>
                             </td>
