@@ -16101,32 +16101,26 @@
             }
 
             async saveTradeToCloud(trade) {
-                // Simple localStorage backup for now
-                try {
-                    localStorage.setItem('simple_trades', JSON.stringify(this.trades));
-                } catch (error) {
-                    console.warn('Could not save to localStorage:', error);
+                if (!window.supabase || !window.supabase.isAuthenticated()) {
+                    throw new Error('Not authenticated');
                 }
 
-                // Optional cloud sync if available
-                if (window.supabase && window.supabase.isAuthenticated()) {
-                    try {
-                        // Simple trade data structure for cloud
-                        const cloudTrade = {
-                            id: trade.id,
-                            name: trade.name,
-                            einsatz: trade.einsatz,
-                            ertrag: trade.ertrag,
-                            notes: trade.notes,
-                            date: trade.date || new Date().toLocaleDateString('de-DE'),
-                            user_id: trade.user_id
-                        };
-                        
-                        // Save to a simple trades table (would need to create this in supabase)
-                        await window.supabase.insert('simple_trades', [cloudTrade]);
-                    } catch (error) {
-                        console.warn('Could not sync to cloud:', error);
-                    }
+                // Simple trade data structure for cloud
+                const cloudTrade = {
+                    id: trade.id,
+                    name: trade.name,
+                    einsatz: trade.einsatz,
+                    ertrag: trade.ertrag,
+                    notes: trade.notes,
+                    date: trade.date || new Date().toLocaleDateString('de-DE'),
+                    user_id: trade.user_id
+                };
+                
+                // Check if it's an update (trade exists) or insert (new trade)
+                if (this.editingTradeId) {
+                    await window.supabase.update('simple_trades', cloudTrade, trade.id);
+                } else {
+                    await window.supabase.insert('simple_trades', [cloudTrade]);
                 }
             }
 
@@ -16174,34 +16168,24 @@
 
             async loadTrades() {
                 try {
-                    // Load from localStorage first
-                    const stored = localStorage.getItem('simple_trades');
-                    if (stored) {
-                        this.trades = JSON.parse(stored);
+                    if (!window.supabase || !window.supabase.isAuthenticated()) {
+                        console.log('Not authenticated - showing empty trades');
+                        this.trades = [];
                         this.renderTrades();
                         return;
                     }
 
-                    // Optional: sync from cloud if available
-                    if (window.supabase && window.supabase.isAuthenticated()) {
-                        try {
-                            const user = window.supabase.getCurrentUser();
-                            const data = await window.supabase.query(`simple_trades?user_id=eq.${user.id}&select=*`);
-                            
-                            if (data && data.length > 0) {
-                                this.trades = data;
-                                this.renderTrades();
-                                // Save to localStorage for offline use
-                                localStorage.setItem('simple_trades', JSON.stringify(this.trades));
-                                return;
-                            }
-                        } catch (error) {
-                            console.warn('Could not load from cloud:', error);
-                        }
+                    const user = window.supabase.getCurrentUser();
+                    const data = await window.supabase.query(`simple_trades?user_id=eq.${user.id}&select=*&order=created_at.desc`);
+                    
+                    if (data && data.length > 0) {
+                        this.trades = data;
+                        console.log(`📊 Loaded ${data.length} trades from cloud`);
+                    } else {
+                        this.trades = [];
+                        console.log('📊 No trades found - starting fresh');
                     }
-
-                    // Initialize empty if nothing found
-                    this.trades = [];
+                    
                     this.renderTrades();
 
                 } catch (error) {
@@ -16919,23 +16903,21 @@
                 if (!confirm('Trade wirklich löschen?')) return;
 
                 try {
+                    if (!window.supabase || !window.supabase.isAuthenticated()) {
+                        alert('Not authenticated');
+                        return;
+                    }
+
+                    // Remove from cloud
+                    await window.supabase.delete('simple_trades', tradeId);
+                    
                     // Remove from local array
                     this.trades = this.trades.filter(t => t.id !== tradeId);
                     
-                    // Update localStorage
-                    localStorage.setItem('simple_trades', JSON.stringify(this.trades));
-                    
-                    // Optional: Remove from cloud
-                    if (window.supabase && window.supabase.isAuthenticated()) {
-                        try {
-                            await window.supabase.delete('simple_trades', tradeId);
-                        } catch (error) {
-                            console.warn('Could not delete from cloud:', error);
-                        }
-                    }
-                    
                     // Refresh display
                     this.renderTrades();
+                    
+                    console.log(`✅ Trade ${tradeId} deleted`);                
 
                 } catch (error) {
                     console.error('Error deleting trade:', error);
