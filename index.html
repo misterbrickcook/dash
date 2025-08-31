@@ -16089,16 +16089,60 @@
                         </tr>
                     `;
                 } else {
-                    tbody.innerHTML = this.trades.map(trade => `
-                        <tr data-trade-id="${trade.id}" class="trade-row">
-                            <td contenteditable="true" data-field="name">${trade.name}</td>
-                            <td contenteditable="true" data-field="einsatz" style="text-align: center;">${trade.einsatz || ''}</td>
-                            <td contenteditable="true" data-field="ertrag" style="text-align: center;" class="trade-amount ${this.getErtragClass(trade.ertrag)}">${trade.ertrag || ''}</td>
-                            <td contenteditable="true" data-field="notes" style="position: relative;">${trade.notes || ''}
-                                <button class="delete-btn" style="display: none;" onclick="tradingManager.deleteTrade('${trade.id}')">×</button>
-                            </td>
-                        </tr>
-                    `).join('');
+                    // Clear tbody first
+                    tbody.innerHTML = '';
+                    
+                    // Create rows using DOM methods to avoid HTML encoding issues
+                    this.trades.forEach(trade => {
+                        const row = document.createElement('tr');
+                        row.dataset.tradeId = trade.id;
+                        row.className = 'trade-row';
+                        
+                        // Trade Name column
+                        const nameCell = document.createElement('td');
+                        nameCell.contentEditable = 'true';
+                        nameCell.dataset.field = 'name';
+                        nameCell.textContent = trade.name || '';
+                        
+                        // Einsatz column  
+                        const einsatzCell = document.createElement('td');
+                        einsatzCell.contentEditable = 'true';
+                        einsatzCell.dataset.field = 'einsatz';
+                        einsatzCell.style.textAlign = 'center';
+                        einsatzCell.textContent = trade.einsatz || '';
+                        
+                        // Ertrag column
+                        const ertragCell = document.createElement('td');
+                        ertragCell.contentEditable = 'true';
+                        ertragCell.dataset.field = 'ertrag';
+                        ertragCell.style.textAlign = 'center';
+                        ertragCell.className = `trade-amount ${this.getErtragClass(trade.ertrag)}`;
+                        ertragCell.textContent = trade.ertrag || '';
+                        
+                        // Notes column with delete button
+                        const notesCell = document.createElement('td');
+                        notesCell.contentEditable = 'true';
+                        notesCell.dataset.field = 'notes';
+                        notesCell.style.position = 'relative';
+                        notesCell.textContent = trade.notes || '';
+                        
+                        // Delete button
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'delete-btn';
+                        deleteBtn.style.display = 'none';
+                        deleteBtn.textContent = '×';
+                        deleteBtn.onclick = () => this.deleteTrade(trade.id);
+                        notesCell.appendChild(deleteBtn);
+                        
+                        // Append all cells to row
+                        row.appendChild(nameCell);
+                        row.appendChild(einsatzCell);
+                        row.appendChild(ertragCell);
+                        row.appendChild(notesCell);
+                        
+                        // Append row to tbody
+                        tbody.appendChild(row);
+                    });
                 }
                 
                 // Add inline editing event listeners
