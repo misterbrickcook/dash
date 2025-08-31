@@ -4721,7 +4721,7 @@
             background: var(--bg-primary);
             border: 1px solid var(--border-primary);
             border-radius: 0;
-            overflow: hidden;
+            overflow-x: auto;
             margin-bottom: 2rem;
         }
 
@@ -4730,7 +4730,14 @@
             border-collapse: collapse;
             font-family: var(--font-mono);
             font-size: var(--font-size-sm);
+            table-layout: fixed;
         }
+
+        .trade-table col:nth-child(1) { width: 25%; }  /* Trade Name */
+        .trade-table col:nth-child(2) { width: 15%; }  /* Einsatz */
+        .trade-table col:nth-child(3) { width: 15%; }  /* Ertrag */
+        .trade-table col:nth-child(4) { width: 35%; }  /* Notizen */
+        .trade-table col:nth-child(5) { width: 10%; }  /* Aktionen */
 
         .trade-table th {
             background: var(--bg-secondary);
@@ -4742,6 +4749,11 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             font-size: 12px;
+        }
+
+        .trade-table th:nth-child(2),
+        .trade-table th:nth-child(3) {
+            text-align: center;
         }
 
         .trade-table td {
@@ -4811,7 +4823,7 @@
         }
 
         .trade-notes {
-            max-width: 300px;
+            min-width: 200px;
             word-wrap: break-word;
             line-height: 1.4;
         }
@@ -4835,6 +4847,11 @@
         .trade-table td[contenteditable="true"]:empty:before {
             content: "-";
             color: var(--text-secondary);
+        }
+
+        .trade-table td[contenteditable="true"] {
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
         .trades-view {
@@ -6852,6 +6869,13 @@
             <!-- Trade Tracking Table -->
             <div class="trade-table-container">
                 <table class="trade-table" id="trade-table">
+                    <colgroup>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Trade Name</th>
