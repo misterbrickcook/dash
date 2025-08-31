@@ -15901,16 +15901,33 @@
         window.tradingManager = new TradingManager();
     </script>
     
+    <!-- ========================================= -->
     <!-- ANALYTICS MANAGER -->
     <!-- ========================================= -->
-    <script>
-        class AnalyticsManager {
-            constructor() {
                 this.chart = null;
+                this.currentPeriod = 'week';
+                this.balanceHistory = [];
+                this.init();
+            }
 
-                // Refresh prices button
-                const refreshPricesBtn = document.getElementById('refresh-prices-btn');
-                if (refreshPricesBtn) {
+            async init() {
+                // Check if supabase is available and user is authenticated
+                if (!window.supabase?.isAuthenticated()) {
+                    window.logAuthWarning('Analytics', 'initialize');
+                    return;
+                }
+                
+                await this.loadBalanceHistory();
+                await this.checkAndRecordDailyBalance();
+                this.setupPeriodButtons();
+                await this.setupChart();
+                await this.updateCurrentBalance();
+                await this.setupHeatmap();
+                await this.setupPerformanceHeatmap();
+                await this.setupMorningRoutineHeatmap();
+                await this.setupEveningRoutineHeatmap();
+                await this.setupSportHeatmap();
+            }
                     refreshPricesBtn.addEventListener('click', () => this.refreshPrices());
                 }
 
