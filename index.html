@@ -15904,9 +15904,6 @@
     <!-- ========================================= -->
     <!-- ANALYTICS MANAGER -->
     <!-- ========================================= -->
-    <script>
-        class AnalyticsManager {
-            constructor() {
                 this.chart = null;
                 this.currentPeriod = 'week';
                 this.balanceHistory = [];
@@ -15931,7 +15928,31 @@
                 await this.setupEveningRoutineHeatmap();
                 await this.setupSportHeatmap();
             }
-                    refreshPricesBtn.addEventListener('click', () => this.refreshPrices());
+
+            async loadBalanceHistory() {
+                try {
+                    if (!window.supabase?.isAuthenticated()) {
+                        this.balanceHistory = [];
+                        return;
+                    }
+
+                    const user = window.supabase.getCurrentUser();
+                    if (!user) {
+                        this.balanceHistory = [];
+                        return;
+                    }
+
+                    // Query balance history from cloud
+                    const data = await window.supabase.query(
+                        `analytics_balance_history?user_id=eq.${user.id}&select=*&order=date.asc`
+                    );
+
+                    this.balanceHistory = data || [];
+                    } catch (error) {
+                    console.error('Error loading balance history:', error);
+                    this.balanceHistory = [];
+                }
+            }
                 }
 
                 // Lock button (placeholder for future functionality)
