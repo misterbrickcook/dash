@@ -6446,7 +6446,7 @@
             <button class="nav-tab" data-tab="tab-todos">ToDos</button>
             <button class="nav-tab" data-tab="tab-ziele">Ziele</button>
             <button class="nav-tab" data-tab="tab-journal">Journal</button>
-            <!-- <button class="nav-tab" data-tab="tab-trading">Trading</button> -->
+            <button class="nav-tab" data-tab="tab-trading">Trading</button>
             <button class="nav-tab" data-tab="tab-analytics">Analytics</button>
             <button class="nav-tab" data-tab="tab-ressourcen">Ressourcen</button>
             <button class="nav-tab" data-tab="tab-vision">Vision</button>
@@ -6732,11 +6732,15 @@
 
         </section>
 
-        <!-- === TRADING TAB === TEMPORARILY DISABLED -->
-        <!-- 
+        <!-- === TRADING TAB === -->
         <section id="tab-trading" class="tab-section">
+            <div class="page-header">
+                <button id="add-trade-btn" class="add-btn">
+                    <i data-lucide="plus"></i>
+                </button>
+            </div>
             
-            Trading Rules Sticky Note
+            <!-- Trading Rules Sticky Note -->
             <div class="trading-rules-sticky">
                 <div class="sticky-header">
                     <span class="sticky-title">📝 Trading Grundregeln</span>
@@ -6789,7 +6793,7 @@
                 <div class="section-header">
                     <h3 id="trading-section-title">Open Positions</h3>
                     <div class="section-actions">
-                        <button id="add-trade-btn" class="trade-action-btn">
+                        <button id="add-trade-secondary-btn" class="trade-action-btn">
                             <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
                         </button>
                         <button id="refresh-prices-btn" class="trade-action-btn">
@@ -6982,7 +6986,7 @@
                 </div>
             </div>
         </div>
-        </section> -->
+        </section>
 
         <!-- === ANALYTICS TAB === -->
         <section id="tab-analytics" class="tab-section">
@@ -8096,7 +8100,7 @@
             'tab-todos': 'todos',
             'tab-ziele': 'goals', 
             'tab-journal': 'journal',
-            // 'tab-trading': 'trading', // DISABLED
+            'tab-trading': 'trading',
             'tab-ressourcen': 'resources',
             'tab-vision': 'vision',
             'tab-wiki': 'wiki',
@@ -8214,12 +8218,12 @@
                 }
             }
             
-            // DISABLED: Trading tab functionality
-            // if (tabId === 'tab-trading') {
-            //     if (window.TradingManager) {
-            //         window.TradingManager.updatePortfolioStats();
-            //     }
-            // }
+            // Trading tab functionality
+            if (tabId === 'tab-trading') {
+                if (window.TradingManager) {
+                    window.TradingManager.updatePortfolioStats();
+                }
+            }
         }
 
         // Handle hash changes for direct URL navigation
@@ -15810,6 +15814,11 @@
                     addTradeBtn.addEventListener('click', () => this.showAddTradeModal());
                 }
 
+                const addTradeSecondaryBtn = document.getElementById('add-trade-secondary-btn');
+                if (addTradeSecondaryBtn) {
+                    addTradeSecondaryBtn.addEventListener('click', () => this.showAddTradeModal());
+                }
+
                 // Add trade modal buttons
                 const addTradeConfirm = document.getElementById('add-trade-confirm');
                 if (addTradeConfirm) {
@@ -15934,10 +15943,10 @@
 
             setupTabListener() {
                 document.addEventListener('click', (e) => {
-                    // DISABLED: Trading tab functionality
-                    // if (e.target.matches('[data-tab="tab-trading"]')) {
-                    //     this.loadTrades();
-                    // }
+                    // Trading tab functionality
+                    if (e.target.matches('[data-tab="tab-trading"]')) {
+                        this.loadTrades();
+                    }
                 });
             }
 
