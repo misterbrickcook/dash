@@ -6872,36 +6872,18 @@
         <div id="add-trade-modal" class="modal hide">
             <div class="modal-content">
                 <button class="close" onclick="tradingManager.hideAddTradeModal()">×</button>
-                <h2>TRADE HINZUFÜGEN</h2>
+                <h2>NEUEN TRADE HINZUFÜGEN</h2>
                 
                 <div class="modal-body">
-                    <form id="add-trade-form" autocomplete="off">
-                        <div class="form-group">
-                            <label for="trade-name">Trade Name</label>
-                            <input type="text" id="trade-name" placeholder="z.B. BONK Long, BTC Swing..." required autocomplete="off">
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="trade-einsatz">Einsatz (optional)</label>
-                                <input type="text" id="trade-einsatz" placeholder="z.B. 0.5 SOL, $100..." autocomplete="off">
-                            </div>
-                            <div class="form-group">
-                                <label for="trade-ertrag">Ertrag (optional)</label>
-                                <input type="text" id="trade-ertrag" placeholder="z.B. +1.2 SOL, -$50..." autocomplete="off">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="trade-notes">Notizen/Learning</label>
-                            <textarea id="trade-notes" placeholder="Was hast du gelernt? Setup? Fehler? Erfolg?" rows="3" autocomplete="off"></textarea>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <button type="button" class="btn secondary" onclick="tradingManager.hideAddTradeModal()">Abbrechen</button>
-                            <button type="submit" class="btn" id="add-trade-confirm">Trade hinzufügen</button>
-                        </div>
-                    </form>
+                    <p style="color: #666; margin: 1rem 0; line-height: 1.5;">
+                        Es wird eine neue leere Zeile oben in der Tabelle eingefügt. 
+                        Du kannst dann direkt in die Zellen klicken und bearbeiten.
+                    </p>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn secondary" onclick="tradingManager.hideAddTradeModal()">Abbrechen</button>
+                        <button type="button" class="btn" onclick="tradingManager.addTrade()">Neue Zeile hinzufügen</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -15806,14 +15788,7 @@
                     });
                 }
 
-                // Add trade form submission
-                const addTradeForm = document.getElementById('add-trade-form');
-                if (addTradeForm) {
-                    addTradeForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        this.addTrade();
-                    });
-                }
+                // Add trade form submission is now handled by onclick in HTML
 
                 // Refresh prices button
                 const refreshPricesBtn = document.getElementById('refresh-prices-btn');
@@ -15947,57 +15922,43 @@
             }
 
             async addTrade() {
-                const name = document.getElementById('trade-name').value.trim();
-                const einsatz = document.getElementById('trade-einsatz').value.trim();
-                const ertrag = document.getElementById('trade-ertrag').value.trim();
-                const notes = document.getElementById('trade-notes').value.trim();
-
-                if (!name) {
-                    alert('Bitte gebe einen Trade Name ein');
-                    return;
-                }
-
-                let trade;
-                let isUpdate = false;
-
-                if (this.editingTradeId) {
-                    // Update existing trade
-                    isUpdate = true;
-                    trade = this.trades.find(t => t.id === this.editingTradeId);
-                    if (trade) {
-                        trade.name = name;
-                        trade.einsatz = einsatz || '';
-                        trade.ertrag = ertrag || '';
-                        trade.notes = notes || '';
-                    }
-                } else {
-                    // Create new trade
-                    trade = {
-                        id: Date.now().toString(),
-                        name: name,
-                        einsatz: einsatz || '',
-                        ertrag: ertrag || '',
-                        notes: notes || '',
-                        date: new Date().toLocaleDateString('de-DE'),
-                        user_id: window.supabase?.getCurrentUser()?.id
-                    };
-                }
+                // Create empty new trade
+                const trade = {
+                    id: Date.now().toString(),
+                    name: 'Neuer Trade',
+                    einsatz: '',
+                    ertrag: '',
+                    notes: '',
+                    date: new Date().toLocaleDateString('de-DE'),
+                    user_id: window.supabase?.getCurrentUser()?.id
+                };
 
                 try {
                     // Save to cloud
                     await this.saveTradeToCloud(trade);
                     
-                    // Add to local array if new
-                    if (!isUpdate) {
-                        this.trades.push(trade);
-                    }
+                    // Add to beginning of local array (top of table)
+                    this.trades.unshift(trade);
                     
-                    // Clear form and close modal
-                    this.clearAddTradeForm();
+                    // Close modal
                     this.hideAddTradeModal();
                     
                     // Refresh display
                     this.renderTrades();
+                    
+                    // Focus on trade name of new row for immediate editing
+                    setTimeout(() => {
+                        const firstRow = document.querySelector('#simple-trade-body tr[data-trade-id] td[data-field="name"]');
+                        if (firstRow) {
+                            firstRow.focus();
+                            // Select all text for easy replacement
+                            const range = document.createRange();
+                            range.selectNodeContents(firstRow);
+                            const selection = window.getSelection();
+                            selection.removeAllRanges();
+                            selection.addRange(range);
+                        }
+                    }, 100);
 
                 } catch (error) {
                     console.error('Error adding trade:', error);
@@ -16030,19 +15991,11 @@
             }
 
             clearAddTradeForm() {
-                document.getElementById('trade-name').value = '';
-                document.getElementById('trade-einsatz').value = '';
-                document.getElementById('trade-ertrag').value = '';
-                document.getElementById('trade-notes').value = '';
-                this.resetModalToAddMode();
+                // No form to clear anymore
             }
 
             resetModalToAddMode() {
-                this.editingTradeId = null;
-                const submitBtn = document.getElementById('add-trade-confirm');
-                if (submitBtn) {
-                    submitBtn.textContent = 'Trade hinzufügen';
-                }
+                // No editing mode anymore
             }
 
             async saveTradeToCloud(trade) {
