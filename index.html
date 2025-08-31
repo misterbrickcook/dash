@@ -4825,12 +4825,16 @@
             min-width: 200px;
             word-wrap: break-word;
             line-height: 1.4;
+            padding-right: 28px !important;
         }
 
         /* Inline editing styles */
         .trade-table td[contenteditable="true"] {
             cursor: text;
             transition: background-color 0.2s ease;
+            position: relative;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
         .trade-table td[contenteditable="true"]:hover {
@@ -4848,30 +4852,27 @@
             color: var(--text-secondary);
         }
 
-        .trade-table td[contenteditable="true"] {
-            white-space: pre-wrap;
-            word-break: break-word;
-            position: relative;
-        }
-
         .trade-delete-btn {
             position: absolute;
-            top: 50%;
-            right: 8px;
-            transform: translateY(-50%);
+            top: 4px;
+            right: 4px;
             background: #dc2626;
             border: none;
-            border-radius: 4px;
-            padding: 4px;
+            border-radius: 2px;
+            padding: 2px;
             color: white;
             cursor: pointer;
             transition: all 0.2s ease;
             display: none;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            z-index: 10;
         }
 
         .trade-delete-btn:hover {
             background: #b91c1c;
-            transform: translateY(-50%) scale(1.1);
+            transform: scale(1.1);
         }
 
         .trades-view {
