@@ -6800,26 +6800,24 @@
                 </button>
             </div>
             
-            <!-- Trade Tracking Table - CLEAN VERSION -->
-            <div class="simple-trade-container">
-                <table class="simple-trade-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 25%;">Trade Name</th>
-                            <th style="width: 20%; text-align: center;">Einsatz</th>
-                            <th style="width: 20%; text-align: center;">Ertrag</th>
-                            <th style="width: 35%;">Notizen/Learning</th>
-                        </tr>
-                    </thead>
-                    <tbody id="simple-trade-body">
-                        <tr>
-                            <td colspan="4" style="text-align: center; padding: 2rem; color: #666;">
-                                Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <!-- Trade Tracking Table - FIXED -->
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr style="background: #f5f5f5;">
+                        <th style="padding: 12px; border: 1px solid #ddd; width: 25%;">Trade Name</th>
+                        <th style="padding: 12px; border: 1px solid #ddd; width: 20%; text-align: center;">Einsatz</th>
+                        <th style="padding: 12px; border: 1px solid #ddd; width: 20%; text-align: center;">Ertrag</th>
+                        <th style="padding: 12px; border: 1px solid #ddd; width: 35%;">Notizen</th>
+                    </tr>
+                </thead>
+                <tbody id="simple-trade-body">
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 2rem; color: #666; border: 1px solid #ddd;">
+                            Noch keine Trades erfasst. Klicke auf + um deinen ersten Trade hinzuzufügen.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
         </section>
 
@@ -16089,16 +16087,16 @@
                         </tr>
                     `;
                 } else {
-                    let html = '';
+                    let rows = '';
                     this.trades.forEach(trade => {
-                        html += '<tr data-trade-id="' + trade.id + '" class="trade-row">';
-                        html += '<td contenteditable="true" data-field="name">' + (trade.name || '') + '</td>';
-                        html += '<td contenteditable="true" data-field="einsatz" style="text-align: center;">' + (trade.einsatz || '') + '</td>';
-                        html += '<td contenteditable="true" data-field="ertrag" style="text-align: center;" class="trade-amount">' + (trade.ertrag || '') + '</td>';
-                        html += '<td contenteditable="true" data-field="notes" style="position: relative;">' + (trade.notes || '') + '<button class="delete-btn" style="display: none;" onclick="tradingManager.deleteTrade(\'' + trade.id + '\')">×</button></td>';
-                        html += '</tr>';
+                        rows += `<tr data-trade-id="${trade.id}" style="border-bottom: 1px solid #eee;">
+                            <td contenteditable="true" data-field="name" style="padding: 12px; border: 1px solid #ddd;">${trade.name || ''}</td>
+                            <td contenteditable="true" data-field="einsatz" style="padding: 12px; border: 1px solid #ddd; text-align: center;">${trade.einsatz || ''}</td>
+                            <td contenteditable="true" data-field="ertrag" style="padding: 12px; border: 1px solid #ddd; text-align: center;">${trade.ertrag || ''}</td>
+                            <td contenteditable="true" data-field="notes" style="padding: 12px; border: 1px solid #ddd; position: relative;">${trade.notes || ''}<button class="delete-btn" style="display: none; position: absolute; top: 4px; right: 4px; background: red; color: white; border: none; width: 18px; height: 18px; font-size: 12px;" onclick="tradingManager.deleteTrade('${trade.id}')">×</button></td>
+                        </tr>`;
                     });
-                    tbody.innerHTML = html;
+                    tbody.innerHTML = rows;
                 }
                 
                 // Add inline editing event listeners
