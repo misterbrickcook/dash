@@ -4765,6 +4765,29 @@
         .trade-amount.positive { color: #059669; }
         .trade-amount.negative { color: #dc2626; }
 
+        /* Delete Button */
+        .delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 18px;
+            height: 18px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+            line-height: 1;
+            z-index: 10;
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+
         .trades-view {
             /* Ensure only one view is visible at a time */
             width: 100%;
@@ -16067,11 +16090,13 @@
                     `;
                 } else {
                     tbody.innerHTML = this.trades.map(trade => `
-                        <tr data-trade-id="${trade.id}">
+                        <tr data-trade-id="${trade.id}" class="trade-row">
                             <td contenteditable="true" data-field="name">${trade.name}</td>
                             <td contenteditable="true" data-field="einsatz" style="text-align: center;">${trade.einsatz || ''}</td>
                             <td contenteditable="true" data-field="ertrag" style="text-align: center;" class="trade-amount ${this.getErtragClass(trade.ertrag)}">${trade.ertrag || ''}</td>
-                            <td contenteditable="true" data-field="notes">${trade.notes || ''}</td>
+                            <td contenteditable="true" data-field="notes" style="position: relative;">${trade.notes || ''}
+                                <button class="delete-btn" style="display: none;" onclick="tradingManager.deleteTrade('${trade.id}')">×</button>
+                            </td>
                         </tr>
                     `).join('');
                 }
@@ -16111,18 +16136,31 @@
                     }
                 });
 
-                // Right-click to delete trade directly
+                // Right-click to show delete button
                 tbody.addEventListener('contextmenu', (e) => {
-                    const row = e.target.closest('tr');
+                    const row = e.target.closest('.trade-row');
                     if (row && row.dataset.tradeId) {
                         e.preventDefault();
-                        const tradeId = row.dataset.tradeId;
-                        const trade = this.trades.find(t => t.id === tradeId);
-                        const tradeName = trade ? trade.name : 'Trade';
                         
-                        if (confirm(`"${tradeName}" löschen?`)) {
-                            this.deleteTrade(tradeId);
+                        // Hide all other delete buttons first
+                        document.querySelectorAll('.delete-btn').forEach(btn => {
+                            btn.style.display = 'none';
+                        });
+                        
+                        // Show delete button for this row
+                        const deleteBtn = row.querySelector('.delete-btn');
+                        if (deleteBtn) {
+                            deleteBtn.style.display = 'inline-block';
                         }
+                    }
+                });
+
+                // Hide delete buttons when clicking elsewhere
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.delete-btn')) {
+                        document.querySelectorAll('.delete-btn').forEach(btn => {
+                            btn.style.display = 'none';
+                        });
                     }
                 });
             }
@@ -16803,8 +16841,6 @@
             }
 
             async deleteTrade(tradeId) {
-                if (!confirm('Trade wirklich löschen?')) return;
-
                 try {
                     if (!window.supabase || !window.supabase.isAuthenticated()) {
                         alert('Not authenticated');
@@ -16824,7 +16860,7 @@
 
                 } catch (error) {
                     console.error('Error deleting trade:', error);
-                    alert('Failed to delete trade');
+                    alert('Fehler beim Löschen');
                 }
             }
 
