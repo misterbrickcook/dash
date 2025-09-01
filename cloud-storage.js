@@ -282,7 +282,6 @@ class CloudStorage {
                     journal_entry_id: entryId,
                     date: date,
                     tag: tag,
-                    frequency: tagFrequency[tag],
                     category: category,
                     created_at: new Date().toISOString()
                 };
@@ -341,9 +340,11 @@ class CloudStorage {
             
             if (result) {
                 result.forEach(tag => {
+                    if (!tag.tag || !tag.date) return; // Skip invalid entries
+                    
                     analytics.totalTags++;
                     analytics.uniqueTags.add(tag.tag);
-                    analytics.tagFrequency[tag.tag] = (analytics.tagFrequency[tag.tag] || 0) + tag.frequency;
+                    analytics.tagFrequency[tag.tag] = (analytics.tagFrequency[tag.tag] || 0) + 1;
                     analytics.categoryBreakdown[tag.category] = (analytics.categoryBreakdown[tag.category] || 0) + 1;
                     
                     const month = tag.date.substring(0, 7); // YYYY-MM
