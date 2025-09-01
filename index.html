@@ -12445,7 +12445,12 @@
                     }
                     
                     try {
-                        this.resources = await cloudStorage.getResources() || [];
+                        // Ensure cloudStorage is initialized
+                        if (!window.cloudStorage) {
+                            console.warn('CloudStorage not yet initialized, retrying...');
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        }
+                        this.resources = await window.cloudStorage.getResources() || [];
                         
                         // Filter text snippets from regular resources
                         this.textsnippets = this.resources.filter(resource => resource.category === 'textsnippets');
