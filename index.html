@@ -6799,6 +6799,76 @@
                     <i data-lucide="plus"></i>
                 </button>
             </div>
+
+            <!-- === STICKY CHEATSHEET === -->
+            <div id="trading-cheatsheet" style="position: sticky; top: 10px; z-index: 100; margin-bottom: 20px;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 20px; color: white; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 600;">📈 Trading Cheatsheet</h3>
+                        <button id="toggle-cheatsheet" style="background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 14px;">−</button>
+                    </div>
+                    
+                    <div id="cheatsheet-content" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                        <!-- Entry Rules -->
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 15px;">
+                            <div style="font-weight: 600; margin-bottom: 8px; color: #ffeb3b;">🎯 Entry Rules</div>
+                            <div style="font-size: 13px; line-height: 1.4;">
+                                • Market Cap < 50M<br>
+                                • Volume > 100k (24h)<br>
+                                • Strong narrative<br>
+                                • Team doxxed<br>
+                                • Max 2% position size
+                            </div>
+                        </div>
+                        
+                        <!-- Exit Strategy -->
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 15px;">
+                            <div style="font-weight: 600; margin-bottom: 8px; color: #4caf50;">💰 Exit Strategy</div>
+                            <div style="font-size: 13px; line-height: 1.4;">
+                                • 2x: Take initials<br>
+                                • 5x: Take 50% profit<br>
+                                • 10x: Take 75% profit<br>
+                                • Moon: Let 25% ride<br>
+                                • Stop Loss: -50%
+                            </div>
+                        </div>
+                        
+                        <!-- Risk Management -->
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 15px;">
+                            <div style="font-weight: 600; margin-bottom: 8px; color: #f44336;">⚠️ Risk Management</div>
+                            <div style="font-size: 13px; line-height: 1.4;">
+                                • Never FOMO buy<br>
+                                • Max 5 open positions<br>
+                                • DCA only on conviction<br>
+                                • Track all trades<br>
+                                • Review weekly
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats Row -->
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center;">
+                            <div>
+                                <div style="font-size: 11px; opacity: 0.8;">Portfolio</div>
+                                <div style="font-weight: 600;">12.5 SOL</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; opacity: 0.8;">Open Positions</div>
+                                <div style="font-weight: 600;">3/5</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; opacity: 0.8;">Win Rate</div>
+                                <div style="font-weight: 600; color: #4caf50;">68%</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; opacity: 0.8;">This Week</div>
+                                <div style="font-weight: 600; color: #4caf50;">+2.1 SOL</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <!-- KOMPLETT NEUE TRADING TABLE -->
             <div style="border: 1px solid #ddd; margin: 20px 0;">
@@ -19423,6 +19493,20 @@
                 setTimeout(() => {
                     window.JournalTagAnalytics.initialize();
                 }, 100);
+            }
+            
+            // Trading cheatsheet toggle
+            if (e.target.matches('#toggle-cheatsheet')) {
+                const content = document.getElementById('cheatsheet-content');
+                const button = document.getElementById('toggle-cheatsheet');
+                
+                if (content.style.display === 'none') {
+                    content.style.display = 'grid';
+                    button.textContent = '−';
+                } else {
+                    content.style.display = 'none';
+                    button.textContent = '+';
+                }
             }
         });
         
