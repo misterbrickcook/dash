@@ -6807,34 +6807,40 @@
                         <button id="toggle-cheatsheet" style="background: #f5f5f5; border: 1px solid #ddd; color: #666; width: 24px; height: 24px; cursor: pointer; font-size: 12px; font-weight: bold;">−</button>
                     </div>
                     
-                    <div id="cheatsheet-content" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                    <div id="cheatsheet-content" style="display: grid; grid-template-columns: 25% 20% 20% 35%; background: #f8f8f8; padding: 15px;">
                         
                         <!-- Research Column -->
-                        <div style="border-left: 3px solid #2196F3; padding-left: 15px;">
+                        <div style="padding-right: 10px;">
                             <div style="font-size: 12px; line-height: 1.8; color: #555;">
                                 <div style="margin-bottom: 6px;">• Developer und Tokens prüfen</div>
                                 <div style="margin-bottom: 6px;">• Website & Roadmap</div>
                                 <div style="margin-bottom: 6px;">• Community Aktivität</div>
-                                <div style="margin-bottom: 6px;">• Fake Volume erkennen</div>
                             </div>
                         </div>
                         
                         <!-- Entry Column -->
-                        <div style="border-left: 3px solid #FF9800; padding-left: 15px;">
+                        <div style="padding-right: 10px;">
                             <div style="font-size: 12px; line-height: 1.8; color: #555;">
                                 <div style="margin-bottom: 6px; font-weight: 600; color: #d32f2f;">• KEINE grünen Kerzen!</div>
                                 <div style="margin-bottom: 6px;">• Nach Dump einsteigen</div>
                                 <div style="margin-bottom: 6px;">• Nichts forcieren</div>
-                                <div style="margin-bottom: 6px;">• Patience zeigen</div>
                             </div>
                         </div>
                         
                         <!-- Exit Column -->
-                        <div style="border-left: 3px solid #4CAF50; padding-left: 15px;">
+                        <div style="padding-right: 10px;">
                             <div style="font-size: 12px; line-height: 1.8; color: #555;">
                                 <div style="margin-bottom: 6px; font-weight: 600;">• Sell Orders sofort setzen</div>
                                 <div style="margin-bottom: 6px;">• Initials protecten</div>
                                 <div style="margin-bottom: 6px;">• Keine übertriebenen Einsätze</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notes/Learning Column -->
+                        <div>
+                            <div style="font-size: 12px; line-height: 1.8; color: #555;">
+                                <div style="margin-bottom: 6px;">• Fake Volume erkennen</div>
+                                <div style="margin-bottom: 6px;">• Patience zeigen</div>
                                 <div style="margin-bottom: 6px;">• Emotions vermeiden</div>
                             </div>
                         </div>
@@ -6846,16 +6852,11 @@
             <!-- KOMPLETT NEUE TRADING TABLE -->
             <div style="border: 1px solid #e0e0e0; margin-top: 0;">
                 <!-- Header -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; background: #f8f8f8; padding: 15px;">
-                    <div style="border-left: 3px solid #2196F3; padding-left: 15px;">
-                        <div style="font-weight: bold; font-size: 14px; color: #2196F3;">Trade Name</div>
-                    </div>
-                    <div style="border-left: 3px solid #FF9800; padding-left: 15px;">
-                        <div style="font-weight: bold; font-size: 14px; color: #FF9800;">Einsatz</div>
-                    </div>
-                    <div style="border-left: 3px solid #4CAF50; padding-left: 15px;">
-                        <div style="font-weight: bold; font-size: 14px; color: #4CAF50;">Ertrag / Notes</div>
-                    </div>
+                <div style="display: grid; grid-template-columns: 25% 20% 20% 35%; background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                    <div style="padding: 12px; font-weight: bold; border-right: 1px solid #ddd;">Trade Name</div>
+                    <div style="padding: 12px; font-weight: bold; border-right: 1px solid #ddd; text-align: center;">Einsatz</div>
+                    <div style="padding: 12px; font-weight: bold; border-right: 1px solid #ddd; text-align: center;">Ertrag</div>
+                    <div style="padding: 12px; font-weight: bold;">Notizen/Learning</div>
                 </div>
                 <!-- Body -->
                 <div id="trades-container">
